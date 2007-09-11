@@ -1,0 +1,44 @@
+Version 1.0.0
+- Clamp large rotations. DONE
+- Restitution. DONE
+- Prismatic joint. DONE
+- Limits and motors. DONE
+- Handle equal limits. DONE
+- Fast broadphase. DONE
+- Collide connected. DONE
+- Island sleeping. DONE
+- Custom allocators. DONE
+- Convex polygons. DONE
+- Compound shapes. DONE
+- Constraint graph. DONE
+- Contact solver. DONE
+- Joint solver. DONE
+- Improved stability. DONE
+- Improve contact matching. DONE
+- Contact solver. DONE
+- Joint solver. DONE
+- Mouse picking. DONE
+- SAP AABB query. DONE
+- Distance joint. DONE
+
+Version 1.1.0
+- Handle dangling joint pointers.
+- Documentation.
+- Bit array for contact id
+- Gear joint.
+- Pulley joint.
+- Circles.
+
+Version 1.2.0
+- Prevent user construction of Body, Joint, Contact.
+- Solver performance.
+
+Version 2.0.0
+- CCD.
+- Meshes.
+- Ray casts.
+
+Version 3.0.0
+- Characters.
+- Vehicles.
+- Tree constraints.
