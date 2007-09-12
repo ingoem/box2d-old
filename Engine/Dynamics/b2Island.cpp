@@ -99,16 +99,6 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 		b->m_position += dt * b->m_linearVelocity;
 		b->m_rotation += dt * b->m_angularVelocity;
 
-		// Prevent large rotations to keep sin/cos accurate.
-		while (b->m_rotation < -20.0f * b2_pi)
-		{
-			b->m_rotation += 2.0f * b2_pi;
-		}
-		while (b->m_rotation > 20.0f * b2_pi)
-		{
-			b->m_rotation -= 2.0f * b2_pi;
-		}
-
 		b->m_R.Set(b->m_rotation);
 	}
 

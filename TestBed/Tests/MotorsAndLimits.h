@@ -118,12 +118,18 @@ public:
 		case 'l':
 			m_joint2->m_enableLimit = !m_joint2->m_enableLimit;
 			m_joint3->m_enableLimit = !m_joint3->m_enableLimit;
+			m_joint2->m_body1->WakeUp();
+			m_joint2->m_body2->WakeUp();
+			m_joint3->m_body2->WakeUp();
 			break;
 
 		case 'm':
 			m_joint1->m_enableMotor = !m_joint1->m_enableMotor;
 			m_joint2->m_enableMotor = !m_joint2->m_enableMotor;
 			m_joint3->m_enableMotor = !m_joint3->m_enableMotor;
+			m_joint2->m_body1->WakeUp();
+			m_joint2->m_body2->WakeUp();
+			m_joint3->m_body2->WakeUp();
 			break;
 
 		case 'p':

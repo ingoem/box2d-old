@@ -33,8 +33,8 @@
 
 TestEntry g_testEntries[] =
 {
-	{"Polygon Shapes", PolyShapes::Create},
 	{"MotorsAndLimits", MotorsAndLimits::Create},
+	{"Polygon Shapes", PolyShapes::Create},
 	{"Pendulum", Pendulum::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Bridge", Bridge::Create},
