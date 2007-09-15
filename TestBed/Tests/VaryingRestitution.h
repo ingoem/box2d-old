@@ -31,34 +31,34 @@ public:
 	VaryingRestitution()
 	{
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(50.0f, 10.0f);
+			sd.extents.Set(50.0f, 10.0f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2PolyDef sd;
 			sd.type = e_polyShape;
-			sd.poly.m_vertexCount = 8;
+			sd.vertexCount = 8;
 			float32 w = 1.5f;
 			float32 b = w / (2.0f + sqrtf(2.0f));
 			float32 s = sqrtf(2.0f) * b;
-			sd.poly.m_vertices[0].Set(0.5f * s, 0.0f);
-			sd.poly.m_vertices[1].Set(0.5f * w, b);
-			sd.poly.m_vertices[2].Set(0.5f * w, b + s);
-			sd.poly.m_vertices[3].Set(0.5f * s, w);
-			sd.poly.m_vertices[4].Set(-0.5f * s, w);
-			sd.poly.m_vertices[5].Set(-0.5f * w, b + s);
-			sd.poly.m_vertices[6].Set(-0.5f * w, b);
-			sd.poly.m_vertices[7].Set(-0.5f * s, 0.0f);
+			sd.vertices[0].Set(0.5f * s, 0.0f);
+			sd.vertices[1].Set(0.5f * w, b);
+			sd.vertices[2].Set(0.5f * w, b + s);
+			sd.vertices[3].Set(0.5f * s, w);
+			sd.vertices[4].Set(-0.5f * s, w);
+			sd.vertices[5].Set(-0.5f * w, b + s);
+			sd.vertices[6].Set(-0.5f * w, b);
+			sd.vertices[7].Set(-0.5f * s, 0.0f);
 			sd.density = 5.0f;
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.AddShape(&sd);
 
 			float32 restitution[7] = {0.0f, 0.1f, 0.3f, 0.5f, 0.75f, 0.9f, 1.0f};

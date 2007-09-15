@@ -63,9 +63,9 @@ struct b2JointNode
 	b2JointNode* next;
 };
 
-struct b2JointDescription
+struct b2JointDef
 {
-	b2JointDescription()
+	b2JointDef()
 	{
 		type = e_unknownJoint;
 		body1 = NULL;
@@ -79,10 +79,10 @@ struct b2JointDescription
 
 struct b2Joint
 {
-	static b2Joint* Create(const b2JointDescription* description, b2BlockAllocator* allocator);
+	static b2Joint* Create(const b2JointDef* def, b2BlockAllocator* allocator);
 	static void Destroy(b2Joint* joint, b2BlockAllocator* allocator);
 
-	b2Joint(const b2JointDescription* description);
+	b2Joint(const b2JointDef* def);
 	virtual ~b2Joint() {}
 
 	virtual void PreSolve() = 0;

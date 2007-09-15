@@ -35,55 +35,55 @@ public:
 	{
 		// Ground body
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(50.0f, 10.0f);
+			sd.extents.Set(50.0f, 10.0f);
 			sd.friction = 0.3f;
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
 
 		sds[0].type = e_polyShape;
-		sds[0].poly.m_vertexCount = 3;
-		sds[0].poly.m_vertices[0].Set(-0.5f, 0.0f);
-		sds[0].poly.m_vertices[1].Set(0.5f, 0.0f);
-		sds[0].poly.m_vertices[2].Set(0.0f, 1.5f);
+		sds[0].vertexCount = 3;
+		sds[0].vertices[0].Set(-0.5f, 0.0f);
+		sds[0].vertices[1].Set(0.5f, 0.0f);
+		sds[0].vertices[2].Set(0.0f, 1.5f);
 		sds[0].density = 1.0f;
 		sds[0].friction = 0.3f;
 		
 		sds[1].type = e_polyShape;
-		sds[1].poly.m_vertexCount = 3;
-		sds[1].poly.m_vertices[0].Set(-0.1f, 0.0f);
-		sds[1].poly.m_vertices[1].Set(0.1f, 0.0f);
-		sds[1].poly.m_vertices[2].Set(0.0f, 1.5f);
+		sds[1].vertexCount = 3;
+		sds[1].vertices[0].Set(-0.1f, 0.0f);
+		sds[1].vertices[1].Set(0.1f, 0.0f);
+		sds[1].vertices[2].Set(0.0f, 1.5f);
 		sds[1].density = 1.0f;
 		sds[1].friction = 0.3f;
 
 		sds[2].type = e_polyShape;
-		sds[2].poly.m_vertexCount = 8;
+		sds[2].vertexCount = 8;
 		float32 w = 1.0f;
 		float32 b = w / (2.0f + sqrtf(2.0f));
 		float32 s = sqrtf(2.0f) * b;
-		sds[2].poly.m_vertices[0].Set(0.5f * s, 0.0f);
-		sds[2].poly.m_vertices[1].Set(0.5f * w, b);
-		sds[2].poly.m_vertices[2].Set(0.5f * w, b + s);
-		sds[2].poly.m_vertices[3].Set(0.5f * s, w);
-		sds[2].poly.m_vertices[4].Set(-0.5f * s, w);
-		sds[2].poly.m_vertices[5].Set(-0.5f * w, b + s);
-		sds[2].poly.m_vertices[6].Set(-0.5f * w, b);
-		sds[2].poly.m_vertices[7].Set(-0.5f * s, 0.0f);
+		sds[2].vertices[0].Set(0.5f * s, 0.0f);
+		sds[2].vertices[1].Set(0.5f * w, b);
+		sds[2].vertices[2].Set(0.5f * w, b + s);
+		sds[2].vertices[3].Set(0.5f * s, w);
+		sds[2].vertices[4].Set(-0.5f * s, w);
+		sds[2].vertices[5].Set(-0.5f * w, b + s);
+		sds[2].vertices[6].Set(-0.5f * w, b);
+		sds[2].vertices[7].Set(-0.5f * s, 0.0f);
 		sds[2].density = 1.0f;
 		sds[2].friction = 0.3f;
 
 		sds[3].type = e_polyShape;
-		sds[3].poly.m_vertexCount = 4;
-		sds[3].poly.m_vertices[0].Set(-0.5f, 0.0f);
-		sds[3].poly.m_vertices[1].Set(0.5f, 0.0f);
-		sds[3].poly.m_vertices[2].Set(0.5f, 1.0f);
-		sds[3].poly.m_vertices[3].Set(-0.5f, 1.0f);
+		sds[3].vertexCount = 4;
+		sds[3].vertices[0].Set(-0.5f, 0.0f);
+		sds[3].vertices[1].Set(0.5f, 0.0f);
+		sds[3].vertices[2].Set(0.5f, 1.0f);
+		sds[3].vertices[3].Set(-0.5f, 1.0f);
 		sds[3].density = 1.0f;
 		sds[3].friction = 0.3f;
 
@@ -99,7 +99,7 @@ public:
 			bodies[bodyIndex] = NULL;
 		}
 
-		b2BodyDescription bd;
+		b2BodyDef bd;
 		bd.AddShape(sds + index);
 		float32 x = b2Random(-2.0f, 2.0f);
 		bd.position.Set(x, 10.0f);
@@ -136,7 +136,7 @@ public:
 
 	int32 bodyIndex;
 	b2Body* bodies[k_maxBodies];
-	b2ShapeDescription sds[4];
+	b2PolyDef sds[4];
 };
 
 #endif

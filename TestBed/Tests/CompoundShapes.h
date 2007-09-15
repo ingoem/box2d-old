@@ -29,32 +29,32 @@ public:
 	CompoundShapes()
 	{
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(50.0f, 10.0f);
+			sd.extents.Set(50.0f, 10.0f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
 			b2Body* body = m_world->CreateBody(&bd);
 		}
 
 		{
-			b2ShapeDescription sd1;
+			b2BoxDef sd1;
 			sd1.type = e_boxShape;
-			sd1.box.m_extents.Set(0.25f, 0.5f);
+			sd1.extents.Set(0.25f, 0.5f);
 			//sd1.localPosition.Set(-0.5f, 0.0f);
 			sd1.density = 1.0f;
 
-			b2ShapeDescription sd2;
+			b2BoxDef sd2;
 			sd2.type = e_boxShape;
-			sd2.box.m_extents.Set(0.25f, 0.5f);
+			sd2.extents.Set(0.25f, 0.5f);
 			//sd2.localPosition.Set(0.5f, 0.0f);
 			sd2.localPosition.Set(0.0f, -0.5f);
 			sd2.localRotation = 0.5f * b2_pi;
 			sd2.density = 1.0f;
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.AddShape(&sd1);
 			bd.AddShape(&sd2);
 

@@ -32,11 +32,11 @@
 // J = [0 0 -1 0 0 1]
 // K = invI1 + invI2
 
-b2RevoluteJoint::b2RevoluteJoint(const b2RevoluteDescription* description)
-: b2Joint(description)
+b2RevoluteJoint::b2RevoluteJoint(const b2RevoluteJointDef* def)
+: b2Joint(def)
 {
-	m_localAnchor1 = b2MulT(m_body1->m_R, description->anchorPoint - m_body1->m_position);
-	m_localAnchor2 = b2MulT(m_body2->m_R, description->anchorPoint - m_body2->m_position);
+	m_localAnchor1 = b2MulT(m_body1->m_R, def->anchorPoint - m_body1->m_position);
+	m_localAnchor2 = b2MulT(m_body2->m_R, def->anchorPoint - m_body2->m_position);
 
 	m_intialAngle = m_body2->m_rotation - m_body1->m_rotation;
 
@@ -45,12 +45,12 @@ b2RevoluteJoint::b2RevoluteJoint(const b2RevoluteDescription* description)
 	m_limitImpulse = 0.0f;
 	m_limitPositionImpulse = 0.0f;
 
-	m_lowerAngle = description->lowerAngle;
-	m_upperAngle = description->upperAngle;
-	m_maxMotorTorque = description->motorTorque;
-	m_motorSpeed = description->motorSpeed;
-	m_enableLimit = description->enableLimit;
-	m_enableMotor = description->enableMotor;
+	m_lowerAngle = def->lowerAngle;
+	m_upperAngle = def->upperAngle;
+	m_maxMotorTorque = def->motorTorque;
+	m_motorSpeed = def->motorSpeed;
+	m_enableLimit = def->enableLimit;
+	m_enableMotor = def->enableMotor;
 }
 
 void b2RevoluteJoint::PreSolve()

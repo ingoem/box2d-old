@@ -31,9 +31,9 @@ struct b2World;
 struct b2JointNode;
 struct b2ContactNode;
 
-struct b2BodyDescription
+struct b2BodyDef
 {
-	b2BodyDescription()
+	b2BodyDef()
 	{
 		memset(shapes, 0, sizeof(shapes));
 		position.Set(0.0f, 0.0f);
@@ -44,7 +44,7 @@ struct b2BodyDescription
 		isSleeping = false;
 	}
 
-	b2ShapeDescription* shapes[b2_maxShapesPerBody];
+	b2ShapeDef* shapes[b2_maxShapesPerBody];
 	b2Vec2 position;
 	float32 rotation;
 	b2Vec2 linearVelocity;
@@ -52,23 +52,51 @@ struct b2BodyDescription
 	bool allowSleep;
 	bool isSleeping;
 
-	void AddShape(b2ShapeDescription* shape);
+	void AddShape(b2ShapeDef* shape);
 };
 
 // A rigid body. Internal computation are done in terms
-// of the center of mass position. When compound shapes are
-// used the center does not correspond to root position.
+// of the center of mass position. The center of mass may
+// be offset from the body's origin.
 struct b2Body
 {
-	b2Body(const b2BodyDescription* bd, b2World* world);
-	~b2Body();
+	// Set the position of the body's origin and rotation (radians).
+	// This breaks any contacts and wakes the other bodies.
+	void SetOriginPosition(const b2Vec2& position, float32 rotation);
 
-	void SetRootPosition(const b2Vec2& position, float rotation);
-	b2Vec2 GetRootPosition() const { return m_position - b2Mul(m_R, m_center); }
+	// Get the position of the body's origin.
+	b2Vec2 GetOriginPosition() const { return m_position - b2Mul(m_R, m_center); }
 
+	// Get the rotation in radians.
+	float32 GetRotation() const { return m_rotation; }
+
+	// Set/Get the linear velocity of the center of mass.
+	void SetLinearVelocity(const b2Vec2& v);
+	b2Vec2 GetLinearVelocity() const;
+
+	// Set/Get the angular velocity.
+	void SetAngularVelocity(float32 w);
+	float32 GetAngularVelocity() const;
+
+	// Apply a force to the center of mass. Additive.
+	void ApplyForce(const b2Vec2& force);
+
+	// Apply a torque. Additive.
+	void ApplyTorque(float32 torque);
+
+	// Is this body static (immovable)?
 	bool IsStatic() const { return m_invMass == 0.0f; }
+
+	// Is this body sleeping (not simulating).
 	bool IsSleeping() const;
+
+	// Wake up this body so it will begin simulating.
 	void WakeUp();
+
+	//--------------- Internal Usage -------------------
+
+	b2Body(const b2BodyDef* bd, b2World* world);
+	~b2Body();
 
 	void SynchronizeShapes();
 
@@ -106,7 +134,7 @@ struct b2Body
 	bool m_islandFlag;
 };
 
-inline void b2BodyDescription::AddShape(b2ShapeDescription* shape)
+inline void b2BodyDef::AddShape(b2ShapeDef* shape)
 {
 	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
 	{

@@ -45,7 +45,7 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_contactManager.m_world = this;
 	m_broadPhase = new b2BroadPhase(worldAABB, &m_contactManager);
 
-	b2BodyDescription bd;
+	b2BodyDef bd;
 	m_groundBody = CreateBody(&bd);
 }
 
@@ -55,10 +55,10 @@ b2World::~b2World()
 	delete m_broadPhase;
 }
 
-b2Body* b2World::CreateBody(const b2BodyDescription* description)
+b2Body* b2World::CreateBody(const b2BodyDef* def)
 {
 	void* mem = m_blockAllocator.Allocate(sizeof(b2Body));
-	b2Body* b = new (mem) b2Body(description, this);
+	b2Body* b = new (mem) b2Body(def, this);
 	b->m_prev = NULL;
 	
 	b->m_next = m_bodyList;
@@ -145,9 +145,9 @@ void b2World::DestroyBody(b2Body* b)
 	m_blockAllocator.Free(b, sizeof(b2Body));
 }
 
-b2Joint* b2World::CreateJoint(const b2JointDescription* description)
+b2Joint* b2World::CreateJoint(const b2JointDef* def)
 {
-	b2Joint* j = b2Joint::Create(description, &m_blockAllocator);
+	b2Joint* j = b2Joint::Create(def, &m_blockAllocator);
 
 	// Connect to the world list.
 	j->m_prev = NULL;

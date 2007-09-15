@@ -21,9 +21,9 @@
 
 #include "b2Joint.h"
 
-struct b2RevoluteDescription : public b2JointDescription
+struct b2RevoluteJointDef : public b2JointDef
 {
-	b2RevoluteDescription()
+	b2RevoluteJointDef()
 	{
 		type = e_revoluteJoint;
 		anchorPoint.Set(0.0f, 0.0f);
@@ -46,7 +46,7 @@ struct b2RevoluteDescription : public b2JointDescription
 
 struct b2RevoluteJoint : public b2Joint
 {
-	b2RevoluteJoint(const b2RevoluteDescription* description);
+	b2RevoluteJoint(const b2RevoluteJointDef* def);
 
 	void PreSolve();
 	void SolveVelocityConstraints(float32 dt);

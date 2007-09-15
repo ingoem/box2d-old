@@ -24,9 +24,9 @@
 struct b2Body;
 class b2BlockAllocator;
 
-struct b2MouseDescription : public b2JointDescription
+struct b2MouseJointDef : public b2JointDef
 {
-	b2MouseDescription()
+	b2MouseJointDef()
 	{
 		type = e_mouseJoint;
 		target.Set(0.0f, 0.0f);
@@ -43,7 +43,7 @@ struct b2MouseDescription : public b2JointDescription
 
 struct b2MouseJoint : public b2Joint
 {
-	b2MouseJoint(const b2MouseDescription* description);
+	b2MouseJoint(const b2MouseJointDef* def);
 
 	void PreSolve();
 	void SolveVelocityConstraints(float32 dt);

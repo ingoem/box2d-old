@@ -23,9 +23,9 @@
 
 struct b2Body;
 
-struct b2DistanceJointDescription : public b2JointDescription
+struct b2DistanceJointDef : public b2JointDef
 {
-	b2DistanceJointDescription()
+	b2DistanceJointDef()
 	{
 		type = e_distanceJoint;
 		anchorPoint1.Set(0.0f, 0.0f);
@@ -38,7 +38,7 @@ struct b2DistanceJointDescription : public b2JointDescription
 
 struct b2DistanceJoint : public b2Joint
 {
-	b2DistanceJoint(const b2DistanceJointDescription* description);
+	b2DistanceJoint(const b2DistanceJointDef* data);
 
 	void PreSolve();
 	void SolveVelocityConstraints(float32 dt);

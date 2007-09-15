@@ -26,37 +26,37 @@
 
 #include <new.h>
 
-b2Joint* b2Joint::Create(const b2JointDescription* description, b2BlockAllocator* allocator)
+b2Joint* b2Joint::Create(const b2JointDef* def, b2BlockAllocator* allocator)
 {
 	b2Joint* joint = NULL;
 
-	switch (description->type)
+	switch (def->type)
 	{
 	case e_distanceJoint:
 		{
 			void* mem = allocator->Allocate(sizeof(b2DistanceJoint));
-			joint = new (mem) b2DistanceJoint((b2DistanceJointDescription*)description);
+			joint = new (mem) b2DistanceJoint((b2DistanceJointDef*)def);
 		}
 		break;
 
 	case e_mouseJoint:
 		{
 			void* mem = allocator->Allocate(sizeof(b2MouseJoint));
-			joint = new (mem) b2MouseJoint((b2MouseDescription*)description);
+			joint = new (mem) b2MouseJoint((b2MouseJointDef*)def);
 		}
 		break;
 
 	case e_prismaticJoint:
 		{
 			void* mem = allocator->Allocate(sizeof(b2PrismaticJoint));
-			joint = new (mem) b2PrismaticJoint((b2PrismaticJointDescription*)description);
+			joint = new (mem) b2PrismaticJoint((b2PrismaticJointDef*)def);
 		}
 		break;
 
 	case e_revoluteJoint:
 		{
 			void* mem = allocator->Allocate(sizeof(b2RevoluteJoint));
-			joint = new (mem) b2RevoluteJoint((b2RevoluteDescription*)description);
+			joint = new (mem) b2RevoluteJoint((b2RevoluteJointDef*)def);
 		}
 		break;
 
@@ -95,11 +95,11 @@ void b2Joint::Destroy(b2Joint* joint, b2BlockAllocator* allocator)
 	}
 }
 
-b2Joint::b2Joint(const b2JointDescription* description)
+b2Joint::b2Joint(const b2JointDef* def)
 {
-	m_type = description->type;
+	m_type = def->type;
 	m_prev = NULL;
 	m_next = NULL;
-	m_body1 = description->body1;
-	m_body2 = description->body2;
+	m_body1 = def->body1;
+	m_body2 = def->body2;
 }

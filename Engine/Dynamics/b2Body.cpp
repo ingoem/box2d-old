@@ -22,7 +22,7 @@
 #include "Contacts/b2Contact.h"
 #include "Engine/Collision/b2Shape.h"
 
-b2Body::b2Body(const b2BodyDescription* bd, b2World* world)
+b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
 	m_position = bd->position;
 	m_rotation = bd->rotation;
@@ -42,7 +42,7 @@ b2Body::b2Body(const b2BodyDescription* bd, b2World* world)
 	m_center.Set(0.0f, 0.0f);
 	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
 	{
-		const b2ShapeDescription* sd = bd->shapes[i];
+		const b2ShapeDef* sd = bd->shapes[i];
 		if (sd == NULL) break;
 		b2MassData* massData = massDatas + i;
 		sd->ComputeMass(massData);
@@ -61,7 +61,7 @@ b2Body::b2Body(const b2BodyDescription* bd, b2World* world)
 	m_I = 0.0f;
 	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
 	{
-		const b2ShapeDescription* sd = bd->shapes[i];
+		const b2ShapeDef* sd = bd->shapes[i];
 		if (sd == NULL) break;
 		b2MassData* massData = massDatas + i;
 		m_I += massData->I;
@@ -96,7 +96,7 @@ b2Body::b2Body(const b2BodyDescription* bd, b2World* world)
 	m_shapeList = NULL;
 	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
 	{
-		const b2ShapeDescription* sd = bd->shapes[i];
+		const b2ShapeDef* sd = bd->shapes[i];
 		if (sd == NULL) break;
 		b2Shape* shape = b2Shape::Create(sd, this, m_center, massDatas + i);
 		shape->m_next = m_shapeList;
@@ -125,7 +125,7 @@ b2Body::~b2Body()
 	}
 }
 
-void b2Body::SetRootPosition(const b2Vec2& position, float rotation)
+void b2Body::SetOriginPosition(const b2Vec2& position, float rotation)
 {
 	m_rotation = rotation;
 	m_R.Set(m_rotation);

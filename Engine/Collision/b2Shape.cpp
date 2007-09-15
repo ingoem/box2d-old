@@ -105,7 +105,7 @@ static void PolyMass(b2MassData* massData, const b2Vec2* vs, int32 count, float3
 	massData->I = I;
 }
 
-void b2ShapeDescription::ComputeMass(b2MassData* massData) const
+void b2ShapeDef::ComputeMass(b2MassData* massData) const
 {
 	if (density == 0.0f)
 	{
@@ -117,19 +117,28 @@ void b2ShapeDescription::ComputeMass(b2MassData* massData) const
 	switch (type)
 	{
 	case e_circleShape:
-		massData->mass = density * b2_pi * circle.m_radius * circle.m_radius;
-		massData->center.Set(0.0f, 0.0f);
-		massData->I = 0.5f * (massData->mass) * circle.m_radius * circle.m_radius;
+		{
+			b2CircleDef* circle = (b2CircleDef*)this;
+			massData->mass = density * b2_pi * circle->radius * circle->radius;
+			massData->center.Set(0.0f, 0.0f);
+			massData->I = 0.5f * (massData->mass) * circle->radius * circle->radius;
+		}
 		break;
 
 	case e_boxShape:
-		massData->mass = 4.0f * density * box.m_extents.x * box.m_extents.y;
-		massData->center.Set(0.0f, 0.0f);
-		massData->I = massData->mass / 3.0f * b2Dot(box.m_extents, box.m_extents);
+		{
+			b2BoxDef* box = (b2BoxDef*)this;
+			massData->mass = 4.0f * density * box->extents.x * box->extents.y;
+			massData->center.Set(0.0f, 0.0f);
+			massData->I = massData->mass / 3.0f * b2Dot(box->extents, box->extents);
+		}
 		break;
 
 	case e_polyShape:
-		PolyMass(massData, poly.m_vertices, poly.m_vertexCount, density);
+		{
+			b2PolyDef* poly = (b2PolyDef*)this;
+			PolyMass(massData, poly->vertices, poly->vertexCount, density);
+		}
 		break;
 
 	default:
@@ -140,22 +149,22 @@ void b2ShapeDescription::ComputeMass(b2MassData* massData) const
 	}
 }
 
-b2Shape* b2Shape::Create(const b2ShapeDescription* description,
+b2Shape* b2Shape::Create(const b2ShapeDef* def,
 					 b2Body* body, const b2Vec2& center, const b2MassData* massData)
 {
-	switch (description->type)
+	switch (def->type)
 	{
 	case e_circleShape:
 		{
 			void* mem = body->m_world->m_blockAllocator.Allocate(sizeof(b2CircleShape));
-			return new (mem) b2CircleShape(description, body, center);
+			return new (mem) b2CircleShape(def, body, center);
 		}
 
 	case e_boxShape:
 	case e_polyShape:
 		{
 			void* mem = body->m_world->m_blockAllocator.Allocate(sizeof(b2PolyShape));
-			return new (mem) b2PolyShape(description, body, center, massData);
+			return new (mem) b2PolyShape(def, body, center, massData);
 		}
 	}
 
@@ -186,12 +195,12 @@ void b2Shape::Destroy(b2Shape*& shape)
 	shape = NULL;
 }
 
-b2Shape::b2Shape(const b2ShapeDescription* description, b2Body* body, const b2Vec2& center)
+b2Shape::b2Shape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center)
 {
-	m_localPosition = description->localPosition - center;
-	m_localRotation = description->localRotation;
-	m_friction = description->friction;
-	m_restitution = description->restitution;
+	m_localPosition = def->localPosition - center;
+	m_localRotation = def->localRotation;
+	m_friction = def->friction;
+	m_restitution = def->restitution;
 	m_body = body;
 
 	m_position = m_body->m_position + b2Mul(m_body->m_R, m_localPosition);
@@ -206,12 +215,14 @@ b2Shape::~b2Shape()
 	m_body->m_world->m_broadPhase->DestroyProxy(m_proxyId);
 }
 
-b2CircleShape::b2CircleShape(const b2ShapeDescription* description, b2Body* body, const b2Vec2& center)
-: b2Shape(description, body, center)
+b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center)
+: b2Shape(def, body, center)
 {
-	b2Assert(description->type == e_circleShape);
+	b2Assert(def->type == e_circleShape);
+	const b2CircleDef* circle = (const b2CircleDef*)def;
+
 	m_type = e_circleShape;
-	m_radius = description->circle.m_radius;
+	m_radius = circle->radius;
 
 	b2AABB aabb;
 	aabb.minVertex.Set(m_position.x - m_radius, m_position.y - m_radius);
@@ -235,17 +246,18 @@ bool b2CircleShape::TestPoint(const b2Vec2& p)
 	return b2Dot(d, d) <= m_radius * m_radius;
 }
 
-b2PolyShape::b2PolyShape(const b2ShapeDescription* description, b2Body* body,
+b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 					 const b2Vec2& center, const b2MassData* massData)
-: b2Shape(description, body, center)
+: b2Shape(def, body, center)
 {
-	b2Assert(description->type == e_boxShape || description->type == e_polyShape);
+	b2Assert(def->type == e_boxShape || def->type == e_polyShape);
 	m_type = e_polyShape;
 
-	if (description->type == e_boxShape)
+	if (def->type == e_boxShape)
 	{
+		const b2BoxDef* box = (const b2BoxDef*)def;
 		m_vertexCount = 4;
-		b2Vec2 h = description->box.m_extents;
+		b2Vec2 h = box->extents;
 		m_vertices[0].Set(h.x, h.y);
 		m_vertices[1].Set(-h.x, h.y);
 		m_vertices[2].Set(-h.x, -h.y);
@@ -263,17 +275,18 @@ b2PolyShape::b2PolyShape(const b2ShapeDescription* description, b2Body* body,
 	}
 	else
 	{
+		const b2PolyDef* poly = (const b2PolyDef*)def;
 		b2AABB aabb;
 		aabb.minVertex.Set(FLT_MAX, FLT_MAX);
 		aabb.maxVertex.Set(-FLT_MAX, -FLT_MAX);
-		m_vertexCount = description->poly.m_vertexCount;
+		m_vertexCount = poly->vertexCount;
 		b2Assert(3 <= m_vertexCount && m_vertexCount <= b2_maxPolyVertices);
 		for (int32 i = 0; i < m_vertexCount; ++i)
 		{
-			m_vertices[i] = description->poly.m_vertices[i];
+			m_vertices[i] = poly->vertices[i];
 
-			aabb.minVertex = b2Min(aabb.minVertex, description->poly.m_vertices[i]);
-			aabb.maxVertex = b2Max(aabb.maxVertex, description->poly.m_vertices[i]);
+			aabb.minVertex = b2Min(aabb.minVertex, m_vertices[i]);
+			aabb.maxVertex = b2Max(aabb.maxVertex, m_vertices[i]);
 		}
 		b2Vec2 offset = 0.5f * (aabb.minVertex + aabb.maxVertex);
 
@@ -283,9 +296,9 @@ b2PolyShape::b2PolyShape(const b2ShapeDescription* description, b2Body* body,
 		for (int32 i = 0; i < m_vertexCount; ++i)
 		{
 			// Shift the vertices so the shape position is the centroid.
-			m_vertices[i] = description->poly.m_vertices[i] - offset;
+			m_vertices[i] = poly->vertices[i] - offset;
 			m_next[i] = i + 1 < m_vertexCount ? i + 1 : 0;
-			b2Vec2 vNext = description->poly.m_vertices[m_next[i]] - offset;
+			b2Vec2 vNext = poly->vertices[m_next[i]] - offset;
 			b2Vec2 edge = vNext - m_vertices[i];
 			m_normals[i] = b2Cross(edge, 1.0f);
 			m_normals[i].Normalize();

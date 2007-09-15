@@ -21,9 +21,9 @@
 
 #include "b2Joint.h"
 
-struct b2PrismaticJointDescription : public b2JointDescription
+struct b2PrismaticJointDef : public b2JointDef
 {
-	b2PrismaticJointDescription()
+	b2PrismaticJointDef()
 	{
 		type = e_prismaticJoint;
 		anchorPoint.Set(0.0f, 0.0f);
@@ -48,7 +48,7 @@ struct b2PrismaticJointDescription : public b2JointDescription
 
 struct b2PrismaticJoint : public b2Joint
 {
-	b2PrismaticJoint(const b2PrismaticJointDescription* description);
+	b2PrismaticJoint(const b2PrismaticJointDef* def);
 
 	void PreSolve();
 	void SolveVelocityConstraints(float32 dt);

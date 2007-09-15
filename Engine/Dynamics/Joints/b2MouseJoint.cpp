@@ -34,15 +34,15 @@
 //   = invMass + invI * cross(r, u) * cross(r, u)
 
 
-b2MouseJoint::b2MouseJoint(const b2MouseDescription* description)
-: b2Joint(description)
+b2MouseJoint::b2MouseJoint(const b2MouseJointDef* def)
+: b2Joint(def)
 {
-	m_target = description->target;
+	m_target = def->target;
 	m_localAnchor = b2MulT(m_body2->m_R, m_target - m_body2->m_position);
 
-	m_motorForce = description->motorForce;
-	m_length = description->length;
-	m_beta = description->beta;
+	m_motorForce = def->motorForce;
+	m_length = def->length;
+	m_beta = def->beta;
 
 	m_impulse = 0.0f;
 }

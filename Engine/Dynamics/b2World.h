@@ -25,8 +25,8 @@
 #include "b2ContactManager.h"
 
 struct b2AABB;
-struct b2BodyDescription;
-struct b2JointDescription;
+struct b2BodyDef;
+struct b2JointDef;
 struct b2Body;
 struct b2Joint;
 struct b2Shape;
@@ -38,10 +38,10 @@ struct b2World
 	b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep);
 	~b2World();
 
-	b2Body* CreateBody(const b2BodyDescription* description);
+	b2Body* CreateBody(const b2BodyDef* def);
 	void DestroyBody(b2Body* body);
 
-	b2Joint* CreateJoint(const b2JointDescription* description);
+	b2Joint* CreateJoint(const b2JointDef* def);
 	void DestroyJoint(b2Joint* joint);
 
 	void Step(float32 dt, int32 iterations);

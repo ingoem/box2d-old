@@ -33,27 +33,27 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(50.0f, 10.0f);
+			sd.extents.Set(50.0f, 10.0f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
 			ground = m_world->CreateBody(&bd);
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(2.0f, 0.5f);
+			sd.extents.Set(2.0f, 0.5f);
 			sd.density = 5.0f;
 			sd.friction = 0.05f;
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.AddShape(&sd);
 
-			b2RevoluteDescription rjd;
+			b2RevoluteJointDef rjd;
 			
 			b2Body* body = NULL;
 			b2Body* prevBody = ground;
@@ -95,7 +95,7 @@ public:
 			bd.rotation = 0.5f * b2_pi;
 			body = m_world->CreateBody(&bd);
 
-			b2PrismaticJointDescription pjd;
+			b2PrismaticJointDef pjd;
 			pjd.anchorPoint.Set(-10.0f, 10.0f);
 			pjd.body1 = ground;
 			pjd.body2 = body;

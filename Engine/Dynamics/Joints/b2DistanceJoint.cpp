@@ -29,13 +29,13 @@
 //   = invMass1 + invI1 * cross(r1, u)^2 + invMass2 + invI2 * cross(r2, u)^2
 
 
-b2DistanceJoint::b2DistanceJoint(const b2DistanceJointDescription* description)
-: b2Joint(description)
+b2DistanceJoint::b2DistanceJoint(const b2DistanceJointDef* def)
+: b2Joint(def)
 {
-	m_localAnchor1 = b2MulT(m_body1->m_R, description->anchorPoint1 - m_body1->m_position);
-	m_localAnchor2 = b2MulT(m_body2->m_R, description->anchorPoint2 - m_body2->m_position);
+	m_localAnchor1 = b2MulT(m_body1->m_R, def->anchorPoint1 - m_body1->m_position);
+	m_localAnchor2 = b2MulT(m_body2->m_R, def->anchorPoint2 - m_body2->m_position);
 
-	b2Vec2 d = description->anchorPoint2 - description->anchorPoint1;
+	b2Vec2 d = def->anchorPoint2 - def->anchorPoint1;
 	m_length = d.Length();
 	m_impulse = 0.0f;
 }

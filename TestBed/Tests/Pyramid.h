@@ -30,24 +30,24 @@ public:
 	Pyramid()
 	{
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(50.0f, 10.0f);
+			sd.extents.Set(50.0f, 10.0f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			float32 a = 0.5f;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(a, a);
+			sd.extents.Set(a, a);
 			sd.density = 2.0f;
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.AddShape(&sd);
 
 			b2Vec2 x = b2Vec2::Make(-10.0f, 0.75f);

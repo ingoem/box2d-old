@@ -36,12 +36,12 @@
 // Cdot = = -dot(ax1, v1) - dot(cross(d + r1, ax1), w1) + dot(ax1, v2) + dot(cross(r2, ax1), v2)
 // J = [-ax1 -cross(d+r1,ax1) ax1 cross(r2,ax1)]
 
-b2PrismaticJoint::b2PrismaticJoint(const b2PrismaticJointDescription* description)
-: b2Joint(description)
+b2PrismaticJoint::b2PrismaticJoint(const b2PrismaticJointDef* def)
+: b2Joint(def)
 {
-	m_localAnchor1 = b2MulT(m_body1->m_R, description->anchorPoint - m_body1->m_position);
-	m_localAnchor2 = b2MulT(m_body2->m_R, description->anchorPoint - m_body2->m_position);
-	m_localXAxis1 = b2MulT(m_body1->m_R, description->axis);
+	m_localAnchor1 = b2MulT(m_body1->m_R, def->anchorPoint - m_body1->m_position);
+	m_localAnchor2 = b2MulT(m_body2->m_R, def->anchorPoint - m_body2->m_position);
+	m_localXAxis1 = b2MulT(m_body1->m_R, def->axis);
 	m_localYAxis1 = b2Cross(1.0f, m_localXAxis1);
 	m_initialAngle = m_body2->m_rotation - m_body1->m_rotation;
 
@@ -58,12 +58,12 @@ b2PrismaticJoint::b2PrismaticJoint(const b2PrismaticJointDescription* descriptio
 	m_limitImpulse = 0.0f;
 	m_limitPositionImpulse = 0.0f;
 
-	m_lowerTranslation = description->lowerTranslation;
-	m_upperTranslation = description->upperTranslation;
-	m_maxMotorForce = description->motorForce;
-	m_motorSpeed = description->motorSpeed;
-	m_enableLimit = description->enableLimit;
-	m_enableMotor = description->enableMotor;
+	m_lowerTranslation = def->lowerTranslation;
+	m_upperTranslation = def->upperTranslation;
+	m_maxMotorForce = def->motorForce;
+	m_motorSpeed = def->motorSpeed;
+	m_enableLimit = def->enableLimit;
+	m_enableMotor = def->enableMotor;
 }
 
 void b2PrismaticJoint::PreSolve()

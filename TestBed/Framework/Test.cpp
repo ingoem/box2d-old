@@ -80,7 +80,7 @@ void Test::MouseDown(const b2Vec2& p)
 
 	if (body)
 	{
-		b2MouseDescription md;
+		b2MouseJointDef md;
 		md.body1 = m_world->m_groundBody;
 		md.body2 = body;
 		md.target = p;
@@ -111,13 +111,13 @@ void Test::LaunchBomb()
 {
 	if (!m_bomb)
 	{
-		b2ShapeDescription sd;
+		b2BoxDef sd;
 		float32 a = 0.5f;
 		sd.type = e_boxShape;
-		sd.box.m_extents.Set(a, a);
+		sd.extents.Set(a, a);
 		sd.density = 20.0f;
 
-		b2BodyDescription bd;
+		b2BodyDef bd;
 		bd.AddShape(&sd);
 		m_bomb = m_world->CreateBody(&bd);
 	}
@@ -125,12 +125,12 @@ void Test::LaunchBomb()
 #if 1
 	b2Vec2 position; position.Set(b2Random(-15.0f, 15.0f), 30.0f);
 	float rotation = b2Random(-1.5f, 1.5f);
-	m_bomb->SetRootPosition(position, rotation);
+	m_bomb->SetOriginPosition(position, rotation);
 	m_bomb->m_linearVelocity = -1.0f * position;
 	m_bomb->m_angularVelocity = b2Random(-20.0f, 20.0f);
 #else
 	b2Vec2 position; position.Set(0.25f, 10.0f);
-	m_bomb->SetRootPosition(position, -0.5f * b2_pi);
+	m_bomb->SetOriginPosition(position, -0.5f * b2_pi);
 	m_bomb->m_linearVelocity = -1.0f * position;
 	m_bomb->m_angularVelocity = 0.0f;
 #endif

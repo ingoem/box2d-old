@@ -40,26 +40,9 @@ enum b2ShapeType
 	e_shapeTypeCount,
 };
 
-struct b2BoxData
+struct b2ShapeDef
 {
-	b2Vec2 m_extents;
-};
-
-struct b2CircleData
-{
-	float32 m_radius;
-};
-
-// Convex polygon, vertices must be in CCW order.
-struct b2PolyData
-{
-	b2Vec2 m_vertices[b2_maxPolyVertices];
-	int32 m_vertexCount;
-};
-
-struct b2ShapeDescription
-{
-	b2ShapeDescription()
+	b2ShapeDef()
 	{
 		type = e_unknownShape;
 		localPosition.Set(0.0f, 0.0f);
@@ -77,30 +60,70 @@ struct b2ShapeDescription
 	float32 friction;
 	float32 restitution;
 	float32 density;
+};
 
-	union
+struct b2BoxDef : public b2ShapeDef
+{
+	b2BoxDef()
 	{
-		b2BoxData box;
-		b2CircleData circle;
-		b2PolyData poly;
-	};
+		type = e_boxShape;
+		extents.Set(1.0f, 1.0f);
+	}
+
+	b2Vec2 extents;
+};
+
+struct b2CircleDef : public b2ShapeDef
+{
+	b2CircleDef()
+	{
+		type = e_circleShape;
+		radius = 1.0f;
+	}
+
+	float32 radius;
+};
+
+// Convex polygon, vertices must be in CCW order.
+struct b2PolyDef : public b2ShapeDef
+{
+	b2PolyDef()
+	{
+		type = e_polyShape;
+		vertexCount = 0;
+	}
+
+	b2Vec2 vertices[b2_maxPolyVertices];
+	int32 vertexCount;
 };
 
 // Shapes are created automatically when a body is created.
+// Client code does not normally interact with shapes.
 struct b2Shape
 {
-	static b2Shape* Create(	const b2ShapeDescription* description,
+	//----------------- Public -------------------------
+
+	virtual bool TestPoint(const b2Vec2& p) = 0;
+	
+	
+	//----------------- Internal -----------------------
+
+	// Internal use only. Do not call.
+	static b2Shape* Create(	const b2ShapeDef* def,
 							b2Body* body, const b2Vec2& center,
 							const b2MassData* massData);
 
+	// Internal use only. Do not call.
 	static void Destroy(b2Shape*& shape);
 
-	b2Shape(const b2ShapeDescription* description, b2Body* body, const b2Vec2& center);
+	// Internal use only. Do not call.
+	b2Shape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center);
+
+	// Internal use only. Do not call.
 	virtual ~b2Shape();
 
+	// Internal use only. Do not call.
 	virtual void UpdateProxy() = 0;
-
-	virtual bool TestPoint(const b2Vec2& p) = 0;
 
 	b2ShapeType m_type;
 
@@ -124,21 +147,31 @@ struct b2Shape
 
 struct b2CircleShape : public b2Shape
 {
-	b2CircleShape(const b2ShapeDescription* description, b2Body* body, const b2Vec2& center);
+	//----------------- Public -------------------------
+
+	bool TestPoint(const b2Vec2& p);
+
+	//----------------- Internal -----------------------
+
+	b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center);
 
 	void UpdateProxy();
-	bool TestPoint(const b2Vec2& p);
 
 	float32 m_radius;
 };
 
 struct b2PolyShape : public b2Shape
 {
-	b2PolyShape(	const b2ShapeDescription* description, b2Body* body,
-		const b2Vec2& center, const b2MassData* massData);
+	//----------------- Public -------------------------
+
+	bool TestPoint(const b2Vec2& p);
+	
+	//----------------- Internal -----------------------
+	
+	b2PolyShape(const b2ShapeDef* def, b2Body* body,
+				const b2Vec2& center, const b2MassData* massData);
 
 	void UpdateProxy();
-	bool TestPoint(const b2Vec2& p);
 
 	b2Vec2 m_extents;
 	b2Vec2 m_vertices[b2_maxPolyVertices];

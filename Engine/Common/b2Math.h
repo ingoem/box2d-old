@@ -33,6 +33,9 @@ inline bool b2IsValid(float x)
 // can be placed in a union.
 struct b2Vec2
 {
+	b2Vec2() {}
+	b2Vec2(float32 x, float32 y) : x(x), y(y) {}
+
 	void SetZero() { x = 0.0f; y = 0.0f; }
 	void Set(float32 x_, float32 y_) { x = x_; y = y_; }
 
@@ -86,6 +89,20 @@ struct b2Vec2
 
 struct b2Mat22
 {
+	b2Mat22() {}
+	b2Mat22(const b2Vec2& c1, const b2Vec2& c2)
+	{
+		col1 = c1;
+		col2 = c2;
+	}
+
+	b2Mat22(float32 angle)
+	{
+		float32 c = cosf(angle), s = sinf(angle);
+		col1.x = c; col2.x = -s;
+		col1.y = s; col2.y = c;
+	}
+
 	void Set(const b2Vec2& c1, const b2Vec2& c2)
 	{
 		col1 = c1;

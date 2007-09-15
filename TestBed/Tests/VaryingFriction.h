@@ -31,22 +31,22 @@ public:
 	VaryingFriction()
 	{
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(50.0f, 10.0f);
+			sd.extents.Set(50.0f, 10.0f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
 			b2Body* body = m_world->CreateBody(&bd);
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(6.5f, 0.125f);
+			sd.extents.Set(6.5f, 0.125f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(-2.0f, 11.0f);
 			bd.rotation = -0.25f;
 			bd.AddShape(&sd);
@@ -54,22 +54,22 @@ public:
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(0.125f, 0.5f);
+			sd.extents.Set(0.125f, 0.5f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(5.25f, 9.5f);
 			bd.AddShape(&sd);
 			b2Body* body = m_world->CreateBody(&bd);
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(6.5f, 0.125f);
+			sd.extents.Set(6.5f, 0.125f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(2.0f, 7.0f);
 			bd.rotation = 0.25f;
 			bd.AddShape(&sd);
@@ -77,22 +77,22 @@ public:
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(0.125f, 0.5f);
+			sd.extents.Set(0.125f, 0.5f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(-5.25f, 5.5f);
 			bd.AddShape(&sd);
 			b2Body* body = m_world->CreateBody(&bd);
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(6.5f, 0.125f);
+			sd.extents.Set(6.5f, 0.125f);
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(-2.0f, 3.0f);
 			bd.rotation = -0.25f;
 			bd.AddShape(&sd);
@@ -100,12 +100,12 @@ public:
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(0.25f, 0.25f);
+			sd.extents.Set(0.25f, 0.25f);
 			sd.density = 25.0f;
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.AddShape(&sd);
 
 			float friction[5] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};

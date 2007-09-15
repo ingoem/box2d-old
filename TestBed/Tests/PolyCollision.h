@@ -33,27 +33,27 @@ public:
 	PolyCollision()
 	{
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(0.375f, 0.125f);
-			sd.box.m_extents *= 10.0f;
+			sd.extents.Set(0.375f, 0.125f);
+			sd.extents *= 10.0f;
 			sd.density = 0.0f;
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
 			bd.AddShape(&sd);
 			m_body1 = m_world->CreateBody(&bd);
 		}
 
 		{
-			b2ShapeDescription sd;
+			b2BoxDef sd;
 			float32 a = 0.5f;
 			sd.type = e_boxShape;
-			sd.box.m_extents.Set(a, a);
-			sd.box.m_extents *= 10.0f;
+			sd.extents.Set(a, a);
+			sd.extents *= 10.0f;
 			sd.density = 1.0f;
 
-			b2BodyDescription bd;
+			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
 			bd.AddShape(&sd);
 			m_body2 = m_world->CreateBody(&bd);
