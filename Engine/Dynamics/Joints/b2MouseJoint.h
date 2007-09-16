@@ -43,16 +43,18 @@ struct b2MouseJointDef : public b2JointDef
 
 struct b2MouseJoint : public b2Joint
 {
+	b2Vec2 GetAnchor1() const;
+	b2Vec2 GetAnchor2() const;
+	float32 GetMotorForce(float32 inv_dt) const { return m_impulse * inv_dt; }
+	void SetTarget(const b2Vec2& target);
+
+	//--------------- Internals Below -------------------
+
 	b2MouseJoint(const b2MouseJointDef* def);
 
 	void PreSolve();
 	void SolveVelocityConstraints(float32 dt);
 	bool SolvePositionConstraints() { return true; }
-
-	b2Vec2 GetAnchor1() const;
-	b2Vec2 GetAnchor2() const;
-	float32 GetMotorForce(float32 inv_dt) const { return m_impulse * inv_dt; }
-	void SetTarget(const b2Vec2& target);
 
 	b2Vec2 m_localAnchor;
 	b2Vec2 m_target;

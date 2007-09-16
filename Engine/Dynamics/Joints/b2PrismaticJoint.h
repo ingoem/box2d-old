@@ -48,17 +48,19 @@ struct b2PrismaticJointDef : public b2JointDef
 
 struct b2PrismaticJoint : public b2Joint
 {
-	b2PrismaticJoint(const b2PrismaticJointDef* def);
-
-	void PreSolve();
-	void SolveVelocityConstraints(float32 dt);
-	bool SolvePositionConstraints();
-
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 	float32 GetJointTranslation() const;
 	float32 GetJointSpeed() const;
 	float32 GetMotorForce(float32 invTimeStep) const;
+
+	//--------------- Internals Below -------------------
+
+	b2PrismaticJoint(const b2PrismaticJointDef* def);
+
+	void PreSolve();
+	void SolveVelocityConstraints(float32 dt);
+	bool SolvePositionConstraints();
 
 	b2Vec2 m_localAnchor1;
 	b2Vec2 m_localAnchor2;

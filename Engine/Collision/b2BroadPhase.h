@@ -22,6 +22,8 @@
 /*
 This broad phase uses the Sweep and Prune algorithm as described in:
 Collision Detection in Interactive 3D Environments by Gino van den Bergen
+Also, some ideas, such as using integral values for fast compares comes from
+Bullet (http:/www.bulletphysics.com).
 */
 
 #include "Engine/Common/b2Settings.h"

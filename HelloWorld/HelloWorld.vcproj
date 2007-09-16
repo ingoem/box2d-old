@@ -172,7 +172,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\main.cpp"
+			RelativePath=".\HelloWorld.cpp"
 			>
 		</File>
 	</Files>

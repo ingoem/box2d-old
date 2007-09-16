@@ -142,6 +142,23 @@ void b2Body::SetOriginPosition(const b2Vec2& position, float rotation)
 	m_world->m_broadPhase->Flush();
 }
 
+void b2Body::SetCenterPosition(const b2Vec2& position, float rotation)
+{
+	m_rotation = rotation;
+	m_R.Set(m_rotation);
+	m_position = position;
+
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
+	{
+		s->m_position = m_position + b2Mul(m_R, s->m_localPosition);
+		s->m_rotation = m_rotation + s->m_localRotation;
+		s->m_R.Set(s->m_rotation);
+		s->UpdateProxy();
+	}
+
+	m_world->m_broadPhase->Flush();
+}
+
 void b2Body::SynchronizeShapes()
 {
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)

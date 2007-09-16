@@ -46,17 +46,19 @@ struct b2RevoluteJointDef : public b2JointDef
 
 struct b2RevoluteJoint : public b2Joint
 {
-	b2RevoluteJoint(const b2RevoluteJointDef* def);
-
-	void PreSolve();
-	void SolveVelocityConstraints(float32 dt);
-	bool SolvePositionConstraints();
-
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 	float32 GetJointAngle() const;
 	float32 GetJointSpeed() const;
 	float32 GetMotorTorque(float32 invTimeStep) const;
+
+	//--------------- Internals Below -------------------
+
+	b2RevoluteJoint(const b2RevoluteJointDef* def);
+
+	void PreSolve();
+	void SolveVelocityConstraints(float32 dt);
+	bool SolvePositionConstraints();
 
 	b2Vec2 m_localAnchor1;
 	b2Vec2 m_localAnchor2;

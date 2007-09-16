@@ -44,9 +44,23 @@ struct b2World
 	b2Joint* CreateJoint(const b2JointDef* def);
 	void DestroyJoint(b2Joint* joint);
 
-	void Step(float32 dt, int32 iterations);
+	// The world provides a single ground body with no collision shapes. You
+	// can use this to simplify the creation of joints.
+	b2Body* GetGroundBody();
 
+	void Step(float32 timeStep, int32 iterations);
+
+	// Query the world for all shapes that potentially overlap the
+	// provided AABB. You provide a shape pointer buffer of specified
+	// size. The number of shapes found is returned.
 	int32 Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount);
+
+	// You can use these to iterate over all the bodies, joints, and contacts.
+	b2Body* GetBodyList();
+	b2Joint* GetJointList();
+	b2Contact* GetContactList();
+
+	//--------------- Internals Below -------------------
 
 	b2BlockAllocator m_blockAllocator;
 	b2StackAllocator m_stackAllocator;
@@ -70,5 +84,26 @@ struct b2World
 	static int32 s_enablePositionCorrection;
 	static int32 s_enableWarmStarting;
 };
+
+inline b2Body* b2World::GetGroundBody()
+{
+	return m_groundBody;
+}
+
+inline b2Body* b2World::GetBodyList()
+{
+	return m_bodyList;
+}
+
+inline b2Joint* b2World::GetJointList()
+{
+	return m_jointList;
+}
+
+inline b2Contact* b2World::GetContactList()
+{
+	return m_contactList;
+}
+
 
 #endif

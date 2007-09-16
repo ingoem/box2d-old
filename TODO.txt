@@ -24,21 +24,21 @@ Version 1.0.0
 Version 1.1.0
 - Handle dangling joint pointers.
 - Documentation.
-- Bit array for contact id
 - Gear joint.
 - Pulley joint.
 - Circles.
+- Collision filters.
 
 Version 1.2.0
-- Prevent user construction of Body, Joint, Contact.
-- Solver performance.
+- Spline joints.
+- Ray casts.
 
 Version 2.0.0
 - CCD.
 - Meshes.
-- Ray casts.
 
 Version 3.0.0
+- Solver performance.
 - Characters.
 - Vehicles.
 - Tree constraints.

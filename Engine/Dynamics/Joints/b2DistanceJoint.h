@@ -38,6 +38,8 @@ struct b2DistanceJointDef : public b2JointDef
 
 struct b2DistanceJoint : public b2Joint
 {
+	//--------------- Internals Below -------------------
+
 	b2DistanceJoint(const b2DistanceJointDef* data);
 
 	void PreSolve();

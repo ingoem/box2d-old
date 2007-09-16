@@ -101,12 +101,12 @@ struct b2PolyDef : public b2ShapeDef
 // Client code does not normally interact with shapes.
 struct b2Shape
 {
-	//----------------- Public -------------------------
-
 	virtual bool TestPoint(const b2Vec2& p) = 0;
 	
-	
-	//----------------- Internal -----------------------
+	// Get the next shape in the parent body's shape list.
+	b2Shape* GetNext();
+
+	//--------------- Internals Below -------------------
 
 	// Internal use only. Do not call.
 	static b2Shape* Create(	const b2ShapeDef* def,
@@ -147,11 +147,9 @@ struct b2Shape
 
 struct b2CircleShape : public b2Shape
 {
-	//----------------- Public -------------------------
-
 	bool TestPoint(const b2Vec2& p);
 
-	//----------------- Internal -----------------------
+	//--------------- Internals Below -------------------
 
 	b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center);
 
@@ -162,11 +160,9 @@ struct b2CircleShape : public b2Shape
 
 struct b2PolyShape : public b2Shape
 {
-	//----------------- Public -------------------------
-
 	bool TestPoint(const b2Vec2& p);
 	
-	//----------------- Internal -----------------------
+	//--------------- Internals Below -------------------
 	
 	b2PolyShape(const b2ShapeDef* def, b2Body* body,
 				const b2Vec2& center, const b2MassData* massData);
@@ -179,5 +175,10 @@ struct b2PolyShape : public b2Shape
 	b2Vec2 m_normals[b2_maxPolyVertices];
 	int32 m_next[b2_maxPolyVertices];
 };
+
+inline b2Shape* b2Shape::GetNext()
+{
+	return m_next;
+}
 
 #endif

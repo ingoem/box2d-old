@@ -79,6 +79,13 @@ struct b2JointDef
 
 struct b2Joint
 {
+	virtual b2Vec2 GetAnchor1() const = 0;
+	virtual b2Vec2 GetAnchor2() const = 0;
+
+	b2Joint* GetNext();
+
+	//--------------- Internals Below -------------------
+
 	static b2Joint* Create(const b2JointDef* def, b2BlockAllocator* allocator);
 	static void Destroy(b2Joint* joint, b2BlockAllocator* allocator);
 
@@ -90,8 +97,6 @@ struct b2Joint
 
 	// This returns true if the position errors are within tolerance.
 	virtual bool SolvePositionConstraints() = 0;
-	virtual b2Vec2 GetAnchor1() const = 0;
-	virtual b2Vec2 GetAnchor2() const = 0;
 
 	b2JointType m_type;
 	b2Joint* m_prev;
@@ -119,6 +124,11 @@ inline void b2Jacobian::Set(const b2Vec2& x1, float32 a1, const b2Vec2& x2, floa
 inline float32 b2Jacobian::Compute(const b2Vec2& x1, float32 a1, const b2Vec2& x2, float32 a2)
 {
 	return b2Dot(linear1, x1) + angular1 * a1 + b2Dot(linear2, x2) + angular2 * a2;
+}
+
+inline b2Joint* b2Joint::GetNext()
+{
+	return m_next;
 }
 
 #endif
