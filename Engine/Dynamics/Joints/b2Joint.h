@@ -70,11 +70,13 @@ struct b2JointDef
 		type = e_unknownJoint;
 		body1 = NULL;
 		body2 = NULL;
+		collideConnected = false;
 	}
 
 	b2JointType type;
 	b2Body* body1;
 	b2Body* body2;
+	bool collideConnected;
 };
 
 struct b2Joint
@@ -107,6 +109,7 @@ struct b2Joint
 	b2Body* m_body2;
 
 	bool m_islandFlag;
+	bool m_collideConnected;
 };
 
 inline void b2Jacobian::SetZero()

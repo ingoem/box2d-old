@@ -50,7 +50,12 @@ struct b2ShapeDef
 		friction = 0.2f;
 		restitution = 0.0f;
 		density = 0.0f;
+		categoryBits = 0x0001;
+		maskBits = 0xFFFF;
+		groupIndex = 0;
 	}
+
+	virtual ~b2ShapeDef() {}
 
 	void ComputeMass(b2MassData* massData) const;
 
@@ -60,17 +65,18 @@ struct b2ShapeDef
 	float32 friction;
 	float32 restitution;
 	float32 density;
-};
 
-struct b2BoxDef : public b2ShapeDef
-{
-	b2BoxDef()
-	{
-		type = e_boxShape;
-		extents.Set(1.0f, 1.0f);
-	}
+	// The collision category bits. Normally you would just set one bit.
+	uint16 categoryBits;
 
-	b2Vec2 extents;
+	// The collision mask bits. This states the categories that this
+	// shape would accept for collision.
+	uint16 maskBits;
+
+	// Collision groups allow a certain group of objects to never collide (negative)
+	// or always collide (positive). Zero means no collision group. Non-zero group
+	// filtering always wins against the mask bits.
+	int16 groupIndex;
 };
 
 struct b2CircleDef : public b2ShapeDef
@@ -82,6 +88,17 @@ struct b2CircleDef : public b2ShapeDef
 	}
 
 	float32 radius;
+};
+
+struct b2BoxDef : public b2ShapeDef
+{
+	b2BoxDef()
+	{
+		type = e_boxShape;
+		extents.Set(1.0f, 1.0f);
+	}
+
+	b2Vec2 extents;
 };
 
 // Convex polygon, vertices must be in CCW order.
@@ -103,6 +120,15 @@ struct b2Shape
 {
 	virtual bool TestPoint(const b2Vec2& p) = 0;
 	
+	b2ShapeType GetType() const;
+
+	// Get the parent body of this shape.
+	b2Body* GetBody();
+
+	const b2Vec2& GetPosition() const;
+	float32 GetRotation() const;
+	const b2Mat22& GetRotationMatrix() const;
+
 	// Get the next shape in the parent body's shape list.
 	b2Shape* GetNext();
 
@@ -175,6 +201,32 @@ struct b2PolyShape : public b2Shape
 	b2Vec2 m_normals[b2_maxPolyVertices];
 	int32 m_next[b2_maxPolyVertices];
 };
+
+
+inline b2ShapeType b2Shape::GetType() const
+{
+	return m_type;
+}
+
+inline b2Body* b2Shape::GetBody()
+{
+	return m_body;
+}
+
+inline const b2Vec2& b2Shape::GetPosition() const
+{
+	return m_position;
+}
+
+inline float32 b2Shape::GetRotation() const
+{
+	return m_rotation;
+}
+
+inline const b2Mat22& b2Shape::GetRotationMatrix() const
+{
+	return m_R;
+}
 
 inline b2Shape* b2Shape::GetNext()
 {

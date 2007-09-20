@@ -7,7 +7,7 @@ For help with Box2D, please visit http://www.box2d.org. There is a forum there w
 The project files with this distribution work with Microsoft Visual C++ 2005 and above. You can download MSVC 2008 for free now and it includes the necessary Platform SDK.
 
 To run the demos, set "Testbed" as your startup project and press F5. Some test bed commands are:
-- 'r' for reset test
+- 'r' to reset the current test
 - SPACE to launch a bomb
 - arrow keys to pan
 - 'a' and 'z' to zoom in/out

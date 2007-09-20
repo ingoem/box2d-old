@@ -123,7 +123,7 @@ BroadPhaseTest::BroadPhaseTest()
 		GetRandomAABB(&actor->aabb);
 		//actor->aabb.minVertex.Set(0.0f, 0.0f);
 		//actor->aabb.maxVertex.Set(k_width, k_width);
-		actor->proxyId = m_broadPhase->CreateProxy(actor->aabb, actor);
+		actor->proxyId = m_broadPhase->CreateProxy(actor->aabb, 0, 0x0001, 0xFFFF, actor);
 		actor->overlapCount = 0;
 		m_broadPhase->Validate();
 	}
@@ -147,7 +147,7 @@ void BroadPhaseTest::CreateProxy()
 		{
 			actor->overlapCount = 0;
 			GetRandomAABB(&actor->aabb);
-			actor->proxyId = m_broadPhase->CreateProxy(actor->aabb, actor);
+			actor->proxyId = m_broadPhase->CreateProxy(actor->aabb, 0, 0x0001, 0xFFFF, actor);
 			return;
 		}
 	}

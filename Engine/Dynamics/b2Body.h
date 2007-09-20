@@ -325,7 +325,7 @@ inline bool b2Body::IsConnected(const b2Body* other) const
 	for (b2JointNode* jn = m_jointList; jn; jn = jn->next)
 	{
 		if (jn->other == other)
-			return true;
+			return jn->joint->m_collideConnected;
 	}
 
 	return false;

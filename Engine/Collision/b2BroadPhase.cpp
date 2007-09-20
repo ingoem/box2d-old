@@ -32,7 +32,7 @@
 // - no broadphase is perfect and neither is this one: it is not great for huge
 //   worlds (use a multi-SAP instead), it is not great for large objects.
 
-#define B2BP_VALIDATE 0
+bool b2BroadPhase::s_validate = false;
 
 static uint16 BinarySearch(b2Bound* bounds, int32 count, uint16 value)
 {
@@ -225,7 +225,7 @@ void b2BroadPhase::Query(uint16* lowerQueryOut, uint16* upperQueryOut,
 	*upperQueryOut = upperQuery;
 }
 
-uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, void* userData)
+uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 categoryBits, uint16 maskBits, void* userData)
 {
 	b2Assert(m_freeProxy != b2_nullProxy);
 	if (m_freeProxy == b2_nullProxy)
@@ -242,6 +242,9 @@ uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, void* userData)
 	m_freeProxy = proxy->GetNext();
 
 	proxy->overlapCount = 0;
+	proxy->groupIndex = groupIndex;
+	proxy->categoryBits	= categoryBits;
+	proxy->maskBits = maskBits;
 	proxy->userData = userData;
 
 	b2Assert(m_proxyCount < b2_maxProxies);
@@ -310,8 +313,11 @@ uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, void* userData)
 		pair->userData = m_pairCallback->PairAdded(proxy->userData, m_proxyPool[m_queryResults[i]].userData);
 	}
 
-#if defined(_DEBUG) && B2BP_VALIDATE == 1
-	Validate();
+#if defined(_DEBUG)
+	if (s_validate)
+	{
+		Validate();
+	}
 #endif
 
 	// Prepare for next query.
@@ -395,8 +401,11 @@ void b2BroadPhase::DestroyProxy(uint16 proxyId)
 	m_freeProxy = proxyId;
 	--m_proxyCount;
 
-#if defined(_DEBUG) && B2BP_VALIDATE == 1
-	Validate();
+#if defined(_DEBUG)
+	if (s_validate)
+	{
+		Validate();
+	}
 #endif
 }
 
@@ -582,8 +591,11 @@ void b2BroadPhase::MoveProxy(uint16 proxyId, const b2AABB& aabb)
 		}
 	}
 
-#if defined(_DEBUG) && B2BP_VALIDATE == 1
-	Validate();
+#if defined(_DEBUG)
+	if (s_validate)
+	{
+		Validate();
+	}
 #endif
 }
 
@@ -604,6 +616,11 @@ void b2BroadPhase::MoveProxy(uint16 proxyId, const b2AABB& aabb)
 void b2BroadPhase::AddPair(uint16 id1, uint16 id2)
 {
 	b2Assert(m_proxyPool[id1].IsValid() && m_proxyPool[id2].IsValid());
+
+	if (b2ShouldCollide(m_proxyPool + id1, m_proxyPool + id2) == false)
+	{
+		return;
+	}
 
 	b2Pair* pair = m_pairManager.Add(id1, id2);
 	
@@ -634,8 +651,11 @@ void b2BroadPhase::AddPair(uint16 id1, uint16 id2)
 	// Confirm this pair for the subsequent call to Flush.
 	pair->SetAdded();
 
-#if defined(_DEBUG) && B2BP_VALIDATE == 1
-	ValidatePairs();
+#if defined(_DEBUG)
+	if (s_validate)
+	{
+		ValidatePairs();
+	}
 #endif
 }
 
@@ -670,8 +690,11 @@ void b2BroadPhase::RemovePair(uint16 id1, uint16 id2)
 
 	pair->SetRemoved();
 
-#if defined(_DEBUG) && B2BP_VALIDATE == 1
-	ValidatePairs();
+#if defined(_DEBUG)
+	if (s_validate)
+	{
+		ValidatePairs();
+	}
 #endif
 }
 

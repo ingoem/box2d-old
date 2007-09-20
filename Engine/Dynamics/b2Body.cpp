@@ -27,8 +27,6 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_position = bd->position;
 	m_rotation = bd->rotation;
 	m_R.Set(m_rotation);
-	m_linearVelocity = bd->linearVelocity;
-	m_angularVelocity = bd->angularVelocity;
 	m_world = world;
 
 	m_force.Set(0.0f, 0.0f);
@@ -86,6 +84,10 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	{
 		m_invI = 0.0f;
 	}
+
+	// Compute the center of mass velocity.
+	m_linearVelocity = bd->linearVelocity + b2Cross(bd->angularVelocity, m_center);
+	m_angularVelocity = bd->angularVelocity;
 
 	m_jointList = NULL;
 	m_contactList = NULL;

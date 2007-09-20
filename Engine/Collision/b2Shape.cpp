@@ -228,7 +228,7 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	aabb.minVertex.Set(m_position.x - m_radius, m_position.y - m_radius);
 	aabb.maxVertex.Set(m_position.x + m_radius, m_position.y + m_radius);
 
-	m_body->m_world->m_broadPhase->CreateProxy(aabb, this);
+	m_body->m_world->m_broadPhase->CreateProxy(aabb, def->groupIndex, def->categoryBits, def->maskBits, this);
 }
 
 void b2CircleShape::UpdateProxy()
@@ -318,7 +318,7 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	b2AABB aabb;
 	aabb.minVertex = m_position - h;
 	aabb.maxVertex = m_position + h;
-	m_proxyId = m_body->m_world->m_broadPhase->CreateProxy(aabb, this);
+	m_proxyId = m_body->m_world->m_broadPhase->CreateProxy(aabb, def->groupIndex, def->categoryBits, def->maskBits, this);
 }
 
 void b2PolyShape::UpdateProxy()

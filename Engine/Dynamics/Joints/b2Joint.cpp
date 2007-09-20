@@ -102,4 +102,6 @@ b2Joint::b2Joint(const b2JointDef* def)
 	m_next = NULL;
 	m_body1 = def->body1;
 	m_body2 = def->body2;
+	m_collideConnected = def->collideConnected;
+	m_islandFlag = false;
 }

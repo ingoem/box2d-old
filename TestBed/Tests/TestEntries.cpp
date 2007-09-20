@@ -30,9 +30,11 @@
 #include "MotorsAndLimits.h"
 #include "Pyramid.h"
 #include "Web.h"
+#include "CollisionFiltering.h"
 
 TestEntry g_testEntries[] =
 {
+	{"Collision Filtering", CollisionFiltering::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Pendulum", Pendulum::Create},

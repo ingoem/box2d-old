@@ -56,6 +56,9 @@ struct b2Proxy
 	uint16 overlapCount;
 	uint16 timeStamp;
 	void* userData;
+	uint16 categoryBits;
+	uint16 maskBits;
+	int16 groupIndex;
 };
 
 struct b2BufferedPair
@@ -82,7 +85,7 @@ public:
 	~b2BroadPhase();
 
 	// Create and destroy proxies. These call Flush first.
-	uint16 CreateProxy(const b2AABB& aabb, void* userData);
+	uint16 CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 categoryBits, uint16 maskBits, void* userData);
 	void DestroyProxy(uint16 proxyId);
 
 	// Call MoveProxy as many times as you like, then when you are done
@@ -129,6 +132,19 @@ public:
 	b2Vec2 m_quantizationFactor;
 	int32 m_proxyCount;
 	uint16 m_timeStamp;
+
+	static bool s_validate;
 };
+
+inline bool b2ShouldCollide(const b2Proxy* p1, const b2Proxy* p2)
+{
+	if (p1->groupIndex == p2->groupIndex && p1->groupIndex != 0)
+	{
+		return p1->groupIndex > 0;
+	}
+
+	bool doCollide = (p1->maskBits & p2->categoryBits) != 0 && (p1->categoryBits & p2->maskBits) != 0;
+	return doCollide;
+}
 
 #endif

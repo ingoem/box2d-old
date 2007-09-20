@@ -211,6 +211,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Tests\CollisionFiltering.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Tests\CompoundShapes.h"
 				>
 			</File>
