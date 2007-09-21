@@ -20,6 +20,7 @@
 #define TEST_H
 
 #include "Engine/Common/b2Settings.h"
+#include "Engine/Dynamics/b2WorldCallbacks.h"
 
 struct b2World;
 struct b2Body;
@@ -63,6 +64,17 @@ struct TestEntry
 
 extern TestEntry g_testEntries[];
 
+// This is called when a joint in the world is implicitly destroyed
+// because an attached body is destroyed. This gives us a chance to
+// nullify the mouse joint.
+class JointCallback : public b2JointDestroyedCallback
+{
+public:
+	void Notify(b2Joint* joint);
+
+	Test* test;
+};
+
 class Test
 {
 public:
@@ -78,8 +90,13 @@ public:
 	void MouseMove(const b2Vec2& p);
 	void LaunchBomb();
 
-protected:
+	// Let derived tests know that a joint was destroyed.
+	virtual void JointDestroyed(b2Joint* joint) {}
 
+protected:
+	friend JointCallback;
+
+	JointCallback m_jointCallback;
 	int32 m_textLine;
 	b2World* m_world;
 	b2Body* m_bomb;

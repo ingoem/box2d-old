@@ -45,6 +45,7 @@ struct b2ShapeDef
 	b2ShapeDef()
 	{
 		type = e_unknownShape;
+		userData = NULL;
 		localPosition.Set(0.0f, 0.0f);
 		localRotation = 0.0f;
 		friction = 0.2f;
@@ -60,6 +61,7 @@ struct b2ShapeDef
 	void ComputeMass(b2MassData* massData) const;
 
 	b2ShapeType type;
+	void* userData;
 	b2Vec2 localPosition;
 	float32 localRotation;
 	float32 friction;
@@ -120,6 +122,8 @@ struct b2Shape
 {
 	virtual bool TestPoint(const b2Vec2& p) = 0;
 	
+	void* GetUserData();
+
 	b2ShapeType GetType() const;
 
 	// Get the parent body of this shape.
@@ -152,6 +156,8 @@ struct b2Shape
 	virtual void UpdateProxy() = 0;
 
 	b2ShapeType m_type;
+
+	void* m_userData;
 
 	b2Body* m_body;
 	uint16 m_proxyId;
@@ -206,6 +212,11 @@ struct b2PolyShape : public b2Shape
 inline b2ShapeType b2Shape::GetType() const
 {
 	return m_type;
+}
+
+inline void* b2Shape::GetUserData()
+{
+	return m_userData;
 }
 
 inline b2Body* b2Shape::GetBody()

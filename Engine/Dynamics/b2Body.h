@@ -35,6 +35,7 @@ struct b2BodyDef
 {
 	b2BodyDef()
 	{
+		userData = NULL;
 		memset(shapes, 0, sizeof(shapes));
 		position.Set(0.0f, 0.0f);
 		rotation = 0.0f;
@@ -44,6 +45,7 @@ struct b2BodyDef
 		isSleeping = false;
 	}
 
+	void* userData;
 	b2ShapeDef* shapes[b2_maxShapesPerBody];
 	b2Vec2 position;
 	float32 rotation;
@@ -135,6 +137,8 @@ struct b2Body
 	// Get the next body in the world's body list.
 	b2Body* GetNext();
 
+	void* GetUserData();
+
 	//--------------- Internals Below -------------------
 
 	b2Body(const b2BodyDef* bd, b2World* world);
@@ -174,6 +178,8 @@ struct b2Body
 	bool m_isSleeping;
 
 	bool m_islandFlag;
+
+	void* m_userData;
 };
 
 

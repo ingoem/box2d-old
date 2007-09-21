@@ -252,6 +252,10 @@
 				RelativePath=".\Dynamics\b2World.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Dynamics\b2WorldCallbacks.h"
+				>
+			</File>
 			<Filter
 				Name="Contacts"
 				>

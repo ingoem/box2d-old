@@ -54,13 +54,16 @@ static void PolyMass(b2MassData* massData, const b2Vec2* vs, int32 count, float3
 	float32 area = 0.0f;
 	float32 I = 0.0f;
 
-	b2Vec2 a; a.Set(0.0f, 0.0f);
+	// pRef is the reference point for forming triangles.
+	// It's location doesn't change the result (except for rounding error).
+	b2Vec2 pRef(0.0f, 0.0f);
 #if 0
+	// This code would put the reference point inside the polygon.
 	for (int32 i = 0; i < count; ++i)
 	{
-		a += vs[i];
+		pRef += vs[i];
 	}
-	a *= 1.0f / count;
+	pRef *= 1.0f / count;
 #endif
 
 	const float32 inv3 = 1.0f / 3.0f;
@@ -68,7 +71,7 @@ static void PolyMass(b2MassData* massData, const b2Vec2* vs, int32 count, float3
 	for (int32 i = 0; i < count; ++i)
 	{
 		// Triangle vertices.
-		b2Vec2 p1 = a;
+		b2Vec2 p1 = pRef;
 		b2Vec2 p2 = vs[i];
 		b2Vec2 p3 = i + 1 < count ? vs[i+1] : vs[0];
 
@@ -197,6 +200,7 @@ void b2Shape::Destroy(b2Shape*& shape)
 
 b2Shape::b2Shape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center)
 {
+	m_userData = def->userData;
 	m_localPosition = def->localPosition - center;
 	m_localRotation = def->localRotation;
 	m_friction = def->friction;
@@ -228,7 +232,7 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	aabb.minVertex.Set(m_position.x - m_radius, m_position.y - m_radius);
 	aabb.maxVertex.Set(m_position.x + m_radius, m_position.y + m_radius);
 
-	m_body->m_world->m_broadPhase->CreateProxy(aabb, def->groupIndex, def->categoryBits, def->maskBits, this);
+	m_proxyId = m_body->m_world->m_broadPhase->CreateProxy(aabb, def->groupIndex, def->categoryBits, def->maskBits, this);
 }
 
 void b2CircleShape::UpdateProxy()

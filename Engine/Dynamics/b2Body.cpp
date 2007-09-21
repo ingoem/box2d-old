@@ -113,6 +113,8 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		m_linearVelocity.Set(0.0f, 0.0f);
 		m_angularVelocity = 0.0f;
 	}
+
+	m_userData = bd->userData;
 }
 
 b2Body::~b2Body()

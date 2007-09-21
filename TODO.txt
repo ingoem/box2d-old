@@ -21,27 +21,37 @@ Version 1.0.0
 - SAP AABB query. DONE
 - Distance joint. DONE
 
+Version 1.0.1
+- Joint limit bug fix. DONE
+
 Version 1.1.0
-- Handle dangling joint pointers.
-- Documentation.
-- Circles.
+- Handle dangling joint pointers. DONE
 - Collision filters. DONE
-- Handle proxies hitting the world boundary.
-- Add "no rotation" option to body def.
-- User data.
-- Improved API.
+- User data. DONE
+- Improved API. DONE
+- Orphaned mouse joint. DONE
 
 Version 1.2.0
+- Documentation.
+- Circles.
+
+Version 1.3.0
+- Handle running out of pairs.
+- Rename engine.lib to box2d.lib
+- Add "no rotation" option to body def.
+- Handle proxies hitting the world boundary.
+
+Version 1.4.0
 - Gear joint.
 - Pulley joint.
 
-Version 1.3.0
+Version 1.5.0
 - Meshes (segment soup).
 
-Version 1.4.0
+Version 1.6.0
 - Ray casts.
 
-Version 1.5.0
+Version 1.7.0
 - Convex hull tool.
 
 Version 2.0.0

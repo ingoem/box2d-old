@@ -23,6 +23,7 @@
 #include "Engine/Common/b2BlockAllocator.h"
 #include "Engine/Common/b2StackAllocator.h"
 #include "b2ContactManager.h"
+#include "b2WorldCallbacks.h"
 
 struct b2AABB;
 struct b2BodyDef;
@@ -37,6 +38,10 @@ struct b2World
 {
 	b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep);
 	~b2World();
+
+	// Set a callback to notify you when a joint is implicitly destroyed
+	// when an attached body is destroyed.
+	void SetJointDestroyedCallback(b2JointDestroyedCallback* callback);
 
 	b2Body* CreateBody(const b2BodyDef* def);
 	void DestroyBody(b2Body* body);
@@ -81,6 +86,8 @@ struct b2World
 
 	b2Body* m_groundBody;
 
+	b2JointDestroyedCallback* m_jointDestroyedCallback;
+
 	static int32 s_enablePositionCorrection;
 	static int32 s_enableWarmStarting;
 };
@@ -104,6 +111,5 @@ inline b2Contact* b2World::GetContactList()
 {
 	return m_contactList;
 }
-
 
 #endif

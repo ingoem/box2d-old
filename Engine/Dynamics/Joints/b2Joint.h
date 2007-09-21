@@ -68,12 +68,14 @@ struct b2JointDef
 	b2JointDef()
 	{
 		type = e_unknownJoint;
+		userData = NULL;
 		body1 = NULL;
 		body2 = NULL;
 		collideConnected = false;
 	}
 
 	b2JointType type;
+	void* userData;
 	b2Body* body1;
 	b2Body* body2;
 	bool collideConnected;
@@ -85,6 +87,8 @@ struct b2Joint
 	virtual b2Vec2 GetAnchor2() const = 0;
 
 	b2Joint* GetNext();
+
+	void* GetUserData();
 
 	//--------------- Internals Below -------------------
 
@@ -110,6 +114,8 @@ struct b2Joint
 
 	bool m_islandFlag;
 	bool m_collideConnected;
+
+	void* m_userData;
 };
 
 inline void b2Jacobian::SetZero()
@@ -132,6 +138,11 @@ inline float32 b2Jacobian::Compute(const b2Vec2& x1, float32 a1, const b2Vec2& x
 inline b2Joint* b2Joint::GetNext()
 {
 	return m_next;
+}
+
+inline void* b2Joint::GetUserData()
+{
+	return m_userData;
 }
 
 #endif

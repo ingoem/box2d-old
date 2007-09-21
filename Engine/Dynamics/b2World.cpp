@@ -30,6 +30,8 @@ int32 b2World::s_enableWarmStarting = 1;
 
 b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 {
+	m_jointDestroyedCallback = NULL;
+
 	m_bodyList = NULL;
 	m_contactList = NULL;
 	m_jointList = NULL;
@@ -53,6 +55,11 @@ b2World::~b2World()
 {
 	DestroyBody(m_groundBody);
 	delete m_broadPhase;
+}
+
+void b2World::SetJointDestroyedCallback(b2JointDestroyedCallback* callback)
+{
+	m_jointDestroyedCallback = callback;
 }
 
 b2Body* b2World::CreateBody(const b2BodyDef* def)
@@ -81,46 +88,12 @@ void b2World::DestroyBody(b2Body* b)
 		b2JointNode* jn0 = jn;
 		jn = jn->next;
 
-		// Detach jn0 from the other body.
-		b2Body* other = jn0->other;
-		other->WakeUp();
-		b2JointNode** node = &other->m_jointList;
-		bool found = false;
-		while (*node)
+		if (m_jointDestroyedCallback)
 		{
-			if (*node == jn0)
-			{
-				*node = (*node)->next;
-				found = true;
-				break;
-			}
-			else
-			{
-				node = &(*node)->next;
-			}
-		}
-		b2Assert(found == true);
-
-		// Remove joint from world list.
-		b2Joint* j = jn0->joint;
-		if (j->m_prev)
-		{
-			j->m_prev->m_next = j->m_next;
+			m_jointDestroyedCallback->Notify(jn0->joint);
 		}
 
-		if (j->m_next)
-		{
-			j->m_next->m_prev = j->m_prev;
-		}
-
-		if (j == m_jointList)
-		{
-			m_jointList = j->m_next;
-		}
-
-		b2Joint::Destroy(j, &m_blockAllocator);
-		b2Assert(m_jointCount > 0);
-		--m_jointCount;
+		DestroyJoint(jn0->joint);
 	}
 
 	// Remove body from world list.
@@ -350,7 +323,10 @@ void b2World::Step(float32 dt, int32 iterations)
 		}
 
 		island.Solve(m_gravity, iterations, dt);
-		island.UpdateSleep(dt);
+		if (m_doSleep)
+		{
+			island.UpdateSleep(dt);
+		}
 
 		// Allow static bodies to participate in other islands.
 		for (int32 i = 0; i < island.m_bodyCount; ++i)

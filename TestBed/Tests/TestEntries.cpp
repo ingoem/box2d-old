@@ -34,6 +34,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Web", Web::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Polygon Shapes", PolyShapes::Create},
@@ -42,7 +43,6 @@ TestEntry g_testEntries[] =
 	{"Bridge", Bridge::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Pyramid", Pyramid::Create},
-	{"Web", Web::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Broad Phase", BroadPhaseTest::Create},

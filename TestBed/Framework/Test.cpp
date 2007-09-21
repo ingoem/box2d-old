@@ -29,6 +29,18 @@
 
 #include <stdio.h>
 
+void JointCallback::Notify(b2Joint* joint)
+{
+	if (test->m_mouseJoint == joint)
+	{
+		test->m_mouseJoint = NULL;
+	}
+	else
+	{
+		test->JointDestroyed(joint);
+	}
+}
+
 Test::Test()
 {
 	b2AABB worldAABB;
@@ -41,6 +53,9 @@ Test::Test()
 	m_bomb = NULL;
 	m_textLine = 30;
 	m_mouseJoint = NULL;
+	
+	m_jointCallback.test = this;
+	m_world->SetJointDestroyedCallback(&m_jointCallback);
 }
 
 Test::~Test()
@@ -119,6 +134,7 @@ void Test::LaunchBomb()
 
 		b2BodyDef bd;
 		bd.AddShape(&sd);
+		bd.allowSleep = true;
 		m_bomb = m_world->CreateBody(&bd);
 	}
 
