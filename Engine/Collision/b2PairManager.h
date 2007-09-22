@@ -26,6 +26,8 @@
 #include "Engine/Common/b2Settings.h"
 #include "Engine/Common/b2Math.h"
 
+#include <limits.h>
+
 const uint16 b2_nullPair = USHRT_MAX;
 const uint16 b2_nullProxy = USHRT_MAX;
 const int32 b2_tableCapacity = b2_maxPairs;	// must be a power of two

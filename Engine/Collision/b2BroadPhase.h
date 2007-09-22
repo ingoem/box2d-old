@@ -113,6 +113,8 @@ private:
 	void IncrementOverlapCount(uint16 proxyId);
 	void IncrementTimeStamp();
 
+	bool ShouldCollide(uint16 id1, uint16 id2);
+
 public:
 	b2PairManager m_pairManager;
 
@@ -135,16 +137,5 @@ public:
 
 	static bool s_validate;
 };
-
-inline bool b2ShouldCollide(const b2Proxy* p1, const b2Proxy* p2)
-{
-	if (p1->groupIndex == p2->groupIndex && p1->groupIndex != 0)
-	{
-		return p1->groupIndex > 0;
-	}
-
-	bool doCollide = (p1->maskBits & p2->categoryBits) != 0 && (p1->categoryBits & p2->maskBits) != 0;
-	return doCollide;
-}
 
 #endif

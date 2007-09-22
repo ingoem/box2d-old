@@ -34,8 +34,8 @@
 
 TestEntry g_testEntries[] =
 {
-	{"Web", Web::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
+	{"Web", Web::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Pendulum", Pendulum::Create},

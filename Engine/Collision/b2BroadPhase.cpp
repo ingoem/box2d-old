@@ -115,6 +115,21 @@ b2BroadPhase::~b2BroadPhase()
 {
 }
 
+bool b2BroadPhase::ShouldCollide(uint16 id1, uint16 id2)
+{
+	b2Assert(id1 < b2_maxProxies);
+	b2Assert(id2 < b2_maxProxies);
+	b2Proxy* p1 = m_proxyPool + id1;
+	b2Proxy* p2 = m_proxyPool + id2;
+	if (p1->groupIndex == p2->groupIndex && p1->groupIndex != 0)
+	{
+		return p1->groupIndex > 0;
+	}
+
+	bool doCollide = (p1->maskBits & p2->categoryBits) != 0 && (p1->categoryBits & p2->maskBits) != 0;
+	return doCollide;
+}
+
 bool b2BroadPhase::TestOverlap(b2Proxy* p1, b2Proxy* p2)
 {
 	for (int32 axis = 0; axis < 2; ++axis)
@@ -302,6 +317,11 @@ uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 ca
 
 	for (int32 i = 0; i < m_queryResultCount; ++i)
 	{
+		if (ShouldCollide(proxyId, m_queryResults[i]) == false)
+		{
+			continue;
+		}
+
 		b2Pair* pair = m_pairManager.Add(proxyId, m_queryResults[i]);
 		if (pair == NULL)
 		{
@@ -617,7 +637,7 @@ void b2BroadPhase::AddPair(uint16 id1, uint16 id2)
 {
 	b2Assert(m_proxyPool[id1].IsValid() && m_proxyPool[id2].IsValid());
 
-	if (b2ShouldCollide(m_proxyPool + id1, m_proxyPool + id2) == false)
+	if (ShouldCollide(id1, id2) == false)
 	{
 		return;
 	}
