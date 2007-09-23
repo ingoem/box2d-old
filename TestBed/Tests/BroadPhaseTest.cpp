@@ -251,7 +251,7 @@ void BroadPhaseTest::Step(const Settings* settings)
 	}
 
 	char buffer[64];
-	sprintf_s(buffer, 64, "overlaps = %d, exact = %d, diff = %d", m_overlapCount, m_overlapCountExact, m_overlapCount - m_overlapCountExact);
+	sprintf(buffer, "overlaps = %d, exact = %d, diff = %d", m_overlapCount, m_overlapCountExact, m_overlapCount - m_overlapCountExact);
 	DrawString(5, 30, buffer);
 	Validate();
 

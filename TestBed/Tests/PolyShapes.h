@@ -46,7 +46,6 @@ public:
 			m_world->CreateBody(&bd);
 		}
 
-		sds[0].type = e_polyShape;
 		sds[0].vertexCount = 3;
 		sds[0].vertices[0].Set(-0.5f, 0.0f);
 		sds[0].vertices[1].Set(0.5f, 0.0f);
@@ -54,7 +53,6 @@ public:
 		sds[0].density = 1.0f;
 		sds[0].friction = 0.3f;
 		
-		sds[1].type = e_polyShape;
 		sds[1].vertexCount = 3;
 		sds[1].vertices[0].Set(-0.1f, 0.0f);
 		sds[1].vertices[1].Set(0.1f, 0.0f);
@@ -62,7 +60,6 @@ public:
 		sds[1].density = 1.0f;
 		sds[1].friction = 0.3f;
 
-		sds[2].type = e_polyShape;
 		sds[2].vertexCount = 8;
 		float32 w = 1.0f;
 		float32 b = w / (2.0f + sqrtf(2.0f));
@@ -78,7 +75,6 @@ public:
 		sds[2].density = 1.0f;
 		sds[2].friction = 0.3f;
 
-		sds[3].type = e_polyShape;
 		sds[3].vertexCount = 4;
 		sds[3].vertices[0].Set(-0.5f, 0.0f);
 		sds[3].vertices[1].Set(0.5f, 0.0f);
@@ -86,6 +82,9 @@ public:
 		sds[3].vertices[3].Set(-0.5f, 1.0f);
 		sds[3].density = 1.0f;
 		sds[3].friction = 0.3f;
+
+		circleDef.radius = 0.5f;
+		circleDef.density = 1.0f;
 
 		bodyIndex = 0;
 		memset(bodies, 0, sizeof(bodies));
@@ -100,7 +99,16 @@ public:
 		}
 
 		b2BodyDef bd;
-		bd.AddShape(sds + index);
+
+		if (index < 4)
+		{
+			bd.AddShape(sds + index);
+		}
+		else
+		{
+			bd.AddShape(&circleDef);
+		}
+
 		float32 x = b2Random(-2.0f, 2.0f);
 		bd.position.Set(x, 10.0f);
 		bd.rotation = b2Random(-b2_pi, b2_pi);
@@ -117,6 +125,7 @@ public:
 		case '2':
 		case '3':
 		case '4':
+		case '5':
 			CreateBody(key - '1');
 			break;
 		}
@@ -124,7 +133,7 @@ public:
 
 	void Step(const Settings* settings)
 	{
-		DrawString(5, m_textLine, "Press 1-4 to drop stuff");
+		DrawString(5, m_textLine, "Press 1-5 to drop stuff");
 		m_textLine += 15;
 		Test::Step(settings);
 	}
@@ -137,6 +146,7 @@ public:
 	int32 bodyIndex;
 	b2Body* bodies[k_maxBodies];
 	b2PolyDef sds[4];
+	b2CircleDef circleDef;
 };
 
 #endif

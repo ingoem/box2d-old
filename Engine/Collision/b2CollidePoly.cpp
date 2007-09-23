@@ -25,15 +25,15 @@ struct ClipVertex
 	b2ContactID id;
 };
 
-static int ClipSegmentToLine(ClipVertex vOut[2], ClipVertex vIn[2],
-					  const b2Vec2& normal, float offset, int8 clipEdge)
+static int32 ClipSegmentToLine(ClipVertex vOut[2], ClipVertex vIn[2],
+					  const b2Vec2& normal, float32 offset, int8 clipEdge)
 {
 	// Start with no output points
-	int numOut = 0;
+	int32 numOut = 0;
 
 	// Calculate the distance of end points to the line
-	float distance0 = b2Dot(normal, vIn[0].v) - offset;
-	float distance1 = b2Dot(normal, vIn[1].v) - offset;
+	float32 distance0 = b2Dot(normal, vIn[0].v) - offset;
+	float32 distance1 = b2Dot(normal, vIn[1].v) - offset;
 
 	// If the points are behind the plane
 	if (distance0 <= 0.0f) vOut[numOut++] = vIn[0];
@@ -43,7 +43,7 @@ static int ClipSegmentToLine(ClipVertex vOut[2], ClipVertex vIn[2],
 	if (distance0 * distance1 < 0.0f)
 	{
 		// Find intersection point of edge and plane
-		float interp = distance0 / (distance0 - distance1);
+		float32 interp = distance0 / (distance0 - distance1);
 		vOut[numOut].v = vIn[0].v + interp * (vIn[1].v - vIn[0].v);
 		if (distance0 > 0.0f)
 		{

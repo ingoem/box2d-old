@@ -20,6 +20,8 @@
 #include "b2World.h"
 #include "b2Body.h"
 
+// This is a callback from the broadphase when two AABB proxies begin
+// to overlap. We create a b2Contact to manage the narrow phase.
 void* b2ContactManager::PairAdded(void* proxyUserData1, void* proxyUserData2)
 {
 	b2Shape* shape1 = (b2Shape*)proxyUserData1;
@@ -73,6 +75,8 @@ void* b2ContactManager::PairAdded(void* proxyUserData1, void* proxyUserData2)
 	return contact;
 }
 
+// This is a callback from the broadphase when two AABB proxies cease
+// to overlap. We destroy the b2Contact.
 void b2ContactManager::PairRemoved(void* pairUserData)
 {
 	b2Contact* c = (b2Contact*)pairUserData;
@@ -149,6 +153,9 @@ void b2ContactManager::PairRemoved(void* pairUserData)
 	}
 }
 
+// This is the top level collision call for the time step. Here
+// all the narrow phase collision is processed for the world
+// contact list.
 void b2ContactManager::Collide()
 {
 	for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)

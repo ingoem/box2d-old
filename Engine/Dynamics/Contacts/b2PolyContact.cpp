@@ -17,8 +17,6 @@
 */
 
 #include "b2PolyContact.h"
-#include "Engine/Dynamics/b2Body.h"
-#include "Engine/Dynamics/b2World.h"
 #include "Engine/Collision/b2Collision.h"
 #include "Engine/Collision/b2Shape.h"
 #include "Engine/Common/b2BlockAllocator.h"

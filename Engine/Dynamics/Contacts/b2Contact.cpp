@@ -17,6 +17,8 @@
 */
 
 #include "b2Contact.h"
+#include "b2CircleContact.h"
+#include "b2PolyAndCircleContact.h"
 #include "b2PolyContact.h"
 #include "Engine/Dynamics/b2World.h"
 #include "Engine/Dynamics/b2Body.h"
@@ -29,6 +31,8 @@ bool b2Contact::s_initialized = false;
 
 void b2Contact::InitializeRegisters()
 {
+	AddType(b2CircleContact::Create, b2CircleContact::Destroy, e_circleShape, e_circleShape);
+	AddType(b2PolyAndCircleContact::Create, b2PolyAndCircleContact::Destroy, e_polyShape, e_circleShape);
 	AddType(b2PolyContact::Create, b2PolyContact::Destroy, e_polyShape, e_polyShape);
 }
 
@@ -110,29 +114,8 @@ void b2Contact::Destroy(b2Contact* contact, b2BlockAllocator* allocator)
 
 b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 {
-	// Get the shapes in a repeatable order.
-	if (s1->m_body->IsStatic())
-	{
-		b2Assert(s2->m_body->IsStatic() == false);
-		m_shape1 = s1;
-		m_shape2 = s2;
-	}
-	else if (s2->m_body->IsStatic())
-	{
-		b2Assert(s1->m_body->IsStatic() == false);
-		m_shape1 = s2;
-		m_shape2 = s1;
-	}
-	else if (s1 < s2)
-	{
-		m_shape1 = s1;
-		m_shape2 = s2;
-	}
-	else
-	{
-		m_shape1 = s2;
-		m_shape2 = s1;
-	}
+	m_shape1 = s1;
+	m_shape2 = s2;
 
 	m_manifoldCount = 0;
 

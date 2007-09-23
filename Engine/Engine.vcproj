@@ -161,6 +161,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Collision\b2CollideCircle.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Collision\b2CollidePoly.cpp"
 				>
 			</File>
@@ -260,6 +264,14 @@
 				Name="Contacts"
 				>
 				<File
+					RelativePath=".\Dynamics\Contacts\b2CircleContact.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dynamics\Contacts\b2CircleContact.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Dynamics\Contacts\b2Contact.cpp"
 					>
 				</File>
@@ -277,6 +289,14 @@
 				</File>
 				<File
 					RelativePath=".\Dynamics\Contacts\b2NullContact.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dynamics\Contacts\b2PolyAndCircleContact.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dynamics\Contacts\b2PolyAndCircleContact.h"
 					>
 				</File>
 				<File

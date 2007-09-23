@@ -126,7 +126,7 @@ struct b2Body
 	bool IsSleeping() const;
 
 	// You can disable sleeping on this particular body.
-	bool AllowSleeping(bool flag);
+	void AllowSleeping(bool flag);
 
 	// Wake up this body so it will begin simulating.
 	void WakeUp();
@@ -301,7 +301,7 @@ inline bool b2Body::IsSleeping() const
 	return m_isSleeping;
 }
 
-inline bool b2Body::AllowSleeping(bool flag)
+inline void b2Body::AllowSleeping(bool flag)
 {
 	m_allowSleep = flag;
 	if (flag == false)

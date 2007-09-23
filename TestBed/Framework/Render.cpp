@@ -60,6 +60,33 @@ void DrawShape(const b2Shape* shape, const Color& c)
 {
 	switch (shape->m_type)
 	{
+	case e_circleShape:
+		{
+			const b2CircleShape* circle = (const b2CircleShape*)shape;
+			b2Vec2 x = circle->m_position;
+			float32 r = circle->m_radius;
+			const float32 k_segments = 16.0f;
+			const float32 k_increment = 2.0f * b2_pi / k_segments;
+			glColor4f(c.cx, c.cy, c.cz, 1.0f);
+			glBegin(GL_LINE_LOOP);
+			float32 theta = 0.0f;
+			for (int32 i = 0; i < k_segments; ++i)
+			{
+				b2Vec2 d(r * cosf(theta), r * sinf(theta));
+				b2Vec2 v = x + d;
+				glVertex2f(v.x, v.y);
+				theta += k_increment;
+			}
+			glEnd();
+
+			glBegin(GL_LINES);
+			glVertex2f(x.x, x.y);
+			b2Vec2 ax = circle->m_R.col1;
+			glVertex2f(x.x + r * ax.x, x.y + r * ax.y);
+			glEnd();
+		}
+		break;
+
 	case e_polyShape:
 		{
 			const b2PolyShape* poly = (const b2PolyShape*)shape;

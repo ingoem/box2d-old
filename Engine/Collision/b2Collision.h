@@ -21,6 +21,7 @@
 
 #include "Engine/Common/b2Math.h"
 
+struct b2CircleShape;
 struct b2PolyShape;
 
 // We use contact ids to facilitate warm starting.
@@ -60,8 +61,9 @@ struct b2AABB
 	b2Vec2 minVertex, maxVertex;
 };
 
+void b2CollideCircle(b2Manifold* manifold, b2CircleShape* circle1, b2CircleShape* circle2);
+void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const b2CircleShape* circle);
 void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* poly1, const b2PolyShape* poly2);
-
 
 inline bool b2AABB::IsValid() const
 {

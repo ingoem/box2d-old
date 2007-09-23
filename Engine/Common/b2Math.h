@@ -71,7 +71,10 @@ struct b2Vec2
 	float32 Normalize()
 	{
 		float32 length = Length();
-		b2Assert(length > 0.0f);
+		if (length < FLT_EPSILON)
+		{
+			return 0.0f;
+		}
 		float32 invLength = 1.0f / length;
 		x *= invLength;
 		y *= invLength;
