@@ -49,7 +49,6 @@ struct b2Proxy
 {
 	uint16 GetNext() const { return lowerBounds[0]; }
 	void SetNext(uint16 next) { lowerBounds[0] = next; }
-
 	bool IsValid() const { return overlapCount != b2_invalid; }
 
 	uint16 lowerBounds[2], upperBounds[2];
@@ -112,6 +111,8 @@ private:
 				b2Bound* edges, uint16 edgeCount, int32 axis);
 	void IncrementOverlapCount(uint16 proxyId);
 	void IncrementTimeStamp();
+
+	bool InRange(const b2AABB& aabb);
 
 	bool ShouldCollide(uint16 id1, uint16 id2);
 

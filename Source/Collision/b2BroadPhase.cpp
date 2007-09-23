@@ -115,6 +115,13 @@ b2BroadPhase::~b2BroadPhase()
 {
 }
 
+inline bool b2BroadPhase::InRange(const b2AABB& aabb)
+{
+	// Does the world AABB completely contain the provided AABB?
+	b2Vec2 d = b2Min(aabb.minVertex - m_worldAABB.minVertex, m_worldAABB.maxVertex - aabb.maxVertex);
+	return b2Min(d.x, d.y) > 0.0f;
+}
+
 bool b2BroadPhase::ShouldCollide(uint16 id1, uint16 id2)
 {
 	b2Assert(id1 < b2_maxProxies);
@@ -315,22 +322,27 @@ uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 ca
 
 	b2Assert(m_queryResultCount < b2_maxProxies);
 
-	for (int32 i = 0; i < m_queryResultCount; ++i)
+	// Create pairs if the AABB is in range.
+	bool inRange = InRange(aabb);
+	if (inRange)
 	{
-		if (ShouldCollide(proxyId, m_queryResults[i]) == false)
+		for (int32 i = 0; i < m_queryResultCount; ++i)
 		{
-			continue;
-		}
+			if (ShouldCollide(proxyId, m_queryResults[i]) == false)
+			{
+				continue;
+			}
 
-		b2Pair* pair = m_pairManager.Add(proxyId, m_queryResults[i]);
-		if (pair == NULL)
-		{
-			continue;
-		}
+			b2Pair* pair = m_pairManager.Add(proxyId, m_queryResults[i]);
+			if (pair == NULL)
+			{
+				continue;
+			}
 
-		// The Add command may return an old pair, which should not happen here.
-		b2Assert(pair->userData == NULL);
-		pair->userData = m_pairCallback->PairAdded(proxy->userData, m_proxyPool[m_queryResults[i]].userData);
+			// The Add command may return an old pair, which should not happen here.
+			b2Assert(pair->userData == NULL);
+			pair->userData = m_pairCallback->PairAdded(proxy->userData, m_proxyPool[m_queryResults[i]].userData);
+		}
 	}
 
 #if defined(_DEBUG)
@@ -440,6 +452,13 @@ void b2BroadPhase::MoveProxy(uint16 proxyId, const b2AABB& aabb)
 	if (aabb.IsValid() == false)
 	{
 		b2Assert(false);
+		return;
+	}
+
+	// If the new AABB is not in range, give up.
+	bool inRange = InRange(aabb);
+	if (inRange == false)
+	{
 		return;
 	}
 
