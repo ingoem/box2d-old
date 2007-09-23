@@ -1,11 +1,8 @@
-del Box2D.ncb
-del /a:H Box2D.suo
-del /s *.user
-rmdir /s /q Engine\Debug
-rmdir /s /q Engine\Release
-rmdir /s /q TestBed\Debug
-rmdir /s /q TestBed\Release
-rmdir /s /q TestBed\Framework\glui\Debug
-rmdir /s /q TestBed\Framework\glui\Release
-rmdir /s /q TestBed\Framework\freeglut\Debug
-rmdir /s /q TestBed\Framework\freeglut\Release
+del Build\VC8\Box2D.ncb
+del /a:H Build\VC8\Box2D.suo
+del /s Build\VC8\*.user
+rmdir /s /q Build\VC8\Box2D
+rmdir /s /q Build\VC8\TestBed
+rmdir /s /q Build\VC8\glui
+rmdir /s /q Build\VC8\freeglut
+rmdir /s /q Build\VC8\HelloWorld
