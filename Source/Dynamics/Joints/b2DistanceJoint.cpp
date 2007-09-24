@@ -74,6 +74,8 @@ void b2DistanceJoint::PreSolve()
 
 void b2DistanceJoint::SolveVelocityConstraints(float32 dt)
 {
+	NOT_USED(dt);
+
 	b2Vec2 r1 = b2Mul(m_body1->m_R, m_localAnchor1);
 	b2Vec2 r2 = b2Mul(m_body2->m_R, m_localAnchor2);
 

@@ -21,6 +21,7 @@
 #include <string.h>
 
 // Thomas Wang's hash, see: http://www.concentric.net/~Ttwang/tech/inthash.htm
+// This assumes proxyId1 and proxyId2 are 16-bit.
 inline uint32 Hash(uint32 proxyId1, uint32 proxyId2)
 {
 	uint32 key = (proxyId2 << 16) | proxyId1;
@@ -33,7 +34,7 @@ inline uint32 Hash(uint32 proxyId1, uint32 proxyId2)
 	return key;
 }
 
-inline bool Equals(const b2Pair& pair, uint16 proxyId1, uint16 proxyId2)
+inline bool Equals(const b2Pair& pair, int32 proxyId1, int32 proxyId2)
 {
 	return pair.proxyId1 == proxyId1 && pair.proxyId2 == proxyId2;
 }
@@ -42,11 +43,11 @@ b2PairManager::b2PairManager()
 {
 	b2Assert(b2IsPowerOfTwo(b2_tableCapacity) == true);
 	b2Assert(b2_tableCapacity >= b2_maxPairs);
-	for (uint32 i = 0; i < b2_tableCapacity; ++i)
+	for (int32 i = 0; i < b2_tableCapacity; ++i)
 	{
 		m_hashTable[i] = b2_nullPair;
 	}
-	for (uint32 i = 0; i < b2_maxPairs; ++i)
+	for (int32 i = 0; i < b2_maxPairs; ++i)
 	{
 		m_next[i] = b2_nullPair;
 	}
@@ -57,11 +58,11 @@ b2PairManager::~b2PairManager()
 {
 }
 
-b2Pair* b2PairManager::Find(uint16 proxyId1, uint16 proxyId2)
+b2Pair* b2PairManager::Find(int32 proxyId1, int32 proxyId2)
 {
 	if (proxyId1 > proxyId2) b2Swap(proxyId1, proxyId2);
 
-	uint32 hash = Hash(proxyId1, proxyId2) & b2_tableMask;
+	int32 hash = Hash(proxyId1, proxyId2) & b2_tableMask;
 
 	int32 index = m_hashTable[hash];
 	while (index != b2_nullPair && Equals(m_pairs[index], proxyId1, proxyId2) == false)
@@ -79,7 +80,7 @@ b2Pair* b2PairManager::Find(uint16 proxyId1, uint16 proxyId2)
 	return m_pairs + index;
 }
 
-inline b2Pair* b2PairManager::Find(uint16 proxyId1, uint16 proxyId2, uint32 hash)
+inline b2Pair* b2PairManager::Find(int32 proxyId1, int32 proxyId2, uint32 hash)
 {
 	int32 index = m_hashTable[hash];
 	
@@ -98,11 +99,11 @@ inline b2Pair* b2PairManager::Find(uint16 proxyId1, uint16 proxyId2, uint32 hash
 	return m_pairs + index;
 }
 
-b2Pair* b2PairManager::Add(uint16 proxyId1, uint16 proxyId2)
+b2Pair* b2PairManager::Add(int32 proxyId1, int32 proxyId2)
 {
 	if (proxyId1 > proxyId2) b2Swap(proxyId1, proxyId2);
 
-	uint32 hash = Hash(proxyId1, proxyId2) & b2_tableMask;
+	int32 hash = Hash(proxyId1, proxyId2) & b2_tableMask;
 
 	b2Pair* pair = Find(proxyId1, proxyId2, hash);
 	if (pair != NULL)
@@ -117,24 +118,24 @@ b2Pair* b2PairManager::Add(uint16 proxyId1, uint16 proxyId2)
 	}
 
 	pair = m_pairs + m_pairCount;
-	pair->proxyId1 = proxyId1;
-	pair->proxyId2 = proxyId2;
+	pair->proxyId1 = (uint16)proxyId1;
+	pair->proxyId2 = (uint16)proxyId2;
 	pair->status = 0;
 	pair->userData = NULL;
 
 	m_next[m_pairCount] = m_hashTable[hash];
-	m_hashTable[hash] = m_pairCount;
+	m_hashTable[hash] = (uint16)m_pairCount;
 
 	++m_pairCount;
 
 	return pair;
 }
 
-void* b2PairManager::Remove(uint16 proxyId1, uint16 proxyId2)
+void* b2PairManager::Remove(int32 proxyId1, int32 proxyId2)
 {
 	if (proxyId1 > proxyId2) b2Swap(proxyId1, proxyId2);
 
-	uint32 hash = Hash(proxyId1, proxyId2) & b2_tableMask;
+	int32 hash = Hash(proxyId1, proxyId2) & b2_tableMask;
 
 	const b2Pair* pair = Find(proxyId1, proxyId2, hash);
 	if (pair == NULL)
@@ -151,10 +152,10 @@ void* b2PairManager::Remove(uint16 proxyId1, uint16 proxyId2)
 	b2Assert(pairIndex < m_pairCount);
 
 	// Remove the pair from the hash table.
-	uint32 index = m_hashTable[hash];
+	int32 index = m_hashTable[hash];
 	b2Assert(index != b2_nullPair);
 
-	uint32 previous = b2_nullPair;
+	int32 previous = b2_nullPair;
 	while (index != pairIndex)
 	{
 		previous = index;
@@ -175,7 +176,7 @@ void* b2PairManager::Remove(uint16 proxyId1, uint16 proxyId2)
 	// pair being removed. We need to fix the hash
 	// table indices to support the move.
 
-	uint32 lastPairIndex = m_pairCount - 1;
+	int32 lastPairIndex = m_pairCount - 1;
 
 	// If the removed pair is the last pair, we are done.
 	if (lastPairIndex == pairIndex)
@@ -186,7 +187,7 @@ void* b2PairManager::Remove(uint16 proxyId1, uint16 proxyId2)
 
 	// Remove the last pair from the hash table.
 	const b2Pair* last = m_pairs + lastPairIndex;
-	uint32 lastHash = Hash(last->proxyId1, last->proxyId2) & b2_tableMask;
+	int32 lastHash = Hash(last->proxyId1, last->proxyId2) & b2_tableMask;
 
 	index = m_hashTable[lastHash];
 	b2Assert(index != b2_nullPair);
@@ -213,7 +214,7 @@ void* b2PairManager::Remove(uint16 proxyId1, uint16 proxyId2)
 
 	// Insert the last pair into the hash table
 	m_next[pairIndex] = m_hashTable[lastHash];
-	m_hashTable[lastHash] = pairIndex;
+	m_hashTable[lastHash] = (uint16)pairIndex;
 
 	--m_pairCount;
 

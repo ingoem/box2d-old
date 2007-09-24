@@ -38,7 +38,7 @@ class Callback : public b2PairCallback
 public:
 	void* PairAdded(void* proxyUserData1, void* proxyUserData2);
 
-	void PairRemoved(void* pairUserData);
+	void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData);
 
 	BroadPhaseTest* m_test;
 };

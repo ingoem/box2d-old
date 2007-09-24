@@ -32,7 +32,7 @@ struct b2ContactManager : b2PairCallback
 	void* PairAdded(void* proxyUserData1, void* proxyUserData2);
 
 	// Implements PairCallback
-	void PairRemoved(void* pairUserData);
+	void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData);
 
 	void Collide();
 

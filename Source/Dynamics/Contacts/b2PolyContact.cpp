@@ -52,8 +52,6 @@ void b2PolyContact::Evaluate()
 	// Match contact ids to facilitate warm starting.
 	if (m_manifold.pointCount > 0)
 	{
-		const b2Body* b1 = m_shape1->m_body;
-		const b2Body* b2 = m_shape2->m_body;
 		bool match[b2_maxManifoldPoints] = {false, false};
 
 		// Match old contact ids to new contact ids and copy the

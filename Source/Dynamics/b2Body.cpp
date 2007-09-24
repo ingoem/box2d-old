@@ -100,7 +100,7 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	{
 		const b2ShapeDef* sd = bd->shapes[i];
 		if (sd == NULL) break;
-		b2Shape* shape = b2Shape::Create(sd, this, m_center, massDatas + i);
+		b2Shape* shape = b2Shape::Create(sd, this, m_center);
 		shape->m_next = m_shapeList;
 		m_shapeList = shape;
 	}

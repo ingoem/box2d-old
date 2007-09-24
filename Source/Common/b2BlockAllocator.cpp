@@ -19,6 +19,7 @@
 #include "b2BlockAllocator.h"
 #include <malloc.h>
 #include <string.h>
+#include <limits.h>
 
 int32 b2BlockAllocator::s_blockSizes[b2_blockSizes] = 
 {
@@ -51,6 +52,8 @@ struct b2Block
 
 b2BlockAllocator::b2BlockAllocator()
 {
+	b2Assert(b2_blockSizes < UCHAR_MAX);
+
 	m_chunkSpace = b2_chunkArrayIncrement;
 	m_chunkCount = 0;
 	m_chunks = (b2Chunk*)malloc(m_chunkSpace * sizeof(b2Chunk));
@@ -66,12 +69,12 @@ b2BlockAllocator::b2BlockAllocator()
 			b2Assert(j < b2_blockSizes);
 			if (i <= s_blockSizes[j])
 			{
-				s_blockSizeLookup[i] = j;
+				s_blockSizeLookup[i] = (uint8)j;
 			}
 			else
 			{
 				++j;
-				s_blockSizeLookup[i] = j;
+				s_blockSizeLookup[i] = (uint8)j;
 			}
 		}
 

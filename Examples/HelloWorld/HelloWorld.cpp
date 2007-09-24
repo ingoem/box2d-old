@@ -25,6 +25,9 @@
 // box.
 int main(int argc, char** argv)
 {
+	NOT_USED(argc);
+	NOT_USED(argv);
+
 	// Define the size of the world. Simulation will still work
 	// if bodies reach the end of the world, but it will be slower.
 	b2AABB worldAABB;
@@ -60,7 +63,7 @@ int main(int argc, char** argv)
 	// Call the body factory which allocates memory for the ground body
 	// from a pool and creates the ground box shape (also from a pool).
 	// The body is also added to the world.
-	b2Body* ground = world.CreateBody(&groundBodyDef);
+	world.CreateBody(&groundBodyDef);
 
 	// Define another box shape for our dynamic body.
 	b2BoxDef boxDef;

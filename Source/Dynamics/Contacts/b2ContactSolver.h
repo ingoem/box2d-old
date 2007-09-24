@@ -54,7 +54,7 @@ struct b2ContactConstraint
 
 struct b2ContactSolver
 {
-	b2ContactSolver(b2Contact** contacts, int32 contactCount, float32 inv_dt, b2StackAllocator* allocator);
+	b2ContactSolver(b2Contact** contacts, int32 contactCount, b2StackAllocator* allocator);
 	~b2ContactSolver();
 
 	void PreSolve();

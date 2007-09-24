@@ -77,8 +77,11 @@ void* b2ContactManager::PairAdded(void* proxyUserData1, void* proxyUserData2)
 
 // This is a callback from the broadphase when two AABB proxies cease
 // to overlap. We destroy the b2Contact.
-void b2ContactManager::PairRemoved(void* pairUserData)
+void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData)
 {
+	NOT_USED(proxyUserData1);
+	NOT_USED(proxyUserData2);
+
 	b2Contact* c = (b2Contact*)pairUserData;
 	if (c != &m_nullContact)
 	{

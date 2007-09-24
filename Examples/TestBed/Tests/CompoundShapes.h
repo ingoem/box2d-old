@@ -32,7 +32,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			b2Body* body = m_world->CreateBody(&bd);
+			m_world->CreateBody(&bd);
 		}
 
 		{
@@ -61,7 +61,7 @@ public:
 				//bd.position.Set(0.0f, 0.45f);
 				bd.rotation = b2Random(-b2_pi, b2_pi);
 
-				b2Body* body = m_world->CreateBody(&bd);
+				m_world->CreateBody(&bd);
 			}
 		}
 	}

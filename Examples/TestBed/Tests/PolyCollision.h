@@ -71,6 +71,8 @@ public:
 
 	void Step(const Settings* settings)
 	{
+		NOT_USED(settings);
+
 		m_world->Step(0.0f, 1);
 
 		for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)

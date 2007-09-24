@@ -79,14 +79,14 @@ public:
 
 	void SetTextLine(int32 line) { m_textLine = line; }
 	virtual void Step(const Settings* settings);
-	virtual void Keyboard(unsigned char key) {}
+	virtual void Keyboard(unsigned char key) { NOT_USED(key); }
 	void MouseDown(const b2Vec2& p);
 	void MouseUp();
 	void MouseMove(const b2Vec2& p);
 	void LaunchBomb();
 
 	// Let derived tests know that a joint was destroyed.
-	virtual void JointDestroyed(b2Joint* joint) {}
+	virtual void JointDestroyed(b2Joint* joint) { NOT_USED(joint); }
 
 protected:
 	friend class JointCallback;

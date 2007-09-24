@@ -37,17 +37,21 @@ struct b2Pair
 {
 	enum
 	{
-		e_bufferedPair = 0x0001,
-		e_removePair = 0x0002,
+		e_pairBuffered = 0x0001,
+		e_pairRemoved = 0x0002,
+		e_pairReceived = 0x0004,
 	};
 
-	void SetBuffered()	{ status |= e_bufferedPair; }
-	void ClearBuffered()	{ status &= ~e_bufferedPair; }
-	bool IsBuffered()		{ return status & e_bufferedPair; }
+	void SetBuffered()		{ status |= e_pairBuffered; }
+	void ClearBuffered()	{ status &= ~e_pairBuffered; }
+	bool IsBuffered()		{ return (status & e_pairBuffered) == e_pairBuffered; }
 
-	void SetAdded()		{ status &= ~e_removePair; }
-	void SetRemoved()	{ status |= e_removePair; }
-	bool IsRemoved()	{ return (status & e_removePair) == e_removePair; }
+	void SetRemoved()		{ status |= e_pairRemoved; }
+	void ClearRemoved()		{ status &= ~e_pairRemoved; }
+	bool IsRemoved()		{ return (status & e_pairRemoved) == e_pairRemoved; }
+
+	void SetReceived()		{ status |= e_pairReceived; }
+	bool IsReceived()		{ return (status & e_pairReceived) == e_pairReceived; }
 
 	void* userData;
 	uint16 proxyId1;
@@ -63,18 +67,18 @@ public:
 
 	// Add a pair and return the new pair. If the pair already exists,
 	// no new pair is created and the old one is returned.
-	b2Pair* Add(uint16 proxyId1, uint16 proxyId2);
+	b2Pair* Add(int32 proxyId1, int32 proxyId2);
 
 	// Remove a pair, return the pair's userData.
-	void* Remove(uint16 proxyId1, uint16 proxyId2);
+	void* Remove(int32 proxyId1, int32 proxyId2);
 
-	b2Pair* Find(uint16 proxyId1, uint16 proxyId2);
+	b2Pair* Find(int32 proxyId1, int32 proxyId2);
 
 	int32 GetCount() const { return m_pairCount; }
 	b2Pair* GetPairs() { return m_pairs; }
 
 private:
-	b2Pair* Find(uint16 proxyId1, uint16 proxyId2, uint32 hashValue);
+	b2Pair* Find(int32 proxyId1, int32 proxyId2, uint32 hashValue);
 
 public:
 	b2Pair m_pairs[b2_maxPairs];

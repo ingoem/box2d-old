@@ -153,7 +153,7 @@ void b2ShapeDef::ComputeMass(b2MassData* massData) const
 }
 
 b2Shape* b2Shape::Create(const b2ShapeDef* def,
-					 b2Body* body, const b2Vec2& center, const b2MassData* massData)
+					 b2Body* body, const b2Vec2& center)
 {
 	switch (def->type)
 	{
@@ -167,7 +167,7 @@ b2Shape* b2Shape::Create(const b2ShapeDef* def,
 	case e_polyShape:
 		{
 			void* mem = body->m_world->m_blockAllocator.Allocate(sizeof(b2PolyShape));
-			return new (mem) b2PolyShape(def, body, center, massData);
+			return new (mem) b2PolyShape(def, body, center);
 		}
 	}
 
@@ -251,7 +251,7 @@ bool b2CircleShape::TestPoint(const b2Vec2& p)
 }
 
 b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
-					 const b2Vec2& center, const b2MassData* massData)
+					 const b2Vec2& center)
 : b2Shape(def, body, center)
 {
 	b2Assert(def->type == e_boxShape || def->type == e_polyShape);

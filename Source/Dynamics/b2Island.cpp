@@ -68,9 +68,7 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 		b->m_angularVelocity += dt * b->m_invI * b->m_torque;
 	}
 
-	float inv_dt = dt > 0.0f ? 1.0f / dt : 0.0f;
-
-	b2ContactSolver contactSolver(m_contacts, m_contactCount, inv_dt, m_allocator);
+	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);
 
 	// Pre-solve
 	contactSolver.PreSolve();

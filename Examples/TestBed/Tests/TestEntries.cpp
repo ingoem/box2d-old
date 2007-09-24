@@ -34,6 +34,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Broad Phase", BroadPhaseTest::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
@@ -45,7 +46,6 @@ TestEntry g_testEntries[] =
 	{"Vertical Stack", VerticalStack::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Varying Friction", VaryingFriction::Create},
-	{"Broad Phase", BroadPhaseTest::Create},
 	{"PolyCollision", PolyCollision::Create},
 	{NULL, NULL}
 };

@@ -140,8 +140,7 @@ struct b2Shape
 
 	// Internal use only. Do not call.
 	static b2Shape* Create(	const b2ShapeDef* def,
-							b2Body* body, const b2Vec2& center,
-							const b2MassData* massData);
+							b2Body* body, const b2Vec2& center);
 
 	// Internal use only. Do not call.
 	static void Destroy(b2Shape*& shape);
@@ -197,7 +196,7 @@ struct b2PolyShape : public b2Shape
 	//--------------- Internals Below -------------------
 	
 	b2PolyShape(const b2ShapeDef* def, b2Body* body,
-				const b2Vec2& center, const b2MassData* massData);
+				const b2Vec2& center);
 
 	void UpdateProxy();
 

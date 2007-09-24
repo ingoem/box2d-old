@@ -19,6 +19,8 @@
 #ifndef B2_SETTINGS_H
 #define B2_SETTINGS_H
 
+#define NOT_USED(x) x
+
 typedef signed char	int8;
 typedef signed short int16;
 typedef signed int int32;

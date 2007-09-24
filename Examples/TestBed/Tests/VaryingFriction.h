@@ -33,7 +33,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			b2Body* body = m_world->CreateBody(&bd);
+			m_world->CreateBody(&bd);
 		}
 
 		{
@@ -45,7 +45,7 @@ public:
 			bd.position.Set(-2.0f, 11.0f);
 			bd.rotation = -0.25f;
 			bd.AddShape(&sd);
-			b2Body* body = m_world->CreateBody(&bd);
+			m_world->CreateBody(&bd);
 		}
 
 		{
@@ -56,7 +56,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(5.25f, 9.5f);
 			bd.AddShape(&sd);
-			b2Body* body = m_world->CreateBody(&bd);
+			m_world->CreateBody(&bd);
 		}
 
 		{
@@ -68,7 +68,7 @@ public:
 			bd.position.Set(2.0f, 7.0f);
 			bd.rotation = 0.25f;
 			bd.AddShape(&sd);
-			b2Body* body = m_world->CreateBody(&bd);
+			m_world->CreateBody(&bd);
 		}
 
 		{
@@ -79,7 +79,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(-5.25f, 5.5f);
 			bd.AddShape(&sd);
-			b2Body* body = m_world->CreateBody(&bd);
+			m_world->CreateBody(&bd);
 		}
 
 		{
@@ -91,7 +91,7 @@ public:
 			bd.position.Set(-2.0f, 3.0f);
 			bd.rotation = -0.25f;
 			bd.AddShape(&sd);
-			b2Body* body = m_world->CreateBody(&bd);
+			m_world->CreateBody(&bd);
 		}
 
 		{
@@ -109,7 +109,7 @@ public:
 			{
 				sd.friction = friction[i];
 				bd.position.Set(-7.5f + 2.0f * i, 14.0f);
-				b2Body* body = m_world->CreateBody(&bd);
+				m_world->CreateBody(&bd);
 			}
 		}
 	}

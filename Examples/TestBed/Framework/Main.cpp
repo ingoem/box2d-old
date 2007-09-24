@@ -106,6 +106,9 @@ void SimulationLoop()
 
 void Keyboard(unsigned char key, int x, int y)
 {
+	NOT_USED(x);
+	NOT_USED(y);
+
 	switch (key)
 	{
 	case 27:
@@ -148,6 +151,9 @@ void Keyboard(unsigned char key, int x, int y)
 
 void KeyboardSpecial(int key, int x, int y)
 {
+	NOT_USED(x);
+	NOT_USED(y);
+
 	switch (key)
 	{
 		// Press left to pan left.

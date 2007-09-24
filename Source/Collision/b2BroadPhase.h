@@ -74,7 +74,7 @@ struct b2PairCallback
 	virtual void* PairAdded(void* proxyUserData1, void* proxyUserData2) = 0;
 
 	// This should free the pair's user data.
-	virtual void PairRemoved(void* pairUserData) = 0;
+	virtual void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData) = 0;
 };
 
 class b2BroadPhase
@@ -85,11 +85,11 @@ public:
 
 	// Create and destroy proxies. These call Flush first.
 	uint16 CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 categoryBits, uint16 maskBits, void* userData);
-	void DestroyProxy(uint16 proxyId);
+	void DestroyProxy(int32 proxyId);
 
 	// Call MoveProxy as many times as you like, then when you are done
 	// call Flush to finalized the proxy pairs (for your time step).
-	void MoveProxy(uint16 proxyId, const b2AABB& aabb);
+	void MoveProxy(int32 proxyId, const b2AABB& aabb);
 	void Flush();
 
 	// Query an AABB for overlapping proxies, returns the user data and
@@ -102,19 +102,19 @@ public:
 private:
 	void ComputeBounds(uint16* lowerValues, uint16* upperValues, const b2AABB& aabb);
 
-	void AddPair(uint16 proxyId1, uint16 proxyId2);
-	void RemovePair(uint16 proxyId1, uint16 proxyId2);
+	void AddPair(int32 proxyId1, int32 proxyId2);
+	void RemovePair(int32 proxyId1, int32 proxyId2);
 
 	bool TestOverlap(b2Proxy* p1, b2Proxy* p2);
 
-	void Query(uint16* lowerIndex, uint16* upperIndex, uint16 lowerValue, uint16 upperValue,
-				b2Bound* edges, uint16 edgeCount, int32 axis);
-	void IncrementOverlapCount(uint16 proxyId);
+	void Query(int32* lowerIndex, int32* upperIndex, uint16 lowerValue, uint16 upperValue,
+				b2Bound* edges, int32 edgeCount, int32 axis);
+	void IncrementOverlapCount(int32 proxyId);
 	void IncrementTimeStamp();
 
 	bool InRange(const b2AABB& aabb);
 
-	bool ShouldCollide(uint16 id1, uint16 id2);
+	bool ShouldCollide(int32 id1, int32 id2);
 
 public:
 	b2PairManager m_pairManager;

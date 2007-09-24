@@ -56,11 +56,8 @@ void* Callback::PairAdded(void* proxyUserData1, void* proxyUserData2)
 	Actor* actor1 = (Actor*)proxyUserData1;
 	Actor* actor2 = (Actor*)proxyUserData2;
 
-	//bool overlap = TestOverlap(actor1->aabb, actor2->aabb);
-	//b2Assert(overlap == true);
-
-	uint16 id1 = (uint16)(actor1 - m_test->m_actors);
-	uint16 id2 = (uint16)(actor2 - m_test->m_actors);
+	int32 id1 = (int32)(actor1 - m_test->m_actors);
+	int32 id2 = (int32)(actor2 - m_test->m_actors);
 	b2Assert(id1 < k_actorCount);
 	b2Assert(id2 < k_actorCount);
 
@@ -72,22 +69,22 @@ void* Callback::PairAdded(void* proxyUserData1, void* proxyUserData2)
 	++actor1->overlapCount;
 	++actor2->overlapCount;
 
-	uint32 id = (id2 << 16) | id1;
-	return (void*)id;
+	return NULL;
 }
 
-void Callback::PairRemoved(void* pairUserData)
+void Callback::PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData)
 {
-	uint32 id = (uint32)pairUserData;
-	uint16 id1 = (uint16)(id & 0xFFFF);
-	uint16 id2 = (uint16)(id >> 16);
+	NOT_USED(pairUserData);
 
-	b2Assert(id1 < k_actorCount && id2 < k_actorCount);
-
-	Actor* actor1 = m_test->m_actors + id1;
-	Actor* actor2 = m_test->m_actors + id2;
+	Actor* actor1 = (Actor*)proxyUserData1;
+	Actor* actor2 = (Actor*)proxyUserData2;
 
 	// The pair may have been removed by destroying a proxy.
+	int32 id1 = (int32)(actor1 - m_test->m_actors);
+	int32 id2 = (int32)(actor2 - m_test->m_actors);
+	b2Assert(id1 < k_actorCount);
+	b2Assert(id2 < k_actorCount);
+
 	m_test->m_overlaps[id1][id2] = false;
 	m_test->m_overlaps[id2][id1] = false;
 	--m_test->m_overlapCount;
@@ -103,6 +100,8 @@ Test* BroadPhaseTest::Create()
 
 BroadPhaseTest::BroadPhaseTest()
 {
+	b2BroadPhase::s_validate = true;
+
 	srand(888);
 
 	b2AABB worldAABB;
@@ -134,6 +133,8 @@ BroadPhaseTest::BroadPhaseTest()
 
 BroadPhaseTest::~BroadPhaseTest()
 {
+	b2BroadPhase::s_validate = false;
+
 	delete m_broadPhase;
 }
 
@@ -208,10 +209,7 @@ void BroadPhaseTest::Action()
 
 void BroadPhaseTest::Step(const Settings* settings)
 {
-	if (m_stepCount == 1348)
-	{
-		int32 test = 1;
-	}
+	NOT_USED(settings);
 
 	if (m_automated == true)
 	{
