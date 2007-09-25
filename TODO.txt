@@ -32,10 +32,10 @@ Version 1.1.0
 - Orphaned mouse joint. DONE
 
 Version 1.2.0
-- Rename engine.lib to box2d.lib
-- Code layout.
-- Circles.
-- Handle proxies hitting the world boundary.
+- Rename engine.lib to box2d.lib. DONE
+- Code layout. DONE
+- Circles. DONE
+- Handle proxies hitting the world boundary. DONE
 
 Version 1.3.0
 - Documentation.
@@ -54,6 +54,7 @@ Version 1.6.0
 
 Version 1.7.0
 - Convex hull tool.
+- CMake
 
 Version 2.0.0
 - CCD.

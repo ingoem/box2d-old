@@ -59,13 +59,14 @@ void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const
 	// Compute circle position in the frame of the polygon.
 	b2Vec2 xLocal = b2MulT(poly->m_R, circle->m_position - poly->m_position);
 
-	// Find edge with maximum separation.
+	// Find the min separating edge.
 	int32 normalIndex = 0;
 	float32 separation = -FLT_MAX;
+	const float32 radius = circle->m_radius;
 	for (int32 i = 0; i < poly->m_vertexCount; ++i)
 	{
 		float32 s = b2Dot(poly->m_normals[i], xLocal - poly->m_vertices[i]);
-		if (s > circle->m_radius)
+		if (s > radius)
 		{
 			// Early out.
 			return;
@@ -73,14 +74,72 @@ void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const
 
 		if (s > separation)
 		{
-			normalIndex = i;
 			separation = s;
+			normalIndex = i;
 		}
 	}
 
+	// If the center is inside the polygon ...
+	if (separation < FLT_EPSILON)
+	{
+		manifold->pointCount = 1;
+		manifold->normal = b2Mul(poly->m_R, poly->m_normals[normalIndex]);
+		manifold->points[0].id.key = 0;
+		manifold->points[0].position = circle->m_position - radius * manifold->normal;
+		manifold->points[0].separation = separation - radius;
+		return;
+	}
+
+	// Project the circle center onto the edge segment.
+	int32 vertIndex1 = normalIndex;
+	int32 vertIndex2 = poly->m_next[vertIndex1];
+	b2Vec2 e = poly->m_vertices[vertIndex2] - poly->m_vertices[vertIndex1];
+	float32 length = e.Normalize();
+
+	// If the edge length is zero ...
+	if (length < FLT_EPSILON)
+	{
+		b2Vec2 d = xLocal - poly->m_vertices[vertIndex1];
+		float32 dist = d.Normalize();
+		if (dist > radius)
+		{
+			return;
+		}
+
+		manifold->pointCount = 1;
+		manifold->normal = b2Mul(poly->m_R, d);
+		manifold->points[0].id.key = 0;
+		manifold->points[0].position = circle->m_position - radius * manifold->normal;
+		manifold->points[0].separation = dist - radius;
+		return;
+	}
+
+	// Project the center onto the edge.
+	float32 u = b2Dot(xLocal - poly->m_vertices[vertIndex1], e);
+	b2Vec2 p;
+	if (u <= 0.0f)
+	{
+		p = poly->m_vertices[vertIndex1];
+	}
+	else if (u >= length)
+	{
+		p = poly->m_vertices[vertIndex2];
+	}
+	else
+	{
+		p = poly->m_vertices[vertIndex1] + u * e;
+	}
+
+	b2Vec2 d = xLocal - p;
+	float32 dist = d.Normalize();
+	if (dist > radius)
+	{
+		return;
+	}
+
 	manifold->pointCount = 1;
-	manifold->normal = b2Mul(poly->m_R, poly->m_normals[normalIndex]);
+	manifold->normal = b2Mul(poly->m_R, d);
 	manifold->points[0].id.key = 0;
-	manifold->points[0].position = circle->m_position - circle->m_radius * manifold->normal;
-	manifold->points[0].separation = separation - circle->m_radius;
+	manifold->points[0].position = circle->m_position - radius * manifold->normal;
+	manifold->points[0].separation = dist - radius;
 }

@@ -37,7 +37,8 @@ struct Settings
 		drawAABBs(0),
 		drawPairs(0),
 		enableWarmStarting(1),
-		enablePositionCorrection(1)
+		enablePositionCorrection(1),
+		pause(0)
 		{}
 
 	float hz;
@@ -49,6 +50,7 @@ struct Settings
 	int drawPairs;
 	int enableWarmStarting;
 	int enablePositionCorrection;
+	int pause;
 };
 
 struct TestEntry

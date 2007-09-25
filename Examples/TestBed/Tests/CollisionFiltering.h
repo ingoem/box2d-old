@@ -22,7 +22,7 @@
 #include <string.h>
 
 // This is a test of collision filtering.
-// There is a triangle, a box, and an octogon.
+// There is a triangle, a box, and a circle.
 // There are 6 shapes. 3 large and 3 small.
 // The 3 small ones always collide.
 // The 3 large ones never collide.
@@ -33,11 +33,11 @@ const int16 k_largeGroup = -1;
 const uint16 k_defaultCategory = 0x0001;
 const uint16 k_triangleCategory = 0x0002;
 const uint16 k_boxCategory = 0x0004;
-const uint16 k_octogonCategory = 0x0008;
+const uint16 k_circleCategory = 0x0008;
 
 const uint16 k_triangleMask = 0xFFFF;
 const uint16 k_boxMask = 0xFFFF ^ k_triangleCategory;
-const uint16 k_octogonMask = 0xFFFF;
+const uint16 k_circleMask = 0xFFFF;
 
 class CollisionFiltering : public Test
 {
@@ -104,44 +104,26 @@ public:
 		boxBodyDef.position.Set(0.0f, 6.0f);
 		m_world->CreateBody(&boxBodyDef);
 
-		// Small octogon
-		b2PolyDef octogonShapeDef;
-		octogonShapeDef.vertexCount = 8;
-		float32 w = 2.0f;
-		float32 b = w / (2.0f + sqrtf(2.0f));
-		float32 s = sqrtf(2.0f) * b;
-		octogonShapeDef.vertices[0].Set(0.5f * s, 0.0f);
-		octogonShapeDef.vertices[1].Set(0.5f * w, b);
-		octogonShapeDef.vertices[2].Set(0.5f * w, b + s);
-		octogonShapeDef.vertices[3].Set(0.5f * s, w);
-		octogonShapeDef.vertices[4].Set(-0.5f * s, w);
-		octogonShapeDef.vertices[5].Set(-0.5f * w, b + s);
-		octogonShapeDef.vertices[6].Set(-0.5f * w, b);
-		octogonShapeDef.vertices[7].Set(-0.5f * s, 0.0f);
-		octogonShapeDef.density = 1.0f;
+		// Small circle
+		b2CircleDef circleShapeDef;
+		circleShapeDef.radius = 1.0f;
+		circleShapeDef.density = 1.0f;
 
-		octogonShapeDef.groupIndex = k_smallGroup;
-		octogonShapeDef.categoryBits = k_octogonCategory;
-		octogonShapeDef.maskBits = k_octogonMask;
+		circleShapeDef.groupIndex = k_smallGroup;
+		circleShapeDef.categoryBits = k_circleCategory;
+		circleShapeDef.maskBits = k_circleMask;
 
-		b2BodyDef octogonBodyDef;
-		octogonBodyDef.AddShape(&octogonShapeDef);
-		octogonBodyDef.position.Set(5.0f, 2.0f);
+		b2BodyDef circleBodyDef;
+		circleBodyDef.AddShape(&circleShapeDef);
+		circleBodyDef.position.Set(5.0f, 2.0f);
 		
-		m_world->CreateBody(&octogonBodyDef);
+		m_world->CreateBody(&circleBodyDef);
 
-		// Large octogon
-		octogonShapeDef.vertices[0] *= 2.0f;
-		octogonShapeDef.vertices[1]	*= 2.0f;
-		octogonShapeDef.vertices[2]	*= 2.0f;
-		octogonShapeDef.vertices[3]	*= 2.0f;
-		octogonShapeDef.vertices[4]	*= 2.0f;
-		octogonShapeDef.vertices[5]	*= 2.0f;
-		octogonShapeDef.vertices[6]	*= 2.0f;
-		octogonShapeDef.vertices[7]	*= 2.0f;
-		octogonShapeDef.groupIndex = k_largeGroup;
-		octogonBodyDef.position.Set(5.0f, 6.0f);
-		m_world->CreateBody(&octogonBodyDef);
+		// Large circle
+		circleShapeDef.radius *= 2.0f;
+		circleShapeDef.groupIndex = k_largeGroup;
+		circleBodyDef.position.Set(5.0f, 6.0f);
+		m_world->CreateBody(&circleBodyDef);
 	}
 	static Test* Create()
 	{

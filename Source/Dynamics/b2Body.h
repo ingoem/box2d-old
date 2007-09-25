@@ -326,6 +326,11 @@ inline b2Body* b2Body::GetNext()
 	return m_next;
 }
 
+inline void* b2Body::GetUserData()
+{
+	return m_userData;
+}
+
 inline bool b2Body::IsConnected(const b2Body* other) const
 {
 	for (b2JointNode* jn = m_jointList; jn; jn = jn->next)

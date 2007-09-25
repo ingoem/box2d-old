@@ -153,6 +153,11 @@ void Test::Step(const Settings* settings)
 {
 	float timeStep = settings->hz > 0.0f ? 1.0f / settings->hz : 0.0f;
 
+	if (settings->pause)
+	{
+		timeStep = 0.0f;
+	}
+
 	b2World::s_enableWarmStarting = settings->enableWarmStarting;
 	b2World::s_enablePositionCorrection = settings->enablePositionCorrection;
 

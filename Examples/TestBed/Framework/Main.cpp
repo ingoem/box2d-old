@@ -141,6 +141,10 @@ void Keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
+	case 'h':
+		settings.pause = !settings.pause;
+		break;
+
 	default:
 		if (test)
 		{

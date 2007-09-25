@@ -34,10 +34,9 @@
 
 TestEntry g_testEntries[] =
 {
-	{"Broad Phase", BroadPhaseTest::Create},
-	{"Varying Restitution", VaryingRestitution::Create},
-	{"Polygon Shapes", PolyShapes::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
+	{"Polygon Shapes", PolyShapes::Create},
+	{"Varying Restitution", VaryingRestitution::Create},
 	{"Web", Web::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Pendulum", Pendulum::Create},
@@ -47,5 +46,6 @@ TestEntry g_testEntries[] =
 	{"Pyramid", Pyramid::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"PolyCollision", PolyCollision::Create},
+	{"Broad Phase", BroadPhaseTest::Create},
 	{NULL, NULL}
 };
