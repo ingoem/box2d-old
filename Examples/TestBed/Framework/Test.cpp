@@ -118,33 +118,27 @@ void Test::MouseMove(const b2Vec2& p)
 
 void Test::LaunchBomb()
 {
-	if (!m_bomb)
+	if (m_bomb)
 	{
-		b2BoxDef sd;
-		float32 a = 0.5f;
-		sd.type = e_boxShape;
-		sd.extents.Set(a, a);
-		sd.density = 20.0f;
-
-		b2BodyDef bd;
-		bd.AddShape(&sd);
-		bd.allowSleep = true;
-		m_bomb = m_world->CreateBody(&bd);
+		m_world->DestroyBody(m_bomb);
+		m_bomb = NULL;
 	}
 
-#if 1
-	b2Vec2 position; position.Set(b2Random(-15.0f, 15.0f), 30.0f);
-	float rotation = b2Random(-1.5f, 1.5f);
-	m_bomb->SetOriginPosition(position, rotation);
-	m_bomb->m_linearVelocity = -1.0f * position;
-	m_bomb->m_angularVelocity = b2Random(-20.0f, 20.0f);
-#else
-	b2Vec2 position; position.Set(0.25f, 10.0f);
-	m_bomb->SetOriginPosition(position, -0.5f * b2_pi);
-	m_bomb->m_linearVelocity = -1.0f * position;
-	m_bomb->m_angularVelocity = 0.0f;
-#endif
-	m_bomb->WakeUp();
+	b2BoxDef sd;
+	float32 a = 0.5f;
+	sd.type = e_boxShape;
+	sd.extents.Set(a, a);
+	sd.density = 20.0f;
+
+	b2BodyDef bd;
+	bd.AddShape(&sd);
+	bd.allowSleep = true;
+	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
+	bd.rotation = b2Random(-1.5f, 1.5f);
+	bd.linearVelocity = -1.0f * bd.position;
+	bd.angularVelocity = b2Random(-20.0f, 20.0f);
+
+	m_bomb = m_world->CreateBody(&bd);
 }
 
 typedef const char *(APIENTRY * WGLGETEXTENSIONSSTRINGEXT_T)( void );
