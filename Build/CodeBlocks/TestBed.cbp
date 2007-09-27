@@ -36,7 +36,7 @@
 			<Add directory="..\..\Contrib\freeglut" />
 		</Compiler>
 		<Linker>
-			<Add library="..\..\Library\libEngine.a" />
+			<Add library="..\..\Library\libBox2D.a" />
 			<Add library="GLU32" />
 			<Add library="OpenGL32" />
 			<Add library="WinMM" />
