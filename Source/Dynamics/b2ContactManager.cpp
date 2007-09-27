@@ -82,6 +82,11 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 	NOT_USED(proxyUserData1);
 	NOT_USED(proxyUserData2);
 
+	if (pairUserData == NULL)
+	{
+		return;
+	}
+
 	b2Contact* c = (b2Contact*)pairUserData;
 	if (c != &m_nullContact)
 	{

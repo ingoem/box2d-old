@@ -173,3 +173,13 @@ void b2Body::SynchronizeShapes()
 		s->UpdateProxy();
 	}
 }
+
+void b2Body::Freeze()
+{
+	m_mass = 0.0f;
+	m_invMass = 0.0f;
+	m_I = 0.0f;
+	m_invI = 0.0f;
+	m_linearVelocity.SetZero();
+	m_angularVelocity = 0.0f;
+}

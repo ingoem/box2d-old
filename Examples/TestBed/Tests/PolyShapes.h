@@ -36,7 +36,8 @@ public:
 			sd.type = e_boxShape;
 			sd.extents.Set(50.0f, 10.0f);
 			sd.friction = 0.3f;
-
+			sd.categoryBits = 0x0001;
+			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
@@ -49,6 +50,8 @@ public:
 		sds[0].vertices[2].Set(0.0f, 1.5f);
 		sds[0].density = 1.0f;
 		sds[0].friction = 0.3f;
+		sds[0].categoryBits = 0x0002;
+		sds[0].maskBits = 0x0003;
 		
 		sds[1].vertexCount = 3;
 		sds[1].vertices[0].Set(-0.1f, 0.0f);
@@ -56,6 +59,7 @@ public:
 		sds[1].vertices[2].Set(0.0f, 1.5f);
 		sds[1].density = 1.0f;
 		sds[1].friction = 0.3f;
+		sds[1].categoryBits = 0x0004;
 
 		sds[2].vertexCount = 8;
 		float32 w = 1.0f;
@@ -71,6 +75,7 @@ public:
 		sds[2].vertices[7].Set(-0.5f * s, 0.0f);
 		sds[2].density = 1.0f;
 		sds[2].friction = 0.3f;
+		sds[2].categoryBits = 0x0004;
 
 		sds[3].vertexCount = 4;
 		sds[3].vertices[0].Set(-0.5f, 0.0f);
@@ -79,6 +84,7 @@ public:
 		sds[3].vertices[3].Set(-0.5f, 1.0f);
 		sds[3].density = 1.0f;
 		sds[3].friction = 0.3f;
+		sds[3].categoryBits = 0x0004;
 
 		circleDef.radius = 0.5f;
 		circleDef.density = 1.0f;
@@ -114,6 +120,19 @@ public:
 		bodyIndex = (bodyIndex + 1) % k_maxBodies;
 	}
 
+	void DestroyBody()
+	{
+		for (int32 i = 0; i < k_maxBodies; ++i)
+		{
+			if (bodies[i] != NULL)
+			{
+				m_world->DestroyBody(bodies[i]);
+				bodies[i] = NULL;
+				return;
+			}
+		}
+	}
+
 	void Keyboard(unsigned char key)
 	{
 		switch (key)
@@ -124,6 +143,10 @@ public:
 		case '4':
 		case '5':
 			CreateBody(key - '1');
+			break;
+
+		case 'd':
+			DestroyBody();
 			break;
 		}
 	}

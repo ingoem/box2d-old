@@ -115,19 +115,13 @@ b2BroadPhase::~b2BroadPhase()
 {
 }
 
-inline bool b2BroadPhase::InRange(const b2AABB& aabb)
-{
-	// Does the world AABB completely contain the provided AABB?
-	b2Vec2 d = b2Min(aabb.minVertex - m_worldAABB.minVertex, m_worldAABB.maxVertex - aabb.maxVertex);
-	return b2Min(d.x, d.y) > 0.0f;
-}
-
 bool b2BroadPhase::ShouldCollide(int32 id1, int32 id2)
 {
 	b2Assert(id1 < b2_maxProxies);
 	b2Assert(id2 < b2_maxProxies);
 	b2Proxy* p1 = m_proxyPool + id1;
 	b2Proxy* p2 = m_proxyPool + id2;
+
 	if (p1->groupIndex == p2->groupIndex && p1->groupIndex != 0)
 	{
 		return p1->groupIndex > 0;
@@ -323,27 +317,23 @@ uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 ca
 	b2Assert(m_queryResultCount < b2_maxProxies);
 
 	// Create pairs if the AABB is in range.
-	bool inRange = InRange(aabb);
-	if (inRange)
+	for (int32 i = 0; i < m_queryResultCount; ++i)
 	{
-		for (int32 i = 0; i < m_queryResultCount; ++i)
+		if (ShouldCollide(proxyId, m_queryResults[i]) == false)
 		{
-			if (ShouldCollide(proxyId, m_queryResults[i]) == false)
-			{
-				continue;
-			}
-
-			b2Pair* pair = m_pairManager.Add(proxyId, m_queryResults[i]);
-			if (pair == NULL)
-			{
-				continue;
-			}
-
-			// The Add command may return an old pair, which should not happen here.
-			b2Assert(pair->IsReceived() == false);
-			pair->userData = m_pairCallback->PairAdded(proxy->userData, m_proxyPool[m_queryResults[i]].userData);
-			pair->SetReceived();
+			continue;
 		}
+
+		b2Pair* pair = m_pairManager.Add(proxyId, m_queryResults[i]);
+		if (pair == NULL)
+		{
+			continue;
+		}
+
+		// The Add command may return an old pair, which should not happen here.
+		b2Assert(pair->IsReceived() == false);
+		pair->userData = m_pairCallback->PairAdded(proxy->userData, m_proxyPool[m_queryResults[i]].userData);
+		pair->SetReceived();
 	}
 
 #if defined(_DEBUG)
@@ -453,13 +443,6 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 	if (aabb.IsValid() == false)
 	{
 		b2Assert(false);
-		return;
-	}
-
-	// If the new AABB is not in range, give up.
-	bool inRange = InRange(aabb);
-	if (inRange == false)
-	{
 		return;
 	}
 
@@ -753,11 +736,9 @@ void b2BroadPhase::Flush()
 		b2Assert(proxy1->IsValid());
 		b2Assert(proxy2->IsValid());
 
-		bool overlap = TestOverlap(proxy1, proxy2);
-
 		if (pair->IsRemoved())
 		{
-			b2Assert(overlap == false);
+			b2Assert(TestOverlap(proxy1, proxy2) == false);
 
 			if (pair->IsReceived())
 			{
@@ -771,7 +752,7 @@ void b2BroadPhase::Flush()
 		}
 		else
 		{
-			b2Assert(overlap == true);
+			b2Assert(TestOverlap(proxy1, proxy2) == true);
 			pair->ClearBuffered();
 
 			if (pair->IsReceived() == false)

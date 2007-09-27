@@ -148,6 +148,9 @@ struct b2Body
 
 	bool IsConnected(const b2Body* other) const;
 
+	// This is called when the child shape has no proxy.
+	void Freeze();
+
 	b2Vec2 m_position;	// center of mass position
 	float32 m_rotation;
 	b2Mat22 m_R;
@@ -181,7 +184,6 @@ struct b2Body
 
 	void* m_userData;
 };
-
 
 inline void b2BodyDef::AddShape(b2ShapeDef* shape)
 {

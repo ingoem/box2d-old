@@ -54,10 +54,10 @@ struct b2Proxy
 	uint16 lowerBounds[2], upperBounds[2];
 	uint16 overlapCount;
 	uint16 timeStamp;
-	void* userData;
 	uint16 categoryBits;
 	uint16 maskBits;
 	int16 groupIndex;
+	void* userData;
 };
 
 struct b2BufferedPair
@@ -70,10 +70,12 @@ struct b2PairCallback
 {
 	virtual ~b2PairCallback() {}
 
-	// This returns the new pair user data.
+	// This should return the new pair user data. It is okay if the
+	// user data is null.
 	virtual void* PairAdded(void* proxyUserData1, void* proxyUserData2) = 0;
 
-	// This should free the pair's user data.
+	// This should free the pair's user data. In extreme circumstances, it is possible
+	// this will be called with null pairUserData because the pair never existed.
 	virtual void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData) = 0;
 };
 
@@ -82,6 +84,11 @@ class b2BroadPhase
 public:
 	b2BroadPhase(const b2AABB& worldAABB, b2PairCallback* callback);
 	~b2BroadPhase();
+
+	// Use this to see if your proxy is in range. If it is not in range,
+	// it should be destroyed. Otherwise you may get O(m^2) pairs, where m
+	// is the number of proxies that are out of range.
+	bool InRange(const b2AABB& aabb) const;
 
 	// Create and destroy proxies. These call Flush first.
 	uint16 CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 categoryBits, uint16 maskBits, void* userData);
@@ -112,7 +119,6 @@ private:
 	void IncrementOverlapCount(int32 proxyId);
 	void IncrementTimeStamp();
 
-	bool InRange(const b2AABB& aabb);
 
 	bool ShouldCollide(int32 id1, int32 id2);
 
@@ -138,5 +144,14 @@ public:
 
 	static bool s_validate;
 };
+
+
+// Does the world AABB intersect provided AABB?
+inline bool b2BroadPhase::InRange(const b2AABB& aabb) const
+{
+	b2Vec2 d = b2Max(aabb.minVertex - m_worldAABB.maxVertex, m_worldAABB.minVertex - aabb.maxVertex);
+	return b2Max(d.x, d.y) < 0.0f;
+
+}
 
 #endif
