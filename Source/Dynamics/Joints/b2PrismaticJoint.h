@@ -50,9 +50,16 @@ struct b2PrismaticJoint : public b2Joint
 {
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
+
+	b2Vec2 GetReactionForce(float32 invTimeStep) const;
+	float32 GetReactionTorque(float32 invTimeStep) const;
+
 	float32 GetJointTranslation() const;
 	float32 GetJointSpeed() const;
 	float32 GetMotorForce(float32 invTimeStep) const;
+
+	void SetMotorSpeed(float32 speed);
+	void SetMotorForce(float32 force);
 
 	//--------------- Internals Below -------------------
 

@@ -179,7 +179,24 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 <p>When you create a body or joint, you need to provide a <em>definition</em> or <em>def</em> for short. These definitions contain all the information needed to build the body or joint. By using this approach we can prevent construction errors, keep the number of function parameters small, provide sensible defaults, and reduce the number of accessors.</p>
 
 <h2>User Data</h2>
-The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes 
+<p>The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes allow you to attach user data as a <code>void*</code>. This is handy when you are examining Box2D data structures and you want to determine how they relate to the data structures in your game engine.</p>
+
+<p>For example, it is typical to attach an <em>actor</em> pointer to the rigid body on that actor. This sets up a circular reference. If you have the actor, you can get the body. If you have the body, you can get the actor.</p>
+<pre class="code">
+    GameActor* actor = GameCreateActor();
+    b2BodyDef bodyDef;
+    bodyDef.userData = actor;
+    actor->body = box2Dworld->CreateBody(&bodyDef);
+</pre>
+
+<p>Here are some examples of cases where you would need the user data:</p>
+<ul>
+<li>Applying damage to an actor using a collision result.</li>
+<li>Playing a scripted event if the player is inside an axis-aligned box.</li>
+<li>Accessing a game structure when Box2D notifies you that a joint is going to be destroyed.</li>
+</ul>
+
+<p>Keep in mind that user data is optional and you can put anything in it. However, you should be consistent. For example, if you want to store an actor pointer on one body, you should keep an actor pointer on all bodies. Don't store an actor pointer on one body, and a foo pointer on another body. This will likely lead to a crash if you try to cast an actor pointer into a foo pointer.</p>
 
 <h2>Dealing with C++</h2>
 <p>C++ is great for capsulation and polymorphism, but it's not so great for API design. There are always significant trade-offs when creating a C++ library.</p>
@@ -253,9 +270,14 @@ The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes
 
 <h1>Shapes</h1>
 <div class = "text">
+<p>Shapes are the collision geometry attached to bodies. Shapes are also used to define the mass of a body. This lets you specify the density and let Box2D do the work of computing the mass properties.</p>
+<p>Shapes have properties of friction and restitution. Shapes carry collision filtering information to let you prevent collisions between some of your game objects.</p>
+<p>Shapes are always owned by a body. You can attach multiple shapes to a single body. Shapes are abstract classes so that many types of shapes can be implemented in Box2D. If you are brave, you can implement your own shape type (and collision algorithms). So how are shapes defined?</p>
+
 <h2>The Shape Definition</h2>
-<p>Shapes are the collision geometry attached to bodies. Shapes do not exist on their own and you cannot create a shape directly. Instead you specify a <em>shape definition</em> that contains all the construction data for a shape. Then you attached the shape definition to a body definition, which in turn is used to create a body. When the body is created the body definition is examined for shape definitions and the corresponding shapes are created and attached to the new body. This may seem a bit convoluted, but it really makes life easier, for me and you.</p>
+<p>Shapes do not exist on their own and you cannot create a shape directly. Instead you specify a <em>shape definition</em> that contains all the construction data for a shape. Then you attached the shape definition to a body definition, which in turn is used to create a body. When the body is created the body definition is examined for shape definitions and the corresponding shapes are created and attached to the new body. This may seem a bit convoluted, but it really makes life easier, for me and you.</p>
 <p>Box2D supports three types of shape definitions: circles, boxes, and convex polygons. Internally, Box2D creates a convex polygon for boxes. This simplifies the collision code. I encourage you to look at <code>b2Shape.h</code> for all the shape definition parameters. But don't worry, I will cover most of them here.</p>
+<p>Box2D does not keep a pointer to your shape definitions. Instead Box2D copies all the data out of the shape definition. So you can create shape definitions on the stack and you can use a single shape definition to spawn multiple shape instances. A caveat is that the user data on the shape definition would be shared by multiple shapes, which is often not desirable.</p>
 
 <h3>Local Position and Rotation</h3>
 <p>Every shape is attached to a body and you are free to attach a shape with any position and rotation. In the shape definition you specify the local position and local rotation that will be used to attach the shape to the body. This really comes in handy when you have have <em>compound shapes</em>.</p>
@@ -273,12 +295,14 @@ The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes
 <h3>Friction and Restitution</h3>
 <p>Friction is used to make objects slide along each other realistically. Box2D supports static and dynamic friction, but uses the same parameter for both. Friction is simulated accurately in Box2D and the friction strength is proportional to the normal force (this is called <em>Coulomb friction</em>). The friction parameter is usually set between 0 and 1. A value of zero turns off friction and a value of one makes the friction strong. When the friction is computed between two shapes, Box2D must combine the friction parameters of the two shapes. This is done with the following formula:</p>
 <pre class="code">
-    float32 combinedFriction = sqrtf(shape1->friction * shape2->friction);
+    float32 friction;
+    friction = sqrtf(shape1->friction * shape2->friction);
 </pre>
 
 <p>Restitution is used to make objects bounce. The restitution value is usually set to be between 0 and 1. Consider dropping a ball on a table. A value of zero means the ball won't bounce. This is called an <em>inelastic</em> collision. A value of one means the ball's velocity will be exactly reflected. This is called a <em>perfectly elastic</em> collision. Restitution is combined using the following formula.</p>
 <pre class="code">
-    float32 combinedRestitution = b2Max(shape1->restitution, shape2->restitution);
+    float32 restitution;
+    restitution = b2Max(shape1->restitution, shape2->restitution);
 </pre>
 
 <p>When a shape develops multiple contacts, restitution is simulated approximately. This is because Box2D uses an iterative solver. Box2D also uses inelastic collisions when the collision velocity is small. This is done to prevent jitter.</p>
@@ -313,7 +337,7 @@ The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes
 </ul>
 
 <h3>Circle Definitions</h3>
-<p><code>b2CircleDef</code> extends <code>b2ShapeDef</code> and adds a radius.</p>
+<p><code>b2CircleDef</code> extends <code>b2ShapeDef</code> and adds a radius. The origin of a circle is its center.</p>
 
 <h3>Box Definitions</h3>
 <p><code>b2BoxDef</code> extends <code>b2ShapeDef</code> and adds an extents vector. Assuming the y-axis is up in your game, the extents vector is defined this way:</p>
@@ -322,10 +346,11 @@ The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes
     boxDef.extents.x = width / 2.0f;
     boxDef.extents.y = height / 2.0f;
 </pre>
+<p>The origin of a box is its center.</p>
 <p>Internally, Box2D does not implement a box shape. Instead, a box definition is used to create a convex polygon.</p>
 
 <h3>Polygon Definitions</h3>
-<p><code>b2PolyDef</code> is used to implement convex polygons. They are a bit tricky to use correctly, so please read closely. The maximum vertices is defined by <code>b2_maxPolyVertices</code> which is currently 8. If you need to use more vertices, you must modify <code>b2_maxPolyVertices</code> in <code>b2Settings.h</code>.</p>
+<p><code>b2PolyDef</code> is used to implement convex polygons. They are a bit tricky to use correctly, so please read closely. The maximum vertex count is defined by <code>b2_maxPolyVertices</code> which is currently 8. If you need to use more vertices, you must modify <code>b2_maxPolyVertices</code> in <code>b2Settings.h</code>.</p>
 <p>When you build a polygon definition you must specify the number of vertices you will use. The vertices must be specified in <b>counter-clockwise</b> (CCW) order. Also, the polygon must be <b>convex</b>. In other words, each vertex must point outwards to some degree. Finally, you must not overlap any vertices. Box2D will automatically close the loop.</p>
 <p>A future version of Box2D will provide a tool to automatically create a convex polygon from a set of points, so you won't have to be so careful.</p>
 <p>Here is an example of a polygon definition of a triangle:</p>
@@ -336,7 +361,7 @@ The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes
     triangleDef.vertices[1].Set(1.0f, 0.0f);
     triangleDef.vertices[2].Set(0.0f, 2.0f);
 </pre>
-<p>The polygon vertices should generally be centered around the origin, but this is not necessary.</p>
+<p>The polygon vertices should generally be centered around the origin, but this is not necessary. The origin of the polygon shape is defined implicitly by its vertices.</p>
 
 <h2>(Not) Creating and Destroying a Shape</h2>
 <p>We don't need to discuss shape creation or destruction because this is handled automatically by Box2D. You should never try to create or destory a shape. You should never hold onto a shape pointer, because the body may be removed somewhere else in your game code.</p>
@@ -348,8 +373,13 @@ The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes
 
 <h1>Bodies</h1>
 <div class = "text">
+<p>Bodies have position and velocity. You can apply forces, torques, and impulses to bodies.</p>
+<p>Bodies are the backbone for shapes. Bodies carry shapes and move them around in the world. Bodies are always <em>rigid bodies</em> in Box2D. That means that two shapes attached to the same rigid body never move relative to each other.</p>
+<p>Bodies hold the mass of its shapes. You usually keep pointers to all the bodies you create. This way you can query the body positions to update the positions of your graphical entities. You should also keep body pointers so you can destroy them when you are done with them.</p>
+
 <h2>The Body Definition</h2>
 <p>Before a body is created you must create a body definition (<code>b2BodyDef</code>). You can create a body definition on the stack or build it into your game's data structures. The choice is up to you.</p>
+<p>Box2D only copies the data out of the body definition, it does not keep a pointer to the body definition. This means you can recycle a body definition to create multiple bodies.</p>
 <p>Lets go over some of the key members of the body definition.</p>
 
 <h3>Adding Shapes</h3>
@@ -381,64 +411,262 @@ The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes
 <p>Now would be a good time to read this section again. It's tricky stuff that you should probably understand.</p>
 
 <h3>Velocity</h3>
-<p>You can set the initial velocity of the body in the body definition. This is purely for convenience because you can set a body's velocity any time you like. However, you should generally not set a body's velocity to constrain its motion. That's what joints are for.</p>
+<p>You can set the initial velocity of the body in the body definition. This is purely for convenience because you can set a body's velocity any time you like.</p>
+<p>Usually you should not set a body's velocity to constrain its motion. To constraint a body, use joints, shapes, forces, and impulses.</p>
 <p>When you are building a body definition you may not know the position of the body's center of mass, therefore the initial linear velocity is applied to the body's origin.</p>
 
 <h3>Sleep Parameters</h3>
+<p>What does sleep mean? Well it is expensive to simulate bodies, so the less we have to simulate the better. When a body comes to rest we would like to stop simulating it.</p>
+<p>When Box2D determines that a body (or group of bodies) has come to rest, the body enters a sleep state which has very little CPU overhead. If an awake body collides with a sleeping body, then the sleeping body wakes up. Bodies will also wake up if a joint or contact attached to them is destroyed. You can also wakeup a body manually.</p>
+<p>The body definition lets you specify whether a body can <em>sleep</em> and whether a body is created sleeping.</p>
+ <pre class="code">
+    bodyDef.allowSleep = true;
+    bodyDef.isSleeping = false;
+</pre>
 
-<h2>Creating a Body</h2>
-<p>Box2D does not keep a reference to the body definition or any of the data it holds (except possibly user data void pointers).</p>
+<h2>Creating and Destroying a Body</h2>
+<p>Bodies are created and destroyed using a body factory provided by the world class. This lets the world create the body with an efficient allocator and embed the body in its data structures.</p>
 <pre class="code">
     b2Body* body = myWorld->CreateBody(&bodyDef);
     ... do stuff ...
     myWorld->DestroyBody(body);
     body = NULL;
 </pre>
+<p><em>Never</em> use <code>new</code> or <code>malloc</code> to create a body. The world won't know about the body and the body won't be properly initialized.</p>
+<p>Box2D does not keep a reference to the body definition or any of the data it holds (except user data pointers).</p>
+<p>Box2D allows you to avoid destroying bodies by deleting your <code>b2World</code> object, which does all the cleanup work for you. However, you should be mindful to nullify and body pointers that you keep in your game engine.</p>
+<p>When you destroy a body all its attached shapes, joints, and contacts are destroyed. This is called <em>implicit destruction</em>. Any body connected to one of those joints and/or contacts is woken. There is mostly very convenient for you. However, you must be aware of one crucial issue:</p>
+<blockquote>
+When a body is destroyed, any joints attached to the body are automatically destroyed. You must nullify any pointers you have to those joints. Otherwise, your program will <b>die horribly</b> if you try to destroy that joint later.
+</blockquote>
+<p>To help you nullify your joint pointers, Box2D provides a listener class named <code>b2WorldListener</code> that you can implement and provide to your world object. Then the world object will notify you when a joint is going to be implicity destroyed.</p>
+
+<h2>Static and Dynamic Bodies</h2>
+<p>Bodies that move around are called <em>dynamic</em> and bodies that are fix are called <em>static</em>. Both static and dynamic bodies can have shapes. If you use the default shape density of 0, then you will get a static body, otherwise you'll get a dynamic body.</p>
+<p>In principle, you could use a single static body for your world by attaching possibly many shapes to it. This will not improve performance much, but it can save a bit of memory. The choice is yours. The maximum number of shapes per body is determined by <code>b2_maxShapesPerBody</code> which has a default value of 64.</p>
+<p>Suppose you want to connect a dynamic body to ground with a joint. You'll need to connect the joint to a static body. If you don't have a static body, you can get a shared static body from your world object.</p>
+<pre class="code">
+    b2Body* ground = myWorld->GetGroundBody();
+    ... build a joint using the ground body ...
+</pre>
 
 <h2>Using a Body</h2>
+<p>Using a body is fairly straightforward. You can set and get the position and rotation of a body. You can set and get the position of the body's origin or its center of mass.  You can set and get its velocities.</p>
+<pre class="code">
+    void SetOriginPosition(const b2Vec2& position, float32 rotation);
+    b2Vec2 GetOriginPosition() const;
+
+    void SetCenterPosition(const b2Vec2& position, float32 rotation);
+    b2Vec2 GetCenterPosition() const;
+
+    float32 GetRotation() const;
+    const b2Mat22& GetRotationMatrix() const;
+
+    void SetLinearVelocity(const b2Vec2& v);
+    b2Vec2 GetLinearVelocity() const;
+
+    void SetAngularVelocity(float32 w);
+    float32 GetAngularVelocity() const;
+</pre>
+
+<p>You can apply forces, torques, and impulses to a body. When you apply a force or an impulse, you provide a world point where the load is applied. This often results in a torque about the center of mass.</p>
+<pre class="code">
+    void ApplyForce(const b2Vec2& force, const b2Vec2& point);
+    void ApplyTorque(float32 torque);
+    void ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point);
+</pre>
+
+<p>Keep in mind that the only body function that wakes it is <code>b2Body::WakeUp</code>. Applying forces <b>does not</b> wake a body. This is done so that bodies under static load can sleep. For example, you may wish to increase the gravity on a body by applying a steady downward force. There is no reason to prevent this body from going to sleep. If you want to apply a force to a body and ensure that it reacts, you must wake the body <em>first</em>.</p>
+
+<p>The body class has some utility functions to help you transform points and vectors between local and world space. If you don't understand these concepts, please read "Essential Mathematics for Games and Interactive Applications" by Jim Van Verth and Lars Bishop. These functions are efficient, so use them with impunity.</p>
+<pre class="code">
+    b2Vec2 GetWorldPoint(const b2Vec2& localPoint);
+    b2Vec2 GetWorldVector(const b2Vec2& localVector);
+    b2Vec2 GetLocalPoint(const b2Vec2& worldPoint);
+    b2Vec2 GetLocalVector(const b2Vec2& worldVector);
+</pre>
+
+<p>You can iterate over a body's shapes. This is useful if you want to draw collision geometry in a debug mode.</p>
+<pre class="code">
+    for (b2Shape* s = body->GetShapeList(); s; s = s->GetNext())
+    {
+        GameDrawShape(s);
+    }
+</pre>
+
 </div>
 
 <h1>Joints</h1>
 <div class = "text">
+<p>Joints are used to constrain bodies to the world or to each other. Typical examples in games include ragdolls, teeters, and pulleys. Joints can be combined in many different ways to create interesting motions.</p>
+<p>Some joints provide limits so you can control the range of motion. Some joint provide motors which can be used to drive the joint at a prescribed speed until a prescribed force/torque is exceeded.</p>
+<p>Joint motors can be used in many ways. You can use motors to control position by specifying a joint velocity that is proportional to the difference between the actual and desired position. You can also use motors to simulate joint friction: set the joint velocity to zero and provide a small, but significant maximum motor force/torque. Then the motor will attempt to keep the joint from moving until the load becomes too strong.</p>
+
 <h2>The Joint Definition</h2>
+<p>Each joint type has a definition that derives from <code>b2JointDef</code>. All joints are connected between two different bodies. One body may static. If you want to waste memory, then create a joint between two static bodies. :)</p>
+<p>You can specify user data for any joint type and you can provide a flag to prevent the attached bodies from colliding with each other. This is actually the default behavior and you must set the <code>collideConnected</code> Boolean to allow collision between to connected bodies.</p>
+<p>The rest of the joint definition data depends on the joint type. We cover these now.</p>
 
-<h2>Creating and Destroying a Joint</h2>
-
-<h2>Using a Joint</h2>
-
-<h2>Orphaned Joints</h2>
-
-<h2>Joint Types</h2>
 <h3>Distance Joint</h3>
+<p><img src="images/distanceJoint.gif" class="imageright"/>One of the simplest joint is a distance joint which says that the distance between two points on two bodies must be constant. When you specify a distance joint the two bodies should already be in place. Then you specify the two <em>anchor</em> points in world coordinates. The first anchor point is connected to body 1, and the second anchor point is connected to body 2. These points imply the length of the distance constraint.</p>
+<p>Here is an example of a distance joint definition. In this case we decide to allow the bodies to collide and we place the anchor points at the respective center of mass positions.</p>
+<pre class="code">
+    b2DistanceJointDef jointDef;
+    jointDef.body1 = myBody1;
+    jointDef.body2 = myBody2;
+    jointDef.collideConnected = true;
+    jointDef.anchorPoint1 = myBody1->GetCenterPosition();
+    jointDef.anchorPoint2 = myBody2->GetCenterPosition();
+</pre>
 
 <h3>Revolute Joint</h3>
+<p><img src="images/revoluteJoint.gif" class="imageright"/>A revolute joint forces two bodies to share a common anchor point, often called a <em>hinge point</em>. The revolute joint has a single degree of freedom: the relative rotation of the two bodies. This is called the <em>joint angle</em>.</p>
+<p>To specify a revolute you need to provide two bodies and a single anchor point in world space. Box2D assumes that the bodies are already in the correct position.</p>
+<p>In this example, two bodies are connected by a revolute joint at the first body's center of mass.</p>
+<pre class="code">
+    b2RevoluteJointDef jointDef;
+    jointDef.body1 = myBody1;
+    jointDef.body2 = myBody2;
+    jointDef.anchorPoint = myBody1->GetCenterPosition();
+</pre>
+<p>The revolute joint angle is positive when body2 rotates CCW about the anchor point. Like all angles in Box2D, the revolute angle is measured in radians. By convention the revolute joint angle is zero when the joint is created, regardless of the current rotation of the two bodies.</p>
+<p>In some cases you might wish to control the joint angle. For this, the revolute joint can optionally simulate a joint limit and/or a motor.</p>
+<p>A joint limit forces the joint angle to remain between an lower and upper bound. The limit will apply as much torque as needed to make this happen. The limit range should include zero, otherwise the joint will lurch when the simulation begins.</p>
+<p>A joint motor allows you to specify the joint speed (the time derivative of the angle). The speed can be negative or positive. A motor can have infinite force, but this is usually not desirable. Have you ever heard the expression:</p>
+<blockquote>"What happens when an irresistible force meets an immovable object?"</blockquote>
+<p>I can tell you it's not pretty. So you can provide a maximum torque for the joint motor. The joint motor will maintain the specified speed unless the required torque exceeds the specified maximum. When the maximum torque is exceeded, the joint will slow down and can even reverse.</p>
+<p>You can use a joint motor to simulate joint friction. Just set the joint speed to zero, and set the maximum torque to some small, but significant value. The motor will try to prevent the joint from rotating, but will yield to a significant load.</p>
+<p>Here's a revision of the revolute joint definition above; this time the joint has a limit and a motor enabled. The motor is setup to simulate joint friction.</p>
+<pre class="code">
+    b2RevoluteJointDef jointDef;
+    jointDef.body1 = myBody1;
+    jointDef.body2 = myBody2;
+    jointDef.anchorPoint = myBody1->GetCenterPosition();
+    jointDef.lowerAngle = -0.5f * b2_pi; // -90 degrees
+    jointDef.upperAngle = 0.25f * b2_pi; // 45 degrees
+    jointDef.enableLimit = true;
+    jointDef.motorTorque = 10.0f;
+    jointDef.motorSpeed = 0.0f;
+    jointDef.enableMotor = true;
+</pre>
 
 <h3>Prismatic Joint</h3>
+<p><img src="images/prismaticJoint.gif" class="imageright"/>A prismatic joint allows for relative translation of two bodies along a specified local axis. A prismatic joint prevents relative rotation. Therefore, a prismatic joint has a single degree of freedom.</p>
+<p>The prismatic joint definition is similar to the revolute joint description; just substitute translation for angle and force for torque. Using this analogy proved an example prismatic joint definition with a joint limit and a friction motor:</p>
+<pre class="code">
+    b2PrismaticJointDef jointDef;
+    jointDef.body1 = myBody1;
+    jointDef.body2 = myBody2;
+    jointDef.anchorPoint = myBody1->GetCenterPosition();
+    jointDef.lowerTranslation = -5.0f;
+    jointDef.upperTranslation = 2.5f;
+    jointDef.enableLimit = true;
+    jointDef.motorForce = 1.0f;
+    jointDef.motorSpeed = 0.0f;
+    jointDef.enableMotor = true;
+</pre>
+<p>Like the revolute joint, the prismatic joint translation is zero when the joint is created. So be sure zero is between your lower and upper translation limits.</p>
 
 <h3>Mouse Joint</h3>
+<p>The mouse joint is used to drag bodies around in the test-bed. It will probably be revised in the future, so I will not go into details about this joint yet.</p>
 
+<h2>Creating and Destroying a Joint</h2>
+<p>Joints are created and destroyed using the world factor methods. This brings up an old issue:</p>
+<blockquote>Don't try to create a body or joint on the stack or on the heap using <code>new</code> or <code>malloc</code>. You must create and destroy bodies and joints using the create and destroy methods of the <code>b2World</code> class.</blockquote>
+<p>Here's an example of the lifetime of a revolute joint:</p>
+<pre class="code">
+    b2RevoluteJointDef jointDef;
+    jointDef.body1 = myBody1;
+    jointDef.body2 = myBody2;
+    jointDef.anchorPoint = myBody1->GetCenterPosition();
+    b2RevoluteJoint* joint = myWorld->CreateJoint(&jointDef);
+    ... do stuff ...
+    myWorld->DestroyJoint(joint);
+    joint = NULL;
+</pre>
+<p>It is always good to nullify your pointer after they are destroyed. This will make the program crash in a controlled manner if you try to reuse the pointer.</p>
+
+<h2>Orphaned Joints</h2>
+<p>The lifetime of a joint is not simple. Heed this warning well:</p>
+<blockquote>Joints are destroyed when an attached body is destroyed. You should implement a <code>b2WorldListener</code> class so that you can nullify your joint pointers when they are implicitly destroyed.</blockquote>
+<p>This precaution is not always necessary. You may organize your game engine so that joints are always destroyed before the attached bodies. In this case you don't need to implement the listener class.</p>
+
+<h2>Using a Joint</h2>
+<p>Many simulations create the joints and don't access them again until they are detroyed. However, there is a lot of useful data contained in joints that you can use to create a rich simulation.</p>
+<p>First of all, you can get the bodies, anchor points, and user data from a joint.</p>
+<pre class="code">
+    b2Body* GetBody1();
+    b2Body* GetBody2();
+    b2Vec2 GetAnchor1();
+    b2Vec2 GetAnchor2();
+    void* GetUserData();
+</pre>
+<p>All joints have a reaction force and torque. This the reaction force applied to body 2 at the anchor point. You can use reaction forces to break joints or trigger other game events. You must provide the inverse time step to get the reaction forces because Box2D stores the reaction impulses. These functions may do some computations, so don't call them if you don't need the result.</p>
+<pre class="code">
+    b2Vec2 GetReactionForce(float32 invTimeStep);
+    float32 GetReactionTorque(float32 invTimeStep);
+</pre>
+
+<h3>Using a Distance Joint</h3>
+<p>Distance joints don't have motors, so there are no extra runtime methods for distance joints.</p>
+
+<h3>Using a Revolute Joint</h3>
+<p>You can access a revolute joint's angle, speed, and motor torque.</p>
+<pre class="code">
+    float32 GetJointAngle() const;
+    float32 GetJointSpeed() const;
+    float32 GetMotorTorque(float32 invTimeStep) const;
+</pre>
+<p>You also update the motor parameters each step.</p>
+<pre class="code">
+    void SetMotorSpeed(float32 speed);
+    void SetMotorTorque(float32 torque);
+</pre>
+<p>Joint motors have some interesting abilities. You can update the joint speed every time step so you can make the joint move back-and-forth like a sine-wave or according to whatever function you want.</p>
+<pre class="code">
+    ... Game Loop Begin ...
+    myJoint->SetMotorSpeed(cosf(0.5f * time));
+    ... Game Loop End ...
+</pre>
+<p>You can also use joint motors to track a desired joint angle. For example:</p>
+<pre class="code">
+    ... Game Loop Begin ...
+    float32 angleError = myJoint->GetJointAngle() - angleTarget;
+    float32 gain = 0.1f;
+    myJoint->SetMotorSpeed(-gain * angleError);
+    ... Game Loop End ...
+</pre>
+<p>Generally your gain parameter should not be too large. Otherwise your joint may become unstable.</p>
+
+<h3>Using a Prismatic Joint</h3>
+<p>Using a prismatic joint is similar to using a revolute joint. Here are the relevant member functions:</p>
+<pre class="code">
+    float32 GetJointTranslation() const;
+    float32 GetJointSpeed() const;
+    float32 GetMotorForce(float32 invTimeStep) const;
+    void SetMotorSpeed(float32 speed);
+    void SetMotorForce(float32 force);
+</pre>
 </div>
-
 
 <h1>Behind the Scenes</h1>
 <div class = "text">
-- Collision System
--- Incremental sort and sweep
--- Polygon collision
+<h2>Collision System</h2>
+<h3>Incremental sweep and prune.</h3>
+<h3>Polygon collision</h3>
 
-- Dynamics
--- Body-joint-contact graph
--- Islands
--- SI solver
--- NSI solver
+<h2>Dynamics</h2>
+<h3>Body-joint-contact graph</h3>
+<h3>Islands</h3>
+<h3>SI solver</h3>
+<h3>NSI solver</h3>
 </div>
 
 <h1>Settings</h1>
 <div class = "text">
-- Units
-- Collision settings
-- Dynamics settings
-
+<h2>Units</h2>
+<h2>Collision settings</h2>
+<h2>Dynamics settings</h2>
 </div>
 
 <h1>References</h1>

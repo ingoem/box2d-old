@@ -293,5 +293,25 @@ float32 b2RevoluteJoint::GetJointSpeed() const
 
 float32 b2RevoluteJoint::GetMotorTorque(float32 invTimeStep) const
 {
-	return m_motorImpulse * invTimeStep;
+	return invTimeStep * m_motorImpulse;
+}
+
+void b2RevoluteJoint::SetMotorSpeed(float32 speed)
+{
+	m_motorSpeed = speed;
+}
+
+void b2RevoluteJoint::SetMotorTorque(float32 torque)
+{
+	m_maxMotorTorque = torque;
+}
+
+b2Vec2 b2RevoluteJoint::GetReactionForce(float32 invTimeStep) const
+{
+	return invTimeStep * m_ptpImpulse;
+}
+
+float32 b2RevoluteJoint::GetReactionTorque(float32 invTimeStep) const
+{
+	return invTimeStep * m_limitImpulse;
 }

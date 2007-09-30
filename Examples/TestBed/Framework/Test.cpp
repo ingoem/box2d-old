@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 
-void JointCallback::Notify(b2Joint* joint)
+void WorldListener::NotifyJointDestroyed(b2Joint* joint)
 {
 	if (test->m_mouseJoint == joint)
 	{
@@ -39,7 +39,7 @@ Test::Test()
 {
 	b2AABB worldAABB;
 	worldAABB.minVertex.Set(-100.0f, -100.0f);
-	worldAABB.maxVertex.Set(100.0f, 100.0f);
+	worldAABB.maxVertex.Set(100.0f, 200.0f);
 	b2Vec2 gravity;
 	gravity.Set(0.0f, -10.0f);
 	bool doSleep = true;
@@ -48,8 +48,8 @@ Test::Test()
 	m_textLine = 30;
 	m_mouseJoint = NULL;
 	
-	m_jointCallback.test = this;
-	m_world->SetJointDestroyedCallback(&m_jointCallback);
+	m_listener.test = this;
+	m_world->SetListener(&m_listener);
 }
 
 Test::~Test()
@@ -163,11 +163,11 @@ void Test::Step(const Settings* settings)
 	{
 		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
 		{
-			if (b->m_invMass == 0.0f)
+			if (b->IsStatic())
 			{
 				DrawShape(s, Color(0.5f, 0.9f, 0.5f));
 			}
-			else if (b->m_isSleeping)
+			else if (b->IsSleeping())
 			{
 				DrawShape(s, Color(0.5f, 0.5f, 0.9f));
 			}

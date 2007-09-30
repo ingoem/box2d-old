@@ -63,3 +63,9 @@ img.imageright {
 	padding: 5px;
 	background: #FFF;
 }
+
+blockquote {
+	padding: 10px 10px 10px 10px;
+	border: thin dotted Silver;
+	background: InfoBackground;
+}

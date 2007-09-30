@@ -94,6 +94,9 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 	{
 		b2Body* b = m_bodies[i];
 
+		if (b->m_invMass == 0.0f)
+			continue;
+
 		b->m_position += dt * b->m_linearVelocity;
 		b->m_rotation += dt * b->m_angularVelocity;
 
@@ -127,6 +130,10 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 	for (int32 i = 0; i < m_bodyCount; ++i)
 	{
 		b2Body* b = m_bodies[i];
+
+		if (b->m_invMass == 0.0f)
+			continue;
+
 		b->SynchronizeShapes();
 		b->m_force.Set(0.0f, 0.0f);
 		b->m_torque = 0.0f;
@@ -148,13 +155,13 @@ void b2Island::UpdateSleep(float32 dt)
 			continue;
 		}
 
-		if (b->m_allowSleep == false)
+		if ((b->m_flags & b2Body::e_allowSleepFlag) == 0)
 		{
 			b->m_sleepTime = 0.0f;
 			minSleepTime = 0.0f;
 		}
 
-		if (b->m_allowSleep == false ||
+		if ((b->m_flags & b2Body::e_allowSleepFlag) == 0 ||
 			b->m_angularVelocity * b->m_angularVelocity > angTolSqr ||
 			b2Dot(b->m_linearVelocity, b->m_linearVelocity) > linTolSqr)
 		{
@@ -173,7 +180,7 @@ void b2Island::UpdateSleep(float32 dt)
 		for (int32 i = 0; i < m_bodyCount; ++i)
 		{
 			b2Body* b = m_bodies[i];
-			b->m_isSleeping = true;
+			b->m_flags |= b2Body::e_sleepFlag;
 		}
 	}
 }

@@ -30,7 +30,7 @@ int32 b2World::s_enableWarmStarting = 1;
 
 b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 {
-	m_jointDestroyedCallback = NULL;
+	m_listener = NULL;
 
 	m_bodyList = NULL;
 	m_contactList = NULL;
@@ -57,9 +57,9 @@ b2World::~b2World()
 	delete m_broadPhase;
 }
 
-void b2World::SetJointDestroyedCallback(b2JointDestroyedCallback* callback)
+void b2World::SetListener(b2WorldListener* listener)
 {
-	m_jointDestroyedCallback = callback;
+	m_listener = listener;
 }
 
 b2Body* b2World::CreateBody(const b2BodyDef* def)
@@ -88,9 +88,9 @@ void b2World::DestroyBody(b2Body* b)
 		b2JointNode* jn0 = jn;
 		jn = jn->next;
 
-		if (m_jointDestroyedCallback)
+		if (m_listener)
 		{
-			m_jointDestroyedCallback->Notify(jn0->joint);
+			m_listener->NotifyJointDestroyed(jn0->joint);
 		}
 
 		DestroyJoint(jn0->joint);
@@ -231,7 +231,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	// Clear all the island flags.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
 	{
-		b->m_islandFlag = false;
+		b->m_flags &= ~b2Body::e_islandFlag;
 	}
 	for (b2Contact* c = m_contactList; c; c = c->m_next)
 	{
@@ -247,9 +247,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
 	for (b2Body* seed = m_bodyList; seed; seed = seed->m_next)
 	{
-		if (seed->m_invMass == 0.0f ||
-			seed->m_islandFlag == true ||
-			seed->m_isSleeping == true)
+		if (seed->m_flags & (b2Body::e_staticFlag | b2Body::e_islandFlag | b2Body::e_sleepFlag))
 		{
 			continue;
 		}
@@ -258,7 +256,7 @@ void b2World::Step(float32 dt, int32 iterations)
 		island.Clear();
 		int32 stackCount = 0;
 		stack[stackCount++] = seed;
-		seed->m_islandFlag = true;
+		seed->m_flags |= b2Body::e_islandFlag;
 
 		// Perform a depth first search (DFS) on the constraint graph.
 		while (stackCount > 0)
@@ -268,11 +266,11 @@ void b2World::Step(float32 dt, int32 iterations)
 			island.Add(b);
 
 			// Make sure the body is awake.
-			b->m_isSleeping = false;
+			b->m_flags &= ~b2Body::e_sleepFlag;
 
 			// To keep islands as small as possible, we don't
 			// propagate islands across static bodies.
-			if (b->m_invMass == 0.0f)
+			if (b->m_flags & b2Body::e_staticFlag)
 			{
 				continue;
 			}
@@ -289,14 +287,14 @@ void b2World::Step(float32 dt, int32 iterations)
 				cn->contact->m_islandFlag = true;
 
 				b2Body* other = cn->other;
-				if (other->m_islandFlag == true)
+				if (other->m_flags & b2Body::e_islandFlag)
 				{
 					continue;
 				}
 
 				b2Assert(stackCount < stackSize);
 				stack[stackCount++] = other;
-				other->m_islandFlag = true;
+				other->m_flags |= b2Body::e_islandFlag;
 			}
 
 			// Search all joints connect to this body.
@@ -311,14 +309,14 @@ void b2World::Step(float32 dt, int32 iterations)
 				jn->joint->m_islandFlag = true;
 
 				b2Body* other = jn->other;
-				if (other->m_islandFlag == true)
+				if (other->m_flags & b2Body::e_islandFlag)
 				{
 					continue;
 				}
 
 				b2Assert(stackCount < stackSize);
 				stack[stackCount++] = other;
-				other->m_islandFlag = true;
+				other->m_flags |= b2Body::e_islandFlag;
 			}
 		}
 
@@ -332,9 +330,9 @@ void b2World::Step(float32 dt, int32 iterations)
 		for (int32 i = 0; i < island.m_bodyCount; ++i)
 		{
 			b2Body* b = island.m_bodies[i];
-			if (b->m_invMass == 0.0f)
+			if (b->m_flags & b2Body::e_staticFlag)
 			{
-				b->m_islandFlag = false;
+				b->m_flags &= ~b2Body::e_islandFlag;
 			}
 		}
 	}

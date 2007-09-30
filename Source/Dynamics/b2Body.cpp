@@ -24,6 +24,7 @@
 
 b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
+	m_flags = 0;
 	m_position = bd->position;
 	m_rotation = bd->rotation;
 	m_R.Set(m_rotation);
@@ -53,6 +54,10 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	{
 		m_center *= 1.0f / m_mass;
 		m_position += b2Mul(m_R, m_center);
+	}
+	else
+	{
+		m_flags |= e_staticFlag;
 	}
 
 	// Compute the moment of inertia.
@@ -106,9 +111,16 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	}
 
 	m_sleepTime = 0.0f;
-	m_allowSleep = bd->allowSleep;
-	m_isSleeping = bd->isSleeping;
-	if (m_isSleeping == true || m_invMass == 0.0f)
+	if (bd->allowSleep)
+	{
+		m_flags |= e_allowSleepFlag;
+	}
+	if (bd->isSleeping)
+	{
+		m_flags |= e_sleepFlag;
+	}
+
+	if ((m_flags & e_sleepFlag)  || m_invMass == 0.0f)
 	{
 		m_linearVelocity.Set(0.0f, 0.0f);
 		m_angularVelocity = 0.0f;

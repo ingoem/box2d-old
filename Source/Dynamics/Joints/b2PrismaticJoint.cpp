@@ -380,5 +380,28 @@ float32 b2PrismaticJoint::GetJointSpeed() const
 
 float32 b2PrismaticJoint::GetMotorForce(float32 invTimeStep) const
 {
-	return m_motorImpulse * invTimeStep;
+	return invTimeStep * m_motorImpulse;
+}
+
+void b2PrismaticJoint::SetMotorSpeed(float32 speed)
+{
+	m_motorSpeed = speed;
+}
+
+void b2PrismaticJoint::SetMotorForce(float32 force)
+{
+	m_maxMotorForce = force;
+}
+
+b2Vec2 b2PrismaticJoint::GetReactionForce(float32 invTimeStep) const
+{
+	b2Vec2 ax1 = b2Mul(m_body1->m_R, m_localXAxis1);
+	b2Vec2 ay1 = b2Mul(m_body1->m_R, m_localYAxis1);
+
+	return (invTimeStep * m_limitImpulse) * ax1 + (invTimeStep * m_linearImpulse) * ay1;
+}
+
+float32 b2PrismaticJoint::GetReactionTorque(float32 invTimeStep) const
+{
+	return invTimeStep * m_angularImpulse;
 }

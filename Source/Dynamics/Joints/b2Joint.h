@@ -83,8 +83,14 @@ struct b2JointDef
 
 struct b2Joint
 {
+	b2Body* GetBody1();
+	b2Body* GetBody2();
+
 	virtual b2Vec2 GetAnchor1() const = 0;
 	virtual b2Vec2 GetAnchor2() const = 0;
+
+	virtual b2Vec2 GetReactionForce(float32 invTimeStep) const = 0;
+	virtual float32 GetReactionTorque(float32 invTimeStep) const = 0;
 
 	b2Joint* GetNext();
 
@@ -133,6 +139,16 @@ inline void b2Jacobian::Set(const b2Vec2& x1, float32 a1, const b2Vec2& x2, floa
 inline float32 b2Jacobian::Compute(const b2Vec2& x1, float32 a1, const b2Vec2& x2, float32 a2)
 {
 	return b2Dot(linear1, x1) + angular1 * a1 + b2Dot(linear2, x2) + angular2 * a2;
+}
+
+inline b2Body* b2Joint::GetBody1()
+{
+	return m_body1;
+}
+
+inline b2Body* b2Joint::GetBody2()
+{
+	return m_body2;
 }
 
 inline b2Joint* b2Joint::GetNext()

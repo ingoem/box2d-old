@@ -121,3 +121,15 @@ b2Vec2 b2DistanceJoint::GetAnchor2() const
 {
 	return m_body2->m_position + b2Mul(m_body2->m_R, m_localAnchor2);
 }
+
+b2Vec2 b2DistanceJoint::GetReactionForce(float32 invTimeStep) const
+{
+	b2Vec2 F = (m_impulse * invTimeStep) * m_u;
+	return F;
+}
+
+float32 b2DistanceJoint::GetReactionTorque(float32 invTimeStep) const
+{
+	NOT_USED(invTimeStep);
+	return 0.0f;
+}

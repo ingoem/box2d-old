@@ -51,7 +51,7 @@ public:
 		sds[0].density = 1.0f;
 		sds[0].friction = 0.3f;
 		sds[0].categoryBits = 0x0002;
-		sds[0].maskBits = 0x0003;
+		//sds[0].maskBits = 0x0003;
 		
 		sds[1].vertexCount = 3;
 		sds[1].vertices[0].Set(-0.1f, 0.0f);

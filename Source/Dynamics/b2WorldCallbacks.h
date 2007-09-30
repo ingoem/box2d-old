@@ -21,21 +21,35 @@
 
 struct b2Joint;
 
-// If a body is destroyed, then any joints attached to it are also destroyed.
-// This prevents memory leaks, but you may unexpectedly be left with an
-// orphaned pointer.
-// This callback class will notify you when a joint is implicitly destroyed.
-// It is NOT called if you directly destroy a joint.
-// Implement this abstract class and provide it to b2World via
-// b2World::SetJointDestroyedCallback(). 
-class b2JointDestroyedCallback
+class b2WorldListener
 {
 public:
-	virtual ~b2JointDestroyedCallback() {}
+	enum BoundaryResponse
+	{
+		e_freezeBody,
+		e_destroyBody,
+	};
 
-	// This function is called right before the joint is destroyed. When this
-	// function is called, you should remove any reference you may have to this joint.
-	virtual void Notify(b2Joint* joint) = 0;
+	virtual ~b2WorldListener() {}
+
+	// If a body is destroyed, then any joints attached to it are also destroyed.
+	// This prevents memory leaks, but you may unexpectedly be left with an
+	// orphaned joint pointer.
+	// Box2D will notify you when a joint is implicitly destroyed.
+	// It is NOT called if you directly destroy a joint.
+	// Implement this abstract class and provide it to b2World via
+	// b2World::SetListener(). 
+	// DO NOT modify the Box2D world inside this callback.
+	virtual void NotifyJointDestroyed(b2Joint* joint) = 0;
+
+	// This is called when a body's shape passes outside of the world boundary. If you
+	// override this and pass back e_destroyBody, you must nullify your copies of the
+	// body pointer.
+	virtual BoundaryResponse NotifyBoundaryViolated(b2Shape* shape)
+	{
+		NOT_USED(shape);
+		return e_freezeBody;
+	}
 };
 
 #endif

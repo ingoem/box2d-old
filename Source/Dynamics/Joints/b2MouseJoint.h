@@ -45,6 +45,10 @@ struct b2MouseJoint : public b2Joint
 {
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
+
+	b2Vec2 GetReactionForce(float32 invTimeStep) const;
+	float32 GetReactionTorque(float32 invTimeStep) const;
+
 	float32 GetMotorForce(float32 inv_dt) const { return m_impulse * inv_dt; }
 	void SetTarget(const b2Vec2& target);
 

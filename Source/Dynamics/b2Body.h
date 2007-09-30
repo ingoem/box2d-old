@@ -122,6 +122,9 @@ struct b2Body
 	// Is this body static (immovable)?
 	bool IsStatic() const;
 
+	// Is this body frozen?
+	bool IsFrozen() const;
+
 	// Is this body sleeping (not simulating).
 	bool IsSleeping() const;
 
@@ -134,12 +137,28 @@ struct b2Body
 	// Get the list of all shapes attached to this body.
 	b2Shape* GetShapeList();
 
+	// Get the list of all contacts attached to this body.
+	b2ContactNode* GetContactList();
+
+	// Get the list of all joints attached to this body.
+	b2JointNode* GetJointList();
+
 	// Get the next body in the world's body list.
 	b2Body* GetNext();
 
 	void* GetUserData();
 
 	//--------------- Internals Below -------------------
+
+	// m_flags
+	enum
+	{
+		e_staticFlag		= 0x0001,
+		e_frozenFlag		= 0x0002,
+		e_islandFlag		= 0x0004,
+		e_sleepFlag			= 0x0008,
+		e_allowSleepFlag	= 0x0010,
+	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);
 	~b2Body();
@@ -150,6 +169,8 @@ struct b2Body
 
 	// This is called when the child shape has no proxy.
 	void Freeze();
+
+	uint32 m_flags;
 
 	b2Vec2 m_position;	// center of mass position
 	float32 m_rotation;
@@ -176,11 +197,6 @@ struct b2Body
 	float32 m_I, m_invI;
 
 	float32 m_sleepTime;
-
-	bool m_allowSleep;
-	bool m_isSleeping;
-
-	bool m_islandFlag;
 
 	void* m_userData;
 };
@@ -239,7 +255,7 @@ inline float32 b2Body::GetAngularVelocity() const
 
 inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point)
 {
-	if (m_isSleeping == false)
+	if (IsSleeping() == false)
 	{
 		m_force += force;
 		m_torque += b2Cross(point - m_position, force);
@@ -248,7 +264,7 @@ inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point)
 
 inline void b2Body::ApplyTorque(float32 torque)
 {
-	if (m_isSleeping == false)
+	if (IsSleeping() == false)
 	{
 		m_torque += torque;
 	}
@@ -256,7 +272,7 @@ inline void b2Body::ApplyTorque(float32 torque)
 
 inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
 {
-	if (m_isSleeping == false)
+	if (IsSleeping() == false)
 	{
 		m_linearVelocity += m_invMass * impulse;
 		m_angularVelocity += m_invI * b2Cross(point - m_position, impulse);
@@ -295,32 +311,51 @@ inline b2Vec2 b2Body::GetLocalVector(const b2Vec2& worldVector)
 
 inline bool b2Body::IsStatic() const
 {
-	return m_invMass == 0.0f;
+	return (m_flags & e_staticFlag) == e_staticFlag;
+}
+
+inline bool b2Body::IsFrozen() const
+{
+	return (m_flags & e_frozenFlag) == e_frozenFlag;
 }
 
 inline bool b2Body::IsSleeping() const
 {
-	return m_isSleeping;
+	return (m_flags & e_sleepFlag) == e_sleepFlag;
 }
 
 inline void b2Body::AllowSleeping(bool flag)
 {
-	m_allowSleep = flag;
-	if (flag == false)
+	if (flag)
 	{
+		m_flags |= e_allowSleepFlag;
+	}
+	else
+	{
+		m_flags &= ~e_allowSleepFlag;
 		WakeUp();
 	}
 }
 
 inline void b2Body::WakeUp()
 {
-	m_isSleeping = false;
+	m_flags &= ~e_sleepFlag;
 	m_sleepTime = 0.0f;
 }
 
 inline b2Shape* b2Body::GetShapeList()
 {
 	return m_shapeList;
+}
+
+inline b2ContactNode* b2Body::GetContactList()
+{
+	return m_contactList;
+}
+
+inline b2JointNode* b2Body::GetJointList()
+{
+	return m_jointList;
 }
 
 inline b2Body* b2Body::GetNext()

@@ -38,6 +38,12 @@ struct b2DistanceJointDef : public b2JointDef
 
 struct b2DistanceJoint : public b2Joint
 {
+	b2Vec2 GetAnchor1() const;
+	b2Vec2 GetAnchor2() const;
+
+	b2Vec2 GetReactionForce(float32 invTimeStep) const;
+	float32 GetReactionTorque(float32 invTimeStep) const;
+
 	//--------------- Internals Below -------------------
 
 	b2DistanceJoint(const b2DistanceJointDef* data);
@@ -45,8 +51,6 @@ struct b2DistanceJoint : public b2Joint
 	void PreSolve();
 	void SolveVelocityConstraints(float32 dt);
 	bool SolvePositionConstraints();
-	b2Vec2 GetAnchor1() const;
-	b2Vec2 GetAnchor2() const;
 
 	b2Vec2 m_localAnchor1;
 	b2Vec2 m_localAnchor2;

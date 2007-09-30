@@ -48,9 +48,16 @@ struct b2RevoluteJoint : public b2Joint
 {
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
+
+	b2Vec2 GetReactionForce(float32 invTimeStep) const;
+	float32 GetReactionTorque(float32 invTimeStep) const;
+
 	float32 GetJointAngle() const;
 	float32 GetJointSpeed() const;
 	float32 GetMotorTorque(float32 invTimeStep) const;
+
+	void SetMotorSpeed(float32 speed);
+	void SetMotorTorque(float32 torque);
 
 	//--------------- Internals Below -------------------
 

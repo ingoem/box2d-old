@@ -64,10 +64,10 @@ extern TestEntry g_testEntries[];
 // This is called when a joint in the world is implicitly destroyed
 // because an attached body is destroyed. This gives us a chance to
 // nullify the mouse joint.
-class JointCallback : public b2JointDestroyedCallback
+class WorldListener : public b2WorldListener
 {
 public:
-	void Notify(b2Joint* joint);
+	void NotifyJointDestroyed(b2Joint* joint);
 
 	Test* test;
 };
@@ -91,9 +91,9 @@ public:
 	virtual void JointDestroyed(b2Joint* joint) { NOT_USED(joint); }
 
 protected:
-	friend class JointCallback;
+	friend class WorldListener;
 
-	JointCallback m_jointCallback;
+	WorldListener m_listener;
 	int32 m_textLine;
 	b2World* m_world;
 	b2Body* m_bomb;

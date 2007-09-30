@@ -39,9 +39,9 @@ struct b2World
 	b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep);
 	~b2World();
 
-	// Set a callback to notify you when a joint is implicitly destroyed
-	// when an attached body is destroyed.
-	void SetJointDestroyedCallback(b2JointDestroyedCallback* callback);
+	// Register a world listener to receive important events that can
+	// help prevent your code from crashing.
+	void SetListener(b2WorldListener* listener);
 
 	b2Body* CreateBody(const b2BodyDef* def);
 	void DestroyBody(b2Body* body);
@@ -86,7 +86,7 @@ struct b2World
 
 	b2Body* m_groundBody;
 
-	b2JointDestroyedCallback* m_jointDestroyedCallback;
+	b2WorldListener* m_listener;
 
 	static int32 s_enablePositionCorrection;
 	static int32 s_enableWarmStarting;
