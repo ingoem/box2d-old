@@ -34,13 +34,13 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Compound Shapes", CompoundShapes::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Web", Web::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Pendulum", Pendulum::Create},
-	{"Compound Shapes", CompoundShapes::Create},
 	{"Bridge", Bridge::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Pyramid", Pyramid::Create},

@@ -61,6 +61,13 @@ struct b2AABB
 	b2Vec2 minVertex, maxVertex;
 };
 
+struct b2OBB
+{
+	b2Mat22 R;
+	b2Vec2 center;
+	b2Vec2 extents;
+};
+
 void b2CollideCircle(b2Manifold* manifold, b2CircleShape* circle1, b2CircleShape* circle2);
 void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const b2CircleShape* circle);
 void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* poly1, const b2PolyShape* poly2);

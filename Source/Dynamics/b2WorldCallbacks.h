@@ -45,9 +45,9 @@ public:
 	// This is called when a body's shape passes outside of the world boundary. If you
 	// override this and pass back e_destroyBody, you must nullify your copies of the
 	// body pointer.
-	virtual BoundaryResponse NotifyBoundaryViolated(b2Shape* shape)
+	virtual BoundaryResponse NotifyBoundaryViolated(b2Body* body)
 	{
-		NOT_USED(shape);
+		NOT_USED(body);
 		return e_freezeBody;
 	}
 };

@@ -247,7 +247,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
 	for (b2Body* seed = m_bodyList; seed; seed = seed->m_next)
 	{
-		if (seed->m_flags & (b2Body::e_staticFlag | b2Body::e_islandFlag | b2Body::e_sleepFlag))
+		if (seed->m_flags & (b2Body::e_staticFlag | b2Body::e_islandFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag))
 		{
 			continue;
 		}
@@ -326,13 +326,26 @@ void b2World::Step(float32 dt, int32 iterations)
 			island.UpdateSleep(dt);
 		}
 
-		// Allow static bodies to participate in other islands.
+		// Post solve cleanup.
 		for (int32 i = 0; i < island.m_bodyCount; ++i)
 		{
+			// Allow static bodies to participate in other islands.
 			b2Body* b = island.m_bodies[i];
 			if (b->m_flags & b2Body::e_staticFlag)
 			{
 				b->m_flags &= ~b2Body::e_islandFlag;
+			}
+
+			// Handle newly frozen bodies.
+			if (b->IsFrozen() && m_listener)
+			{
+				b2WorldListener::BoundaryResponse response = m_listener->NotifyBoundaryViolated(b);
+				if (response == b2WorldListener::e_destroyBody)
+				{
+					DestroyBody(b);
+					b = NULL;
+					island.m_bodies[i] = NULL;
+				}
 			}
 		}
 	}

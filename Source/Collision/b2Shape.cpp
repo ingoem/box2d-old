@@ -198,18 +198,12 @@ void b2Shape::Destroy(b2Shape*& shape)
 	shape = NULL;
 }
 
-b2Shape::b2Shape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center)
+b2Shape::b2Shape(const b2ShapeDef* def, b2Body* body)
 {
 	m_userData = def->userData;
-	m_localPosition = def->localPosition - center;
-	m_localRotation = def->localRotation;
 	m_friction = def->friction;
 	m_restitution = def->restitution;
 	m_body = body;
-
-	m_position = m_body->m_position + b2Mul(m_body->m_R, m_localPosition);
-	m_rotation = m_body->m_rotation + m_localRotation;
-	m_R.Set(m_rotation);
 
 	m_proxyId = b2_nullProxy;
 }
@@ -222,14 +216,17 @@ b2Shape::~b2Shape()
 	}
 }
 
-b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center)
-: b2Shape(def, body, center)
+b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter)
+: b2Shape(def, body)
 {
 	b2Assert(def->type == e_circleShape);
 	const b2CircleDef* circle = (const b2CircleDef*)def;
 
+	m_localPosition = def->localPosition - localCenter;
 	m_type = e_circleShape;
 	m_radius = circle->radius;
+
+	m_position = m_body->m_position + b2Mul(m_body->m_R, m_localPosition);
 
 	b2AABB aabb;
 	aabb.minVertex.Set(m_position.x - m_radius, m_position.y - m_radius);
@@ -251,8 +248,10 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	}
 }
 
-void b2CircleShape::UpdateProxy()
+void b2CircleShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
 {
+	m_position = position + b2Mul(R, m_localPosition);
+
 	if (m_proxyId == b2_nullProxy)
 	{	
 		return;
@@ -281,78 +280,86 @@ bool b2CircleShape::TestPoint(const b2Vec2& p)
 	return b2Dot(d, d) <= m_radius * m_radius;
 }
 
+const b2Vec2& b2CircleShape::GetPosition() const
+{
+	return m_position;
+}
+
+const b2Mat22& b2CircleShape::GetRotationMatrix() const
+{
+	return m_body->m_R;
+}
+
 b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
-					 const b2Vec2& center)
-: b2Shape(def, body, center)
+					 const b2Vec2& localCenter)
+: b2Shape(def, body)
 {
 	b2Assert(def->type == e_boxShape || def->type == e_polyShape);
 	m_type = e_polyShape;
+	b2Mat22 localR(def->localRotation);
+	b2Vec2 localPosition = def->localPosition - localCenter;
 
+	// Get the vertices transformed into the body frame.
 	if (def->type == e_boxShape)
 	{
 		const b2BoxDef* box = (const b2BoxDef*)def;
 		m_vertexCount = 4;
 		b2Vec2 h = box->extents;
-		m_vertices[0].Set(h.x, h.y);
-		m_vertices[1].Set(-h.x, h.y);
-		m_vertices[2].Set(-h.x, -h.y);
-		m_vertices[3].Set(h.x, -h.y);
-		m_normals[0].Set(0.0f, 1.0f);
-		m_normals[1].Set(-1.0f, 0.0f);
-		m_normals[2].Set(0.0f, -1.0f);
-		m_normals[3].Set(1.0f, 0.0f);
-		m_next[0] = 1;
-		m_next[1] = 2;
-		m_next[2] = 3;
-		m_next[3] = 0;
-
-		m_extents = h;
+		m_vertices[0] = localPosition + b2Mul(localR, b2Vec2(h.x, h.y));
+		m_vertices[1] = localPosition + b2Mul(localR, b2Vec2(-h.x, h.y));
+		m_vertices[2] = localPosition + b2Mul(localR, b2Vec2(-h.x, -h.y));
+		m_vertices[3] = localPosition + b2Mul(localR, b2Vec2(h.x, -h.y));
 	}
 	else
 	{
 		const b2PolyDef* poly = (const b2PolyDef*)def;
-		b2AABB aabb;
-		aabb.minVertex.Set(FLT_MAX, FLT_MAX);
-		aabb.maxVertex.Set(-FLT_MAX, -FLT_MAX);
 		m_vertexCount = poly->vertexCount;
 		b2Assert(3 <= m_vertexCount && m_vertexCount <= b2_maxPolyVertices);
 		for (int32 i = 0; i < m_vertexCount; ++i)
 		{
-			m_vertices[i] = poly->vertices[i];
-
-			aabb.minVertex = b2Min(aabb.minVertex, m_vertices[i]);
-			aabb.maxVertex = b2Max(aabb.maxVertex, m_vertices[i]);
+			m_vertices[i] = localPosition + b2Mul(localR, poly->vertices[i]);
 		}
-		b2Vec2 offset = 0.5f * (aabb.minVertex + aabb.maxVertex);
-
-		b2Assert(m_localRotation == 0.0f); // TODO_ERIN handle local rotation
-
-		m_localPosition += offset;
-		for (int32 i = 0; i < m_vertexCount; ++i)
-		{
-			// Shift the vertices so the shape position is the centroid.
-			m_vertices[i] = poly->vertices[i] - offset;
-			m_next[i] = i + 1 < m_vertexCount ? i + 1 : 0;
-			b2Vec2 vNext = poly->vertices[m_next[i]] - offset;
-			b2Vec2 edge = vNext - m_vertices[i];
-			m_normals[i] = b2Cross(edge, 1.0f);
-			m_normals[i].Normalize();
-		}
-
-		for (int32 i = 0; i < m_vertexCount; ++i)
-		{
-			// Ensure the polygon in convex.
-			b2Assert(b2Cross(m_normals[i], m_normals[m_next[i]]) > 0.0f);
-		}
-
-		m_extents = 0.5f * (aabb.maxVertex - aabb.minVertex);
 	}
 
-	b2Mat22 absR = b2Abs(m_R);
-	b2Vec2 h = b2Mul(absR, m_extents);
+	// Compute bounding box. TODO_ERIN optimize OBB
+	b2Vec2 minVertex(FLT_MAX, FLT_MAX);
+	b2Vec2 maxVertex(-FLT_MAX, -FLT_MAX);
+	for (int32 i = 0; i < m_vertexCount; ++i)
+	{
+		minVertex = b2Min(minVertex, m_vertices[i]);
+		maxVertex = b2Max(maxVertex, m_vertices[i]);
+	}
+
+	m_localOBB.R.SetIdentity();
+	m_localOBB.center = 0.5f * (minVertex + maxVertex);
+	m_localOBB.extents = 0.5f * (maxVertex - minVertex);
+
+	// Compute the edge normals and next index map.
+	for (int32 i = 0; i < m_vertexCount; ++i)
+	{
+		m_next[i] = i + 1 < m_vertexCount ? i + 1 : 0;
+		b2Vec2 edge = m_vertices[m_next[i]] - m_vertices[i];
+		m_normals[i] = b2Cross(edge, 1.0f);
+		m_normals[i].Normalize();
+	}
+
+	// Ensure the polygon in convex. TODO_ERIN compute convex hull.
+	for (int32 i = 0; i < m_vertexCount; ++i)
+	{
+		b2Assert(b2Cross(m_normals[i], m_normals[m_next[i]]) > 0.0f);
+	}
+
+	// The body transform is copied for convenience.
+	m_R = m_body->m_R;
+	m_position = m_body->m_position;
+
+	b2Mat22 R = b2Mul(m_R, m_localOBB.R);
+	b2Mat22 absR = b2Abs(R);
+	b2Vec2 h = b2Mul(absR, m_localOBB.extents);
+	b2Vec2 position = m_position + b2Mul(m_R, m_localOBB.center);
 	b2AABB aabb;
-	aabb.minVertex = m_position - h;
-	aabb.maxVertex = m_position + h;
+	aabb.minVertex = position - h;
+	aabb.maxVertex = position + h;
 
 	b2BroadPhase* broadPhase = m_body->m_world->m_broadPhase;
 	if (broadPhase->InRange(aabb))
@@ -370,18 +377,24 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	}
 }
 
-void b2PolyShape::UpdateProxy()
+void b2PolyShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
 {
+	// The body transform is copied for convenience.
+	m_R = R;
+	m_position = position;
+
 	if (m_proxyId == b2_nullProxy)
 	{	
 		return;
 	}
 
-	b2Mat22 absR = b2Abs(m_R);
-	b2Vec2 h = b2Mul(absR, m_extents);
+	b2Mat22 obbR = b2Mul(m_R, m_localOBB.R);
+	b2Mat22 absR = b2Abs(obbR);
+	b2Vec2 h = b2Mul(absR, m_localOBB.extents);
+	b2Vec2 center = m_position + b2Mul(m_R, m_localOBB.center);
 	b2AABB aabb;
-	aabb.minVertex = m_position - h;
-	aabb.maxVertex = m_position + h;
+	aabb.minVertex = center - h;
+	aabb.maxVertex = center + h;
 
 	b2BroadPhase* broadPhase = m_body->m_world->m_broadPhase;
 	if (broadPhase->InRange(aabb))
@@ -411,3 +424,14 @@ bool b2PolyShape::TestPoint(const b2Vec2& p)
 
 	return true;
 }
+
+const b2Vec2& b2PolyShape::GetPosition() const
+{
+	return m_position;
+}
+
+const b2Mat22& b2PolyShape::GetRotationMatrix() const
+{
+	return m_R;
+}
+

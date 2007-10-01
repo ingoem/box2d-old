@@ -20,6 +20,7 @@
 #define B2_SHAPE_H
 
 #include "../Common/b2Math.h"
+#include "b2Collision.h"
 
 struct b2Body;
 
@@ -129,9 +130,8 @@ struct b2Shape
 	// Get the parent body of this shape.
 	b2Body* GetBody();
 
-	const b2Vec2& GetPosition() const;
-	float32 GetRotation() const;
-	const b2Mat22& GetRotationMatrix() const;
+	virtual const b2Vec2& GetPosition() const = 0;
+	virtual const b2Mat22& GetRotationMatrix() const = 0;
 
 	// Get the next shape in the parent body's shape list.
 	b2Shape* GetNext();
@@ -140,19 +140,19 @@ struct b2Shape
 
 	// Internal use only. Do not call.
 	static b2Shape* Create(	const b2ShapeDef* def,
-							b2Body* body, const b2Vec2& center);
+							b2Body* body, const b2Vec2& localCenter);
 
 	// Internal use only. Do not call.
 	static void Destroy(b2Shape*& shape);
 
 	// Internal use only. Do not call.
-	b2Shape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center);
+	b2Shape(const b2ShapeDef* def, b2Body* body);
 
 	// Internal use only. Do not call.
 	virtual ~b2Shape();
 
 	// Internal use only. Do not call.
-	virtual void UpdateProxy() = 0;
+	virtual void Synchronize(const b2Vec2& position, const b2Mat22& R) = 0;
 
 	b2ShapeType m_type;
 
@@ -160,15 +160,6 @@ struct b2Shape
 
 	b2Body* m_body;
 	uint16 m_proxyId;
-
-	// Position in world
-	b2Vec2 m_position;
-	float32 m_rotation;
-	b2Mat22 m_R;
-
-	// Local position in parent body
-	b2Vec2 m_localPosition;
-	float32 m_localRotation;
 
 	float32 m_friction;
 	float32 m_restitution;
@@ -180,33 +171,44 @@ struct b2CircleShape : public b2Shape
 {
 	bool TestPoint(const b2Vec2& p);
 
+	const b2Vec2& GetPosition() const;
+	const b2Mat22& GetRotationMatrix() const;
+
 	//--------------- Internals Below -------------------
 
-	b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& center);
+	b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);
 
-	void UpdateProxy();
+	void Synchronize(const b2Vec2& position, const b2Mat22& R);
 
+	// Local position in parent body
+	b2Vec2 m_localPosition;
 	float32 m_radius;
+
+	// Position in world.
+	b2Vec2 m_position;
 };
 
 struct b2PolyShape : public b2Shape
 {
 	bool TestPoint(const b2Vec2& p);
 	
+	const b2Vec2& GetPosition() const;
+	const b2Mat22& GetRotationMatrix() const;
+
 	//--------------- Internals Below -------------------
 	
-	b2PolyShape(const b2ShapeDef* def, b2Body* body,
-				const b2Vec2& center);
+	b2PolyShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);
 
-	void UpdateProxy();
+	void Synchronize(const b2Vec2& position, const b2Mat22& R);
 
-	b2Vec2 m_extents;
+	b2Mat22 m_R;		// copied from parent body
+	b2Vec2 m_position;	// copied from parent body
+	b2OBB m_localOBB;
 	b2Vec2 m_vertices[b2_maxPolyVertices];
 	int32 m_vertexCount;
 	b2Vec2 m_normals[b2_maxPolyVertices];
 	int32 m_next[b2_maxPolyVertices];
 };
-
 
 inline b2ShapeType b2Shape::GetType() const
 {
@@ -221,21 +223,6 @@ inline void* b2Shape::GetUserData()
 inline b2Body* b2Shape::GetBody()
 {
 	return m_body;
-}
-
-inline const b2Vec2& b2Shape::GetPosition() const
-{
-	return m_position;
-}
-
-inline float32 b2Shape::GetRotation() const
-{
-	return m_rotation;
-}
-
-inline const b2Mat22& b2Shape::GetRotationMatrix() const
-{
-	return m_R;
 }
 
 inline b2Shape* b2Shape::GetNext()

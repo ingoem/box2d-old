@@ -119,6 +119,18 @@ struct b2Mat22
 		col1.y = s; col2.y = c;
 	}
 
+	void SetIdentity()
+	{
+		col1.x = 1.0f; col2.x = 0.0f;
+		col1.y = 0.0f; col2.y = 1.0f;
+	}
+
+	void SetZero()
+	{
+		col1.x = 0.0f; col2.x = 0.0f;
+		col1.y = 0.0f; col2.y = 0.0f;
+	}
+
 	b2Mat22 Invert() const
 	{
 		float32 a = col1.x, b = col2.x, c = col1.y, d = col2.y;

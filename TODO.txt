@@ -42,19 +42,19 @@ Version 1.2.1
 - Handle running out of pairs. DONE
 
 Version 1.3.0
-- Documentation.
+- Documentation phase 1. DONE
 - Add "no rotation" option to body def.
 - b2Settings configuration for pixel coordinates.
 - Slider-crank test.
 - Notify client when a body is frozen.
 - Fix collide-connected.
-- Fix compound polygons.
+- Fix compound polygons. DONE
 - Check degenerate containment resolution.
+- Access to contacts and joints. DONE
 
 Version 1.4.0
 - Gear joint.
 - Pulley joint.
-- Access to contacts and joints.
 - Try position correction clamping and larger Baumgarte.
 - Personalize the phpbb header.
 

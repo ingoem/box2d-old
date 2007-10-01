@@ -36,31 +36,83 @@ public:
 		}
 
 		{
-			b2BoxDef sd1;
-			sd1.type = e_boxShape;
-			sd1.extents.Set(0.25f, 0.5f);
-			//sd1.localPosition.Set(-0.5f, 0.0f);
-			sd1.density = 1.0f;
+			b2CircleDef sd1;
+			sd1.radius = 0.5f;
+			sd1.localPosition.Set(-0.5f, 0.5f);
+			sd1.density = 2.0f;
 
-			b2BoxDef sd2;
-			sd2.type = e_boxShape;
-			sd2.extents.Set(0.25f, 0.5f);
-			//sd2.localPosition.Set(0.5f, 0.0f);
-			sd2.localPosition.Set(0.0f, -0.5f);
-			sd2.localRotation = 0.5f * b2_pi;
-			sd2.density = 1.0f;
+			b2CircleDef sd2;
+			sd2.radius = 0.5f;
+			sd2.localPosition.Set(0.5f, 0.5f);
+			sd2.density = 0.0f; // massless
 
 			b2BodyDef bd;
 			bd.AddShape(&sd1);
 			bd.AddShape(&sd2);
 
-			for (int i = 0; i < 100; ++i)
+			for (int i = 0; i < 4; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
-				bd.position.Set(x, 1.05f + 1.5f * i);
-				//bd.position.Set(0.0f, 0.45f);
+				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
 				bd.rotation = b2Random(-b2_pi, b2_pi);
+				m_world->CreateBody(&bd);
+			}
+		}
 
+		{
+			b2BoxDef sd1;
+			sd1.extents.Set(0.25f, 0.5f);
+			sd1.density = 2.0f;
+
+			b2BoxDef sd2;
+			sd2.extents.Set(0.25f, 0.5f);
+			sd2.localPosition.Set(0.0f, -0.5f);
+			sd2.localRotation = 0.5f * b2_pi;
+			sd2.density = 2.0f;
+
+			b2BodyDef bd;
+			bd.AddShape(&sd1);
+			bd.AddShape(&sd2);
+
+			for (int i = 0; i < 4; ++i)
+			{
+				float32 x = b2Random(-0.1f, 0.1f);
+				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
+				bd.rotation = b2Random(-b2_pi, b2_pi);
+				m_world->CreateBody(&bd);
+			}
+		}
+
+		{
+			b2PolyDef sd1;
+			sd1.vertexCount = 3;
+			sd1.vertices[0].Set(-1.0f, 0.0f);
+			sd1.vertices[1].Set(1.0f, 0.0f);
+			sd1.vertices[2].Set(0.0f, 0.5f);
+			sd1.localRotation = 0.3524f * b2_pi;
+			b2Mat22 R1(sd1.localRotation);
+			sd1.localPosition = b2Mul(R1, b2Vec2(1.0f, 0.0f));
+			sd1.density = 2.0f;
+
+			b2PolyDef sd2;
+			sd2.vertexCount = 3;
+			sd2.vertices[0].Set(-1.0f, 0.0f);
+			sd2.vertices[1].Set(1.0f, 0.0f);
+			sd2.vertices[2].Set(0.0f, 0.5f);
+			sd2.localRotation = -0.3524f * b2_pi;
+			b2Mat22 R2(sd2.localRotation);
+			sd2.localPosition = b2Mul(R2, b2Vec2(-1.0f, 0.0f));
+			sd2.density = 2.0f;
+
+			b2BodyDef bd;
+			bd.AddShape(&sd1);
+			bd.AddShape(&sd2);
+
+			for (int i = 0; i < 4; ++i)
+			{
+				float32 x = b2Random(-0.1f, 0.1f);
+				bd.position.Set(x, 1.05f + 2.5f * i);
+				bd.rotation = 0.0f;
 				m_world->CreateBody(&bd);
 			}
 		}
