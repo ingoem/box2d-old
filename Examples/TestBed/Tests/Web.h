@@ -160,6 +160,20 @@ public:
 		}
 	}
 
+	b2BoundaryResponse BoundaryViolated(b2Body* body)
+	{
+		for (int32 i = 0; i < 4; ++i)
+		{
+			if (m_bodies[i] == body)
+			{
+				m_bodies[i] = NULL;
+				return b2_destroyBody;
+			}
+		}
+
+		return b2_freezeBody;
+	}
+
 	static Test* Create()
 	{
 		return new Web;

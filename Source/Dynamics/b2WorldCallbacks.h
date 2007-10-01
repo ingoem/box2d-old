@@ -21,15 +21,15 @@
 
 struct b2Joint;
 
+enum b2BoundaryResponse
+{
+	b2_freezeBody,
+	b2_destroyBody,
+};
+
 class b2WorldListener
 {
 public:
-	enum BoundaryResponse
-	{
-		e_freezeBody,
-		e_destroyBody,
-	};
-
 	virtual ~b2WorldListener() {}
 
 	// If a body is destroyed, then any joints attached to it are also destroyed.
@@ -45,10 +45,10 @@ public:
 	// This is called when a body's shape passes outside of the world boundary. If you
 	// override this and pass back e_destroyBody, you must nullify your copies of the
 	// body pointer.
-	virtual BoundaryResponse NotifyBoundaryViolated(b2Body* body)
+	virtual b2BoundaryResponse NotifyBoundaryViolated(b2Body* body)
 	{
 		NOT_USED(body);
-		return e_freezeBody;
+		return b2_freezeBody;
 	}
 };
 

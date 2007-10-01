@@ -43,13 +43,13 @@ Version 1.2.1
 
 Version 1.3.0
 - Documentation phase 1. DONE
-- Add "no rotation" option to body def.
+- Add "no rotation" option to body def. DONE
 - b2Settings configuration for pixel coordinates.
 - Slider-crank test.
-- Notify client when a body is frozen.
-- Fix collide-connected.
+- Notify client when a body is frozen. DONE
+- Fix collide-connected. DONE
 - Fix compound polygons. DONE
-- Check degenerate containment resolution.
+- Check degenerate containment resolution. DONE (no problem found)
 - Access to contacts and joints. DONE
 
 Version 1.4.0

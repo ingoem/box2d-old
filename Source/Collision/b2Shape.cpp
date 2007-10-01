@@ -226,6 +226,7 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	m_type = e_circleShape;
 	m_radius = circle->radius;
 
+	m_R = m_body->m_R;
 	m_position = m_body->m_position + b2Mul(m_body->m_R, m_localPosition);
 
 	b2AABB aabb;
@@ -250,6 +251,7 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 
 void b2CircleShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
 {
+	m_R = R;
 	m_position = position + b2Mul(R, m_localPosition);
 
 	if (m_proxyId == b2_nullProxy)
@@ -278,16 +280,6 @@ bool b2CircleShape::TestPoint(const b2Vec2& p)
 {
 	b2Vec2 d = p - m_position;
 	return b2Dot(d, d) <= m_radius * m_radius;
-}
-
-const b2Vec2& b2CircleShape::GetPosition() const
-{
-	return m_position;
-}
-
-const b2Mat22& b2CircleShape::GetRotationMatrix() const
-{
-	return m_body->m_R;
 }
 
 b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
@@ -424,14 +416,3 @@ bool b2PolyShape::TestPoint(const b2Vec2& p)
 
 	return true;
 }
-
-const b2Vec2& b2PolyShape::GetPosition() const
-{
-	return m_position;
-}
-
-const b2Mat22& b2PolyShape::GetRotationMatrix() const
-{
-	return m_R;
-}
-

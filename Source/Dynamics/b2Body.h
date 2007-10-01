@@ -43,6 +43,7 @@ struct b2BodyDef
 		angularVelocity = 0.0f;
 		allowSleep = true;
 		isSleeping = false;
+		preventRotation = false;
 	}
 
 	void* userData;
@@ -53,6 +54,7 @@ struct b2BodyDef
 	float32 angularVelocity;
 	bool allowSleep;
 	bool isSleeping;
+	bool preventRotation;
 
 	void AddShape(b2ShapeDef* shape);
 };
@@ -165,6 +167,8 @@ struct b2Body
 
 	void SynchronizeShapes();
 
+	// This is used to prevent connected bodies from colliding.
+	// It may lie, depending on the collideConnected flag.
 	bool IsConnected(const b2Body* other) const;
 
 	// This is called when the child shape has no proxy.
@@ -373,7 +377,7 @@ inline bool b2Body::IsConnected(const b2Body* other) const
 	for (b2JointNode* jn = m_jointList; jn; jn = jn->next)
 	{
 		if (jn->other == other)
-			return jn->joint->m_collideConnected;
+			return jn->joint->m_collideConnected == false;
 	}
 
 	return false;

@@ -81,12 +81,13 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		m_invMass = 0.0f;
 	}
 
-	if (m_I > 0.0f)
+	if (m_I > 0.0f && bd->preventRotation == false)
 	{
 		m_invI = 1.0f / m_I;
 	}
 	else
 	{
+		m_I = 0.0f;
 		m_invI = 0.0f;
 	}
 
@@ -181,8 +182,6 @@ void b2Body::SetCenterPosition(const b2Vec2& position, float rotation)
 
 void b2Body::SynchronizeShapes()
 {
-	b2Assert(IsFrozen() == false);
-
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		s->Synchronize(m_position, m_R);
@@ -191,10 +190,7 @@ void b2Body::SynchronizeShapes()
 
 void b2Body::Freeze()
 {
-	m_mass = 0.0f;
-	m_invMass = 0.0f;
-	m_I = 0.0f;
-	m_invI = 0.0f;
+	m_flags |= e_frozenFlag;
 	m_linearVelocity.SetZero();
 	m_angularVelocity = 0.0f;
 }

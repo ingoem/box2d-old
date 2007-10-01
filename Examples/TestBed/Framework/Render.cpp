@@ -77,7 +77,7 @@ void DrawShape(const b2Shape* shape, const Color& c)
 
 			glBegin(GL_LINES);
 			glVertex2f(x.x, x.y);
-			b2Vec2 ax = circle->GetRotationMatrix().col1;
+			b2Vec2 ax = circle->m_R.col1;
 			glVertex2f(x.x + r * ax.x, x.y + r * ax.y);
 			glEnd();
 		}

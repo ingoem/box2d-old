@@ -68,6 +68,7 @@ class WorldListener : public b2WorldListener
 {
 public:
 	void NotifyJointDestroyed(b2Joint* joint);
+	b2BoundaryResponse NotifyBoundaryViolated(b2Body* body);
 
 	Test* test;
 };
@@ -89,6 +90,11 @@ public:
 
 	// Let derived tests know that a joint was destroyed.
 	virtual void JointDestroyed(b2Joint* joint) { NOT_USED(joint); }
+	virtual b2BoundaryResponse BoundaryViolated(b2Body* body)
+	{
+		NOT_USED(body);
+		return b2_freezeBody;
+	}
 
 protected:
 	friend class WorldListener;

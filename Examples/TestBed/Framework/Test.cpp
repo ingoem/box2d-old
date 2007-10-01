@@ -35,6 +35,17 @@ void WorldListener::NotifyJointDestroyed(b2Joint* joint)
 	}
 }
 
+b2BoundaryResponse WorldListener::NotifyBoundaryViolated(b2Body* body)
+{
+	if (test->m_bomb == body)
+	{
+		test->m_bomb = NULL;
+		return b2_destroyBody;
+	}
+
+	return test->BoundaryViolated(body);
+}
+
 Test::Test()
 {
 	b2AABB worldAABB;
