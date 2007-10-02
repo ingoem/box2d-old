@@ -34,15 +34,15 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Pendulum", Pendulum::Create},
+	{"Bridge", Bridge::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Vertical Stack", VerticalStack::Create},
-	{"Pendulum", Pendulum::Create},
 	{"Web", Web::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
-	{"Bridge", Bridge::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"PolyCollision", PolyCollision::Create},

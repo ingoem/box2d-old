@@ -47,15 +47,15 @@ public:
 			bd.AddShape(&sd);
 
 			b2RevoluteJointDef jd;
-			const int32 numPlanks = 25;
+			const int32 numPlanks = 30;
 
 			b2Body* prevBody = ground;
 			for (int i = 0; i < numPlanks; ++i)
 			{
-				bd.position.Set(-15.5f + 1.25f * i, 5.0f);
+				bd.position.Set(-14.5f + 1.0f * i, 5.0f);
 				b2Body* body = m_world->CreateBody(&bd);
 
-				jd.anchorPoint.Set(-16.125f + 1.25f * i, 5.0f);
+				jd.anchorPoint.Set(-15.0f + 1.0f * i, 5.0f);
 				jd.body1 = prevBody;
 				jd.body2 = body;
 				m_world->CreateJoint(&jd);
@@ -63,7 +63,7 @@ public:
 				prevBody = body;
 			}
 
-			jd.anchorPoint.Set(-16.125f + 1.25f * numPlanks, 5.0f);
+			jd.anchorPoint.Set(-15.0f + 1.0f * numPlanks, 5.0f);
 			jd.body1 = prevBody;
 			jd.body2 = ground;
 			m_world->CreateJoint(&jd);

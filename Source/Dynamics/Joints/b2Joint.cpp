@@ -21,8 +21,10 @@
 #include "b2MouseJoint.h"
 #include "b2RevoluteJoint.h"
 #include "b2PrismaticJoint.h"
+#include "../b2Body.h"
+#include "../b2World.h"
 #include "../../Common/b2BlockAllocator.h"
-#include "../../Dynamics/b2Body.h"
+#include "../../Collision/b2BroadPhase.h"
 
 #include <new.h>
 

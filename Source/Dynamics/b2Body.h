@@ -193,6 +193,7 @@ struct b2Body
 	b2Body* m_next;
 
 	b2Shape* m_shapeList;
+	int32 m_shapeCount;
 
 	b2JointNode* m_jointList;
 	b2ContactNode* m_contactList;

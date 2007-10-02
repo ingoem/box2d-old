@@ -90,6 +90,8 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 	b2Contact* c = (b2Contact*)pairUserData;
 	if (c != &m_nullContact)
 	{
+		b2Assert(m_world->m_contactCount > 0);
+
 		// Remove from the world.
 		if (c->m_prev)
 		{
@@ -106,6 +108,7 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 			m_world->m_contactList = c->m_next;
 		}
 
+		// If there are contact points, then disconnect from the island graph.
 		if (c->GetManifoldCount() > 0)
 		{
 			b2Body* body1 = c->m_shape1->m_body;
@@ -115,7 +118,6 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 			body1->WakeUp();
 			body2->WakeUp();
 
-			// Disconnect from island graph.
 			// Remove from body 1
 			if (c->m_node1.prev)
 			{

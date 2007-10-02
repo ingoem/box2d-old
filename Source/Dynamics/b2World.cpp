@@ -147,11 +147,24 @@ b2Joint* b2World::CreateJoint(const b2JointDef* def)
 	if (j->m_body2->m_jointList) j->m_body2->m_jointList->prev = &j->m_node2;
 	j->m_body2->m_jointList = &j->m_node2;
 
+	// If the joint prevents collisions, then reset collision filtering.
+	if (def->collideConnected == false)
+	{
+		// Reset the proxies on the body with the minimum number of shapes.
+		b2Body* b = def->body1->m_shapeCount < def->body2->m_shapeCount ? def->body1 : def->body2;
+		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
+		{
+			s->ResetProxy(m_broadPhase);
+		}
+	}
+
 	return j;
 }
 
 void b2World::DestroyJoint(b2Joint* j)
 {
+	bool collideConnected = j->m_collideConnected;
+
 	// Remove from the world.
 	if (j->m_prev)
 	{
@@ -218,6 +231,17 @@ void b2World::DestroyJoint(b2Joint* j)
 
 	b2Assert(m_jointCount > 0);
 	--m_jointCount;
+
+	// If the joint prevents collisions, then reset collision filtering.
+	if (collideConnected == false)
+	{
+		// Reset the proxies on the body with the minimum number of shapes.
+		b2Body* b = body1->m_shapeCount < body2->m_shapeCount ? body1 : body2;
+		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
+		{
+			s->ResetProxy(m_broadPhase);
+		}
+	}
 }
 
 void b2World::Step(float32 dt, int32 iterations)

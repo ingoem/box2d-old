@@ -99,6 +99,9 @@ public:
 	void MoveProxy(int32 proxyId, const b2AABB& aabb);
 	void Flush();
 
+	// Get a single proxy. Returns NULL if the id is invalid.
+	b2Proxy* GetProxy(int32 proxyId);
+
 	// Query an AABB for overlapping proxies, returns the user data and
 	// the count, up to the supplied maximum count.
 	int32 Query(const b2AABB& aabb, void** userData, int32 maxCount);
@@ -109,8 +112,8 @@ public:
 private:
 	void ComputeBounds(uint16* lowerValues, uint16* upperValues, const b2AABB& aabb);
 
-	void AddPair(int32 proxyId1, int32 proxyId2);
-	void RemovePair(int32 proxyId1, int32 proxyId2);
+	void AddBufferedPair(int32 proxyId1, int32 proxyId2);
+	void RemoveBufferedPair(int32 proxyId1, int32 proxyId2);
 
 	bool TestOverlap(b2Proxy* p1, b2Proxy* p2);
 
@@ -146,12 +149,20 @@ public:
 };
 
 
-// Does the world AABB intersect provided AABB?
 inline bool b2BroadPhase::InRange(const b2AABB& aabb) const
 {
 	b2Vec2 d = b2Max(aabb.minVertex - m_worldAABB.maxVertex, m_worldAABB.minVertex - aabb.maxVertex);
 	return b2Max(d.x, d.y) < 0.0f;
+}
 
+inline b2Proxy* b2BroadPhase::GetProxy(int32 proxyId)
+{
+	if (proxyId == b2_nullProxy || m_proxyPool[proxyId].IsValid() == false)
+	{
+		return NULL;
+	}
+
+	return m_proxyPool + proxyId;
 }
 
 #endif

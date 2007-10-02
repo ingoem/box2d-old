@@ -31,6 +31,19 @@ typedef float float32;
 
 const float32 b2_pi = 3.14159265359f;
 
+// Define your unit system here. The default system is
+// meters-kilograms-seconds. For the tuning to work well,
+// your dynamic objects should be bigger than a pebble and smaller
+// than a house.
+const float32 b2_lengthUnitsPerMeter = 1.0f;
+const float32 b2_massUnitsPerKilogram = 1.0f;
+const float32 b2_timeUnitsPerSecond = 1.0f;
+
+// Use this for pixels:
+//const float32 b2_lengthUnitsPerMeter = 50.0f;
+
+
+
 // Global tuning constants based on MKS units.
 
 // Collision
@@ -41,17 +54,17 @@ const int32 b2_maxProxies = 512;				// this must be a power of two
 const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
 
 // Dynamics
-const float32 b2_linearSlop = 0.01f;
-const float32 b2_angularSlop = 2.0f / 180.0f * b2_pi;
-const float32 b2_velocityThreshold = 1.0f;
-const float32 b2_maxLinearCorrection = 0.2f;
-const float32 b2_maxAngularCorrection = 8.0f / 180.0f * b2_pi;
+const float32 b2_linearSlop = 0.01f * b2_lengthUnitsPerMeter;	// 1 cm
+const float32 b2_angularSlop = 2.0f / 180.0f * b2_pi;			// 2 degrees
+const float32 b2_velocityThreshold = 1.0f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;		// 1 m/s
+const float32 b2_maxLinearCorrection = 0.2f * b2_lengthUnitsPerMeter;	// 20 cm
+const float32 b2_maxAngularCorrection = 8.0f / 180.0f * b2_pi;			// 8 degrees
 const float32 b2_contactBaumgarte = 0.2f;
 
 // Sleep
-const float32 b2_timeToSleep = 0.5f;
-const float32 b2_linearSleepTolerance = 0.01f;
-const float32 b2_angularSleepTolerance = 0.01f;
+const float32 b2_timeToSleep = 0.5f * b2_timeUnitsPerSecond;	// half a second
+const float32 b2_linearSleepTolerance = 0.01f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;	// 1 cm/s
+const float32 b2_angularSleepTolerance = 0.5f / 180.0f / b2_timeUnitsPerSecond;					// 0.5 degrees/s
 
 void b2Assert(bool condition);
 

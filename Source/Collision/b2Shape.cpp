@@ -282,6 +282,42 @@ bool b2CircleShape::TestPoint(const b2Vec2& p)
 	return b2Dot(d, d) <= m_radius * m_radius;
 }
 
+void b2CircleShape::ResetProxy(b2BroadPhase* broadPhase)
+{
+	if (m_proxyId == b2_nullProxy)
+	{	
+		return;
+	}
+
+	b2Proxy* proxy = broadPhase->GetProxy(m_proxyId);
+	int16 groupIndex = proxy->groupIndex;
+	uint16 categoryBits = proxy->categoryBits;
+	uint16 maskBits = proxy->maskBits;
+
+	broadPhase->DestroyProxy(m_proxyId);
+	proxy = NULL;
+
+	b2AABB aabb;
+	aabb.minVertex.Set(m_position.x - m_radius, m_position.y - m_radius);
+	aabb.maxVertex.Set(m_position.x + m_radius, m_position.y + m_radius);
+
+	if (broadPhase->InRange(aabb))
+	{
+		m_proxyId = broadPhase->CreateProxy(aabb, groupIndex, categoryBits, maskBits, this);
+	}
+	else
+	{
+		m_proxyId = b2_nullProxy;
+	}
+
+	if (m_proxyId == b2_nullProxy)
+	{
+		m_body->Freeze();
+	}
+}
+
+
+
 b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 					 const b2Vec2& localCenter)
 : b2Shape(def, body)
@@ -416,3 +452,42 @@ bool b2PolyShape::TestPoint(const b2Vec2& p)
 
 	return true;
 }
+
+void b2PolyShape::ResetProxy(b2BroadPhase* broadPhase)
+{
+	if (m_proxyId == b2_nullProxy)
+	{	
+		return;
+	}
+
+	b2Proxy* proxy = broadPhase->GetProxy(m_proxyId);
+	int16 groupIndex = proxy->groupIndex;
+	uint16 categoryBits = proxy->categoryBits;
+	uint16 maskBits = proxy->maskBits;
+
+	broadPhase->DestroyProxy(m_proxyId);
+	proxy = NULL;
+
+	b2Mat22 R = b2Mul(m_R, m_localOBB.R);
+	b2Mat22 absR = b2Abs(R);
+	b2Vec2 h = b2Mul(absR, m_localOBB.extents);
+	b2Vec2 position = m_position + b2Mul(m_R, m_localOBB.center);
+	b2AABB aabb;
+	aabb.minVertex = position - h;
+	aabb.maxVertex = position + h;
+
+	if (broadPhase->InRange(aabb))
+	{
+		m_proxyId = broadPhase->CreateProxy(aabb, groupIndex, categoryBits, maskBits, this);
+	}
+	else
+	{
+		m_proxyId = b2_nullProxy;
+	}
+
+	if (m_proxyId == b2_nullProxy)
+	{
+		m_body->Freeze();
+	}
+}
+

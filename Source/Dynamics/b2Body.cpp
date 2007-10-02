@@ -38,6 +38,7 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	b2MassData massDatas[b2_maxShapesPerBody];
 
 	// Compute the shape mass properties, the bodies total mass and COM.
+	m_shapeCount = 0;
 	m_center.Set(0.0f, 0.0f);
 	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
 	{
@@ -47,6 +48,7 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		sd->ComputeMass(massData);
 		m_mass += massData->mass;
 		m_center += massData->mass * (sd->localPosition + massData->center);
+		++m_shapeCount;
 	}
 
 	// Compute center of mass, and shift the origin to the COM.
@@ -62,10 +64,9 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 
 	// Compute the moment of inertia.
 	m_I = 0.0f;
-	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
+	for (int32 i = 0; i < m_shapeCount; ++i)
 	{
 		const b2ShapeDef* sd = bd->shapes[i];
-		if (sd == NULL) break;
 		b2MassData* massData = massDatas + i;
 		m_I += massData->I;
 		b2Vec2 r = sd->localPosition + massData->center - m_center;
@@ -102,10 +103,9 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 
 	// Create the shapes.
 	m_shapeList = NULL;
-	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
+	for (int32 i = 0; i < m_shapeCount; ++i)
 	{
 		const b2ShapeDef* sd = bd->shapes[i];
-		if (sd == NULL) break;
 		b2Shape* shape = b2Shape::Create(sd, this, m_center);
 		shape->m_next = m_shapeList;
 		m_shapeList = shape;

@@ -23,6 +23,7 @@
 #include "b2Collision.h"
 
 struct b2Body;
+class b2BroadPhase;
 
 struct b2MassData
 {
@@ -136,6 +137,10 @@ struct b2Shape
 	// Get the world rotation.
 	const b2Mat22& GetRotationMatrix() const;
 
+	// Remove and then add proxy from the broad-phase.
+	// This is used to refresh the collision filters.
+	virtual void ResetProxy(b2BroadPhase* broadPhase) = 0;
+
 	// Get the next shape in the parent body's shape list.
 	b2Shape* GetNext();
 
@@ -177,6 +182,8 @@ struct b2CircleShape : public b2Shape
 {
 	bool TestPoint(const b2Vec2& p);
 
+	void ResetProxy(b2BroadPhase* broadPhase);
+
 	//--------------- Internals Below -------------------
 
 	b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);
@@ -192,6 +199,8 @@ struct b2PolyShape : public b2Shape
 {
 	bool TestPoint(const b2Vec2& p);
 	
+	void ResetProxy(b2BroadPhase* broadPhase);
+
 	//--------------- Internals Below -------------------
 	
 	b2PolyShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);

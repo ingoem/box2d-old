@@ -490,7 +490,7 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 				{
 					if (TestOverlap(proxy, prevProxy))
 					{
-						AddPair(proxyId, prevProxyId);
+						AddBufferedPair(proxyId, prevProxyId);
 					}
 
 					++prevProxy->upperBounds[axis];
@@ -525,7 +525,7 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 				{
 					if (TestOverlap(proxy, nextProxy))
 					{
-						AddPair(proxyId, nextProxyId);
+						AddBufferedPair(proxyId, nextProxyId);
 					}
 
 					--nextProxy->lowerBounds[axis];
@@ -563,7 +563,7 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 
 				if (nextEdge->IsUpper())
 				{
-					RemovePair(proxyId, nextProxyId);
+					RemoveBufferedPair(proxyId, nextProxyId);
 
 					--nextProxy->upperBounds[axis];
 					--bound->stabbingCount;
@@ -596,7 +596,7 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 
 				if (prevEdge->IsLower() == true)
 				{
-					RemovePair(proxyId, prevProxyId);
+					RemoveBufferedPair(proxyId, prevProxyId);
 
 					++prevProxy->lowerBounds[axis];
 					--bound->stabbingCount;
@@ -636,7 +636,7 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 // We may add a pair that is not in the pair manager or pair buffer.
 // We may add a pair that is already in the pair manager and pair buffer.
 // If the added pair is not a new pair, then it must be in the pair buffer (because RemovePair was called).
-void b2BroadPhase::AddPair(int32 id1, int32 id2)
+void b2BroadPhase::AddBufferedPair(int32 id1, int32 id2)
 {
 	b2Assert(m_proxyPool[id1].IsValid() && m_proxyPool[id2].IsValid());
 
@@ -683,7 +683,7 @@ void b2BroadPhase::AddPair(int32 id1, int32 id2)
 }
 
 // Buffer a pair for removal.
-void b2BroadPhase::RemovePair(int32 id1, int32 id2)
+void b2BroadPhase::RemoveBufferedPair(int32 id1, int32 id2)
 {
 	b2Assert(m_proxyPool[id1].IsValid() && m_proxyPool[id2].IsValid());
 

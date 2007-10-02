@@ -39,7 +39,8 @@ public:
 		{
 			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(0.375f, 0.125f);
+			//sd.extents.Set(0.375f, 0.125f);
+			sd.extents.Set(0.6f, 0.125f);
 			sd.density = 20.0f;
 			sd.friction = 0.2f;
 
@@ -47,6 +48,7 @@ public:
 			bd.AddShape(&sd);
 
 			b2RevoluteJointDef jd;
+			jd.collideConnected = false;
 
 			const float32 y = 25.0f;
 			b2Body* prevBody = ground;
