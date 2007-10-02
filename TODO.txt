@@ -44,7 +44,7 @@ Version 1.2.1
 Version 1.3.0
 - Documentation phase 1. DONE
 - Add "no rotation" option to body def. DONE
-- b2Settings configuration for pixel coordinates.
+- b2Settings configuration for pixel coordinates. DONE
 - Slider-crank test.
 - Notify client when a body is frozen. DONE
 - Fix collide-connected. DONE
