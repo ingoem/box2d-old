@@ -241,6 +241,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\SliderCrank.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\TestEntries.cpp"
 				>
 			</File>

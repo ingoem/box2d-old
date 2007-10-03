@@ -31,9 +31,11 @@
 #include "Pyramid.h"
 #include "Web.h"
 #include "CollisionFiltering.h"
+#include "SliderCrank.h"
 
 TestEntry g_testEntries[] =
 {
+	{"Slider Crank", SliderCrank::Create},
 	{"Pendulum", Pendulum::Create},
 	{"Bridge", Bridge::Create},
 	{"Compound Shapes", CompoundShapes::Create},

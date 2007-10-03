@@ -54,7 +54,7 @@ const int32 b2_maxProxies = 512;				// this must be a power of two
 const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
 
 // Dynamics
-const float32 b2_linearSlop = 0.01f * b2_lengthUnitsPerMeter;	// 1 cm
+const float32 b2_linearSlop = 0.005f * b2_lengthUnitsPerMeter;	// 0.5 cm
 const float32 b2_angularSlop = 2.0f / 180.0f * b2_pi;			// 2 degrees
 const float32 b2_velocityThreshold = 1.0f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;		// 1 m/s
 const float32 b2_maxLinearCorrection = 0.2f * b2_lengthUnitsPerMeter;	// 20 cm

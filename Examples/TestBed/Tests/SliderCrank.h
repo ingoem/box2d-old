@@ -16,13 +16,15 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef MOTORS_AND_LIMITS_H
-#define MOTORS_AND_LIMITS_H
+#ifndef SLIDER_CRANK_H
+#define SLIDER_CRANK_H
 
-class MotorsAndLimits : public Test
+// A motor driven slider crank with joint friction.
+
+class SliderCrank : public Test
 {
 public:
-	MotorsAndLimits()
+	SliderCrank()
 	{
 		b2Body* ground = NULL;
 		{
@@ -37,70 +39,70 @@ public:
 		}
 
 		{
+			// Define crank.
 			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(2.0f, 0.5f);
-			sd.density = 5.0f;
-			sd.friction = 0.05f;
+			sd.extents.Set(0.5f, 2.0f);
+			sd.density = 1.0f;
 
 			b2BodyDef bd;
 			bd.AddShape(&sd);
 
 			b2RevoluteJointDef rjd;
-			
-			b2Body* body = NULL;
+
 			b2Body* prevBody = ground;
-			const float32 y = 8.0f;
 
-			bd.position.Set(3.0f, y);
-			body = m_world->CreateBody(&bd);
+			bd.position.Set(0.0f, 7.0f);
+			b2Body* body = m_world->CreateBody(&bd);
 
-			rjd.anchorPoint.Set(0.0f, y);
+			rjd.anchorPoint.Set(0.0f, 5.0f);
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
 			rjd.motorSpeed = 1.0f * b2_pi;
 			rjd.motorTorque = 10000.0f;
 			rjd.enableMotor = true;
-			
 			m_joint1 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
 
 			prevBody = body;
 
-			bd.position.Set(9.0f, y);
+			// Define follower.
+			sd.extents.Set(0.5f, 4.0f);
+			bd.position.Set(0.0f, 13.0f);
 			body = m_world->CreateBody(&bd);
 
-			rjd.anchorPoint.Set(6.0f, y);
+			rjd.anchorPoint.Set(0.0f, 9.0f);
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
-			rjd.motorSpeed = 0.5f * b2_pi;
-			rjd.motorTorque = 2000.0f;
-			rjd.enableMotor = true;
-			rjd.lowerAngle = - 0.5f * b2_pi;
-			rjd.upperAngle = 0.5f * b2_pi;
-			//rjd.enableMotor = false;
-			//rjd.minAngle = 0.0f;
-			//rjd.maxAngle = 0.0f;
-			rjd.enableLimit = true;
+			rjd.enableMotor = false;
+			m_world->CreateJoint(&rjd);
 
-			m_joint2 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
+			prevBody = body;
 
-			bd.position.Set(-10.0f, 10.0f);
-			bd.rotation = 0.5f * b2_pi;
+			// Define piston
+			sd.extents.Set(1.5f, 1.5f);
+			bd.position.Set(0.0f, 17.0f);
 			body = m_world->CreateBody(&bd);
 
+			rjd.anchorPoint.Set(0.0f, 17.0f);
+			rjd.body1 = prevBody;
+			rjd.body2 = body;
+			m_world->CreateJoint(&rjd);
+
 			b2PrismaticJointDef pjd;
-			pjd.anchorPoint.Set(-10.0f, 10.0f);
+			pjd.anchorPoint.Set(0.0f, 17.0f);
 			pjd.body1 = ground;
 			pjd.body2 = body;
-			pjd.axis.Set(1.0f, 0.0f);
-			pjd.motorSpeed = 10.0f;
+			pjd.axis.Set(0.0f, 1.0f);
+			pjd.motorSpeed = 0.0f;		// joint friction
 			pjd.motorForce = 1000.0f;
 			pjd.enableMotor = true;
-			pjd.lowerTranslation = 0.0f;
-			pjd.upperTranslation = 20.0f;
-			pjd.enableLimit = true;
 
-			m_joint3 = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
+			m_joint2 = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
+
+			// Create a payload
+			sd.density = 2.0f;
+			bd.position.Set(0.0f, 23.0f);
+			m_world->CreateBody(&bd);
 		}
 	}
 
@@ -108,50 +110,35 @@ public:
 	{
 		switch (key)
 		{
-		case 'l':
-			m_joint2->m_enableLimit = !m_joint2->m_enableLimit;
-			m_joint3->m_enableLimit = !m_joint3->m_enableLimit;
-			m_joint2->m_body1->WakeUp();
-			m_joint2->m_body2->WakeUp();
-			m_joint3->m_body2->WakeUp();
+		case 'f':
+			m_joint2->m_enableMotor = !m_joint2->m_enableMotor;
+			m_joint2->GetBody2()->WakeUp();
 			break;
 
 		case 'm':
 			m_joint1->m_enableMotor = !m_joint1->m_enableMotor;
-			m_joint2->m_enableMotor = !m_joint2->m_enableMotor;
-			m_joint3->m_enableMotor = !m_joint3->m_enableMotor;
-			m_joint2->m_body1->WakeUp();
-			m_joint2->m_body2->WakeUp();
-			m_joint3->m_body2->WakeUp();
-			break;
-
-		case 'p':
-			m_joint3->m_body2->WakeUp();
-			m_joint3->m_motorSpeed = -m_joint3->m_motorSpeed;
+			m_joint1->GetBody2()->WakeUp();
 			break;
 		}
 	}
 
 	void Step(const Settings* settings)
 	{
-		DrawString(5, m_textLine, "Keys: (l) limits, (m) motors, (p) prismatic speed");
+		DrawString(5, m_textLine, "Keys: (f) toggle friction, (m) toggle motor");
 		m_textLine += 15;
-		float32 torque1 = m_joint1->GetMotorTorque(settings->hz);
-		float32 torque2 = m_joint2->GetMotorTorque(settings->hz);
-		float32 force3 = m_joint3->GetMotorForce(settings->hz);
-		DrawString(5, m_textLine, "Motor Torque = %4.0f, %4.0f : Motor Force = %4.0f", torque1, torque2, force3);
+		float32 torque = m_joint1->GetMotorTorque(settings->hz);
+		DrawString(5, m_textLine, "Motor Torque = %5.0f", torque);
 		m_textLine += 15;
 		Test::Step(settings);
 	}
 
 	static Test* Create()
 	{
-		return new MotorsAndLimits;
+		return new SliderCrank;
 	}
 
 	b2RevoluteJoint* m_joint1;
-	b2RevoluteJoint* m_joint2;
-	b2PrismaticJoint* m_joint3;
+	b2PrismaticJoint* m_joint2;
 };
 
 #endif
