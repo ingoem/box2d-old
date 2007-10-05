@@ -113,7 +113,8 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 			bool jointsOkay = true;
 			for (int i = 0; i < m_jointCount; ++i)
 			{
-				jointsOkay = m_joints[i]->SolvePositionConstraints();
+				bool jointOkay = m_joints[i]->SolvePositionConstraints();
+				jointsOkay = jointsOkay && jointOkay;
 			}
 
 			if (contactsOkay && jointsOkay)

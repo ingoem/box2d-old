@@ -204,6 +204,8 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 	b2Vec2 p2 = b2->m_position + r2;
 	b2Vec2 ptpC = p2 - p1;
 
+	float32 positionError = ptpC.Length();
+
 	// Prevent overly large corrections.
 	b2Vec2 dpMax = b2Vec2::Make(b2_maxLinearCorrection, b2_maxLinearCorrection);
 	ptpC = b2Clamp(ptpC, -dpMax, dpMax);
@@ -218,7 +220,6 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 	b2->m_rotation += b2->m_invI * b2Cross(r2, impulse);
 	b2->m_R.Set(b2->m_rotation);
 
-	float32 positionError = ptpC.Length();
 
 	// Handle limits.
 	float32 angularError = 0.0f;
