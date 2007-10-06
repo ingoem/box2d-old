@@ -74,9 +74,9 @@ struct b2PulleyJoint : public b2Joint
 	void SolveVelocityConstraints(float32 dt);
 	bool SolvePositionConstraints();
 
-	b2Body* m_groundBody;
-	b2Vec2 m_localRoot1;
-	b2Vec2 m_localRoot2;
+	b2Body* m_ground;
+	b2Vec2 m_groundAnchor1;
+	b2Vec2 m_groundAnchor2;
 	b2Vec2 m_localAnchor1;
 	b2Vec2 m_localAnchor2;
 

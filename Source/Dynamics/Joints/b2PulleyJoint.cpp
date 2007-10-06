@@ -43,14 +43,13 @@
 b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 : b2Joint(def)
 {
-	m_groundBody = m_body1->m_world->m_groundBody;
-	m_localRoot1 = def->groundPoint1 - m_groundBody->m_position;
-	m_localRoot2 = def->groundPoint2 - m_groundBody->m_position;
+	m_ground = m_body1->m_world->m_groundBody;
+	m_groundAnchor1 = def->groundPoint1 - m_ground->m_position;
+	m_groundAnchor2 = def->groundPoint2 - m_ground->m_position;
 	m_localAnchor1 = b2MulT(m_body1->m_R, def->anchorPoint1 - m_body1->m_position);
 	m_localAnchor2 = b2MulT(m_body2->m_R, def->anchorPoint2 - m_body2->m_position);
 
-	// Clamp the ratio to a reasonable range.
-	m_ratio = b2Clamp(def->ratio, 0.01f, 100.0f);
+	m_ratio = def->ratio;
 
 	b2Vec2 d1 = def->groundPoint1 - def->anchorPoint1;
 	b2Vec2 d2 = def->groundPoint2 - def->anchorPoint2;
@@ -74,10 +73,50 @@ b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 
 void b2PulleyJoint::PreSolve()
 {
-#if 0
-	// Compute the effective mass matrix.
+	// u1 = (p1 - s1) / norm(p1 - s1)
+	// u2 = (p2 - s2) / norm(p2 - s2)
+	// Cdot = dot(u1, v1 + cross(w1, r1)) + ratio * dot(u2, v2 + cross(w2, r2))
+	// J = [u1 cross(r1, u1) ratio * u2  ratio * cross(r2, u2)]
+	// K = J * invM * JT
+	//   = invMass1 + invI1 * cross(r1, u1)^2 + ratio^2 * (invMass2 + invI2 * cross(r2, u2)^2)
+
+	b2Vec2 s1 = m_ground->m_position + m_groundAnchor1;
+	b2Vec2 s2 = m_ground->m_position + m_groundAnchor2;
+
 	b2Vec2 r1 = b2Mul(m_body1->m_R, m_localAnchor1);
 	b2Vec2 r2 = b2Mul(m_body2->m_R, m_localAnchor2);
+
+	b2Vec2 p1 = m_body1->m_position + r1;
+	b2Vec2 p2 = m_body2->m_position	+ r2;
+
+	m_u1 = p1 - s1;
+	m_u2 = p2 - s2;
+
+	// TODO use fast inv sqrt
+	float32 length1 = m_u1.Length();
+	float32 length2 = m_u2.Length();
+
+	if (length1 > b2_linearSlop)
+	{
+		m_u1 *= 1.0f / length1;
+	}
+	else
+	{
+		m_u1.SetZero();
+	}
+
+	if (length2 > b2_linearSlop)
+	{
+		m_u2 *= 1.0f / length2;
+	}
+	else
+	{
+		m_u2.SetZero();
+	}
+
+
+#if 0
+	// Compute the effective mass matrix.
 	m_u = m_body2->m_position + r2 - m_body1->m_position - r1;
 
 	// Handle singularity.
