@@ -348,6 +348,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Source\Dynamics\Joints\b2PulleyJoint.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Joints\b2PulleyJoint.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Source\Dynamics\Joints\b2RevoluteJoint.cpp"
 					>
 				</File>

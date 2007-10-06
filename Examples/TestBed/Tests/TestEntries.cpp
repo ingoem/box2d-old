@@ -35,9 +35,9 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Bridge", Bridge::Create},
 	{"Slider Crank", SliderCrank::Create},
 	{"Pendulum", Pendulum::Create},
-	{"Bridge", Bridge::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Web", Web::Create},

@@ -319,6 +319,8 @@ void Test::Step(const Settings* settings)
 
 		DrawString(5, m_textLine, "bodies/contacts/joints = %d/%d/%d",
 			m_world->m_bodyCount, m_world->m_contactCount, m_world->m_jointCount);
+
+		m_textLine += 15;
 	}
 
 	if (m_mouseJoint)

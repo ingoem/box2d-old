@@ -56,7 +56,7 @@ Version 1.4.0
 - Gear joint.
 - Pulley joint.
 - Try position correction clamping and larger Baumgarte.
-- Personalize the phpbb header.
+- Personalize the phpbb header. DONE
 
 Version 2.0.0
 - CCD.
