@@ -193,7 +193,7 @@ void b2PulleyJoint::SolveVelocityConstraints(float32 dt)
 		b1->m_angularVelocity += b1->m_invI * b2Cross(r1, P1);
 	}
 
-	if (m_limitState2 >= e_atUpperLimit)
+	if (m_limitState2 == e_atUpperLimit)
 	{
 		v2 = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2);
 		Cdot = -b2Dot(m_u2, v2);
@@ -289,7 +289,7 @@ bool b2PulleyJoint::SolvePositionConstraints()
 
 		C = m_maxLength1 - length1;
 		linearError = b2Max(linearError, -C);
-		C = b2Clamp(C, -b2_maxLinearCorrection, -b2_linearSlop);
+		C = b2Clamp(C + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
 		impulse = -m_mass1 * C;
 		float32 oldLimitPositionImpulse = m_limitPositionImpulse1;
 		m_limitPositionImpulse1 = b2Max(0.0f, m_limitPositionImpulse1 + impulse);
@@ -320,7 +320,7 @@ bool b2PulleyJoint::SolvePositionConstraints()
 
 		C = m_maxLength2 - length2;
 		linearError = b2Max(linearError, -C);
-		C = b2Clamp(C, -b2_maxLinearCorrection, -b2_linearSlop);
+		C = b2Clamp(C + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
 		impulse = -m_mass2 * C;
 		float32 oldLimitPositionImpulse = m_limitPositionImpulse2;
 		m_limitPositionImpulse2 = b2Max(0.0f, m_limitPositionImpulse2 + impulse);
