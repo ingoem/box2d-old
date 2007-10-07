@@ -92,8 +92,6 @@ struct b2PulleyJoint : public b2Joint
 	b2Vec2 m_u2;
 	
 	float32 m_lengthConstant;
-	float32 m_length1;
-	float32 m_length2;
 	float32 m_ratio;
 	
 	float32 m_maxLength1;
@@ -109,6 +107,8 @@ struct b2PulleyJoint : public b2Joint
 	float32 m_motorImpulse;
 	float32 m_limitImpulse1;
 	float32 m_limitImpulse2;
+	float32 m_limitPositionImpulse1;
+	float32 m_limitPositionImpulse2;
 
 	b2LimitState m_limitState1;
 	b2LimitState m_limitState2;

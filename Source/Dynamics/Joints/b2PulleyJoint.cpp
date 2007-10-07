@@ -90,28 +90,28 @@ void b2PulleyJoint::PreSolve()
 	m_u1 = p1 - s1;
 	m_u2 = p2 - s2;
 
-	m_length1 = m_u1.Length();
-	m_length2 = m_u2.Length();
+	float32 length1 = m_u1.Length();
+	float32 length2 = m_u2.Length();
 
-	if (m_length1 > b2_linearSlop)
+	if (length1 > b2_linearSlop)
 	{
-		m_u1 *= 1.0f / m_length1;
+		m_u1 *= 1.0f / length1;
 	}
 	else
 	{
 		m_u1.SetZero();
 	}
 
-	if (m_length2 > b2_linearSlop)
+	if (length2 > b2_linearSlop)
 	{
-		m_u2 *= 1.0f / m_length2;
+		m_u2 *= 1.0f / length2;
 	}
 	else
 	{
 		m_u2.SetZero();
 	}
 
-	if (m_length1 < m_maxLength1)
+	if (length1 < m_maxLength1)
 	{
 		m_limitState1 = e_inactiveLimit;
 		m_limitImpulse1 = 0.0f;
@@ -119,9 +119,10 @@ void b2PulleyJoint::PreSolve()
 	else
 	{
 		m_limitState1 = e_atUpperLimit;
+		m_limitPositionImpulse1 = 0.0f;
 	}
 
-	if (m_length2 < m_maxLength2)
+	if (length2 < m_maxLength2)
 	{
 		m_limitState2 = e_inactiveLimit;
 		m_limitImpulse2 = 0.0f;
@@ -129,6 +130,7 @@ void b2PulleyJoint::PreSolve()
 	else
 	{
 		m_limitState2 = e_atUpperLimit;
+		m_limitPositionImpulse2 = 0.0f;
 	}
 
 	// Compute effective mass.
@@ -146,8 +148,8 @@ void b2PulleyJoint::PreSolve()
 	m_mass = 1.0f / m_mass;
 
 	// Warm starting.
-	b2Vec2 P1 = (m_impulse + m_limitImpulse1) * m_u1;
-	b2Vec2 P2 = (m_ratio * m_impulse + m_limitImpulse2) * m_u2;
+	b2Vec2 P1 = (m_impulse - m_limitImpulse1) * m_u1;
+	b2Vec2 P2 = (m_ratio * m_impulse - m_limitImpulse2) * m_u2;
 	b1->m_linearVelocity += b1->m_invMass * P1;
 	b1->m_angularVelocity += b1->m_invI * b2Cross(r1, P1);
 	b2->m_linearVelocity += b2->m_invMass * P2;
@@ -178,28 +180,28 @@ void b2PulleyJoint::SolveVelocityConstraints(float32 dt)
 	b2->m_linearVelocity += b2->m_invMass * P2;
 	b2->m_angularVelocity += b2->m_invI * b2Cross(r2, P2);
 
-	if (m_length1 >= m_maxLength1)
+	if (m_limitState1 == e_atUpperLimit)
 	{
 		v1 = b1->m_linearVelocity + b2Cross(b1->m_angularVelocity, r1);
-		Cdot = b2Dot(m_u1, v1);
+		Cdot = -b2Dot(m_u1, v1);
 		impulse = -m_mass1 * Cdot;
 		float32 oldLimitImpulse = m_limitImpulse1;
-		m_limitImpulse1 = b2Min(0.0f, m_limitImpulse1 + impulse);
+		m_limitImpulse1 = b2Max(0.0f, m_limitImpulse1 + impulse);
 		impulse = m_limitImpulse1 - oldLimitImpulse;
-		P1 = impulse * m_u1;
+		P1 = -impulse * m_u1;
 		b1->m_linearVelocity += b1->m_invMass * P1;
 		b1->m_angularVelocity += b1->m_invI * b2Cross(r1, P1);
 	}
 
-	if (m_length2 >= m_maxLength2)
+	if (m_limitState2 >= e_atUpperLimit)
 	{
 		v2 = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2);
-		Cdot = b2Dot(m_u2, v2);
+		Cdot = -b2Dot(m_u2, v2);
 		impulse = -m_mass2 * Cdot;
 		float32 oldLimitImpulse = m_limitImpulse2;
-		m_limitImpulse2 = b2Min(0.0f, m_limitImpulse2 + impulse);
+		m_limitImpulse2 = b2Max(0.0f, m_limitImpulse2 + impulse);
 		impulse = m_limitImpulse2 - oldLimitImpulse;
-		P2 = impulse * m_u2;
+		P2 = -impulse * m_u2;
 		b2->m_linearVelocity += b2->m_invMass * P2;
 		b2->m_angularVelocity += b2->m_invI * b2Cross(r2, P2);
 	}
@@ -231,28 +233,29 @@ bool b2PulleyJoint::SolvePositionConstraints()
 	m_u1 = p1 - s1;
 	m_u2 = p2 - s2;
 
-	m_length1 = m_u1.Length();
-	m_length2 = m_u2.Length();
+	float32 length1 = m_u1.Length();
+	float32 length2 = m_u2.Length();
 
-	if (m_length1 > b2_linearSlop)
+	if (length1 > b2_linearSlop)
 	{
-		m_u1 *= 1.0f / m_length1;
+		m_u1 *= 1.0f / length1;
 	}
 	else
 	{
 		m_u1.SetZero();
 	}
 
-	if (m_length2 > b2_linearSlop)
+	if (length2 > b2_linearSlop)
 	{
-		m_u2 *= 1.0f / m_length2;
+		m_u2 *= 1.0f / length2;
 	}
 	else
 	{
 		m_u2.SetZero();
 	}
 
-	float32 C = m_length1 + m_ratio * m_length2 - m_lengthConstant;
+	float32 C = length1 + m_ratio * length2 - m_lengthConstant;
+	float32 linearError = b2Abs(C);
 	C = b2Clamp(C, -b2_maxLinearCorrection, b2_maxLinearCorrection);
 
 	float32 impulse = -m_mass * C;
@@ -267,7 +270,69 @@ bool b2PulleyJoint::SolvePositionConstraints()
 	b1->m_R.Set(b1->m_rotation);
 	b2->m_R.Set(b2->m_rotation);
 
-	return b2Abs(C) < b2_linearSlop;
+	if (m_limitState1 == e_atUpperLimit)
+	{
+		r1 = b2Mul(b1->m_R, m_localAnchor1);
+		p1 = b1->m_position + r1;
+
+		m_u1 = p1 - s1;
+		length1 = m_u1.Length();
+
+		if (length1 > b2_linearSlop)
+		{
+			m_u1 *= 1.0f / length1;
+		}
+		else
+		{
+			m_u1.SetZero();
+		}
+
+		C = m_maxLength1 - length1;
+		linearError = b2Max(linearError, -C);
+		C = b2Clamp(C, -b2_maxLinearCorrection, -b2_linearSlop);
+		impulse = -m_mass1 * C;
+		float32 oldLimitPositionImpulse = m_limitPositionImpulse1;
+		m_limitPositionImpulse1 = b2Max(0.0f, m_limitPositionImpulse1 + impulse);
+		impulse = m_limitPositionImpulse1 - oldLimitPositionImpulse;
+
+		P1 = -impulse * m_u1;
+		b1->m_position += b1->m_invMass * P1;
+		b1->m_rotation += b1->m_invI * b2Cross(r1, P1);
+		b1->m_R.Set(b1->m_rotation);
+	}
+
+	if (m_limitState2 == e_atUpperLimit)
+	{
+		r2 = b2Mul(b2->m_R, m_localAnchor2);
+		p2 = b2->m_position + r2;
+
+		m_u2 = p2 - s2;
+		length2 = m_u2.Length();
+
+		if (length2 > b2_linearSlop)
+		{
+			m_u2 *= 1.0f / length2;
+		}
+		else
+		{
+			m_u2.SetZero();
+		}
+
+		C = m_maxLength2 - length2;
+		linearError = b2Max(linearError, -C);
+		C = b2Clamp(C, -b2_maxLinearCorrection, -b2_linearSlop);
+		impulse = -m_mass2 * C;
+		float32 oldLimitPositionImpulse = m_limitPositionImpulse2;
+		m_limitPositionImpulse2 = b2Max(0.0f, m_limitPositionImpulse2 + impulse);
+		impulse = m_limitPositionImpulse2 - oldLimitPositionImpulse;
+
+		P2 = -impulse * m_u2;
+		b2->m_position += b2->m_invMass * P2;
+		b2->m_rotation += b2->m_invI * b2Cross(r2, P2);
+		b2->m_R.Set(b2->m_rotation);
+	}
+
+	return linearError < b2_linearSlop;
 }
 
 b2Vec2 b2PulleyJoint::GetAnchor1() const
