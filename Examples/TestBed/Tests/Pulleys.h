@@ -38,12 +38,12 @@ public:
 
 		{
 			float32 a = 2.0f;
-			float32 y = 22.0f;
-			float32 L = 8.0f;
+			float32 y = 16.0f;
+			float32 L = 12.0f;
 
 			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(a, a);
+			sd.extents.Set(2.0f * a, a);
 			sd.density = 5.0f;
 
 			b2BodyDef bd;
@@ -65,10 +65,17 @@ public:
 			pulleyDef.ratio = 2.0f;
 			pulleyDef.collideConnected = true;
 
-			pulleyDef.maxLength1 = 16.0f;
-			pulleyDef.maxLength2 = 10.0f;
+			pulleyDef.maxLength1 = 28.0f;
+			pulleyDef.maxLength2 = 12.0f;
 
 			m_joint1 = (b2PulleyJoint*)m_world->CreateJoint(&pulleyDef);
+
+			b2PrismaticJointDef prismDef;
+			prismDef.body1 = ground;
+			prismDef.body2 = body2;
+			prismDef.axis.Set(0.0f, 1.0f);
+			prismDef.anchorPoint = body2->GetCenterPosition();
+			m_joint2 = (b2PrismaticJoint*)m_world->CreateJoint(&prismDef);
 		}
 	}
 
@@ -82,9 +89,10 @@ public:
 	}
 
 	void Step(const Settings* settings)
-	{		
-		float32 L = m_joint1->GetLength1() + m_joint1->GetRatio() * m_joint1->GetLength2();
-		DrawString(5, m_textLine, "L1 + ratio*L2 = %4.2f", L);
+	{
+		float32 ratio = m_joint1->GetRatio();
+		float32 L = m_joint1->GetLength1() + ratio * m_joint1->GetLength2();
+		DrawString(5, m_textLine, "L1 + %4.2f * L2 = %4.2f", ratio, L);
 		m_textLine += 15;
 
 		Test::Step(settings);
@@ -96,6 +104,7 @@ public:
 	}
 
 	b2PulleyJoint* m_joint1;
+	b2PrismaticJoint* m_joint2;
 };
 
 #endif

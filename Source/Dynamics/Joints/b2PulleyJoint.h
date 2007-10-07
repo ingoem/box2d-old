@@ -23,6 +23,13 @@
 
 struct b2Body;
 
+// The pulley joint is connected to two bodies and two fixed ground points.
+// The pulley supports a ratio such that:
+// length1 + ratio * length2 = constant
+// Yes, the force transmitted is scaled by the ratio.
+// The pulley also enforces a maximum length limit on both sides. This is
+// useful to prevent one side of the pulley hitting the top.
+
 // We need a minimum pulley length to help prevent one side going to zero.
 const float32 b2_minPulleyLength = b2_lengthUnitsPerMeter;
 
@@ -38,9 +45,6 @@ struct b2PulleyJointDef : public b2JointDef
 		maxLength1 = 0.5f * b2_minPulleyLength;
 		maxLength2 = 0.5f * b2_minPulleyLength;
 		ratio = 1.0f;
-		motorSpeed = 0.0f;
-		motorForce = 0.0f;
-		enableMotor = false;
 	}
 
 	b2Vec2 groundPoint1;
@@ -50,9 +54,6 @@ struct b2PulleyJointDef : public b2JointDef
 	float32 maxLength1;
 	float32 maxLength2;
 	float32 ratio;		// length1 + ratio * length2 = original_length
-	float32 motorSpeed;
-	float32 motorForce;
-	bool enableMotor;
 };
 
 struct b2PulleyJoint : public b2Joint
@@ -62,9 +63,6 @@ struct b2PulleyJoint : public b2Joint
 
 	b2Vec2 GetGroundPoint1() const;
 	b2Vec2 GetGroundPoint2() const;
-
-	void SetMotorSpeed(float32 speed);
-	float32 GetMotorForce(float32 invTimeStep);
 
 	b2Vec2 GetReactionForce(float32 invTimeStep) const;
 	float32 GetReactionTorque(float32 invTimeStep) const;
@@ -91,29 +89,28 @@ struct b2PulleyJoint : public b2Joint
 	b2Vec2 m_u1;
 	b2Vec2 m_u2;
 	
-	float32 m_lengthConstant;
+	float32 m_C0;
 	float32 m_ratio;
 	
 	float32 m_maxLength1;
 	float32 m_maxLength2;
 
-	float32 m_motorSpeed;
-	float32 m_maxMotorForce;
+	// Effective masses
+	float32 m_pulleyMass;
+	float32 m_limitMass1;
+	float32 m_limitMass2;
 
-	float32 m_mass;	// effective mass for the constraint.
-	float32 m_mass1;
-	float32 m_mass2;
-	float32 m_impulse;
-	float32 m_motorImpulse;
+	// Impulses for accumulation/warm starting.
+	float32 m_pulleyImpulse;
 	float32 m_limitImpulse1;
 	float32 m_limitImpulse2;
+
+	// Position impulses for accumulation.
 	float32 m_limitPositionImpulse1;
 	float32 m_limitPositionImpulse2;
 
 	b2LimitState m_limitState1;
 	b2LimitState m_limitState2;
-
-	bool m_enableMotor;
 };
 
 #endif
