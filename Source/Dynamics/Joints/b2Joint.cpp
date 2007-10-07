@@ -21,6 +21,7 @@
 #include "b2MouseJoint.h"
 #include "b2RevoluteJoint.h"
 #include "b2PrismaticJoint.h"
+#include "b2PulleyJoint.h"
 #include "../b2Body.h"
 #include "../b2World.h"
 #include "../../Common/b2BlockAllocator.h"
@@ -62,6 +63,13 @@ b2Joint* b2Joint::Create(const b2JointDef* def, b2BlockAllocator* allocator)
 		}
 		break;
 
+	case e_pulleyJoint:
+		{
+			void* mem = allocator->Allocate(sizeof(b2PulleyJoint));
+			joint = new (mem) b2PulleyJoint((b2PulleyJointDef*)def);
+		}
+		break;
+
 	default:
 		b2Assert(false);
 		break;
@@ -89,6 +97,10 @@ void b2Joint::Destroy(b2Joint* joint, b2BlockAllocator* allocator)
 
 	case e_revoluteJoint:
 		allocator->Free(joint, sizeof(b2RevoluteJoint));
+		break;
+
+	case e_pulleyJoint:
+		allocator->Free(joint, sizeof(b2PulleyJoint));
 		break;
 
 	default:

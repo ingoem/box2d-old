@@ -23,7 +23,7 @@
 #include "../Dynamics/Joints/b2Joint.h"
 #include "../Collision/b2Shape.h"
 
-#include <string.h>
+#include <memory.h>
 
 struct b2Joint;
 struct b2Contact;

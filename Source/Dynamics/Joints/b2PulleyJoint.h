@@ -24,7 +24,7 @@
 struct b2Body;
 
 // We need a minimum pulley length to help prevent one side going to zero.
-const float32 b2_minPulleyLength = 0.1f * b2_lengthUnitsPerMeter;
+const float32 b2_minPulleyLength = b2_lengthUnitsPerMeter;
 
 struct b2PulleyJointDef : public b2JointDef
 {
@@ -60,11 +60,19 @@ struct b2PulleyJoint : public b2Joint
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 
+	b2Vec2 GetGroundPoint1() const;
+	b2Vec2 GetGroundPoint2() const;
+
 	void SetMotorSpeed(float32 speed);
 	float32 GetMotorForce(float32 invTimeStep);
 
 	b2Vec2 GetReactionForce(float32 invTimeStep) const;
 	float32 GetReactionTorque(float32 invTimeStep) const;
+
+	float32 GetLength1() const;
+	float32 GetLength2() const;
+
+	float32 GetRatio() const;
 
 	//--------------- Internals Below -------------------
 
@@ -83,7 +91,9 @@ struct b2PulleyJoint : public b2Joint
 	b2Vec2 m_u1;
 	b2Vec2 m_u2;
 	
-	float32 m_length;
+	float32 m_lengthConstant;
+	float32 m_length1;
+	float32 m_length2;
 	float32 m_ratio;
 	
 	float32 m_maxLength1;
@@ -93,9 +103,15 @@ struct b2PulleyJoint : public b2Joint
 	float32 m_maxMotorForce;
 
 	float32 m_mass;	// effective mass for the constraint.
+	float32 m_mass1;
+	float32 m_mass2;
 	float32 m_impulse;
 	float32 m_motorImpulse;
-	float32 m_limitImpulse;
+	float32 m_limitImpulse1;
+	float32 m_limitImpulse2;
+
+	b2LimitState m_limitState1;
+	b2LimitState m_limitState2;
 
 	bool m_enableMotor;
 };

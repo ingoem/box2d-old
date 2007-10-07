@@ -18,7 +18,7 @@
 
 #include "b2StackAllocator.h"
 #include "b2Math.h"
-#include <malloc.h>
+#include <stdlib.h>
 
 b2StackAllocator::b2StackAllocator()
 {

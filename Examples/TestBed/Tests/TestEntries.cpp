@@ -32,9 +32,11 @@
 #include "Web.h"
 #include "CollisionFiltering.h"
 #include "SliderCrank.h"
+#include "Pulleys.h"
 
 TestEntry g_testEntries[] =
 {
+	{"Pulleys", Pulleys::Create},
 	{"Bridge", Bridge::Create},
 	{"Slider Crank", SliderCrank::Create},
 	{"Pendulum", Pendulum::Create},

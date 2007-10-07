@@ -156,7 +156,7 @@ typedef const char *(APIENTRY * WGLGETEXTENSIONSSTRINGEXT_T)( void );
 
 void Test::Step(const Settings* settings)
 {
-	float timeStep = settings->hz > 0.0f ? 1.0f / settings->hz : 0.0f;
+	float32 timeStep = settings->hz > 0.0f ? 1.0f / settings->hz : 0.0f;
 
 	if (settings->pause)
 	{

@@ -29,6 +29,16 @@ inline bool b2IsValid(float x)
 	return _finite(x) != 0;
 }
 
+inline float32 b2InvSqrt(float32 x)
+{
+	float32 xhalf = 0.5f * x;
+	int32 i = *(int32*)&x;
+	i = 0x5f3759df - (i >> 1);
+	x = *(float32*)&i;
+	x = x * (1.5f - xhalf * x * x);
+	return x;
+}
+
 // b2Vec2 has no constructor so that it
 // can be placed in a union.
 struct b2Vec2

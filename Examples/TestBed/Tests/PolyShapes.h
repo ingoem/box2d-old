@@ -21,8 +21,6 @@
 
 #include "../Framework/Render.h"
 
-#include <string.h>
-
 const int32 k_maxBodies = 256;
 
 class PolyShapes : public Test

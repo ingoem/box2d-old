@@ -31,25 +31,36 @@ void DrawJoint(b2Joint* joint)
 	b2Vec2 p1 = joint->GetAnchor1();
 	b2Vec2 p2 = joint->GetAnchor2();
 
+	glColor3f(0.5f, 0.8f, 0.8f);
+	glBegin(GL_LINES);
+
 	switch (joint->m_type)
 	{
 	case e_distanceJoint:
-		glColor3f(0.5f, 0.8f, 0.8f);
-		glBegin(GL_LINES);
 		glVertex2f(p1.x, p1.y);
 		glVertex2f(p2.x, p2.y);
-		glEnd();
+		break;
+
+	case e_pulleyJoint:
+		{
+			b2PulleyJoint* pulley = (b2PulleyJoint*)joint;
+			b2Vec2 s1 = pulley->GetGroundPoint1();
+			b2Vec2 s2 = pulley->GetGroundPoint2();
+			glVertex2f(s1.x, s1.y);
+			glVertex2f(p1.x, p1.y);
+			glVertex2f(s2.x, s2.y);
+			glVertex2f(p2.x, p2.y);
+		}
 		break;
 
 	default:
-		glColor3f(0.5f, 0.8f, 0.8f);
-		glBegin(GL_LINES);
 		glVertex2f(x1.x, x1.y);
 		glVertex2f(p1.x, p1.y);
 		glVertex2f(x2.x, x2.y);
 		glVertex2f(p2.x, p2.y);
-		glEnd();
 	}
+
+	glEnd();
 }
 
 void DrawShape(const b2Shape* shape, const Color& c)

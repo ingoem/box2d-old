@@ -40,8 +40,6 @@ enum b2LimitState
 	e_inactiveLimit,
 	e_atLowerLimit,
 	e_atUpperLimit,
-	e_atLimit1,
-	e_atLimit2,
 	e_equalLimits
 };
 

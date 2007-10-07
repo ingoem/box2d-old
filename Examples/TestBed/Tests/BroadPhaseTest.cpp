@@ -20,8 +20,6 @@
 #include "../Framework/Render.h"
 
 #include <stdio.h>
-#include <string.h>
-
 const float32 k_width = 1.0f;
 
 inline void GetRandomAABB(b2AABB* aabb)
