@@ -33,9 +33,11 @@
 #include "CollisionFiltering.h"
 #include "SliderCrank.h"
 #include "Pulleys.h"
+#include "Gears.h"
 
 TestEntry g_testEntries[] =
 {
+	{"Gears", Gears::Create},
 	{"Pulleys", Pulleys::Create},
 	{"Bridge", Bridge::Create},
 	{"Slider Crank", SliderCrank::Create},

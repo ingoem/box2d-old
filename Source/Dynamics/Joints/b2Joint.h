@@ -32,7 +32,8 @@ enum b2JointType
 	e_prismaticJoint,
 	e_distanceJoint,
 	e_pulleyJoint,
-	e_mouseJoint
+	e_mouseJoint,
+	e_gearJoint
 };
 
 enum b2LimitState
@@ -83,6 +84,8 @@ struct b2JointDef
 
 struct b2Joint
 {
+	b2JointType GetType() const;
+
 	b2Body* GetBody1();
 	b2Body* GetBody2();
 
@@ -139,6 +142,11 @@ inline void b2Jacobian::Set(const b2Vec2& x1, float32 a1, const b2Vec2& x2, floa
 inline float32 b2Jacobian::Compute(const b2Vec2& x1, float32 a1, const b2Vec2& x2, float32 a2)
 {
 	return b2Dot(linear1, x1) + angular1 * a1 + b2Dot(linear2, x2) + angular2 * a2;
+}
+
+inline b2JointType b2Joint::GetType() const
+{
+	return m_type;
 }
 
 inline b2Body* b2Joint::GetBody1()

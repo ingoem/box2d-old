@@ -58,10 +58,10 @@ b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 	float32 length1 = b2Max(0.5f * b2_minPulleyLength, d1.Length());
 	float32 length2 = b2Max(0.5f * b2_minPulleyLength, d2.Length());
 
-	m_C0 = length1 + m_ratio * length2;
+	m_constant = length1 + m_ratio * length2;
 
-	m_maxLength1 = b2Clamp(def->maxLength1, length1, m_C0 - m_ratio * b2_minPulleyLength);
-	m_maxLength2 = b2Clamp(def->maxLength2, length2, (m_C0 - b2_minPulleyLength) / m_ratio);
+	m_maxLength1 = b2Clamp(def->maxLength1, length1, m_constant - m_ratio * b2_minPulleyLength);
+	m_maxLength2 = b2Clamp(def->maxLength2, length2, (m_constant - b2_minPulleyLength) / m_ratio);
 
 	m_pulleyImpulse = 0.0f;
 	m_limitImpulse1 = 0.0f;
@@ -247,7 +247,7 @@ bool b2PulleyJoint::SolvePositionConstraints()
 			m_u2.SetZero();
 		}
 
-		float32 C = m_C0 - length1 - m_ratio * length2;
+		float32 C = m_constant - length1 - m_ratio * length2;
 		linearError = b2Max(linearError, b2Abs(C));
 		C = b2Clamp(C, -b2_maxLinearCorrection, b2_maxLinearCorrection);
 		float32 impulse = -m_pulleyMass * C;

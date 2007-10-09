@@ -53,7 +53,7 @@ struct b2PulleyJointDef : public b2JointDef
 	b2Vec2 anchorPoint2;
 	float32 maxLength1;
 	float32 maxLength2;
-	float32 ratio;		// length1 + ratio * length2 = original_length
+	float32 ratio;
 };
 
 struct b2PulleyJoint : public b2Joint
@@ -89,7 +89,7 @@ struct b2PulleyJoint : public b2Joint
 	b2Vec2 m_u1;
 	b2Vec2 m_u2;
 	
-	float32 m_C0;
+	float32 m_constant;
 	float32 m_ratio;
 	
 	float32 m_maxLength1;

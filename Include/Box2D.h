@@ -33,5 +33,6 @@
 #include "../Source/Dynamics/Joints/b2PrismaticJoint.h"
 #include "../Source/Dynamics/Joints/b2RevoluteJoint.h"
 #include "../Source/Dynamics/Joints/b2PulleyJoint.h"
+#include "../Source/Dynamics/Joints/b2GearJoint.h"
 
 #endif
