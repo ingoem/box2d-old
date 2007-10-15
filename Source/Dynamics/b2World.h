@@ -67,6 +67,8 @@ struct b2World
 
 	//--------------- Internals Below -------------------
 
+	void DestroyBodies();
+
 	b2BlockAllocator m_blockAllocator;
 	b2StackAllocator m_stackAllocator;
 
@@ -80,6 +82,9 @@ struct b2World
 	int32 m_bodyCount;
 	int32 m_contactCount;
 	int32 m_jointCount;
+
+	// These bodies will be destroyed at the next time step.
+	b2Body* m_bodyDestroyList;
 
 	b2Vec2 m_gravity;
 	bool m_doSleep;

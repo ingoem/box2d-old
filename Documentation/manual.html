@@ -11,7 +11,7 @@
 <div class="titlearea">
 <div class="title">Box2D User Manual</div>
 <div class="subtitle">
-Erin Catto, 9/30/07<br/>
+Erin Catto, 10/14/07<br/>
 </div>
 <div class="copyright">
 Copyright (c) 2007 Erin Catto <a href="http://www.box2d.org">http://www.box2d.org</a><br/>
@@ -36,7 +36,7 @@ Copyright (c) 2007 Erin Catto <a href="http://www.box2d.org">http://www.box2d.or
 
 <h1>Core Concepts</h1>
 <div class = "text">
-Box2D works with several fundamental objects. We briefly define these objects here and more details are given later in this document.
+<p>Box2D works with several fundamental objects. We briefly define these objects here and more details are given later in this document.</p>
 
 <dl>
 <dt>rigid body</dt>
@@ -396,7 +396,8 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 <p>The body definition gives you the chance to initialize the position of the body on creation. This has better performance than creating the body at the world origin and then moving the body.</p>
 <p>A body has two main points of interest. The first point is the body's <em>origin</em>. The bodies origin is defined implicitly by the shapes it holds. Recall that shape definitions hold a local position. This local position is relative the body's origin. The second point of interest is the <em>center of mass</em>. The center of mass is determined from mass distribution of the attached shapes. Internally Box2D works with the center of mass position, but remembers the location of the body origin.</p>
 <p>When you are building the body definition, you may not know where the center of mass is located. Therefore you specify the position of the body's origin. You may also specify the body's rotation, which is not affected by the position of the center of mass.</p>
-<p><img src="images/bodyOrigin.gif" class="imageright"/>Consider a body made of two boxes. The boxes are arranged in an upside-down T configuration. The first box is placed at the body origin, so its local position and rotation are zero. The second box actually has the same extents as the first box, but it has been moved up the y-axis and rotated 90 degrees. When the body is created, Box2D determines that the center of mass is halfway between the two box centers (0, 0.75). Here is code that produces this body:</p>
+<img src="images/bodyOrigin.gif" class="figure"/><br/>
+<p>Consider a body made of two boxes. The boxes are arranged in an upside-down T configuration. The first box is placed at the body origin, so its local position and rotation are zero. The second box actually has the same extents as the first box, but it has been moved up the y-axis and rotated 90 degrees. When the body is created, Box2D determines that the center of mass is halfway between the two box centers (0, 0.75). Here is code that produces this body:</p>
 <pre class="code">
     b2BoxDef box1;
     box1.extents.Set(2.0f, 1.0f);
@@ -508,7 +509,8 @@ When a body is destroyed, any joints attached to the body are automatically dest
 <p>The rest of the joint definition data depends on the joint type. We cover these now.</p>
 
 <h3>Distance Joint</h3>
-<p><img src="images/distanceJoint.gif" class="imageright"/>One of the simplest joint is a distance joint which says that the distance between two points on two bodies must be constant. When you specify a distance joint the two bodies should already be in place. Then you specify the two <em>anchor</em> points in world coordinates. The first anchor point is connected to body 1, and the second anchor point is connected to body 2. These points imply the length of the distance constraint.</p>
+<p>One of the simplest joint is a distance joint which says that the distance between two points on two bodies must be constant. When you specify a distance joint the two bodies should already be in place. Then you specify the two <em>anchor</em> points in world coordinates. The first anchor point is connected to body 1, and the second anchor point is connected to body 2. These points imply the length of the distance constraint.</p>
+<img src="images/distanceJoint.gif" class="figure"/><br/>
 <p>Here is an example of a distance joint definition. In this case we decide to allow the bodies to collide and we place the anchor points at the respective center of mass positions.</p>
 <pre class="code">
     b2DistanceJointDef jointDef;
@@ -520,7 +522,8 @@ When a body is destroyed, any joints attached to the body are automatically dest
 </pre>
 
 <h3>Revolute Joint</h3>
-<p><img src="images/revoluteJoint.gif" class="imageright"/>A revolute joint forces two bodies to share a common anchor point, often called a <em>hinge point</em>. The revolute joint has a single degree of freedom: the relative rotation of the two bodies. This is called the <em>joint angle</em>.</p>
+<p>A revolute joint forces two bodies to share a common anchor point, often called a <em>hinge point</em>. The revolute joint has a single degree of freedom: the relative rotation of the two bodies. This is called the <em>joint angle</em>.</p>
+<img src="images/revoluteJoint.gif" class="figure"/><br/>
 <p>To specify a revolute you need to provide two bodies and a single anchor point in world space. Box2D assumes that the bodies are already in the correct position.</p>
 <p>In this example, two bodies are connected by a revolute joint at the first body's center of mass.</p>
 <pre class="code">
@@ -551,7 +554,8 @@ When a body is destroyed, any joints attached to the body are automatically dest
 </pre>
 
 <h3>Prismatic Joint</h3>
-<p><img src="images/prismaticJoint.gif" class="imageright"/>A prismatic joint allows for relative translation of two bodies along a specified local axis. A prismatic joint prevents relative rotation. Therefore, a prismatic joint has a single degree of freedom.</p>
+<p>A prismatic joint allows for relative translation of two bodies along a specified local axis. A prismatic joint prevents relative rotation. Therefore, a prismatic joint has a single degree of freedom.</p>
+<img src="images/prismaticJoint.gif" class="figure"/><br/>
 <p>The prismatic joint definition is similar to the revolute joint description; just substitute translation for angle and force for torque. Using this analogy proved an example prismatic joint definition with a joint limit and a friction motor:</p>
 <pre class="code">
     b2PrismaticJointDef jointDef;
@@ -566,6 +570,56 @@ When a body is destroyed, any joints attached to the body are automatically dest
     jointDef.enableMotor = true;
 </pre>
 <p>Like the revolute joint, the prismatic joint translation is zero when the joint is created. So be sure zero is between your lower and upper translation limits.</p>
+
+<h3>Pulley Joint</h3>
+<p>A pulley is used to create an idealized pulley. The pulley connects two bodies to ground and to each other. As one body goes up, the other goes down. The total length of the pulley rope is conserved according to the initial configuration.</p>
+<blockquote>
+    length1 + length2 == constant
+</blockquote>
+<img src="images/pulleyJoint.gif" class="figure"/><br/>
+<p>You can supply a ratio that simulates a <em>block and tackle</em>. This causes one side of the pulley to extend faster than the other. At the same time the constraint force is smaller on one side than the other. You can use this to create mechanical leverage.</p>
+<blockquote>
+    length1 + ratio * length2 == constant
+</blockquote>
+<p>For example, if the ratio is 2, then length1 will vary at twice the rate of length2. Also the force in the rope attached to body1 will have half the constraint force as the rope attached to body2.</p>
+<p>Pulleys can be troublesome when one side is fully extended. The rope on the other side will have zero length. At this point the constraint equations become singular (bad). Therefore the pulley joint constrains the maximum length that either side can attain. Also, you may want to control the maximum lengths for gameplay reasons. So the maximum lengths improve stability and give you more control.</p>
+<p>Here is an example pulley definition:</p>
+<pre class="code">
+    b2Vec2 p1 = myBody1->GetCenterPosition();
+    b2Vec2 p2 = myBody2->GetCenterPosition();
+    b2PulleyJointDef jointDef;
+    jointDef.body1 = myBody1;
+    jointDef.body2 = myBody2;
+    jointDef.anchorPoint1 = p1;
+    jointDef.anchorPoint2 = p2;
+    jointDef.groundPoint1.Set(p1.x, p1.y + 10.0f);
+    jointDef.groundPoint2.Set(p2.x, p2.y + 12.0f);
+    jointDef.ratio = 1.0f;
+    jointDef.maxLength1 = 18.0f;
+    jointDef.maxLength2 = 20.0f;
+</pre>
+
+<h3>Gear Joint</h3>
+<p>If you want to create a sophisticated mechanical contraption you might want to use a gears. In priciple you can create gears in Box2D by using compound shapes to model gear teeth. This is not very efficient and might be tedious to author. You also have to be careful to line up the gears so the teeth mesh smoothly. Box2D has a simpler method of creating gears: the <em>gear joint</em>.</p>
+<img src="images/gearJoint.gif" class="figure"/><br/>
+<p>The gear joint requires the you have two bodies connected to ground by a revolute or prismatic joint. You can use any combination of those joint types. Also, Box2D requires that the revolute and prismatic joints were created with the ground as body1.</p>
+<p>Like the pulley ratio, you can specify a gear ratio. However, in this case the gear ratio can be negative. Also keep in mind that when one joint is a revolute joint (angular) and the other joint is prismatic (translation), then the gear ratio with have units of length or one over length.</p>
+<blockquote>
+    coordinate1 + ratio * coordinate2 == constant
+</blockquote>
+<p>Here is an example gear joint:</p>
+<pre class="code">
+    b2GearJointDef jointDef;
+    jointDef.body1 = myBody1;
+    jointDef.body2 = myBody2;
+    jointDef.joint1 = myRevoluteJoint;
+    jointDef.joint2 = myPrismaticJoint;
+    jointDef.ratio = 2.0f * b2_pi / myLength;
+</pre>
+<p>Note that the gear joint depends on two other joints. This creates a fragile situation. What happens if those joints are deleted?</p>
+<blockquote>
+Always delete gear joints before the revolute/prismatic joints on the gears. Otherwise your code will crash in a bad way due to the orphaned joint pointers in the gear joint. You should also delete the gear joint before you delete any of the bodies involved.
+</blockquote>
 
 <h3>Mouse Joint</h3>
 <p>The mouse joint is used to drag bodies around in the test-bed. It will probably be revised in the future, so I will not go into details about this joint yet.</p>
@@ -646,6 +700,81 @@ When a body is destroyed, any joints attached to the body are automatically dest
     float32 GetMotorForce(float32 invTimeStep) const;
     void SetMotorSpeed(float32 speed);
     void SetMotorForce(float32 force);
+</pre>
+
+<h3>Using Pulley Joints</h3>
+<p>Pully joints provide the current lengths.</p>
+<pre class="code">
+	float32 GetLength1() const;
+	float32 GetLength2() const;
+</pre>
+
+<h3>Using Gear Joints</h3>
+<p>Gear joints don't provide any information beyond the functions defined in <code>b2Joint</code>.</p>
+
+</div>
+
+<h1>Contacts</h1>
+<div class = "text">
+<h2>Introduction</h2>
+<p>Contacts are objects created by Box2D to manage collision between shapes. There are different kinds of contacts, derived from <code>b2Contact</code>, for managing contact between different kinds of shapes. For example there is a contact class for managing polygon-polygon collision and another contact class for managing circle-circle collision. This is normally not important to you, I just thought you might like to know.</p>
+
+<p>Here is some terminlogy associated with contacts. This terminology is particular to Box2D, but you might find similar terminology in other physics engines.</p>
+<dl>
+<dt>contact</dt>
+<dd>An object that manages contact between a pair of shapes over a number of time steps. A contact object is present while the two shapes' axis-aligned bounding boxes overlap.</dd>
+<dt>contact manifold</dt>
+<dd>A contact object will create contact manifold objects when the shape pair actually touches. A manifold has a single normal vector and up to two contact points. The idea is that there is some one dimensional region where the two convex 2D shapes overlap. Multiple manifolds are possible when a convex shape collides with a non-convex shape (like a line segment soup).</dd>
+<dt>contact point</dt>
+<dd>A contact point belongs to a contact manifold and position, separation, impulses, and a feature based id. The contact's normal vector is held in it's parent manifold.</dd>
+<dt>contact separation</dt>
+<dd>Separation is the opposite of penetration. Separation is negative when shapes overlap. You can assume that Box2D will only have contact points with zero or negative separation.</dd>
+<dt>contact impulses</dt>
+<dd>Box2D use a <em>Sequential Impulse</em> solver and stores the results with the contact points. You can safely use the impulse values to guage the collision intensity. For example, you can use the impulses to trigger breakables or to play collision sounds.</dd>
+<dt>contact ids</dt>
+<dd>Box2D tries to use the contact impulses from one time step as the initial guess for the next time step. Box2D uses contact ids to match contact points across time steps. The ids contain geometric features indices that help to distinguish one contact point from another.</dd>
+</dl>
+
+<p>Contacts are created when two shape's AABBs overlap. Sometimes collision filtering will prevent the creation of contacts. Box2D sometimes needs to create a contact even though the collision is filtered. In this case it uses a <code>b2NullContact</code> that prevents collision from occuring. Contacts are destroyed with the AABBs cease to overlap.</p>
+
+<p>So you might gather that there may be contacts created for shapes that are not touching (just their AABBs). Well, this is correct. It's a "chick or egg" problem. We don't know if we need a contact object until one is created to analyze the collision. We could delete the contact right away if the shapes are not touching, or we can just wait until the AABBS stop overlapping. Box2D takes the latter approach.</p>
+
+<h2>Contact Callbacks</h2>
+<p>Box2D has a simple approach to contact callbacks: it doesn't have any. Why is this? Well, Box2D stores all the contact points across time steps, so you can access the data any time you like. Normally, you will look at contact points after a time step.</p>
+
+<p>As you traverse the contact objects, you might decide to destroy a body. For example, when a vehicle hits a wall, you might want to destroy the wall. Normally, this creates a buggy situation because the contact object you are processing needs to be destroyed when you destroy one of the bodies involved. Box2D has a solution for this problem.</p>
+
+<blockquote>
+Box2D does not destroy bodies immediately. When you destroy a body, Box2D removes it from the world body list and adds it to a deferred destruction list. The body is actually destroyed the next time you call <code>b2World::Step</code>.
+</blockquote>
+
+<h2>Processing Contacts</h2>
+<p>Here is a snippet from the test <code>CollisionProcessing</code>. The code iterates over all the contacts and for shapes that are touching, it will destroy the lighter parent body. Note that with Box2D's deferred body destruction, the same body might be destroyed more than once.</p>
+<pre class="code">
+for (b2Contact* c = m_world->GetContactList(); c; c = c->GetNext())
+{
+    if (c->GetManifoldCount() > 0)
+    {
+        b2Body* body1 = c->GetShape1()->GetBody();
+        b2Body* body2 = c->GetShape2()->GetBody();
+        float32 mass1 = body1->GetMass();
+        float32 mass2 = body2->GetMass();
+
+        if (mass1 > 0.0f && mass2 > 0.0f)
+        {
+            if (mass2 > mass1)
+            {
+                m_world->DestroyBody(body1);
+                body1 = NULL;
+            }
+            else
+            {
+                m_world->DestroyBody(body2);
+                body2 = NULL;
+            }
+        }
+    }
+}
 </pre>
 </div>
 

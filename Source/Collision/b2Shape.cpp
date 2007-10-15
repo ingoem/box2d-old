@@ -178,16 +178,15 @@ b2Shape* b2Shape::Create(const b2ShapeDef* def,
 void b2Shape::Destroy(b2Shape*& shape)
 {
 	b2BlockAllocator& allocator = shape->m_body->m_world->m_blockAllocator;
+	shape->~b2Shape();
 
 	switch (shape->m_type)
 	{
 	case e_circleShape:
-		shape->~b2Shape();
 		allocator.Free(shape, sizeof(b2CircleShape));
 		break;
 
 	case e_polyShape:
-		shape->~b2Shape();
 		allocator.Free(shape, sizeof(b2PolyShape));
 		break;
 

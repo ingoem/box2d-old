@@ -63,7 +63,6 @@ public:
 			pulleyDef.groundPoint1.Set(-10.0f, y + a + L);
 			pulleyDef.groundPoint2.Set(10.0f, y + a + L);
 			pulleyDef.ratio = 2.0f;
-			pulleyDef.collideConnected = true;
 
 			pulleyDef.maxLength1 = 28.0f;
 			pulleyDef.maxLength2 = 12.0f;

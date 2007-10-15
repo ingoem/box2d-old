@@ -28,6 +28,8 @@
 #include "../Source/Dynamics/b2World.h"
 #include "../Source/Dynamics/b2Body.h"
 
+#include "../Source/Dynamics/Contacts/b2Contact.h"
+
 #include "../Source/Dynamics/Joints/b2DistanceJoint.h"
 #include "../Source/Dynamics/Joints/b2MouseJoint.h"
 #include "../Source/Dynamics/Joints/b2PrismaticJoint.h"

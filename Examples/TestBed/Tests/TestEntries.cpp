@@ -31,12 +31,15 @@
 #include "Pyramid.h"
 #include "Web.h"
 #include "CollisionFiltering.h"
+#include "CollisionProcessing.h"
 #include "SliderCrank.h"
 #include "Pulleys.h"
 #include "Gears.h"
 
 TestEntry g_testEntries[] =
 {
+	{"Collision Processing", CollisionProcessing::Create},
+	{"Web", Web::Create},
 	{"Gears", Gears::Create},
 	{"Pulleys", Pulleys::Create},
 	{"Bridge", Bridge::Create},
@@ -44,7 +47,6 @@ TestEntry g_testEntries[] =
 	{"Pendulum", Pendulum::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Vertical Stack", VerticalStack::Create},
-	{"Web", Web::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Varying Restitution", VaryingRestitution::Create},

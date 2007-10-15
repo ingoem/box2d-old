@@ -40,6 +40,8 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_contactCount = 0;
 	m_jointCount = 0;
 
+	m_bodyDestroyList = NULL;
+
 	m_doSleep = doSleep;
 
 	m_gravity = gravity;
@@ -79,24 +81,15 @@ b2Body* b2World::CreateBody(const b2BodyDef* def)
 	return b;
 }
 
+// Body destruction is deferred to make contact processing more robust.
 void b2World::DestroyBody(b2Body* b)
 {
-	// Delete the attached joints
-	b2JointNode* jn = b->m_jointList;
-	while (jn)
+	if (b->m_flags & b2Body::e_destroyedFlag)
 	{
-		b2JointNode* jn0 = jn;
-		jn = jn->next;
-
-		if (m_listener)
-		{
-			m_listener->NotifyJointDestroyed(jn0->joint);
-		}
-
-		DestroyJoint(jn0->joint);
+		return;
 	}
 
-	// Remove body from world list.
+	// Remove from normal body list.
 	if (b->m_prev)
 	{
 		b->m_prev->m_next = b->m_next;
@@ -111,11 +104,49 @@ void b2World::DestroyBody(b2Body* b)
 	{
 		m_bodyList = b->m_next;
 	}
+
+	b->m_flags |= b2Body::e_destroyedFlag;
 	b2Assert(m_bodyCount > 0);
 	--m_bodyCount;
 
-	b->~b2Body();
-	m_blockAllocator.Free(b, sizeof(b2Body));
+	// Add to the deferred destruction list.
+	b->m_prev = NULL;
+	b->m_next = m_bodyDestroyList;
+	m_bodyDestroyList = b;
+}
+
+void b2World::DestroyBodies()
+{
+	b2Body* b = m_bodyDestroyList;
+	while (b)
+	{
+		b2Assert((b->m_flags & b2Body::e_destroyedFlag) == b2Body::e_destroyedFlag);
+
+		// Preserve the next pointer.
+		b2Body* b0 = b;
+		b = b->m_next;
+
+		// Delete the attached joints
+		b2JointNode* jn = b0->m_jointList;
+		while (jn)
+		{
+			b2JointNode* jn0 = jn;
+			jn = jn->next;
+
+			if (m_listener)
+			{
+				m_listener->NotifyJointDestroyed(jn0->joint);
+			}
+
+			DestroyJoint(jn0->joint);
+		}
+
+		b0->~b2Body();
+		m_blockAllocator.Free(b0, sizeof(b2Body));
+	}
+
+	// Reset the list.
+	m_bodyDestroyList = NULL;
 }
 
 b2Joint* b2World::CreateJoint(const b2JointDef* def)
@@ -246,6 +277,9 @@ void b2World::DestroyJoint(b2Joint* j)
 
 void b2World::Step(float32 dt, int32 iterations)
 {
+	// Handle deferred body destruction.
+	DestroyBodies();
+
 	// Create and/or update contacts.
 	m_contactManager.Collide();
 

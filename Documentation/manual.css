@@ -57,11 +57,9 @@ pre.code {
 	font-family: monospace;
 }
 
-img.imageright {
-	float: right;
-	margin: 0 0 0.2em 15px;
+img.figure {
+	margin: 0 0 0.2em 50px;
 	padding: 5px;
-	background: #FFF;
 }
 
 blockquote {

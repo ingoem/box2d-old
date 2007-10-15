@@ -45,6 +45,7 @@ struct b2PulleyJointDef : public b2JointDef
 		maxLength1 = 0.5f * b2_minPulleyLength;
 		maxLength2 = 0.5f * b2_minPulleyLength;
 		ratio = 1.0f;
+		collideConnected = true;
 	}
 
 	b2Vec2 groundPoint1;

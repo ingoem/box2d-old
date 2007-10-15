@@ -217,6 +217,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\CollisionProcessing.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\CompoundShapes.h"
 				>
 			</File>
