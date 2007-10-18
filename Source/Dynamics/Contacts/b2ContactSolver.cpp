@@ -18,7 +18,8 @@
 
 #include "b2ContactSolver.h"
 #include "b2Contact.h"
-#include "../../Dynamics/b2Body.h"
+#include "../b2Body.h"
+#include "../b2World.h"
 #include "../../Common/b2StackAllocator.h"
 
 b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2StackAllocator* allocator)
@@ -141,18 +142,32 @@ void b2ContactSolver::PreSolve()
 		b2Vec2 normal = c->normal;
 		b2Vec2 tangent = b2Cross(normal, 1.0f);
 
-		for (int32 j = 0; j < c->pointCount; ++j)
+		if (b2World::s_enableWarmStarting)
 		{
-			b2ContactConstraintPoint* ccp = c->points + j;
-			b2Vec2 P = ccp->normalImpulse * normal + ccp->tangentImpulse * tangent;
-			b2Vec2 r1 = b2Mul(b1->m_R, ccp->localAnchor1);
-			b2Vec2 r2 = b2Mul(b2->m_R, ccp->localAnchor2);
-			b1->m_angularVelocity -= invI1 * b2Cross(r1, P);
-			b1->m_linearVelocity -= invMass1 * P;
-			b2->m_angularVelocity += invI2 * b2Cross(r2, P);
-			b2->m_linearVelocity += invMass2 * P;
+			for (int32 j = 0; j < c->pointCount; ++j)
+			{
+				b2ContactConstraintPoint* ccp = c->points + j;
+				b2Vec2 P = ccp->normalImpulse * normal + ccp->tangentImpulse * tangent;
+				b2Vec2 r1 = b2Mul(b1->m_R, ccp->localAnchor1);
+				b2Vec2 r2 = b2Mul(b2->m_R, ccp->localAnchor2);
+				b1->m_angularVelocity -= invI1 * b2Cross(r1, P);
+				b1->m_linearVelocity -= invMass1 * P;
+				b2->m_angularVelocity += invI2 * b2Cross(r2, P);
+				b2->m_linearVelocity += invMass2 * P;
 
-			ccp->positionImpulse = 0.0f;
+				ccp->positionImpulse = 0.0f;
+			}
+		}
+		else
+		{
+			for (int32 j = 0; j < c->pointCount; ++j)
+			{
+				b2ContactConstraintPoint* ccp = c->points + j;
+				ccp->normalImpulse = 0.0f;
+				ccp->tangentImpulse = 0.0f;
+
+				ccp->positionImpulse = 0.0f;
+			}
 		}
 	}
 }
@@ -267,14 +282,14 @@ bool b2ContactSolver::SolvePositionConstraints(float32 beta)
 			// Approximate the current separation.
 			float32 separation = b2Dot(dp, normal) + ccp->separation;
 
-			// Prevent large corrections
-			separation = b2Max(separation, -b2_maxLinearCorrection);
-
 			// Track max constraint error.
 			minSeparation = b2Min(minSeparation, separation);
 
+			// Prevent large corrections and allow slop.
+			float32 C = beta * b2Clamp(separation + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
+
 			// Compute normal impulse
-			float32 dImpulse = -ccp->normalMass * beta * b2Min(0.0f, separation + b2_linearSlop);
+			float32 dImpulse = -ccp->normalMass * C;
 
 			// b2Clamp the accumulated impulse
 			float32 impulse0 = ccp->positionImpulse;

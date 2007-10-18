@@ -67,7 +67,7 @@ struct b2World
 
 	//--------------- Internals Below -------------------
 
-	void DestroyBodies();
+	void CleanBodyList();
 
 	b2BlockAllocator m_blockAllocator;
 	b2StackAllocator m_stackAllocator;

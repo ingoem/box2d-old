@@ -62,6 +62,13 @@ struct b2Contact
 
 	//--------------- Internals Below -------------------
 
+	// m_flags
+	enum
+	{
+		e_islandFlag	= 0x0001,
+		e_destroyFlag	= 0x0002
+	};
+
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
 						b2ShapeType type1, b2ShapeType type2);
 	static void InitializeRegisters();
@@ -76,8 +83,7 @@ struct b2Contact
 	static b2ContactRegister s_registers[e_shapeTypeCount][e_shapeTypeCount];
 	static bool s_initialized;
 
-	// The parent world.
-	b2World* m_world;
+	uint32 m_flags;
 
 	// World pool and list pointers.
 	b2Contact* m_prev;
@@ -95,8 +101,6 @@ struct b2Contact
 	// Combined friction
 	float32 m_friction;
 	float32 m_restitution;
-
-	bool m_islandFlag;
 };
 
 inline b2Contact* b2Contact::GetNext()

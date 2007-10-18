@@ -84,7 +84,7 @@ b2Body* b2World::CreateBody(const b2BodyDef* def)
 // Body destruction is deferred to make contact processing more robust.
 void b2World::DestroyBody(b2Body* b)
 {
-	if (b->m_flags & b2Body::e_destroyedFlag)
+	if (b->m_flags & b2Body::e_destroyFlag)
 	{
 		return;
 	}
@@ -105,7 +105,7 @@ void b2World::DestroyBody(b2Body* b)
 		m_bodyList = b->m_next;
 	}
 
-	b->m_flags |= b2Body::e_destroyedFlag;
+	b->m_flags |= b2Body::e_destroyFlag;
 	b2Assert(m_bodyCount > 0);
 	--m_bodyCount;
 
@@ -115,12 +115,14 @@ void b2World::DestroyBody(b2Body* b)
 	m_bodyDestroyList = b;
 }
 
-void b2World::DestroyBodies()
+void b2World::CleanBodyList()
 {
+	m_contactManager.m_destroyImmediate = true;
+
 	b2Body* b = m_bodyDestroyList;
 	while (b)
 	{
-		b2Assert((b->m_flags & b2Body::e_destroyedFlag) == b2Body::e_destroyedFlag);
+		b2Assert((b->m_flags & b2Body::e_destroyFlag) != 0);
 
 		// Preserve the next pointer.
 		b2Body* b0 = b;
@@ -147,6 +149,8 @@ void b2World::DestroyBodies()
 
 	// Reset the list.
 	m_bodyDestroyList = NULL;
+
+	m_contactManager.m_destroyImmediate = false;
 }
 
 b2Joint* b2World::CreateJoint(const b2JointDef* def)
@@ -277,8 +281,11 @@ void b2World::DestroyJoint(b2Joint* j)
 
 void b2World::Step(float32 dt, int32 iterations)
 {
+	// Handle deferred contact destruction.
+	m_contactManager.CleanContactList();
+
 	// Handle deferred body destruction.
-	DestroyBodies();
+	CleanBodyList();
 
 	// Create and/or update contacts.
 	m_contactManager.Collide();
@@ -293,7 +300,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	}
 	for (b2Contact* c = m_contactList; c; c = c->m_next)
 	{
-		c->m_islandFlag = false;
+		c->m_flags &= ~b2Contact::e_islandFlag;
 	}
 	for (b2Joint* j = m_jointList; j; j = j->m_next)
 	{
@@ -336,13 +343,13 @@ void b2World::Step(float32 dt, int32 iterations)
 			// Search all contacts connected to this body.
 			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
 			{
-				if (cn->contact->m_islandFlag == true)
+				if (cn->contact->m_flags & b2Contact::e_islandFlag)
 				{
 					continue;
 				}
 
 				island.Add(cn->contact);
-				cn->contact->m_islandFlag = true;
+				cn->contact->m_flags |= b2Contact::e_islandFlag;
 
 				b2Body* other = cn->other;
 				if (other->m_flags & b2Body::e_islandFlag)

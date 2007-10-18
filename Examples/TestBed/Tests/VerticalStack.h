@@ -37,7 +37,7 @@ public:
 
 		{
 			b2BoxDef sd;
-			float32 a = 0.75f;
+			float32 a = 0.5f;
 			sd.type = e_boxShape;
 			sd.extents.Set(a, a);
 			sd.density = 1.0f;
@@ -51,7 +51,7 @@ public:
 				//float32 x = b2Random(-0.1f, 0.1f);
 				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;
 				//bd.position.Set(x, 0.752f + 1.54f * i);
-				bd.position.Set(0.0f, 0.752f + 1.54f * i);
+				bd.position.Set(0.0f, 0.51f + 1.02f * i);
 				m_world->CreateBody(&bd);
 			}
 		}

@@ -17,7 +17,8 @@
 */
 
 #include "b2PrismaticJoint.h"
-#include "../../Dynamics/b2Body.h"
+#include "../b2Body.h"
+#include "../b2World.h"
 
 // Linear constraint (point-to-line)
 // d = p2 - p1 = x2 + r2 - x1 - r1
@@ -145,17 +146,26 @@ void b2PrismaticJoint::PreSolve()
 		m_limitImpulse = 0.0f;
 	}
 
-	// Warm starting.
-	b2Vec2 P1 = m_linearImpulse * m_linearJacobian.linear1 + (m_motorImpulse + m_limitImpulse) * m_motorJacobian.linear1;
-	b2Vec2 P2 = m_linearImpulse * m_linearJacobian.linear2 + (m_motorImpulse + m_limitImpulse) * m_motorJacobian.linear2;
-	float32 L1 = m_linearImpulse * m_linearJacobian.angular1 - m_angularImpulse + (m_motorImpulse + m_limitImpulse) * m_motorJacobian.angular1;
-	float32 L2 = m_linearImpulse * m_linearJacobian.angular2 + m_angularImpulse + (m_motorImpulse + m_limitImpulse) * m_motorJacobian.angular2;
+	if (b2World::s_enableWarmStarting)
+	{
+		b2Vec2 P1 = m_linearImpulse * m_linearJacobian.linear1 + (m_motorImpulse + m_limitImpulse) * m_motorJacobian.linear1;
+		b2Vec2 P2 = m_linearImpulse * m_linearJacobian.linear2 + (m_motorImpulse + m_limitImpulse) * m_motorJacobian.linear2;
+		float32 L1 = m_linearImpulse * m_linearJacobian.angular1 - m_angularImpulse + (m_motorImpulse + m_limitImpulse) * m_motorJacobian.angular1;
+		float32 L2 = m_linearImpulse * m_linearJacobian.angular2 + m_angularImpulse + (m_motorImpulse + m_limitImpulse) * m_motorJacobian.angular2;
 
-	b1->m_linearVelocity += invMass1 * P1;
-	b1->m_angularVelocity += invI1 * L1;
+		b1->m_linearVelocity += invMass1 * P1;
+		b1->m_angularVelocity += invI1 * L1;
 
-	b2->m_linearVelocity += invMass2 * P2;
-	b2->m_angularVelocity += invI2 * L2;
+		b2->m_linearVelocity += invMass2 * P2;
+		b2->m_angularVelocity += invI2 * L2;
+	}
+	else
+	{
+		m_linearImpulse = 0.0f;
+		m_angularImpulse = 0.0f;
+		m_limitImpulse = 0.0f;
+		m_motorImpulse = 0.0f;
+	}
 
 	m_limitPositionImpulse = 0.0f;
 }
@@ -299,23 +309,27 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 		}
 		else if (m_limitState == e_atLowerLimit)
 		{
-			// Prevent large angular corrections
-			float32 limitC = b2Clamp(translation - m_lowerTranslation, -b2_maxLinearCorrection, b2_maxLinearCorrection);
-			limitImpulse = -m_motorMass * (limitC + b2_linearSlop);
+			float32 limitC = translation - m_lowerTranslation;
+			positionError = b2Max(positionError, -limitC);
+
+			// Prevent large linear corrections and allow some slop.
+			limitC = b2Clamp(limitC + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
+			limitImpulse = -m_motorMass * limitC;
 			float32 oldLimitImpulse = m_limitPositionImpulse;
 			m_limitPositionImpulse = b2Max(m_limitPositionImpulse + limitImpulse, 0.0f);
 			limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
-			positionError = b2Max(positionError, -limitC);
 		}
 		else if (m_limitState == e_atUpperLimit)
 		{
-			// Prevent large angular corrections
-			float32 limitC = b2Clamp(translation - m_upperTranslation, -b2_maxLinearCorrection, b2_maxLinearCorrection);
-			limitImpulse = -m_motorMass * (limitC - b2_linearSlop);
+			float32 limitC = translation - m_upperTranslation;
+			positionError = b2Max(positionError, limitC);
+
+			// Prevent large linear corrections and allow some slop.
+			limitC = b2Clamp(limitC - b2_linearSlop, 0.0f, b2_maxLinearCorrection);
+			limitImpulse = -m_motorMass * limitC;
 			float32 oldLimitImpulse = m_limitPositionImpulse;
 			m_limitPositionImpulse = b2Min(m_limitPositionImpulse + limitImpulse, 0.0f);
 			limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
-			positionError = b2Max(positionError, limitC);
 		}
 
 		b1->m_position += (invMass1 * limitImpulse) * m_motorJacobian.linear1;

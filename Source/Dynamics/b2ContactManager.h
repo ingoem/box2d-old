@@ -23,10 +23,11 @@
 #include "../Dynamics/Contacts/b2NullContact.h"
 
 struct b2World;
+struct b2Contact;
 
 struct b2ContactManager : b2PairCallback
 {
-	b2ContactManager() : m_world(NULL) {}
+	b2ContactManager() : m_world(NULL), m_destroyImmediate(false) {}
 
 	// Implements PairCallback
 	void* PairAdded(void* proxyUserData1, void* proxyUserData2);
@@ -36,11 +37,17 @@ struct b2ContactManager : b2PairCallback
 
 	void Collide();
 
+	void CleanContactList();
+
+	void DestroyContact(b2Contact* contact);
+
 	b2World* m_world;
 
 	// This lets us provide broadphase proxy pair user data for
 	// contacts that shouldn't exist.
 	b2NullContact m_nullContact;
+
+	bool m_destroyImmediate;
 };
 
 #endif

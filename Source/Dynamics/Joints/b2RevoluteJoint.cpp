@@ -17,7 +17,8 @@
 */
 
 #include "b2RevoluteJoint.h"
-#include "../../Dynamics/b2Body.h"
+#include "../b2Body.h"
+#include "../b2World.h"
 
 // Point-to-point constraint
 // C = p2 - p1
@@ -124,12 +125,20 @@ void b2RevoluteJoint::PreSolve()
 		m_limitImpulse = 0.0f;
 	}
 
-	// Warm starting.
-	b1->m_linearVelocity -= invMass1 * m_ptpImpulse;
-	b1->m_angularVelocity -= invI1 * (b2Cross(r1, m_ptpImpulse) + m_motorImpulse + m_limitImpulse);
+	if (b2World::s_enableWarmStarting)
+	{
+		b1->m_linearVelocity -= invMass1 * m_ptpImpulse;
+		b1->m_angularVelocity -= invI1 * (b2Cross(r1, m_ptpImpulse) + m_motorImpulse + m_limitImpulse);
 
-	b2->m_linearVelocity += invMass2 * m_ptpImpulse;
-	b2->m_angularVelocity += invI2 * (b2Cross(r2, m_ptpImpulse) + m_motorImpulse + m_limitImpulse);
+		b2->m_linearVelocity += invMass2 * m_ptpImpulse;
+		b2->m_angularVelocity += invI2 * (b2Cross(r2, m_ptpImpulse) + m_motorImpulse + m_limitImpulse);
+	}
+	else
+	{
+		m_ptpImpulse.SetZero();
+		m_motorImpulse = 0.0f;
+		m_limitImpulse = 0.0f;
+	}
 
 	m_limitPositionImpulse = 0.0f;
 }
@@ -238,23 +247,27 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 		}
 		else if (m_limitState == e_atLowerLimit)
 		{
-			// Prevent large angular corrections
-			float32 limitC = b2Clamp(angle - m_lowerAngle, -b2_maxAngularCorrection, b2_maxAngularCorrection);
-			limitImpulse = -m_motorMass * (limitC + b2_angularSlop);
+			float32 limitC = angle - m_lowerAngle;
+			angularError = b2Max(0.0f, -limitC);
+
+			// Prevent large angular corrections and allow some slop.
+			limitC = b2Clamp(limitC + b2_angularSlop, -b2_maxAngularCorrection, 0.0f);
+			limitImpulse = -m_motorMass * limitC;
 			float32 oldLimitImpulse = m_limitPositionImpulse;
 			m_limitPositionImpulse = b2Max(m_limitPositionImpulse + limitImpulse, 0.0f);
 			limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
-			angularError = b2Max(0.0f, -limitC);
 		}
 		else if (m_limitState == e_atUpperLimit)
 		{
-			// Prevent large angular corrections
-			float32 limitC = b2Clamp(angle - m_upperAngle, -b2_maxAngularCorrection, b2_maxAngularCorrection);
-			limitImpulse = -m_motorMass * (limitC - b2_angularSlop);
+			float32 limitC = angle - m_upperAngle;
+			angularError = b2Max(0.0f, limitC);
+
+			// Prevent large angular corrections and allow some slop.
+			limitC = b2Clamp(limitC - b2_angularSlop, 0.0f, b2_maxAngularCorrection);
+			limitImpulse = -m_motorMass * limitC;
 			float32 oldLimitImpulse = m_limitPositionImpulse;
 			m_limitPositionImpulse = b2Min(m_limitPositionImpulse + limitImpulse, 0.0f);
 			limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
-			angularError = b2Max(0.0f, limitC);
 		}
 
 		b1->m_rotation -= b1->m_invI * limitImpulse;

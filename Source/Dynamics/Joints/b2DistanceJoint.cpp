@@ -17,7 +17,8 @@
 */
 
 #include "b2DistanceJoint.h"
-#include "../../Dynamics/b2Body.h"
+#include "../b2Body.h"
+#include "../b2World.h"
 
 #include <stdio.h>
 
@@ -64,12 +65,18 @@ void b2DistanceJoint::PreSolve()
 	b2Assert(m_mass > FLT_EPSILON);
 	m_mass = 1.0f / m_mass;
 
-	// Warm starting.
-	b2Vec2 P = m_impulse * m_u;
-	m_body1->m_linearVelocity -= m_body1->m_invMass * P;
-	m_body1->m_angularVelocity -= m_body1->m_invI * b2Cross(r1, P);
-	m_body2->m_linearVelocity += m_body2->m_invMass * P;
-	m_body2->m_angularVelocity += m_body2->m_invI * b2Cross(r2, P);
+	if (b2World::s_enableWarmStarting)
+	{
+		b2Vec2 P = m_impulse * m_u;
+		m_body1->m_linearVelocity -= m_body1->m_invMass * P;
+		m_body1->m_angularVelocity -= m_body1->m_invI * b2Cross(r1, P);
+		m_body2->m_linearVelocity += m_body2->m_invMass * P;
+		m_body2->m_angularVelocity += m_body2->m_invI * b2Cross(r2, P);
+	}
+	else
+	{
+		m_impulse = 0.0f;
+	}
 }
 
 void b2DistanceJoint::SolveVelocityConstraints(float32 dt)

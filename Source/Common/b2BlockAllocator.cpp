@@ -42,6 +42,7 @@ bool b2BlockAllocator::s_blockSizeLookupInitialized;
 
 struct b2Chunk
 {
+	int32 blockSize;
 	b2Block* blocks;
 };
 
@@ -119,7 +120,11 @@ void* b2BlockAllocator::Allocate(int32 size)
 
 		b2Chunk* chunk = m_chunks + m_chunkCount;
 		chunk->blocks = (b2Block*)malloc(b2_chunkSize);
+#if defined(_DEBUG)
+		memset(chunk->blocks, 0xcd, b2_chunkSize);
+#endif
 		int32 blockSize = s_blockSizes[index];
+		chunk->blockSize = blockSize;
 		int32 blockCount = b2_chunkSize / blockSize;
 		b2Assert(blockCount * blockSize <= b2_chunkSize);
 		for (int32 i = 0; i < blockCount - 1; ++i)
@@ -142,7 +147,6 @@ void b2BlockAllocator::Free(void* p, int32 size)
 {
 	if (size == 0)
 	{
-		p = NULL;
 		return;
 	}
 
@@ -150,6 +154,33 @@ void b2BlockAllocator::Free(void* p, int32 size)
 
 	int32 index = s_blockSizeLookup[size];
 	b2Assert(0 <= index && index < b2_blockSizes);
+
+#ifdef _DEBUG
+	// Verify the memory address and size is valid.
+	int32 blockSize = s_blockSizes[index];
+	bool found = false;
+	int32 gap = (int32)((int8*)&m_chunks->blocks - (int8*)m_chunks);
+	for (int32 i = 0; i < m_chunkCount; ++i)
+	{
+		b2Chunk* chunk = m_chunks + i;
+		if (chunk->blockSize != blockSize)
+		{
+			b2Assert(	(int8*)p + blockSize <= (int8*)chunk->blocks ||
+						(int8*)chunk->blocks + b2_chunkSize + gap <= (int8*)p);
+		}
+		else
+		{
+			if ((int8*)chunk->blocks <= (int8*)p && (int8*)p + blockSize <= (int8*)chunk->blocks + b2_chunkSize)
+			{
+				found = true;
+			}
+		}
+	}
+
+	b2Assert(found);
+
+	memset(p, 0xfd, blockSize);
+#endif
 
 	b2Block* block = (b2Block*)p;
 	block->next = m_freeLists[index];

@@ -40,7 +40,7 @@ public:
 			float32 a = 0.5f;
 			sd.type = e_boxShape;
 			sd.extents.Set(a, a);
-			sd.density = 2.0f;
+			sd.density = 5.0f;
 
 			b2BodyDef bd;
 			bd.AddShape(&sd);

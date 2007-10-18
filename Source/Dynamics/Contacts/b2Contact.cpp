@@ -114,6 +114,8 @@ void b2Contact::Destroy(b2Contact* contact, b2BlockAllocator* allocator)
 
 b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 {
+	m_flags = 0;
+
 	m_shape1 = s1;
 	m_shape2 = s2;
 
@@ -121,7 +123,16 @@ b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 
 	m_friction = sqrtf(m_shape1->m_friction * m_shape2->m_friction);
 	m_restitution = b2Max(m_shape1->m_restitution, m_shape2->m_restitution);
-	m_world = s1->m_body->m_world;
 	m_prev = NULL;
 	m_next = NULL;
+
+	m_node1.contact = NULL;
+	m_node1.prev = NULL;
+	m_node1.next = NULL;
+	m_node1.other = NULL;
+
+	m_node2.contact = NULL;
+	m_node2.prev = NULL;
+	m_node2.next = NULL;
+	m_node2.other = NULL;
 }

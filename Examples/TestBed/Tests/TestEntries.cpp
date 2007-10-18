@@ -39,6 +39,8 @@
 TestEntry g_testEntries[] =
 {
 	{"Collision Processing", CollisionProcessing::Create},
+	{"Vertical Stack", VerticalStack::Create},
+	{"Pyramid", Pyramid::Create},
 	{"Web", Web::Create},
 	{"Gears", Gears::Create},
 	{"Pulleys", Pulleys::Create},
@@ -46,12 +48,10 @@ TestEntry g_testEntries[] =
 	{"Slider Crank", SliderCrank::Create},
 	{"Pendulum", Pendulum::Create},
 	{"Compound Shapes", CompoundShapes::Create},
-	{"Vertical Stack", VerticalStack::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
-	{"Pyramid", Pyramid::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"PolyCollision", PolyCollision::Create},
 	{"Broad Phase", BroadPhaseTest::Create},

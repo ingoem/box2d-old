@@ -92,74 +92,106 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 	{
 		b2Assert(m_world->m_contactCount > 0);
 
-		// Remove from the world.
-		if (c->m_prev)
+		if (m_destroyImmediate == true)
 		{
-			c->m_prev->m_next = c->m_next;
+			DestroyContact(c);
+			c = NULL;
+		}
+		else
+		{
+			c->m_flags |= b2Contact::e_destroyFlag;
+		}
+	}
+}
+
+void b2ContactManager::DestroyContact(b2Contact* c)
+{
+	b2Assert(m_world->m_contactCount > 0);
+
+	// Remove from the world.
+	if (c->m_prev)
+	{
+		c->m_prev->m_next = c->m_next;
+	}
+
+	if (c->m_next)
+	{
+		c->m_next->m_prev = c->m_prev;
+	}
+
+	if (c == m_world->m_contactList)
+	{
+		m_world->m_contactList = c->m_next;
+	}
+
+	// If there are contact points, then disconnect from the island graph.
+	if (c->GetManifoldCount() > 0)
+	{
+		b2Body* body1 = c->m_shape1->m_body;
+		b2Body* body2 = c->m_shape2->m_body;
+
+		// Wake up touching bodies.
+		body1->WakeUp();
+		body2->WakeUp();
+
+		// Remove from body 1
+		if (c->m_node1.prev)
+		{
+			c->m_node1.prev->next = c->m_node1.next;
 		}
 
-		if (c->m_next)
+		if (c->m_node1.next)
 		{
-			c->m_next->m_prev = c->m_prev;
+			c->m_node1.next->prev = c->m_node1.prev;
 		}
 
-		if (c == m_world->m_contactList)
+		if (&c->m_node1 == body1->m_contactList)
 		{
-			m_world->m_contactList = c->m_next;
+			body1->m_contactList = c->m_node1.next;
 		}
 
-		// If there are contact points, then disconnect from the island graph.
-		if (c->GetManifoldCount() > 0)
+		c->m_node1.prev = NULL;
+		c->m_node1.next = NULL;
+
+		// Remove from body 2
+		if (c->m_node2.prev)
 		{
-			b2Body* body1 = c->m_shape1->m_body;
-			b2Body* body2 = c->m_shape2->m_body;
-
-			// Wake up touching bodies.
-			body1->WakeUp();
-			body2->WakeUp();
-
-			// Remove from body 1
-			if (c->m_node1.prev)
-			{
-				c->m_node1.prev->next = c->m_node1.next;
-			}
-
-			if (c->m_node1.next)
-			{
-				c->m_node1.next->prev = c->m_node1.prev;
-			}
-
-			if (&c->m_node1 == body1->m_contactList)
-			{
-				body1->m_contactList = c->m_node1.next;
-			}
-
-			c->m_node1.prev = NULL;
-			c->m_node1.next = NULL;
-
-			// Remove from body 2
-			if (c->m_node2.prev)
-			{
-				c->m_node2.prev->next = c->m_node2.next;
-			}
-
-			if (c->m_node2.next)
-			{
-				c->m_node2.next->prev = c->m_node2.prev;
-			}
-
-			if (&c->m_node2 == body2->m_contactList)
-			{
-				body2->m_contactList = c->m_node2.next;
-			}
-
-			c->m_node2.prev = NULL;
-			c->m_node2.next = NULL;
+			c->m_node2.prev->next = c->m_node2.next;
 		}
 
-		// Call the factory.
-		b2Contact::Destroy(c, &m_world->m_blockAllocator);
-		--m_world->m_contactCount;
+		if (c->m_node2.next)
+		{
+			c->m_node2.next->prev = c->m_node2.prev;
+		}
+
+		if (&c->m_node2 == body2->m_contactList)
+		{
+			body2->m_contactList = c->m_node2.next;
+		}
+
+		c->m_node2.prev = NULL;
+		c->m_node2.next = NULL;
+	}
+
+	// Call the factory.
+	b2Contact::Destroy(c, &m_world->m_blockAllocator);
+	--m_world->m_contactCount;
+}
+
+// Destroy any contacts marked for deferred destruction.
+void b2ContactManager::CleanContactList()
+{
+	b2Contact* c = m_world->m_contactList;
+	while (c != NULL)
+	{
+		b2Contact* c0 = c;
+		c = c->m_next;
+
+		if (c0->m_flags & b2Contact::e_destroyFlag)
+		{
+			DestroyContact(c0);
+			c0 = NULL;
+		}
 	}
 }
 
@@ -183,8 +215,9 @@ void b2ContactManager::Collide()
 
 		if (oldCount == 0 && newCount > 0)
 		{
-			// Connect to island graph.
+			b2Assert(c->GetManifolds()->pointCount > 0);
 
+			// Connect to island graph.
 			b2Body* body1 = c->m_shape1->m_body;
 			b2Body* body2 = c->m_shape2->m_body;
 
