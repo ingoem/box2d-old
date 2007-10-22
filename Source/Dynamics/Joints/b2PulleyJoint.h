@@ -78,7 +78,7 @@ struct b2PulleyJoint : public b2Joint
 	b2PulleyJoint(const b2PulleyJointDef* data);
 
 	void PreSolve();
-	void SolveVelocityConstraints(float32 dt);
+	void SolveVelocityConstraints(const b2StepInfo* step);
 	bool SolvePositionConstraints();
 
 	b2Body* m_ground;

@@ -79,9 +79,9 @@ void b2DistanceJoint::PreSolve()
 	}
 }
 
-void b2DistanceJoint::SolveVelocityConstraints(float32 dt)
+void b2DistanceJoint::SolveVelocityConstraints(const b2StepInfo* step)
 {
-	NOT_USED(dt);
+	NOT_USED(step);
 
 	b2Vec2 r1 = b2Mul(m_body1->m_R, m_localAnchor1);
 	b2Vec2 r2 = b2Mul(m_body2->m_R, m_localAnchor2);

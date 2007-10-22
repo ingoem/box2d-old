@@ -41,6 +41,8 @@ struct b2BodyDef
 		rotation = 0.0f;
 		linearVelocity.Set(0.0f, 0.0f);
 		angularVelocity = 0.0f;
+		linearDamping = 0.0f;
+		angularDamping = 0.0f;
 		allowSleep = true;
 		isSleeping = false;
 		preventRotation = false;
@@ -52,6 +54,8 @@ struct b2BodyDef
 	float32 rotation;
 	b2Vec2 linearVelocity;
 	float32 angularVelocity;
+	float32 linearDamping;
+	float32 angularDamping;
 	bool allowSleep;
 	bool isSleeping;
 	bool preventRotation;
@@ -201,6 +205,9 @@ struct b2Body
 
 	float32 m_mass, m_invMass;
 	float32 m_I, m_invI;
+
+	float32 m_linearDamping;
+	float32 m_angularDamping;
 
 	float32 m_sleepTime;
 

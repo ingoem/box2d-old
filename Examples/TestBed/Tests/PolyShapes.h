@@ -108,6 +108,7 @@ public:
 		else
 		{
 			bd.AddShape(&circleDef);
+			bd.angularDamping = 0.02f;
 		}
 
 		float32 x = b2Random(-2.0f, 2.0f);

@@ -416,6 +416,15 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 <p>Usually you should not set a body's velocity to constrain its motion. To constraint a body, use joints, shapes, forces, and impulses.</p>
 <p>When you are building a body definition you may not know the position of the body's center of mass, therefore the initial linear velocity is applied to the body's origin.</p>
 
+<h3>Damping</h3>
+<p>Damping is used to reduce the world velocity of bodies. Damping is different than friction because damping occurs with contact and damping is much cheaper to simulate than friction. However, damping is not a replacement for friction and the two effects should be used together.</p>
+<p>Damping only works well for fixed time steps. If you need to vary the time step you will need to modify the code. Please visit the forums and ask for help.</p>
+<p>Damping parameters should be between 0 and 1, with 0 meaning no damping, and 1 meaning full damping. Normally you will use a damping value between 0 and 0.1. I generally do not use linear damping because it makes bodies look <em>floaty</em>.</p>
+ <pre class="code">
+    bodyDef.linearDamping = 0.0f;
+    bodyDef.angularDamping = 0.01f;
+</pre>
+
 <h3>Sleep Parameters</h3>
 <p>What does sleep mean? Well it is expensive to simulate bodies, so the less we have to simulate the better. When a body comes to rest we would like to stop simulating it.</p>
 <p>When Box2D determines that a body (or group of bodies) has come to rest, the body enters a sleep state which has very little CPU overhead. If an awake body collides with a sleeping body, then the sleeping body wakes up. Bodies will also wake up if a joint or contact attached to them is destroyed. You can also wakeup a body manually.</p>

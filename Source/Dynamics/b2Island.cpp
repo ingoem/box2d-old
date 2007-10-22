@@ -55,7 +55,7 @@ void b2Island::Clear()
 	m_jointCount = 0;
 }
 
-void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
+void b2Island::Solve(const b2StepInfo* step, const b2Vec2& gravity)
 {
 	for (int32 i = 0; i < m_bodyCount; ++i)
 	{
@@ -64,8 +64,11 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 		if (b->m_invMass == 0.0f)
 			continue;
 
-		b->m_linearVelocity += dt * (gravity + b->m_invMass * b->m_force);
-		b->m_angularVelocity += dt * b->m_invI * b->m_torque;
+		b->m_linearVelocity += step->dt * (gravity + b->m_invMass * b->m_force);
+		b->m_angularVelocity += step->dt * b->m_invI * b->m_torque;
+
+		b->m_linearVelocity *= b->m_linearDamping;
+		b->m_angularVelocity *= b->m_angularDamping;
 	}
 
 	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);
@@ -79,13 +82,13 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 	}
 
 	// Solve velocity constraints.
-	for (int32 i = 0; i < iterations; ++i)
+	for (int32 i = 0; i < step->iterations; ++i)
 	{
 		contactSolver.SolveVelocityConstraints();
 
 		for (int32 j = 0; j < m_jointCount; ++j)
 		{
-			m_joints[j]->SolveVelocityConstraints(dt);
+			m_joints[j]->SolveVelocityConstraints(step);
 		}
 	}
 
@@ -97,8 +100,8 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 		if (b->m_invMass == 0.0f)
 			continue;
 
-		b->m_position += dt * b->m_linearVelocity;
-		b->m_rotation += dt * b->m_angularVelocity;
+		b->m_position += step->dt * b->m_linearVelocity;
+		b->m_rotation += step->dt * b->m_angularVelocity;
 
 		b->m_R.Set(b->m_rotation);
 	}
@@ -106,7 +109,7 @@ void b2Island::Solve(b2Vec2 gravity, int32 iterations, float32 dt)
 	// Solve position constraints.
 	if (b2World::s_enablePositionCorrection)
 	{
-		for (m_positionIterations = 0; m_positionIterations < iterations; ++m_positionIterations)
+		for (m_positionIterations = 0; m_positionIterations < step->iterations; ++m_positionIterations)
 		{
 			bool contactsOkay = contactSolver.SolvePositionConstraints(b2_contactBaumgarte);
 
@@ -145,8 +148,8 @@ void b2Island::UpdateSleep(float32 dt)
 {
 	float32 minSleepTime = FLT_MAX;
 
-	float32 linTolSqr = b2_linearSleepTolerance * b2_linearSleepTolerance;
-	float32 angTolSqr = b2_angularSleepTolerance * b2_angularSleepTolerance;
+	const float32 linTolSqr = b2_linearSleepTolerance * b2_linearSleepTolerance;
+	const float32 angTolSqr = b2_angularSleepTolerance * b2_angularSleepTolerance;
 
 	for (int32 i = 0; i < m_bodyCount; ++i)
 	{

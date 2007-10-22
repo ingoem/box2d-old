@@ -104,7 +104,7 @@ void Test::MouseDown(const b2Vec2& p)
 		md.body1 = m_world->m_groundBody;
 		md.body2 = body;
 		md.target = p;
-		md.motorForce = 400.0f * body->m_mass;
+		md.maxForce = 1000.0f * body->m_mass;
 		m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
 		body->WakeUp();
 	}

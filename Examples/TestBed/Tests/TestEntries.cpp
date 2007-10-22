@@ -38,6 +38,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Compound Shapes", CompoundShapes::Create},
 	{"Collision Processing", CollisionProcessing::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Pyramid", Pyramid::Create},
@@ -47,7 +48,6 @@ TestEntry g_testEntries[] =
 	{"Bridge", Bridge::Create},
 	{"Slider Crank", SliderCrank::Create},
 	{"Pendulum", Pendulum::Create},
-	{"Compound Shapes", CompoundShapes::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Varying Restitution", VaryingRestitution::Create},

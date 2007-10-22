@@ -143,7 +143,7 @@ void b2RevoluteJoint::PreSolve()
 	m_limitPositionImpulse = 0.0f;
 }
 
-void b2RevoluteJoint::SolveVelocityConstraints(float32 dt)
+void b2RevoluteJoint::SolveVelocityConstraints(const b2StepInfo* step)
 {
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
@@ -167,7 +167,7 @@ void b2RevoluteJoint::SolveVelocityConstraints(float32 dt)
 		float32 motorCdot = b2->m_angularVelocity - b1->m_angularVelocity - m_motorSpeed;
 		float32 motorImpulse = -m_motorMass * motorCdot;
 		float32 oldMotorImpulse = m_motorImpulse;
-		m_motorImpulse = b2Clamp(m_motorImpulse + motorImpulse, -dt * m_maxMotorTorque, dt * m_maxMotorTorque);
+		m_motorImpulse = b2Clamp(m_motorImpulse + motorImpulse, -step->dt * m_maxMotorTorque, step->dt * m_maxMotorTorque);
 		motorImpulse = m_motorImpulse - oldMotorImpulse;
 		b1->m_angularVelocity -= b1->m_invI * motorImpulse;
 		b2->m_angularVelocity += b2->m_invI * motorImpulse;

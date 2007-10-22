@@ -64,7 +64,7 @@ struct b2RevoluteJoint : public b2Joint
 	b2RevoluteJoint(const b2RevoluteJointDef* def);
 
 	void PreSolve();
-	void SolveVelocityConstraints(float32 dt);
+	void SolveVelocityConstraints(const b2StepInfo* step);
 	bool SolvePositionConstraints();
 
 	b2Vec2 m_localAnchor1;

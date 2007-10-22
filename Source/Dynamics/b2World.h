@@ -34,6 +34,13 @@ struct b2Shape;
 struct b2Contact;
 class b2BroadPhase;
 
+struct b2StepInfo
+{
+	float32 dt;			// time step
+	float32 inv_dt;		// inverse time step (0 if dt == 0).
+	int32 iterations;
+};
+
 struct b2World
 {
 	b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep);

@@ -151,9 +151,9 @@ void b2GearJoint::PreSolve()
 	b2->m_angularVelocity += b2->m_invI * m_impulse * m_J.angular2;
 }
 
-void b2GearJoint::SolveVelocityConstraints(float32 dt)
+void b2GearJoint::SolveVelocityConstraints(const b2StepInfo* step)
 {
-	NOT_USED(dt);
+	NOT_USED(step);
 
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;

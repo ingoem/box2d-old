@@ -281,6 +281,18 @@ void b2World::DestroyJoint(b2Joint* j)
 
 void b2World::Step(float32 dt, int32 iterations)
 {
+	b2StepInfo step;
+	step.dt = dt;
+	step.iterations	= iterations;
+	if (dt > 0.0f)
+	{
+		step.inv_dt = 1.0f / dt;
+	}
+	else
+	{
+		step.inv_dt = 0.0f;
+	}
+
 	// Handle deferred contact destruction.
 	m_contactManager.CleanContactList();
 
@@ -385,7 +397,7 @@ void b2World::Step(float32 dt, int32 iterations)
 			}
 		}
 
-		island.Solve(m_gravity, iterations, dt);
+		island.Solve(&step, m_gravity);
 		if (m_doSleep)
 		{
 			island.UpdateSleep(dt);

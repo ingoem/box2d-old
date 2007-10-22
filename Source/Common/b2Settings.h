@@ -64,7 +64,7 @@ const float32 b2_contactBaumgarte = 0.2f;
 // Sleep
 const float32 b2_timeToSleep = 0.5f * b2_timeUnitsPerSecond;	// half a second
 const float32 b2_linearSleepTolerance = 0.01f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;	// 1 cm/s
-const float32 b2_angularSleepTolerance = 0.5f / 180.0f / b2_timeUnitsPerSecond;					// 0.5 degrees/s
+const float32 b2_angularSleepTolerance = 2.0f / 180.0f / b2_timeUnitsPerSecond;					// 2 degrees/s
 
 void b2Assert(bool condition);
 

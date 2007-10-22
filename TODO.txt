@@ -58,6 +58,12 @@ Version 1.4.0
 - Personalize the phpbb header. DONE
 - Document contacts and new joint types. DONE
 
+Version 1.4.1
+- Fix contact list. DONE
+- Damping. DONE
+- Poly-circle ids. DONE
+- Improve mouse joint. DONE
+
 Version 2.0.0
 - CCD.
 
@@ -67,8 +73,8 @@ Version 2.1.0
 
 Version 2.2.0
 - Handle orphaned gear joint.
-- Improve mouse joint.
-- Clean up joint limit code.
+- Friction joint for top down games.
+- Rolling resistance for circles.
 
 Version 2.3.0
 - Convex hull tool.

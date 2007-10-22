@@ -30,6 +30,9 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_R.Set(m_rotation);
 	m_world = world;
 
+	m_linearDamping = b2Clamp(1.0f - bd->linearDamping, 0.0f, 1.0f);
+	m_angularDamping = b2Clamp(1.0f - bd->angularDamping, 0.0f, 1.0f);
+
 	m_force.Set(0.0f, 0.0f);
 	m_torque = 0.0f;
 

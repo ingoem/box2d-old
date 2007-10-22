@@ -17,22 +17,16 @@
 */
 
 #include "b2MouseJoint.h"
-#include "../../Dynamics/b2Body.h"
-
-#include <stdio.h>
+#include "../b2Body.h"
+#include "../b2World.h"
 
 // p = attached point, m = mouse point
-// C = norm(p - m) - L
-// u = (p - m) / norm(p - m)
-// Cdot = dot(u, v + cross(w, r))
-//      = [u^T cross(r, u)^T] [v; w]
-// K = J * invM * JT
-//   = [u^T cross(r, u)^T][invMass  0][u]
-//                        [0     invI][cross(r, u)]
-//   = [u^T cross(r, u)^T][invMass*u]
-//                        [invI * cross(r, u)]
-//   = invMass + invI * cross(r, u) * cross(r, u)
-
+// C = p - m
+// Cdot = v
+//      = v + cross(w, r)
+// J = [I r_skew]
+// Identity used:
+// w k % (rx i + ry j) = w * (-ry i + rx j)
 
 b2MouseJoint::b2MouseJoint(const b2MouseJointDef* def)
 : b2Joint(def)
@@ -40,11 +34,23 @@ b2MouseJoint::b2MouseJoint(const b2MouseJointDef* def)
 	m_target = def->target;
 	m_localAnchor = b2MulT(m_body2->m_R, m_target - m_body2->m_position);
 
-	m_motorForce = def->motorForce;
-	m_length = def->length;
-	m_beta = def->beta;
+	m_maxForce = def->maxForce;
+	m_impulse.SetZero();
 
-	m_impulse = 0.0f;
+	float32 mass = m_body2->m_mass;
+
+	// Frequency
+	float32 omega = 2.0f * b2_pi * def->frequencyHz;
+
+	// Damping coefficient
+	float32 d = 2.0f * mass * def->dampingRatio * omega;
+
+	// Spring stiffness
+	float32 k = mass * omega * omega;
+
+	// magic formulas
+	m_gamma = 1.0f / (d + def->timeStep * k);
+	m_beta = def->timeStep * k / (d + def->timeStep * k);
 }
 
 void b2MouseJoint::SetTarget(const b2Vec2& target)
@@ -55,53 +61,63 @@ void b2MouseJoint::SetTarget(const b2Vec2& target)
 
 void b2MouseJoint::PreSolve()
 {
-	b2Body* body = m_body2;
+	b2Body* b = m_body2;
 
 	// Compute the effective mass matrix.
-	b2Vec2 r = b2Mul(body->m_R, m_localAnchor);
-	m_u = body->m_position + r - m_target;
+	b2Vec2 r = b2Mul(b->m_R, m_localAnchor);
 
-	// Handle singularity.
-	float32 length = m_u.Length();
-	if (length > FLT_EPSILON)
-	{
-		m_u *= 1.0f / length;
-	}
-	else
-	{
-		m_u.Set(0.0f, 1.0f);
-	}
+	// K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
+	//      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r1.y*r1.y -r1.x*r1.y]
+	//        [    0     1/m1+1/m2]           [-r1.x*r1.y r1.x*r1.x]           [-r1.x*r1.y r1.x*r1.x]
+	float32 invMass = b->m_invMass;
+	float32 invI = b->m_invI;
 
-	m_positionError = length - m_length;
+	b2Mat22 K1;
+	K1.col1.x = invMass;	K1.col2.x = 0.0f;
+	K1.col1.y = 0.0f;		K1.col2.y = invMass;
 
-	float32 cru = b2Cross(r, m_u);
-	m_mEff = body->m_invMass + body->m_invI * cru * cru;
-	b2Assert(m_mEff > FLT_EPSILON);
-	m_mEff = 1.0f / m_mEff;
+	b2Mat22 K2;
+	K2.col1.x =  invI * r.y * r.y;	K2.col2.x = -invI * r.x * r.y;
+	K2.col1.y = -invI * r.x * r.y;	K2.col2.y =  invI * r.x * r.x;
+
+	b2Mat22 K = K1 + K2;
+	K.col1.x += m_gamma;
+	K.col2.y += m_gamma;
+
+	m_ptpMass = K.Invert();
+
+	m_C = b->m_position + r - m_target;
+
+	// Cheat with some damping
+	b->m_angularVelocity *= 0.98f;
 
 	// Warm starting.
-	b2Vec2 P = m_impulse * m_u;
-	body->m_linearVelocity += body->m_invMass * P;
-	body->m_angularVelocity += body->m_invI * b2Cross(r, P);
+	b2Vec2 P = m_impulse;
+	b->m_linearVelocity += invMass * P;
+	b->m_angularVelocity += invI * b2Cross(r, P);
 }
 
-void b2MouseJoint::SolveVelocityConstraints(float32 dt)
+void b2MouseJoint::SolveVelocityConstraints(const b2StepInfo* step)
 {
 	b2Body* body = m_body2;
 
 	b2Vec2 r = b2Mul(body->m_R, m_localAnchor);
 
-	// Cdot = dot(u, v + cross(w, r))
-	float32 Cdot = b2Dot(m_u, body->m_linearVelocity + b2Cross(body->m_angularVelocity, r));
-	float32 impulse = -m_mEff * (Cdot + m_beta / dt * m_positionError);
+	// Cdot = v + cross(w, r)
+	b2Vec2 Cdot = body->m_linearVelocity + b2Cross(body->m_angularVelocity, r);
+	b2Vec2 impulse = -b2Mul(m_ptpMass, Cdot + (m_beta * step->inv_dt) * m_C + m_gamma * m_impulse);
 
-	float32 oldImpulse = m_impulse;
-	m_impulse = b2Clamp(m_impulse + impulse, -dt * m_motorForce, 0.0f);
+	b2Vec2 oldImpulse = m_impulse;
+	m_impulse += impulse;
+	float32 length = m_impulse.Length();
+	if (length > step->dt * m_maxForce)
+	{
+		m_impulse *= step->dt * m_maxForce / length;
+	}
 	impulse = m_impulse - oldImpulse;
 
-	b2Vec2 P = impulse * m_u;
-	body->m_linearVelocity += body->m_invMass * P;
-	body->m_angularVelocity += body->m_invI * b2Cross(r, P);
+	body->m_linearVelocity += body->m_invMass * impulse;
+	body->m_angularVelocity += body->m_invI * b2Cross(r, impulse);
 }
 
 b2Vec2 b2MouseJoint::GetAnchor1() const
@@ -116,7 +132,7 @@ b2Vec2 b2MouseJoint::GetAnchor2() const
 
 b2Vec2 b2MouseJoint::GetReactionForce(float32 invTimeStep) const
 {
-	b2Vec2 F = (m_impulse * invTimeStep) * m_u;
+	b2Vec2 F = invTimeStep * m_impulse;
 	return F;
 }
 

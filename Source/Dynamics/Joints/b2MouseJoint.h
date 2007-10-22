@@ -30,15 +30,17 @@ struct b2MouseJointDef : public b2JointDef
 	{
 		type = e_mouseJoint;
 		target.Set(0.0f, 0.0f);
-		motorForce = 0.0f;
-		beta = 0.2f;
-		length = 1.0f;
+		maxForce = 0.0f;
+		frequencyHz = 5.0f;
+		dampingRatio = 0.7f;
+		timeStep = 1.0f / 60.0f;
 	}
 
 	b2Vec2 target;
-	float32 beta;
-	float32 motorForce;
-	float32 length;
+	float32 maxForce;
+	float32 frequencyHz;
+	float32 dampingRatio;
+	float32 timeStep;
 };
 
 struct b2MouseJoint : public b2Joint
@@ -49,7 +51,6 @@ struct b2MouseJoint : public b2Joint
 	b2Vec2 GetReactionForce(float32 invTimeStep) const;
 	float32 GetReactionTorque(float32 invTimeStep) const;
 
-	float32 GetMotorForce(float32 inv_dt) const { return m_impulse * inv_dt; }
 	void SetTarget(const b2Vec2& target);
 
 	//--------------- Internals Below -------------------
@@ -57,19 +58,21 @@ struct b2MouseJoint : public b2Joint
 	b2MouseJoint(const b2MouseJointDef* def);
 
 	void PreSolve();
-	void SolveVelocityConstraints(float32 dt);
-	bool SolvePositionConstraints() { return true; }
+	void SolveVelocityConstraints(const b2StepInfo* step);
+	bool SolvePositionConstraints()
+	{
+		return true;
+	}
 
 	b2Vec2 m_localAnchor;
 	b2Vec2 m_target;
-	b2Vec2 m_u;
-	float32 m_positionError;
-	float32 m_impulse;
+	b2Vec2 m_impulse;
 
-	float32 m_mEff;		// effective mass
-	float32 m_motorForce;
-	float32 m_length;
-	float32 m_beta;
+	b2Mat22 m_ptpMass;		// effective mass for point-to-point constraint.
+	b2Vec2 m_C;				// position error
+	float32 m_maxForce;
+	float32 m_beta;			// bias factor
+	float32 m_gamma;		// softness
 };
 
 #endif

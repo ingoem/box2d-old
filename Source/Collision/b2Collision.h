@@ -25,6 +25,8 @@ struct b2CircleShape;
 struct b2PolyShape;
 
 // We use contact ids to facilitate warm starting.
+const uint8 b2_nullFeature = UCHAR_MAX;
+
 union b2ContactID
 {
 	struct Features

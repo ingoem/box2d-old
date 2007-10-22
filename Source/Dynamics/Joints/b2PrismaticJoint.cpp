@@ -170,7 +170,7 @@ void b2PrismaticJoint::PreSolve()
 	m_limitPositionImpulse = 0.0f;
 }
 
-void b2PrismaticJoint::SolveVelocityConstraints(float32 dt)
+void b2PrismaticJoint::SolveVelocityConstraints(const b2StepInfo* step)
 {
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
@@ -203,7 +203,7 @@ void b2PrismaticJoint::SolveVelocityConstraints(float32 dt)
 		float32 motorCdot = m_motorJacobian.Compute(b1->m_linearVelocity, b1->m_angularVelocity, b2->m_linearVelocity, b2->m_angularVelocity) - m_motorSpeed;
 		float32 motorImpulse = -m_motorMass * motorCdot;
 		float32 oldMotorImpulse = m_motorImpulse;
-		m_motorImpulse = b2Clamp(m_motorImpulse + motorImpulse, -dt * m_maxMotorForce, dt * m_maxMotorForce);
+		m_motorImpulse = b2Clamp(m_motorImpulse + motorImpulse, -step->dt * m_maxMotorForce, step->dt * m_maxMotorForce);
 		motorImpulse = m_motorImpulse - oldMotorImpulse;
 
 		b1->m_linearVelocity += (invMass1 * motorImpulse) * m_motorJacobian.linear1;

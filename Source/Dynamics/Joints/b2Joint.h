@@ -23,6 +23,7 @@
 
 struct b2Body;
 struct b2Joint;
+struct b2StepInfo;
 class b2BlockAllocator;
 
 enum b2JointType
@@ -108,7 +109,7 @@ struct b2Joint
 	virtual ~b2Joint() {}
 
 	virtual void PreSolve() = 0;
-	virtual void SolveVelocityConstraints(float32 dt) = 0;
+	virtual void SolveVelocityConstraints(const b2StepInfo* step) = 0;
 
 	// This returns true if the position errors are within tolerance.
 	virtual bool SolvePositionConstraints() = 0;
