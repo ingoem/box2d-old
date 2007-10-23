@@ -75,6 +75,7 @@ Version 2.2.0
 - Handle orphaned gear joint.
 - Friction joint for top down games.
 - Rolling resistance for circles.
+- Re-filter function.
 
 Version 2.3.0
 - Convex hull tool.
