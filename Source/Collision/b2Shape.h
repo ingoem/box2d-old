@@ -146,21 +146,18 @@ struct b2Shape
 
 	//--------------- Internals Below -------------------
 
-	// Internal use only. Do not call.
 	static b2Shape* Create(	const b2ShapeDef* def,
 							b2Body* body, const b2Vec2& localCenter);
 
-	// Internal use only. Do not call.
 	static void Destroy(b2Shape*& shape);
 
-	// Internal use only. Do not call.
 	b2Shape(const b2ShapeDef* def, b2Body* body);
 
-	// Internal use only. Do not call.
 	virtual ~b2Shape();
 
-	// Internal use only. Do not call.
 	virtual void Synchronize(const b2Vec2& position, const b2Mat22& R) = 0;
+
+	virtual b2Vec2 Support(const b2Vec2& d) const = 0;
 
 	b2Mat22 m_R;
 	b2Vec2 m_position;
@@ -190,6 +187,8 @@ struct b2CircleShape : public b2Shape
 
 	void Synchronize(const b2Vec2& position, const b2Mat22& R);
 
+	b2Vec2 Support(const b2Vec2& d) const;
+
 	// Local position in parent body
 	b2Vec2 m_localPosition;
 	float32 m_radius;
@@ -206,6 +205,8 @@ struct b2PolyShape : public b2Shape
 	b2PolyShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);
 
 	void Synchronize(const b2Vec2& position, const b2Mat22& R);
+
+	b2Vec2 Support(const b2Vec2& d) const;
 
 	b2OBB m_localOBB;
 	b2Vec2 m_vertices[b2_maxPolyVertices];

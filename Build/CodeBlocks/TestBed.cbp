@@ -161,12 +161,16 @@
 		<Unit filename="..\..\Examples\TestBed\Tests\BroadPhaseTest.cpp" />
 		<Unit filename="..\..\Examples\TestBed\Tests\BroadPhaseTest.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\CollisionFiltering.h" />
+		<Unit filename="..\..\Examples\TestBed\Tests\CollisionProcessing.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\CompoundShapes.h" />
+		<Unit filename="..\..\Examples\TestBed\Tests\Gears.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\MotorsAndLimits.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\Pendulum.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\PolyCollision.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\PolyShapes.h" />
+		<Unit filename="..\..\Examples\TestBed\Tests\Pulleys.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\Pyramid.h" />
+		<Unit filename="..\..\Examples\TestBed\Tests\SliderCrank.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\TestEntries.cpp" />
 		<Unit filename="..\..\Examples\TestBed\Tests\VaryingFriction.h" />
 		<Unit filename="..\..\Examples\TestBed\Tests\VaryingRestitution.h" />

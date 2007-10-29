@@ -105,9 +105,15 @@ bool b2DistanceJoint::SolvePositionConstraints()
 	b2Vec2 r1 = b2Mul(m_body1->m_R, m_localAnchor1);
 	b2Vec2 r2 = b2Mul(m_body2->m_R, m_localAnchor2);
 	b2Vec2 d = m_body2->m_position + r2 - m_body1->m_position - r1;
-	float32 C = d.Length() - m_length;
+
+	float32 length = d.Normalize();
+	float32 C = length - m_length;
+	C = b2Clamp(C, -b2_maxLinearCorrection, b2_maxLinearCorrection);
+
 	float32 impulse = -m_mass * C;
+	m_u = d;
 	b2Vec2 P = impulse * m_u;
+
 	m_body1->m_position -= m_body1->m_invMass * P;
 	m_body1->m_rotation -= m_body1->m_invI * b2Cross(r1, P);
 	m_body2->m_position += m_body2->m_invMass * P;

@@ -88,7 +88,7 @@ Version 2.5.0
 - Convex decomposition.
 
 Version 2.6.0
-- Ropes.
+- Ropes and particles.
 
 Version 3+
 - Solver performance.
@@ -97,3 +97,4 @@ Version 3+
 - Vehicles.
 - Tree constraints.
 - Buoyancy.
+- Heightfields.

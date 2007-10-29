@@ -177,6 +177,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Source\Collision\b2Distance.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Source\Collision\b2PairManager.cpp"
 				>
 			</File>

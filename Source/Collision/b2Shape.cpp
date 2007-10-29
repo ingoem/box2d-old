@@ -275,6 +275,13 @@ void b2CircleShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
 	}
 }
 
+b2Vec2 b2CircleShape::Support(const b2Vec2& d) const
+{
+	b2Vec2 u = d;
+	u.Normalize();
+	return m_position + m_radius * u;
+}
+
 bool b2CircleShape::TestPoint(const b2Vec2& p)
 {
 	b2Vec2 d = p - m_position;
@@ -314,6 +321,7 @@ void b2CircleShape::ResetProxy(b2BroadPhase* broadPhase)
 		m_body->Freeze();
 	}
 }
+
 
 
 
@@ -434,6 +442,25 @@ void b2PolyShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
 		m_proxyId = b2_nullProxy;
 		m_body->Freeze();
 	}
+}
+
+b2Vec2 b2PolyShape::Support(const b2Vec2& d) const
+{
+	b2Vec2 dLocal = b2MulT(m_R, d);
+
+	int32 bestIndex = 0;
+	float32 bestValue = b2Dot(m_vertices[0], dLocal);
+	for (int32 i = 1; i < m_vertexCount; ++i)
+	{
+		float32 value = b2Dot(m_vertices[i], dLocal);
+		if (value > bestValue)
+		{
+			bestIndex = i;
+			bestValue = value;
+		}
+	}
+
+	return m_position + b2Mul(m_R, m_vertices[bestIndex]);
 }
 
 bool b2PolyShape::TestPoint(const b2Vec2& p)

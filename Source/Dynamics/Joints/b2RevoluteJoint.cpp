@@ -216,7 +216,7 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 	float32 positionError = ptpC.Length();
 
 	// Prevent overly large corrections.
-	b2Vec2 dpMax = b2Vec2::Make(b2_maxLinearCorrection, b2_maxLinearCorrection);
+	b2Vec2 dpMax(b2_maxLinearCorrection, b2_maxLinearCorrection);
 	ptpC = b2Clamp(ptpC, -dpMax, dpMax);
 
 	b2Vec2 impulse = -b2Mul(m_ptpMass, ptpC);

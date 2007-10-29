@@ -20,7 +20,9 @@
 #define B2_COLLISION_H
 
 #include "../Common/b2Math.h"
+#include <limits.h>
 
+struct b2Shape;
 struct b2CircleShape;
 struct b2PolyShape;
 
@@ -73,6 +75,8 @@ struct b2OBB
 void b2CollideCircle(b2Manifold* manifold, b2CircleShape* circle1, b2CircleShape* circle2);
 void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const b2CircleShape* circle);
 void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* poly1, const b2PolyShape* poly2);
+
+float32 b2Distance(b2Vec2* x1, b2Vec2* x2, const b2Shape* poly1, const b2Shape* poly2);
 
 inline bool b2AABB::IsValid() const
 {
