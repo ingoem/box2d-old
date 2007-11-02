@@ -45,6 +45,9 @@ public:
 			{
 				float32 x = sd.radius * (2.02f * i - 5.0f);
 				bd.position.Set(x, y);
+				float32 w = 100.0f;
+				bd.angularVelocity = w;
+				bd.linearVelocity.Set(w * L, 0.0f);
 				b2Body* body = m_world->CreateBody(&bd);
 
 				jd.anchorPoint.Set(x, y + L);

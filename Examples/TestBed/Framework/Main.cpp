@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize(width, height);
-	mainWindow = glutCreateWindow("Box2D - Pseudo Velocities");
+	mainWindow = glutCreateWindow("Box2D - Full NGS");
 	//glutSetOption (GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 
 	glutDisplayFunc(SimulationLoop);
