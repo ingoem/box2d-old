@@ -19,10 +19,6 @@
 #ifndef POLYCOLLISION_H
 #define POLYCOLLISION_H
 
-
-#include "../Framework/Render.h"
-#include "freeglut/GL/glut.h"
-
 class PolyCollision : public Test
 {
 public:

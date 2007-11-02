@@ -108,7 +108,7 @@ struct b2Joint
 	b2Joint(const b2JointDef* def);
 	virtual ~b2Joint() {}
 
-	virtual void PreSolve() = 0;
+	virtual void PrepareVelocitySolver() = 0;
 	virtual void SolveVelocityConstraints(const b2StepInfo* step) = 0;
 
 	// This returns true if the position errors are within tolerance.

@@ -65,7 +65,7 @@ struct b2PrismaticJoint : public b2Joint
 
 	b2PrismaticJoint(const b2PrismaticJointDef* def);
 
-	void PreSolve();
+	void PrepareVelocitySolver();
 	void SolveVelocityConstraints(const b2StepInfo* step);
 	bool SolvePositionConstraints();
 

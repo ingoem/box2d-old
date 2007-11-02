@@ -65,7 +65,7 @@ struct b2GearJoint : public b2Joint
 
 	b2GearJoint(const b2GearJointDef* data);
 
-	void PreSolve();
+	void PrepareVelocitySolver();
 	void SolveVelocityConstraints(const b2StepInfo* step);
 	bool SolvePositionConstraints();
 

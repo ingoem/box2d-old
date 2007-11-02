@@ -153,6 +153,19 @@ struct b2Mat22
 		return B;
 	}
 
+	// Solve A * x = b
+	b2Vec2 Solve(const b2Vec2& b) const
+	{
+		float32 a11 = col1.x, a12 = col2.x, a21 = col1.y, a22 = col2.y;
+		float32 det = a11 * a22 - a12 * a21;
+		b2Assert(det != 0.0f);
+		det = 1.0f / det;
+		b2Vec2 x;
+		x.x = det * (a22 * b.x - a12 * b.y);
+		x.y = det * (a11 * b.y - a21 * b.x);
+		return x;
+	}
+
 	b2Vec2 col1, col2;
 };
 

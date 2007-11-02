@@ -17,33 +17,32 @@
 */
 
 #include "../Framework/Test.h"
+#include "../Framework/Render.h"
+#include "freeglut/GL/glut.h"
 
-#include "VerticalStack.h"
-#include "VaryingFriction.h"
-#include "VaryingRestitution.h"
-#include "CompoundShapes.h"
-#include "PolyShapes.h"
-#include "Pendulum.h"
 #include "Bridge.h"
-#include "PolyCollision.h"
 #include "BroadPhaseTest.h"
-#include "MotorsAndLimits.h"
-#include "Pyramid.h"
-#include "Web.h"
+#include "Chain.h"
 #include "CollisionFiltering.h"
 #include "CollisionProcessing.h"
-#include "SliderCrank.h"
-#include "Pulleys.h"
-#include "Gears.h"
+#include "CompoundShapes.h"
 #include "Cradle.h"
+#include "Gears.h"
+#include "MotorsAndLimits.h"
+#include "PolyCollision.h"
+#include "PolyShapes.h"
+#include "Pulleys.h"
+#include "Pyramid.h"
+#include "SliderCrank.h"
+#include "VaryingFriction.h"
+#include "VaryingRestitution.h"
+#include "VerticalStack.h"
+#include "Web.h"
 
 TestEntry g_testEntries[] =
 {
-	{"Simple Pendulum", Cradle::Create},
-	{"Chain", Pendulum::Create},
+	{"Chain", Chain::Create},
 	{"Bridge", Bridge::Create},
-#if 0
-	{"Newton's Cradle", Cradle::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Collision Processing", CollisionProcessing::Create},
@@ -59,6 +58,6 @@ TestEntry g_testEntries[] =
 	{"Varying Friction", VaryingFriction::Create},
 	{"PolyCollision", PolyCollision::Create},
 	{"Broad Phase", BroadPhaseTest::Create},
-#endif
+	{"Newton's Cradle", Cradle::Create},
 	{NULL, NULL}
 };

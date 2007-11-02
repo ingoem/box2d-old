@@ -57,7 +57,7 @@ struct b2MouseJoint : public b2Joint
 
 	b2MouseJoint(const b2MouseJointDef* def);
 
-	void PreSolve();
+	void PrepareVelocitySolver();
 	void SolveVelocityConstraints(const b2StepInfo* step);
 	bool SolvePositionConstraints()
 	{

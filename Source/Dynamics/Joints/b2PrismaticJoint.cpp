@@ -67,7 +67,7 @@ b2PrismaticJoint::b2PrismaticJoint(const b2PrismaticJointDef* def)
 	m_enableMotor = def->enableMotor;
 }
 
-void b2PrismaticJoint::PreSolve()
+void b2PrismaticJoint::PrepareVelocitySolver()
 {
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;

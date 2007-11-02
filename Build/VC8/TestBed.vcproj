@@ -213,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\Chain.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\CollisionFiltering.h"
 				>
 			</File>
@@ -230,10 +234,6 @@
 			</File>
 			<File
 				RelativePath="..\..\Examples\TestBed\Tests\MotorsAndLimits.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Examples\TestBed\Tests\Pendulum.h"
 				>
 			</File>
 			<File

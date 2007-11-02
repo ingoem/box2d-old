@@ -17,7 +17,6 @@
 */
 
 #include "BroadPhaseTest.h"
-#include "../Framework/Render.h"
 
 #include <stdio.h>
 const float32 k_width = 1.0f;

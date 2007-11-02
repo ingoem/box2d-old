@@ -16,13 +16,13 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef PENDULUM_H
-#define PENDULUM_H
+#ifndef CHAIN_H
+#define CHAIN_H
 
-class Pendulum : public Test
+class Chain : public Test
 {
 public:
-	Pendulum()
+	Chain()
 	{
 		b2Body* ground = NULL;
 		{
@@ -69,7 +69,7 @@ public:
 
 	static Test* Create()
 	{
-		return new Pendulum;
+		return new Chain;
 	}
 };
 

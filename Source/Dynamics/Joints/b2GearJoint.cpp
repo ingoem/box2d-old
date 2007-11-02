@@ -100,7 +100,7 @@ b2GearJoint::b2GearJoint(const b2GearJointDef* def)
 	m_impulse = 0.0f;
 }
 
-void b2GearJoint::PreSolve()
+void b2GearJoint::PrepareVelocitySolver()
 {
 	b2Body* g1 = m_ground1;
 	b2Body* g2 = m_ground2;

@@ -68,7 +68,7 @@ b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 	m_limitImpulse2 = 0.0f;
 }
 
-void b2PulleyJoint::PreSolve()
+void b2PulleyJoint::PrepareVelocitySolver()
 {
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;

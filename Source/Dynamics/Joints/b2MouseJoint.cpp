@@ -59,7 +59,7 @@ void b2MouseJoint::SetTarget(const b2Vec2& target)
 	m_target = target;
 }
 
-void b2MouseJoint::PreSolve()
+void b2MouseJoint::PrepareVelocitySolver()
 {
 	b2Body* b = m_body2;
 

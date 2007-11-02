@@ -19,6 +19,9 @@
 #ifndef CRADLE_H
 #define CRADLE_H
 
+// Note this is a very tricky problem to get right.
+// See: http://www.bulletphysics.com/Bullet/phpBB3/viewtopic.php?f=4&t=1584
+// I'm using a gap, but the simulation still breaks down after a few swings.
 class Cradle : public Test
 {
 public:
@@ -28,7 +31,7 @@ public:
 
 		{
 			b2CircleDef sd;
-			sd.radius = 0.5f;
+			sd.radius = 0.25f;
 			sd.density = 20.0f;
 			sd.friction = 0.0f;
 			sd.restitution = 1.0f;
@@ -39,15 +42,15 @@ public:
 			b2RevoluteJointDef jd;
 
 			const float32 y = 5.0f;
-			const float32 L = 5.0f;
+			const float32 L = 2.0f;
 
-			for (int32 i = 0; i < 1; ++i)
+			for (int32 i = 0; i < 5; ++i)
 			{
-				float32 x = sd.radius * (2.02f * i - 5.0f);
+				float32 x = sd.radius * (2.01f * i - 5.0f);
 				bd.position.Set(x, y);
-				float32 w = 100.0f;
-				bd.angularVelocity = w;
-				bd.linearVelocity.Set(w * L, 0.0f);
+				//float32 w = 100.0f;
+				//bd.angularVelocity = w;
+				//bd.linearVelocity.Set(w * L, 0.0f);
 				b2Body* body = m_world->CreateBody(&bd);
 
 				jd.anchorPoint.Set(x, y + L);

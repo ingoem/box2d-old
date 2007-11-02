@@ -20,6 +20,8 @@
 #define BROAD_PHASE_TEST_H
 
 #include "../Framework/Test.h"
+#include "../Framework/Render.h"
+#include "freeglut/GL/glut.h"
 
 const int32 k_actorCount = 256;
 const float32 k_extent = 15.0f;

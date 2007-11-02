@@ -48,7 +48,7 @@ struct b2DistanceJoint : public b2Joint
 
 	b2DistanceJoint(const b2DistanceJointDef* data);
 
-	void PreSolve();
+	void PrepareVelocitySolver();
 	void SolveVelocityConstraints(const b2StepInfo* step);
 	bool SolvePositionConstraints();
 
