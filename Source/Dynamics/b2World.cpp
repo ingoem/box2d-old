@@ -292,6 +292,8 @@ void b2World::Step(float32 dt, int32 iterations)
 	{
 		step.inv_dt = 0.0f;
 	}
+	
+	m_positionIterationCount = 0;
 
 	// Handle deferred contact destruction.
 	m_contactManager.CleanContactList();
@@ -398,6 +400,9 @@ void b2World::Step(float32 dt, int32 iterations)
 		}
 
 		island.Solve(&step, m_gravity);
+
+		m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
+		
 		if (m_doSleep)
 		{
 			island.UpdateSleep(dt);

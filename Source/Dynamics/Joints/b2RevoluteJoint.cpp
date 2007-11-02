@@ -20,6 +20,8 @@
 #include "../b2Body.h"
 #include "../b2World.h"
 
+#include "../b2Island.h"
+
 // Point-to-point constraint
 // C = p2 - p1
 // Cdot = v2 - v1
@@ -62,6 +64,10 @@ void b2RevoluteJoint::PreSolve()
 	// Compute the effective mass matrix.
 	b2Vec2 r1 = b2Mul(b1->m_R, m_localAnchor1);
 	b2Vec2 r2 = b2Mul(b2->m_R, m_localAnchor2);
+
+	b2Vec2 p1 = b1->m_position + r1;
+	b2Vec2 p2 = b2->m_position + r2;
+	m_ptpC = p2 - p1;
 
 	// K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
 	//      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r1.y*r1.y -r1.x*r1.y]
@@ -152,6 +158,7 @@ void b2RevoluteJoint::SolveVelocityConstraints(const b2StepInfo* step)
 	b2Vec2 r2 = b2Mul(b2->m_R, m_localAnchor2);
 
 	// Solve point-to-point constraint
+	//b2Vec2 ptpCdot = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1) + 0.4f * step->inv_dt * m_ptpC;
 	b2Vec2 ptpCdot = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
 	b2Vec2 ptpImpulse = -b2Mul(m_ptpMass, ptpCdot);
 	m_ptpImpulse += ptpImpulse;
@@ -200,10 +207,89 @@ void b2RevoluteJoint::SolveVelocityConstraints(const b2StepInfo* step)
 	}
 }
 
+// Position Correction Notes
+// =========================
+// I tried the several algorithms for position correction of the 2D revolute joint.
+// I looked at these systems:
+// - simple pendulum (sphere on massless stick)
+// - suspension bridge with 30 1m long planks of length 1m.
+// - multi-link chain with 30 1m long links.
+//
+// Here are the algorithms:
+//
+// Baumgarte - A fraction of the position error is added to the velocity error. There is no
+// separate position solver.
+//
+// Pseudo Velocities - After the velocity solver and position integration, the position error,
+// Jacobian, and effective mass are recomputed. Then a velocity LCP is solved with pseudo velocities
+// and a fraction of the position error is added to the pseudo velocity error. The pseudo velocities
+// are initialized to zero and there is no warm-starting. After the position solver, the pseudo velocities
+// are added to the positions. This is also called the First Order World method or the Position LCP method.
+//
+// Modified Nonlinear Gauss-Seidel (NGS) - Like Pseudo Velocities except the position error is computed each iteration
+// and the positions are updated after each iteration. The pseudo velocity states are not needed because they
+// are effectively zero at the beginning of each iteration. Since we have the current position error, we allow
+// the iterations to terminate early if the error becomes smaller than b2_linearSlop.
+//
+// Full NGS or just NGS - Like Modified NGS except the Jacobian and effective mass are recomputed each iteration.
+//
+// Here are the results:
+// Baumgarte - this is the cheapest algorithm but it has some stability problems, especially with the bridge.
+// The chain links separate easily close to the root and they jitter as they struggle to pull together. This
+// is one of the most common methods in the field. The big drawback is that the position correction artificially
+// affects the momentum, thus leading to instabilities and false bounce. I used a bias factor of 0.2. A larger
+// bias factor makes the bridge less stable, a smaller factor makes joints and contacts more spongy.
+//
+// Pseudo Velocities - the is more stable than the Baumgarte method. The bridge is stable. However, joints still separate
+// with large angular velocities. Drag the simple pendulum in a circle quickly and the joint will separate. The
+// chain separates easily and does not recover. I used a bias factor of 0.2. A larger value lead to the bridge
+// collapsing when a heavy cube drops on it.
+//
+//
+//
+void b2RevoluteJoint::PreparePositionSolver()
+{
+	b2Body* b1 = m_body1;
+	b2Body* b2 = m_body2;
+
+	b2Vec2 r1 = b2Mul(b1->m_R, m_localAnchor1);
+	b2Vec2 r2 = b2Mul(b2->m_R, m_localAnchor2);
+
+	b2Vec2 p1 = b1->m_position + r1;
+	b2Vec2 p2 = b2->m_position + r2;
+	m_ptpC = p2 - p1;
+	//b2Vec2 dpMax(b2_maxLinearCorrection, b2_maxLinearCorrection);
+	//m_ptpC = b2Clamp(m_ptpC, -dpMax, dpMax);
+
+	float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
+	float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
+
+	b2Mat22 K1;
+	K1.col1.x = invMass1 + invMass2;	K1.col2.x = 0.0f;
+	K1.col1.y = 0.0f;					K1.col2.y = invMass1 + invMass2;
+
+	b2Mat22 K2;
+	K2.col1.x =  invI1 * r1.y * r1.y;	K2.col2.x = -invI1 * r1.x * r1.y;
+	K2.col1.y = -invI1 * r1.x * r1.y;	K2.col2.y =  invI1 * r1.x * r1.x;
+
+	b2Mat22 K3;
+	K3.col1.x =  invI2 * r2.y * r2.y;	K3.col2.x = -invI2 * r2.x * r2.y;
+	K3.col1.y = -invI2 * r2.x * r2.y;	K3.col2.y =  invI2 * r2.x * r2.x;
+
+	b2Mat22 K = K1 + K2 + K3;
+	m_ptpMass = K.Invert();
+
+	m_r1 = r1;
+	m_r2 = r2;
+}
+
 bool b2RevoluteJoint::SolvePositionConstraints()
 {
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
+
+	float32 positionError = 0.0f;
+#if 0
 
 	// Solve point-to-point position error.
 	b2Vec2 r1 = b2Mul(b1->m_R, m_localAnchor1);
@@ -213,11 +299,29 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 	b2Vec2 p2 = b2->m_position + r2;
 	b2Vec2 ptpC = p2 - p1;
 
-	float32 positionError = ptpC.Length();
+	positionError = ptpC.Length();
 
 	// Prevent overly large corrections.
 	b2Vec2 dpMax(b2_maxLinearCorrection, b2_maxLinearCorrection);
 	ptpC = b2Clamp(ptpC, -dpMax, dpMax);
+
+	float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
+	float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
+
+	b2Mat22 K1;
+	K1.col1.x = invMass1 + invMass2;	K1.col2.x = 0.0f;
+	K1.col1.y = 0.0f;					K1.col2.y = invMass1 + invMass2;
+
+	b2Mat22 K2;
+	K2.col1.x =  invI1 * r1.y * r1.y;	K2.col2.x = -invI1 * r1.x * r1.y;
+	K2.col1.y = -invI1 * r1.x * r1.y;	K2.col2.y =  invI1 * r1.x * r1.x;
+
+	b2Mat22 K3;
+	K3.col1.x =  invI2 * r2.y * r2.y;	K3.col2.x = -invI2 * r2.x * r2.y;
+	K3.col1.y = -invI2 * r2.x * r2.y;	K3.col2.y =  invI2 * r2.x * r2.x;
+
+	b2Mat22 K = K1 + K2 + K3;
+	m_ptpMass = K.Invert();
 
 	b2Vec2 impulse = -b2Mul(m_ptpMass, ptpC);
 
@@ -228,7 +332,21 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 	b2->m_position += b2->m_invMass * impulse;
 	b2->m_rotation += b2->m_invI * b2Cross(r2, impulse);
 	b2->m_R.Set(b2->m_rotation);
+#else
+	b2Vec2 ptpCdot = b2->m_dp + b2Cross(b2->m_dr, m_r2) - b1->m_dp - b2Cross(b1->m_dr, m_r1) + 0.2f * m_ptpC;
+	b2Vec2 ptpImpulse = -b2Mul(m_ptpMass, ptpCdot);
 
+	b2Vec2 dp1 = b1->m_invMass * ptpImpulse;
+	b2Vec2 dp2 = b2->m_invMass * ptpImpulse;
+
+	positionError = 10000.0f; //b2Max(dp1.Length(), dp2.Length());
+
+	b1->m_dp -= dp1;
+	b1->m_dr -= b1->m_invI * b2Cross(m_r1, ptpImpulse);
+
+	b2->m_dp += dp2;
+	b2->m_dr += b2->m_invI * b2Cross(m_r2, ptpImpulse);
+#endif
 
 	// Handle limits.
 	float32 angularError = 0.0f;

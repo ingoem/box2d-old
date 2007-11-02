@@ -112,6 +112,7 @@ struct b2Joint
 	virtual void SolveVelocityConstraints(const b2StepInfo* step) = 0;
 
 	// This returns true if the position errors are within tolerance.
+	virtual void PreparePositionSolver() {}
 	virtual bool SolvePositionConstraints() = 0;
 
 	b2JointType m_type;

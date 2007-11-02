@@ -314,12 +314,13 @@ void Test::Step(const Settings* settings)
 		DrawString(5, m_textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)",
 			m_world->m_broadPhase->m_proxyCount, b2_maxProxies,
 			m_world->m_broadPhase->m_pairManager.m_pairCount, b2_maxPairs);
-
 		m_textLine += 15;
 
 		DrawString(5, m_textLine, "bodies/contacts/joints = %d/%d/%d",
 			m_world->m_bodyCount, m_world->m_contactCount, m_world->m_jointCount);
+		m_textLine += 15;
 
+		DrawString(5, m_textLine, "position iterations = %d", m_world->m_positionIterationCount);
 		m_textLine += 15;
 	}
 

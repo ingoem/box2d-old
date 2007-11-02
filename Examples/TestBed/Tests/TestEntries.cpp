@@ -35,9 +35,15 @@
 #include "SliderCrank.h"
 #include "Pulleys.h"
 #include "Gears.h"
+#include "Cradle.h"
 
 TestEntry g_testEntries[] =
 {
+	{"Simple Pendulum", Cradle::Create},
+	{"Chain", Pendulum::Create},
+	{"Bridge", Bridge::Create},
+#if 0
+	{"Newton's Cradle", Cradle::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Collision Processing", CollisionProcessing::Create},
@@ -46,14 +52,13 @@ TestEntry g_testEntries[] =
 	{"Web", Web::Create},
 	{"Gears", Gears::Create},
 	{"Pulleys", Pulleys::Create},
-	{"Bridge", Bridge::Create},
 	{"Slider Crank", SliderCrank::Create},
-	{"Pendulum", Pendulum::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"PolyCollision", PolyCollision::Create},
 	{"Broad Phase", BroadPhaseTest::Create},
+#endif
 	{NULL, NULL}
 };

@@ -100,6 +100,8 @@ struct b2World
 
 	b2WorldListener* m_listener;
 
+	int32 m_positionIterationCount;
+
 	static int32 s_enablePositionCorrection;
 	static int32 s_enableWarmStarting;
 };

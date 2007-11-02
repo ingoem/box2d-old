@@ -64,6 +64,9 @@ Version 1.4.1
 - Poly-circle ids. DONE
 - Improve mouse joint. DONE
 
+Version 1.4.2
+- Improve joint stability.
+
 Version 2.0.0
 - CCD.
 

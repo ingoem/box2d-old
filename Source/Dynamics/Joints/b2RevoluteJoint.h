@@ -65,6 +65,8 @@ struct b2RevoluteJoint : public b2Joint
 
 	void PreSolve();
 	void SolveVelocityConstraints(const b2StepInfo* step);
+
+	void PreparePositionSolver();
 	bool SolvePositionConstraints();
 
 	b2Vec2 m_localAnchor1;
@@ -85,6 +87,8 @@ struct b2RevoluteJoint : public b2Joint
 	bool m_enableLimit;
 	bool m_enableMotor;
 	b2LimitState m_limitState;
+
+	b2Vec2 m_r1, m_r2, m_ptpC;
 };
 
 #endif

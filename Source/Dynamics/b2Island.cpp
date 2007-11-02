@@ -24,6 +24,8 @@
 #include "Joints/b2Joint.h"
 #include "../Common/b2StackAllocator.h"
 
+int32 b2Island::m_positionIterationCount = 0;
+
 b2Island::b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacity, b2StackAllocator* allocator)
 {
 	m_bodyCapacity = bodyCapacity;
@@ -97,6 +99,9 @@ void b2Island::Solve(const b2StepInfo* step, const b2Vec2& gravity)
 	{
 		b2Body* b = m_bodies[i];
 
+		b->m_dp.SetZero();
+		b->m_dr = 0.0f;
+
 		if (b->m_invMass == 0.0f)
 			continue;
 
@@ -106,10 +111,15 @@ void b2Island::Solve(const b2StepInfo* step, const b2Vec2& gravity)
 		b->m_R.Set(b->m_rotation);
 	}
 
+	for (int32 i = 0; i < m_jointCount; ++i)
+	{
+		m_joints[i]->PreparePositionSolver();
+	}
+
 	// Solve position constraints.
 	if (b2World::s_enablePositionCorrection)
 	{
-		for (m_positionIterations = 0; m_positionIterations < step->iterations; ++m_positionIterations)
+		for (m_positionIterationCount = 0; m_positionIterationCount < step->iterations; ++m_positionIterationCount)
 		{
 			bool contactsOkay = contactSolver.SolvePositionConstraints(b2_contactBaumgarte);
 
@@ -137,6 +147,10 @@ void b2Island::Solve(const b2StepInfo* step, const b2Vec2& gravity)
 
 		if (b->m_invMass == 0.0f)
 			continue;
+
+		b->m_position += b->m_dp;
+		b->m_rotation += b->m_dr;
+		b->m_R.Set(b->m_rotation);
 
 		b->SynchronizeShapes();
 		b->m_force.Set(0.0f, 0.0f);

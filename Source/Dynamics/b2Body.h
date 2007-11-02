@@ -188,6 +188,9 @@ struct b2Body
 	b2Vec2 m_linearVelocity;
 	float32 m_angularVelocity;
 
+	b2Vec2 m_dp;
+	float32 m_dr;
+
 	b2Vec2 m_force;
 	float32 m_torque;
 
