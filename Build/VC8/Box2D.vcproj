@@ -280,6 +280,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Source\Dynamics\Contacts\b2Conservative.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Contacts\b2Conservative.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Source\Dynamics\Contacts\b2Contact.cpp"
 					>
 				</File>

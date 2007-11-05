@@ -205,6 +205,7 @@ b2Shape::b2Shape(const b2ShapeDef* def, b2Body* body)
 	m_body = body;
 
 	m_proxyId = b2_nullProxy;
+	m_maxRadius = 0.0f;
 }
 
 b2Shape::~b2Shape()
@@ -226,7 +227,9 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	m_radius = circle->radius;
 
 	m_R = m_body->m_R;
-	m_position = m_body->m_position + b2Mul(m_body->m_R, m_localPosition);
+	b2Vec2 r = b2Mul(m_body->m_R, m_localPosition);
+	m_position = m_body->m_position + r;
+	m_maxRadius = r.Length() + m_radius;
 
 	b2AABB aabb;
 	aabb.minVertex.Set(m_position.x - m_radius, m_position.y - m_radius);
@@ -359,10 +362,12 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	// Compute bounding box. TODO_ERIN optimize OBB
 	b2Vec2 minVertex(FLT_MAX, FLT_MAX);
 	b2Vec2 maxVertex(-FLT_MAX, -FLT_MAX);
+	m_maxRadius = 0.0f;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
 		minVertex = b2Min(minVertex, m_vertices[i]);
 		maxVertex = b2Max(maxVertex, m_vertices[i]);
+		m_maxRadius = b2Max(m_maxRadius, m_vertices[i].Length());
 	}
 
 	m_localOBB.R.SetIdentity();

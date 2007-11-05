@@ -16,8 +16,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef BODY_H
-#define BODY_H
+#ifndef B2_BODY_H
+#define B2_BODY_H
 
 #include "../Common/b2Math.h"
 #include "../Dynamics/Joints/b2Joint.h"
@@ -184,6 +184,9 @@ struct b2Body
 	b2Vec2 m_position;	// center of mass position
 	float32 m_rotation;
 	b2Mat22 m_R;
+
+	b2Vec2 m_position0;
+	float32 m_rotation0;
 
 	b2Vec2 m_linearVelocity;
 	float32 m_angularVelocity;

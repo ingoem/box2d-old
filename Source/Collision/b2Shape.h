@@ -158,6 +158,7 @@ struct b2Shape
 	virtual void Synchronize(const b2Vec2& position, const b2Mat22& R) = 0;
 
 	virtual b2Vec2 Support(const b2Vec2& d) const = 0;
+	float32 GetMaxRadius() const;
 
 	b2Mat22 m_R;
 	b2Vec2 m_position;
@@ -171,6 +172,8 @@ struct b2Shape
 
 	float32 m_friction;
 	float32 m_restitution;
+
+	float32 m_maxRadius;
 
 	b2Shape* m_next;
 };
@@ -244,5 +247,11 @@ inline const b2Mat22& b2Shape::GetRotationMatrix() const
 {
 	return m_R;
 }
+
+inline float32 b2Shape::GetMaxRadius() const
+{
+	return m_maxRadius;
+}
+
 
 #endif

@@ -27,6 +27,7 @@
 #include "CollisionProcessing.h"
 #include "CompoundShapes.h"
 #include "Cradle.h"
+#include "DistanceTest.h"
 #include "Gears.h"
 #include "MotorsAndLimits.h"
 #include "PolyCollision.h"
@@ -41,6 +42,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Distance Test", DistanceTest::Create},
 	{"Chain", Chain::Create},
 	{"Bridge", Bridge::Create},
 	{"Varying Restitution", VaryingRestitution::Create},

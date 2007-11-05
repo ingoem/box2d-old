@@ -19,6 +19,8 @@
 #include "b2Collision.h"
 #include "b2Shape.h"
 
+int32 g_GJK_Iterations = 0;
+
 // GJK using Voronoi regions (Christer Ericson) and region selection
 // optimizations (Casey Muratori).
 
@@ -28,10 +30,10 @@ static int32 ProcessTwo(b2Vec2* p1Out, b2Vec2* p2Out, b2Vec2* p1s, b2Vec2* p2s, 
 {
 	// If in point[1] region
 	b2Vec2 r = -points[1];
-	b2Vec2 d = points[1] - points[0];
+	b2Vec2 d = points[0] - points[1];
 	float32 length = d.Normalize();
 	float32 lambda = b2Dot(r, d);
-	if (lambda >= 0.0f || length < FLT_EPSILON)
+	if (lambda <= 0.0f || length < FLT_EPSILON)
 	{
 		// The simplex is reduced to a point.
 		*p1Out = p1s[1];
@@ -43,8 +45,9 @@ static int32 ProcessTwo(b2Vec2* p1Out, b2Vec2* p2Out, b2Vec2* p1s, b2Vec2* p2s, 
 	}
 
 	// Else in edge region
-	*p1Out = -(lambda * p1s[0] + (1.0f - lambda) * p1s[1]);
-	*p2Out = -(lambda * p2s[0] + (1.0f - lambda) * p2s[1]);
+	lambda /= length;
+	*p1Out = p1s[1] + lambda * (p1s[0] - p1s[1]);
+	*p2Out = p2s[1] + lambda * (p2s[0] - p2s[1]);
 	return 2;
 }
 
@@ -136,21 +139,24 @@ float32 b2Distance(b2Vec2* p1Out, b2Vec2* p2Out, const b2Shape* shape1, const b2
 	*p1Out = shape1->m_position;
 	*p2Out = shape2->m_position;
 
+	float32 vSqr = 0.0f;
 	const int32 maxIterations = 20;
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
 		b2Vec2 v = *p2Out - *p1Out;
-		b2Vec2 w1 = shape1->Support(-v);
-		b2Vec2 w2 = shape2->Support(v);
+		b2Vec2 w1 = shape1->Support(v);
+		b2Vec2 w2 = shape2->Support(-v);
 		b2Vec2 w = w2 - w1;
-		float32 vSqr = b2Dot(v, v);
-		if (vSqr - b2Dot(v, w) <= 0.01f * vSqr) // or w in points
+		vSqr = b2Dot(v, v);
+		float32 vw = b2Dot(v, w);
+		if (vSqr - vw <= 0.01f * vSqr) // or w in points
 		{
 			if (pointCount == 0)
 			{
 				*p1Out = w1;
 				*p2Out = w2;
 			}
+			g_GJK_Iterations = iter;
 			return sqrtf(vSqr);
 		}
 
@@ -186,11 +192,13 @@ float32 b2Distance(b2Vec2* p1Out, b2Vec2* p2Out, const b2Shape* shape1, const b2
 			maxSqr = b2Max(maxSqr, b2Dot(points[i], points[i]));
 		}
 
-		if (pointCount == 3 || vSqr <= 0.01f * maxSqr)
+		if (pointCount == 3 || vSqr <= 100.0f * FLT_EPSILON * maxSqr)
 		{
-			break;
+			g_GJK_Iterations = iter;
+			return sqrtf(vSqr);
 		}
 	}
 
-	return 0.0f;
+	g_GJK_Iterations = maxIterations;
+	return sqrtf(vSqr);
 }
