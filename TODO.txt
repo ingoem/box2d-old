@@ -101,3 +101,5 @@ Version 3+
 - Tree constraints.
 - Buoyancy.
 - Heightfields.
+- Revolute 3x3 effective mass.
+- Use velocity lambda to control NGS clamping.
