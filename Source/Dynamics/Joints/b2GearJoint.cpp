@@ -151,7 +151,7 @@ void b2GearJoint::PrepareVelocitySolver()
 	b2->m_angularVelocity += b2->m_invI * m_impulse * m_J.angular2;
 }
 
-void b2GearJoint::SolveVelocityConstraints(const b2StepInfo* step)
+void b2GearJoint::SolveVelocityConstraints(const b2TimeStep* step)
 {
 	NOT_USED(step);
 

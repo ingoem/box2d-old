@@ -28,6 +28,8 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_position = bd->position;
 	m_rotation = bd->rotation;
 	m_R.Set(m_rotation);
+	m_position0 = m_position;
+	m_rotation0 = m_rotation;
 	m_world = world;
 
 	m_linearDamping = b2Clamp(1.0f - bd->linearDamping, 0.0f, 1.0f);
@@ -156,6 +158,9 @@ void b2Body::SetOriginPosition(const b2Vec2& position, float rotation)
 	m_R.Set(m_rotation);
 	m_position = position + b2Mul(m_R, m_center);
 
+	m_position0 = m_position;
+	m_rotation0 = m_rotation;
+
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		s->Synchronize(m_position, m_R);
@@ -175,6 +180,9 @@ void b2Body::SetCenterPosition(const b2Vec2& position, float rotation)
 	m_R.Set(m_rotation);
 	m_position = position;
 
+	m_position0 = m_position;
+	m_rotation0 = m_rotation;
+
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		s->Synchronize(m_position, m_R);
@@ -188,6 +196,14 @@ void b2Body::SynchronizeShapes()
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		s->Synchronize(m_position, m_R);
+	}
+}
+
+void b2Body::QuickSyncShapes();
+{
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
+	{
+		s->QuickSync(m_position, m_R);
 	}
 }
 

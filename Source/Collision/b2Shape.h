@@ -156,6 +156,7 @@ struct b2Shape
 	virtual ~b2Shape();
 
 	virtual void Synchronize(const b2Vec2& position, const b2Mat22& R) = 0;
+	virtual void QuickSync(const b2Vec2& position, const b2Mat22& R) = 0;
 
 	virtual b2Vec2 Support(const b2Vec2& d) const = 0;
 	float32 GetMaxRadius() const;
@@ -189,6 +190,7 @@ struct b2CircleShape : public b2Shape
 	b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);
 
 	void Synchronize(const b2Vec2& position, const b2Mat22& R);
+	void QuickSync(const b2Vec2& position, float32 rotation);
 
 	b2Vec2 Support(const b2Vec2& d) const;
 
@@ -208,6 +210,7 @@ struct b2PolyShape : public b2Shape
 	b2PolyShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);
 
 	void Synchronize(const b2Vec2& position, const b2Mat22& R);
+	void QuickSync(const b2Vec2& position, float32 rotation);
 
 	b2Vec2 Support(const b2Vec2& d) const;
 

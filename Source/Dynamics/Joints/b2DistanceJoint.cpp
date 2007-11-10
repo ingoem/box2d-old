@@ -79,7 +79,7 @@ void b2DistanceJoint::PrepareVelocitySolver()
 	}
 }
 
-void b2DistanceJoint::SolveVelocityConstraints(const b2StepInfo* step)
+void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep* step)
 {
 	NOT_USED(step);
 

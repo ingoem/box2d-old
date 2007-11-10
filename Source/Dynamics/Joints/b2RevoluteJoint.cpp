@@ -145,7 +145,7 @@ void b2RevoluteJoint::PrepareVelocitySolver()
 	m_limitPositionImpulse = 0.0f;
 }
 
-void b2RevoluteJoint::SolveVelocityConstraints(const b2StepInfo* step)
+void b2RevoluteJoint::SolveVelocityConstraints(const b2TimeStep* step)
 {
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;

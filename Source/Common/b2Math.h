@@ -109,7 +109,7 @@ struct b2Mat22
 		col2 = c2;
 	}
 
-	b2Mat22(float32 angle)
+	explicit b2Mat22(float32 angle)
 	{
 		float32 c = cosf(angle), s = sinf(angle);
 		col1.x = c; col2.x = -s;

@@ -21,6 +21,8 @@
 
 struct b2Shape;
 
-void b2Conservative(b2Shape* shape1, b2Shape* shape2);
+// Move two bodies and their shapes forward in time conservatively.
+// Returns true if the shapes collide.
+bool b2Conservative(b2Shape* shape1, b2Shape* shape2);
 
 #endif

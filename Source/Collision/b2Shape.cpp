@@ -278,6 +278,12 @@ void b2CircleShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
 	}
 }
 
+void b2CircleShape::QuickSync(const b2Vec2& position, const b2Mat22& R)
+{
+	m_R = R;
+	m_position = position + b2Mul(R, m_localPosition);
+}
+
 b2Vec2 b2CircleShape::Support(const b2Vec2& d) const
 {
 	b2Vec2 u = d;
@@ -447,6 +453,12 @@ void b2PolyShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
 		m_proxyId = b2_nullProxy;
 		m_body->Freeze();
 	}
+}
+
+void b2PolyShape::QuickSync(const b2Vec2& position, const b2Mat22& R)
+{
+	m_R = R;
+	m_position = position;
 }
 
 b2Vec2 b2PolyShape::Support(const b2Vec2& d) const

@@ -281,7 +281,7 @@ void b2World::DestroyJoint(b2Joint* j)
 
 void b2World::Step(float32 dt, int32 iterations)
 {
-	b2StepInfo step;
+	b2TimeStep step;
 	step.dt = dt;
 	step.iterations	= iterations;
 	if (dt > 0.0f)
@@ -301,7 +301,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	// Handle deferred body destruction.
 	CleanBodyList();
 
-	// Create and/or update contacts.
+	// Update contacts.
 	m_contactManager.Collide();
 
 	// Size the island for the worst case.

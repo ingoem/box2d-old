@@ -64,7 +64,7 @@ struct b2RevoluteJoint : public b2Joint
 	b2RevoluteJoint(const b2RevoluteJointDef* def);
 
 	void PrepareVelocitySolver();
-	void SolveVelocityConstraints(const b2StepInfo* step);
+	void SolveVelocityConstraints(const b2TimeStep* step);
 
 	bool SolvePositionConstraints();
 

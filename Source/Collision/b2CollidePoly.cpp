@@ -235,8 +235,10 @@ static void FindIncidentEdge(ClipVertex c[2], const b2PolyShape* poly1, int32 ed
 // Clip
 
 // The normal points from 1 to 2
-void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* polyA, const b2PolyShape* polyB)
+void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* polyA, const b2PolyShape* polyB, bool conservative)
 {
+	NOT_USED(conservative);
+
 	manifold->pointCount = 0;
 
 	int32 edgeA = 0;

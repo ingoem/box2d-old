@@ -97,7 +97,7 @@ void b2MouseJoint::PrepareVelocitySolver()
 	b->m_angularVelocity += invI * b2Cross(r, P);
 }
 
-void b2MouseJoint::SolveVelocityConstraints(const b2StepInfo* step)
+void b2MouseJoint::SolveVelocityConstraints(const b2TimeStep* step)
 {
 	b2Body* body = m_body2;
 

@@ -49,7 +49,7 @@ struct b2DistanceJoint : public b2Joint
 	b2DistanceJoint(const b2DistanceJointDef* data);
 
 	void PrepareVelocitySolver();
-	void SolveVelocityConstraints(const b2StepInfo* step);
+	void SolveVelocityConstraints(const b2TimeStep* step);
 	bool SolvePositionConstraints();
 
 	b2Vec2 m_localAnchor1;

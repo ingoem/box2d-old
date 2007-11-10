@@ -34,7 +34,7 @@ struct b2Shape;
 struct b2Contact;
 class b2BroadPhase;
 
-struct b2StepInfo
+struct b2TimeStep
 {
 	float32 dt;			// time step
 	float32 inv_dt;		// inverse time step (0 if dt == 0).

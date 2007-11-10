@@ -171,6 +171,7 @@ struct b2Body
 	~b2Body();
 
 	void SynchronizeShapes();
+	void QuickSyncShapes();
 
 	// This is used to prevent connected bodies from colliding.
 	// It may lie, depending on the collideConnected flag.
@@ -185,6 +186,7 @@ struct b2Body
 	float32 m_rotation;
 	b2Mat22 m_R;
 
+	// Conservative advancement data.
 	b2Vec2 m_position0;
 	float32 m_rotation0;
 

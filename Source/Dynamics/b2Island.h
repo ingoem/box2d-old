@@ -25,7 +25,7 @@ class b2StackAllocator;
 struct b2Contact;
 struct b2Body;
 struct b2Joint;
-struct b2StepInfo;
+struct b2TimeStep;
 
 struct b2Island
 {
@@ -34,7 +34,7 @@ struct b2Island
 
 	void Clear();
 
-	void Solve(const b2StepInfo* step, const b2Vec2& gravity);
+	void Solve(const b2TimeStep* step, const b2Vec2& gravity);
 
 	void UpdateSleep(float32 dt);
 

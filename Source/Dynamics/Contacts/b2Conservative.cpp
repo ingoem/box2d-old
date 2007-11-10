@@ -21,10 +21,12 @@
 #include "../../Collision/b2Shape.h"
 #include "../b2Body.h"
 
-void b2Conservative(b2Shape* shape1, b2Shape* shape2)
+
+bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 {
 	b2Body* body1 = shape1->GetBody();
 	b2Body* body2 = shape2->GetBody();
+
 	b2Vec2 v1 = body1->m_position - body1->m_position0;
 	float32 w1 = body1->m_rotation - body1->m_rotation0;
 	b2Vec2 v2 = body2->m_position - body2->m_position0;
@@ -33,35 +35,97 @@ void b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	float32 r1 = shape1->GetMaxRadius();
 	float32 r2 = shape2->GetMaxRadius();
 
+	b2Vec2 p1Start = body1->m_position0;
+	float32 a1Start = body1->m_rotation0;
+
+	b2Vec2 p2Start = body2->m_position0;
+	float32 a2Start = body2->m_rotation0;
+
+	b2Vec2 p1 = p1Start;
+	float32 a1 = a1Start;
+	b2Vec2 p2 = p2Start;
+	float32 a2 = a2Start;
+
+	shape1->QuickSync(p1, a1);
+	shape2->QuickSync(p2, a2);
+
+	float32 s1 = 0.0f;
 	const int32 maxIterations = 10;
+	b2Vec2 d;
+	float32 invRelativeVelocity = 0.0f;
+	bool hit = false;
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
 		// Get the accurate distance between shapes.
 		b2Vec2 x1, x2;
 		float32 distance = b2Distance(&x1, &x2, shape1, shape2);
-		if (distance == 0.0f)
+		if (distance < b2_linearSlop)
 		{
-			b2Assert(false);
+			hit = true;
 			break;
 		}
 
-		b2Vec2 d = x2 - x1;
-		d.Normalize();
+		if (iter == 0)
+		{
+			b2Vec2 d = x2 - x1;
+			d.Normalize();
+			float32 relativeVelocity = b2Dot(d, v1 - v2) + w1 * r1 + w2 * r2;
+			if (b2Abs(relativeVelocity) < FLT_EPSILON)
+			{
+				hit = false;
+				break;
+			}
+
+			invRelativeVelocity = 1.0f / relativeVelocity;
+		}
 
 		// Get the conservative movement.
-		float32 movement = b2Dot(d, v1 - v2) + w1 * r1 + w2 * r2;
+		float32 ds = distance * invRelativeVelocity;
+		float32 s2 = s1 + ds;
 
-		if (movement <= distance)
+		if (s2 < 0.0f || 1.0f < s2)
 		{
+			hit = false;
 			break;
 		}
 
-		float32 dt = distance / movement;
-		dt;
+		if (s2 < (1.0f + 100.0f * FLT_EPSILON) * s1)
+		{
+			hit = true;
+			break;
+		}
+
+		s1 = s2;
+
+		// Move forward conservatively.
+		p1 = p1Start + s1 * v1;
+		a1 = a1Start + s1 * w1;
+		p2 = p2Start + s1 * v2;
+		a2 = a2Start + s1 * w2;
+
+		b2Mat22 R1(a1), R2(a2);
+		shape1->QuickSync(p1, R1);
+		shape2->QuickSync(p2, R2);
 	}
 
-		
+	if (hit)
+	{
+		// Hit, move bodies to safe position and re-sync shapes.
+		body1->m_position = p1;
+		body1->m_rotation = a1;
+		body1->m_R.Set(a1);
+		body1->QuickSyncShapes();
 
+		body2->m_position = p2;
+		body2->m_rotation = a2;
+		body2->m_R.Set(a2);
+		body2->QuickSyncShapes();
 
+		return true;
+	}
 
+	// No hit, restore shapes.
+	shape1->QuickSync(body1->m_position, body1->m_rotation);
+	shape2->QuickSync(body2->m_position, body2->m_rotation);
+	return false;
 }

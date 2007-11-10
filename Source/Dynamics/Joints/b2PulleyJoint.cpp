@@ -152,7 +152,7 @@ void b2PulleyJoint::PrepareVelocitySolver()
 	b2->m_angularVelocity += b2->m_invI * b2Cross(r2, P2);
 }
 
-void b2PulleyJoint::SolveVelocityConstraints(const b2StepInfo* step)
+void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep* step)
 {
 	NOT_USED(step);
 

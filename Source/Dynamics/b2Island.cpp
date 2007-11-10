@@ -136,7 +136,7 @@ void b2Island::Clear()
 	m_jointCount = 0;
 }
 
-void b2Island::Solve(const b2StepInfo* step, const b2Vec2& gravity)
+void b2Island::Solve(const b2TimeStep* step, const b2Vec2& gravity)
 {
 	for (int32 i = 0; i < m_bodyCount; ++i)
 	{
@@ -150,6 +150,10 @@ void b2Island::Solve(const b2StepInfo* step, const b2Vec2& gravity)
 
 		b->m_linearVelocity *= b->m_linearDamping;
 		b->m_angularVelocity *= b->m_angularDamping;
+
+		// Store positions for conservative advancement.
+		b->m_position0 = b->m_position;
+		b->m_rotation0 = b->m_rotation;
 	}
 
 	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);

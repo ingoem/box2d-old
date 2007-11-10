@@ -103,3 +103,4 @@ Version 3+
 - Heightfields.
 - Revolute 3x3 effective mass.
 - Use velocity lambda to control NGS clamping.
+- Sensors.
