@@ -251,19 +251,25 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	}
 }
 
-void b2CircleShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
+void Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
+					const b2Vec2& position2, const b2Mat22& R2);
 {
-	m_R = R;
-	m_position = position + b2Mul(R, m_localPosition);
+	m_R = R2;
+	m_position = position2 + b2Mul(m_R, m_localPosition);
 
 	if (m_proxyId == b2_nullProxy)
 	{	
 		return;
 	}
 
+	// Compute an AABB that covers the swept shape (may miss some rotation effect).
+	b2Vec2 p1 = b2Min(position1 + b2Mul(R1, m_localPosition), m_position);
+	b2Vec2 lower = b2Min(p1, m_position);
+	b2Vec2 upper = b2Max(p1, m_position);
+
 	b2AABB aabb;
-	aabb.minVertex.Set(m_position.x - m_radius, m_position.y - m_radius);
-	aabb.maxVertex.Set(m_position.x + m_radius, m_position.y + m_radius);
+	aabb.minVertex.Set(lower.x - m_radius, lower.y - m_radius);
+	aabb.maxVertex.Set(upper.x + m_radius, upper.y + m_radius);
 
 	b2BroadPhase* broadPhase = m_body->m_world->m_broadPhase;
 	if (broadPhase->InRange(aabb))
