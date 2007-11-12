@@ -147,7 +147,7 @@ void* b2PairManager::Remove(int32 proxyId1, int32 proxyId2)
 	b2Assert(pair->proxyId2 == proxyId2);
 
 	int32 pairIndex = int32(pair - m_pairs);
-	b2Assert(pairIndex < m_pairCount);
+	b2Assert(0 <= pairIndex && pairIndex < m_pairCount);
 
 	// Remove the pair from the hash table.
 	int32 index = m_hashTable[hash];

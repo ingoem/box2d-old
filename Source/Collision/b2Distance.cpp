@@ -120,7 +120,7 @@ static int32 ProcessThree(b2Vec2* p1Out, b2Vec2* p2Out, b2Vec2* p1s, b2Vec2* p2s
 
 	// Inside the triangle, compute barycentric coordinates
 	float32 denom = va + vb + vc;
-	b2Assert(denom > FLT_EPSILON);
+	b2Assert(denom > 0.0f);
 	denom = 1.0f / denom;
 	float32 u = va * denom;
 	float32 v = vb * denom;

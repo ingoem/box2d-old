@@ -25,6 +25,7 @@ public:
 
 	CCDTest()
 	{
+		m_world->m_gravity.SetZero();
 #if 0
 		{
 			b2BoxDef sd;
@@ -41,10 +42,11 @@ public:
 			b2CircleDef sd;
 			sd.type = e_circleShape;
 			sd.radius = 1.0f;
+			sd.density = 1.0f;
 
 			b2BodyDef bd;
-			bd.position.Set(-10.0f, 20.0f);
-			bd.linearVelocity.Set(10.0f, 0.0f);
+			bd.position.Set(-50.0f, 20.0f);
+			bd.linearVelocity.Set(400.0f, 0.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
@@ -54,10 +56,11 @@ public:
 			b2CircleDef sd;
 			sd.type = e_circleShape;
 			sd.radius = 1.0f;
+			sd.density = 1.0f;
 
 			b2BodyDef bd;
-			bd.position.Set(10.0f, 20.0f);
-			bd.linearVelocity.Set(-10.0f, 0.0f);
+			bd.position.Set(50.0f, 20.0f);
+			bd.linearVelocity.Set(-400.0f, 0.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}

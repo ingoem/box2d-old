@@ -103,19 +103,14 @@ b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2Sta
 				ccp->tangentMass = 1.0f /  kTangent;
 
 				// Setup a velocity bias for restitution.
-				if (ccp->separation <= 0.0f)
+				ccp->velocityBias = 0.0f;
+				float32 vRel = b2Dot(c->normal, v2 + b2Cross(w2, r2) - v1 - b2Cross(w1, r1));
+				if (vRel < -b2_velocityThreshold)
 				{
-					float32 vRel = b2Dot(c->normal, v2 + b2Cross(w2, r2) - v1 - b2Cross(w1, r1));
-					if (vRel < -b2_velocityThreshold)
-					{
-						ccp->velocityBias = -c->restitution * vRel;
-					}
-					else
-					{
-						ccp->velocityBias = 0.0f;
-					}
+					ccp->velocityBias = -c->restitution * vRel;
 				}
-				else
+
+				if (ccp->separation > b2_linearSlop)
 				{
 					ccp->velocityBias = -0.0167f * ccp->separation; // TODO_ERIN b2TimeStep
 				}

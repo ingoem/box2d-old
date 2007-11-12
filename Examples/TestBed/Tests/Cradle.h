@@ -27,6 +27,8 @@ class Cradle : public Test
 public:
 	Cradle()
 	{
+		b2BroadPhase::s_validate = true;
+
 		b2Body* ground = m_world->GetGroundBody();
 
 		{
@@ -46,7 +48,7 @@ public:
 
 			for (int32 i = 0; i < 5; ++i)
 			{
-				float32 x = sd.radius * (2.01f * i - 5.0f);
+				float32 x = sd.radius * (2.02f * i - 5.0f);
 				bd.position.Set(x, y);
 				//float32 w = 100.0f;
 				//bd.angularVelocity = w;
@@ -59,6 +61,11 @@ public:
 				m_world->CreateJoint(&jd);
 			}
 		}
+	}
+
+	~Cradle()
+	{
+		b2BroadPhase::s_validate = false;
 	}
 
 	static Test* Create()

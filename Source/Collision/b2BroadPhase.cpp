@@ -148,6 +148,9 @@ bool b2BroadPhase::TestOverlap(b2Proxy* p1, b2Proxy* p2)
 
 void b2BroadPhase::ComputeBounds(uint16* lowerValues, uint16* upperValues, const b2AABB& aabb)
 {
+	b2Assert(aabb.maxVertex.x > aabb.minVertex.x);
+	b2Assert(aabb.maxVertex.y > aabb.minVertex.y);
+
 	b2Vec2 minVertex = b2Clamp(aabb.minVertex, m_worldAABB.minVertex, m_worldAABB.maxVertex);
 	b2Vec2 maxVertex = b2Clamp(aabb.maxVertex, m_worldAABB.minVertex, m_worldAABB.maxVertex);
 
@@ -330,9 +333,9 @@ uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 ca
 		}
 
 		// The Add command may return an old pair, which should not happen here.
-		b2Assert(pair->IsReceived() == false);
+		b2Assert(pair->IsFinal() == false);
 		pair->userData = m_pairCallback->PairAdded(proxy->userData, m_proxyPool[m_queryResults[i]].userData);
-		pair->SetReceived();
+		pair->SetFinal();
 	}
 
 #if defined(_DEBUG)
@@ -435,7 +438,7 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 {
 	if (proxyId == b2_nullProxy || b2_maxProxies <= proxyId)
 	{
-		
+		b2Assert(false);
 		return;
 	}
 
@@ -450,6 +453,13 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 	b2Proxy* proxy = m_proxyPool + proxyId;
 	uint16 lowerValues[2], upperValues[2];
 	ComputeBounds(lowerValues, upperValues, aabb);
+
+	uint16 lowerBounds[2], upperBounds[2];
+	for (int32 i = 0; i < 2; ++i)
+	{
+		lowerBounds[i] = proxy->lowerBounds[i];
+		upperBounds[i] = proxy->upperBounds[i];
+	}
 
 	for (int32 axis = 0; axis < 2; ++axis)
 	{
@@ -638,11 +648,13 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 void b2BroadPhase::AddBufferedPair(int32 id1, int32 id2)
 {
 	b2Assert(m_proxyPool[id1].IsValid() && m_proxyPool[id2].IsValid());
-
+	
 	if (ShouldCollide(id1, id2) == false)
 	{
 		return;
 	}
+
+	b2Assert(m_pairBufferCount < b2_maxPairs);
 
 	b2Pair* pair = m_pairManager.Add(id1, id2);
 	
@@ -655,17 +667,13 @@ void b2BroadPhase::AddBufferedPair(int32 id1, int32 id2)
 	if (pair->IsBuffered() == false)
 	{
 		// This must be a new pair.
-		b2Assert(pair->IsReceived() == false);
+		b2Assert(pair->IsFinal() == false);
 
-		// If there is room in the pair buffer ...
-		if (m_pairBufferCount < b2_maxPairs)
-		{
-			// Add it to the pair buffer.
-			pair->SetBuffered();
-			m_pairBuffer[m_pairBufferCount].proxyId1 = pair->proxyId1;
-			m_pairBuffer[m_pairBufferCount].proxyId2 = pair->proxyId2;
-			++m_pairBufferCount;
-		}
+		// Add it to the pair buffer.
+		pair->SetBuffered();
+		m_pairBuffer[m_pairBufferCount].proxyId1 = pair->proxyId1;
+		m_pairBuffer[m_pairBufferCount].proxyId2 = pair->proxyId2;
+		++m_pairBufferCount;
 
 		b2Assert(m_pairBufferCount <= m_pairManager.GetCount());
 	}
@@ -685,6 +693,7 @@ void b2BroadPhase::AddBufferedPair(int32 id1, int32 id2)
 void b2BroadPhase::RemoveBufferedPair(int32 id1, int32 id2)
 {
 	b2Assert(m_proxyPool[id1].IsValid() && m_proxyPool[id2].IsValid());
+	b2Assert(m_pairBufferCount < b2_maxPairs);
 
 	b2Pair* pair = m_pairManager.Find(id1, id2);
 
@@ -697,15 +706,12 @@ void b2BroadPhase::RemoveBufferedPair(int32 id1, int32 id2)
 	if (pair->IsBuffered() == false)
 	{
 		// This must be an old pair.
-		b2Assert(pair->IsReceived());
+		b2Assert(pair->IsFinal());
 
-		if (m_pairBufferCount < b2_maxPairs)
-		{
-			pair->SetBuffered();
-			m_pairBuffer[m_pairBufferCount].proxyId1 = pair->proxyId1;
-			m_pairBuffer[m_pairBufferCount].proxyId2 = pair->proxyId2;
-			++m_pairBufferCount;
-		}
+		pair->SetBuffered();
+		m_pairBuffer[m_pairBufferCount].proxyId1 = pair->proxyId1;
+		m_pairBuffer[m_pairBufferCount].proxyId2 = pair->proxyId2;
+		++m_pairBufferCount;
 
 		b2Assert(m_pairBufferCount <= m_pairManager.GetCount());
 	}
@@ -728,6 +734,7 @@ void b2BroadPhase::Flush()
 	{
 		b2Pair* pair = m_pairManager.Find(m_pairBuffer[i].proxyId1, m_pairBuffer[i].proxyId2);
 		b2Assert(pair->IsBuffered());
+		pair->ClearBuffered();
 
 		b2Proxy* proxy1 = m_proxyPool + pair->proxyId1;
 		b2Proxy* proxy2 = m_proxyPool + pair->proxyId2;
@@ -739,7 +746,7 @@ void b2BroadPhase::Flush()
 		{
 			b2Assert(TestOverlap(proxy1, proxy2) == false);
 
-			if (pair->IsReceived())
+			if (pair->IsFinal() == true)
 			{
 				m_pairCallback->PairRemoved(proxy1->userData, proxy2->userData, pair->userData);
 			}
@@ -752,12 +759,11 @@ void b2BroadPhase::Flush()
 		else
 		{
 			b2Assert(TestOverlap(proxy1, proxy2) == true);
-			pair->ClearBuffered();
 
-			if (pair->IsReceived() == false)
+			if (pair->IsFinal() == false)
 			{
 				pair->userData = m_pairCallback->PairAdded(proxy1->userData, proxy2->userData);
-				pair->SetReceived();
+				pair->SetFinal();
 			}
 		}
 	}

@@ -37,9 +37,9 @@ struct b2Pair
 {
 	enum
 	{
-		e_pairBuffered = 0x0001,
-		e_pairRemoved = 0x0002,
-		e_pairReceived = 0x0004,
+		e_pairBuffered	= 0x0001,
+		e_pairRemoved	= 0x0002,
+		e_pairFinal		= 0x0004,
 	};
 
 	void SetBuffered()		{ status |= e_pairBuffered; }
@@ -50,8 +50,8 @@ struct b2Pair
 	void ClearRemoved()		{ status &= ~e_pairRemoved; }
 	bool IsRemoved()		{ return (status & e_pairRemoved) == e_pairRemoved; }
 
-	void SetReceived()		{ status |= e_pairReceived; }
-	bool IsReceived()		{ return (status & e_pairReceived) == e_pairReceived; }
+	void SetFinal()		{ status |= e_pairFinal; }
+	bool IsFinal()		{ return (status & e_pairFinal) == e_pairFinal; }
 
 	void* userData;
 	uint16 proxyId1;

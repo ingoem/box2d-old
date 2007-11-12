@@ -69,6 +69,7 @@ Version 1.4.2
 
 Version 2.0.0
 - CCD.
+- Simplify broad-phase.
 
 Version 2.1.0
 - Meshes (segment soup).
