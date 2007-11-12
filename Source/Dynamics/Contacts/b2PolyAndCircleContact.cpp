@@ -17,6 +17,7 @@
 */
 
 #include "b2PolyAndCircleContact.h"
+#include "b2Conservative.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <new.h>
@@ -45,7 +46,7 @@ b2PolyAndCircleContact::b2PolyAndCircleContact(b2Shape* s1, b2Shape* s2)
 
 void b2PolyAndCircleContact::Evaluate()
 {
-	b2CollidePolyAndCircle(&m_manifold, (b2PolyShape*)m_shape1, (b2CircleShape*)m_shape2);
+	b2CollidePolyAndCircle(&m_manifold, (b2PolyShape*)m_shape1, (b2CircleShape*)m_shape2, false);
 
 	if (m_manifold.pointCount > 0)
 	{

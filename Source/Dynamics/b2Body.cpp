@@ -163,7 +163,7 @@ void b2Body::SetOriginPosition(const b2Vec2& position, float rotation)
 
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
-		s->Synchronize(m_position, m_R);
+		s->Synchronize(m_position, m_R, m_position, m_R);
 	}
 
 	m_world->m_broadPhase->Flush();
@@ -185,7 +185,7 @@ void b2Body::SetCenterPosition(const b2Vec2& position, float rotation)
 
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
-		s->Synchronize(m_position, m_R);
+		s->Synchronize(m_position, m_R, m_position, m_R);
 	}
 
 	m_world->m_broadPhase->Flush();
@@ -193,13 +193,14 @@ void b2Body::SetCenterPosition(const b2Vec2& position, float rotation)
 
 void b2Body::SynchronizeShapes()
 {
+	b2Mat22 R0(m_rotation0);
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
-		s->Synchronize(m_position, m_R);
+		s->Synchronize(m_position0, R0, m_position, m_R);
 	}
 }
 
-void b2Body::QuickSyncShapes();
+void b2Body::QuickSyncShapes()
 {
 	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{

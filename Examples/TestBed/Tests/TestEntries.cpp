@@ -22,6 +22,7 @@
 
 #include "Bridge.h"
 #include "BroadPhaseTest.h"
+#include "CCDTest.h"
 #include "Chain.h"
 #include "CollisionFiltering.h"
 #include "CollisionProcessing.h"
@@ -42,6 +43,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"CCD Test", CCDTest::Create},
 	{"Distance Test", DistanceTest::Create},
 	{"Chain", Chain::Create},
 	{"Bridge", Bridge::Create},

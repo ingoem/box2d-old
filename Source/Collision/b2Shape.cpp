@@ -251,8 +251,8 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	}
 }
 
-void Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
-					const b2Vec2& position2, const b2Mat22& R2);
+void b2CircleShape::Synchronize(const b2Vec2& position1, const b2Mat22& R1,
+								const b2Vec2& position2, const b2Mat22& R2)
 {
 	m_R = R2;
 	m_position = position2 + b2Mul(m_R, m_localPosition);
@@ -429,24 +429,41 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	}
 }
 
-void b2PolyShape::Synchronize(const b2Vec2& position, const b2Mat22& R)
+void b2PolyShape::Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
+								const b2Vec2& position2, const b2Mat22& R2)
 {
 	// The body transform is copied for convenience.
-	m_R = R;
-	m_position = position;
+	m_R = R2;
+	m_position = position2;
 
 	if (m_proxyId == b2_nullProxy)
 	{	
 		return;
 	}
 
-	b2Mat22 obbR = b2Mul(m_R, m_localOBB.R);
-	b2Mat22 absR = b2Abs(obbR);
-	b2Vec2 h = b2Mul(absR, m_localOBB.extents);
-	b2Vec2 center = m_position + b2Mul(m_R, m_localOBB.center);
+	b2AABB aabb1, aabb2;
+
+	{
+		b2Mat22 obbR = b2Mul(R1, m_localOBB.R);
+		b2Mat22 absR = b2Abs(obbR);
+		b2Vec2 h = b2Mul(absR, m_localOBB.extents);
+		b2Vec2 center = position1 + b2Mul(R1, m_localOBB.center);
+		aabb1.minVertex = center - h;
+		aabb1.maxVertex = center + h;
+	}
+
+	{
+		b2Mat22 obbR = b2Mul(R2, m_localOBB.R);
+		b2Mat22 absR = b2Abs(obbR);
+		b2Vec2 h = b2Mul(absR, m_localOBB.extents);
+		b2Vec2 center = position2 + b2Mul(R2, m_localOBB.center);
+		aabb2.minVertex = center - h;
+		aabb2.maxVertex = center + h;
+	}
+
 	b2AABB aabb;
-	aabb.minVertex = center - h;
-	aabb.maxVertex = center + h;
+	aabb.minVertex = b2Min(aabb1.minVertex, aabb2.minVertex);
+	aabb.maxVertex = b2Max(aabb1.maxVertex, aabb2.maxVertex);
 
 	b2BroadPhase* broadPhase = m_body->m_world->m_broadPhase;
 	if (broadPhase->InRange(aabb))

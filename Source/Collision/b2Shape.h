@@ -192,7 +192,7 @@ struct b2CircleShape : public b2Shape
 
 	void Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 						const b2Vec2& position2, const b2Mat22& R2);
-	void QuickSync(const b2Vec2& position, float32 rotation);
+	void QuickSync(const b2Vec2& position, const b2Mat22& R);
 
 	b2Vec2 Support(const b2Vec2& d) const;
 
@@ -213,7 +213,7 @@ struct b2PolyShape : public b2Shape
 
 	void Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 						const b2Vec2& position2, const b2Mat22& R2);
-	void QuickSync(const b2Vec2& position, float32 rotation);
+	void QuickSync(const b2Vec2& position, const b2Mat22& R);
 
 	b2Vec2 Support(const b2Vec2& d) const;
 

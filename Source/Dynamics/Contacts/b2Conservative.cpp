@@ -46,8 +46,10 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	b2Vec2 p2 = p2Start;
 	float32 a2 = a2Start;
 
-	shape1->QuickSync(p1, a1);
-	shape2->QuickSync(p2, a2);
+	b2Mat22 R1(a1), R2(a2);
+
+	shape1->QuickSync(p1, R1);
+	shape2->QuickSync(p2, R2);
 
 	float32 s1 = 0.0f;
 	const int32 maxIterations = 10;
@@ -103,7 +105,8 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 		p2 = p2Start + s1 * v2;
 		a2 = a2Start + s1 * w2;
 
-		b2Mat22 R1(a1), R2(a2);
+		R1.Set(a1);
+		R2.Set(a2);
 		shape1->QuickSync(p1, R1);
 		shape2->QuickSync(p2, R2);
 	}
@@ -125,7 +128,7 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	}
 
 	// No hit, restore shapes.
-	shape1->QuickSync(body1->m_position, body1->m_rotation);
-	shape2->QuickSync(body2->m_position, body2->m_rotation);
+	shape1->QuickSync(body1->m_position, body1->m_R);
+	shape2->QuickSync(body2->m_position, body2->m_R);
 	return false;
 }

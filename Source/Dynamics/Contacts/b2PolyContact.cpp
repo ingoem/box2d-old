@@ -17,6 +17,7 @@
 */
 
 #include "b2PolyContact.h"
+#include "b2Conservative.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <memory.h>
@@ -47,7 +48,7 @@ void b2PolyContact::Evaluate()
 	b2Manifold m0;
 	memcpy(&m0, &m_manifold, sizeof(b2Manifold));
 
-	b2CollidePoly(&m_manifold, (b2PolyShape*)m_shape1, (b2PolyShape*)m_shape2);
+	b2CollidePoly(&m_manifold, (b2PolyShape*)m_shape1, (b2PolyShape*)m_shape2, false);
 
 	// Match contact ids to facilitate warm starting.
 	if (m_manifold.pointCount > 0)

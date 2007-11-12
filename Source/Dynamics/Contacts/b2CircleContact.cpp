@@ -17,6 +17,7 @@
 */
 
 #include "b2CircleContact.h"
+#include "b2Conservative.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <new.h>
@@ -41,7 +42,6 @@ b2CircleContact::b2CircleContact(b2Shape* s1, b2Shape* s2)
 	m_manifold.pointCount = 0;
 	m_manifold.points[0].normalImpulse = 0.0f;
 	m_manifold.points[0].tangentImpulse = 0.0f;
-
 
 	bool hit = b2Conservative(s1, s2);
 	if (hit)
