@@ -166,7 +166,7 @@ void b2Body::SetOriginPosition(const b2Vec2& position, float rotation)
 		s->Synchronize(m_position, m_R, m_position, m_R);
 	}
 
-	m_world->m_broadPhase->Flush();
+	m_world->m_broadPhase->Commit();
 }
 
 void b2Body::SetCenterPosition(const b2Vec2& position, float rotation)
@@ -188,7 +188,7 @@ void b2Body::SetCenterPosition(const b2Vec2& position, float rotation)
 		s->Synchronize(m_position, m_R, m_position, m_R);
 	}
 
-	m_world->m_broadPhase->Flush();
+	m_world->m_broadPhase->Commit();
 }
 
 void b2Body::SynchronizeShapes()

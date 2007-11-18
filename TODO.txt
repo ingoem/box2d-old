@@ -74,7 +74,7 @@ Version 2.0.0
 Version 2.1.0
 - Meshes (segment soup).
 - Ray casts.
-- Check repeatability.
+- CMake files from forum.
 
 Version 2.2.0
 - Handle orphaned gear joint.
@@ -84,7 +84,7 @@ Version 2.2.0
 
 Version 2.3.0
 - Convex hull tool.
-- CMake
+- Angle joint.
 
 Version 2.4.0
 - Spline joints.

@@ -263,7 +263,7 @@ void b2CircleShape::Synchronize(const b2Vec2& position1, const b2Mat22& R1,
 	}
 
 	// Compute an AABB that covers the swept shape (may miss some rotation effect).
-	b2Vec2 p1 = b2Min(position1 + b2Mul(R1, m_localPosition), m_position);
+	b2Vec2 p1 = position1 + b2Mul(R1, m_localPosition);
 	b2Vec2 lower = b2Min(p1, m_position);
 	b2Vec2 upper = b2Max(p1, m_position);
 

@@ -110,6 +110,11 @@ b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2Sta
 					ccp->velocityBias = -c->restitution * vRel;
 				}
 
+				if (ccp->separation > 0.0f)
+				{
+					ccp->separation += 0.0f;
+				}
+
 				if (ccp->separation > b2_linearSlop)
 				{
 					ccp->velocityBias = -0.0167f * ccp->separation; // TODO_ERIN b2TimeStep

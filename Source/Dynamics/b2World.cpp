@@ -432,9 +432,9 @@ void b2World::Step(float32 dt, int32 iterations)
 		}
 	}
 
-	m_broadPhase->Flush();
-
 	m_stackAllocator.Free(stack);
+
+	m_broadPhase->Commit();
 }
 
 int32 b2World::Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount)

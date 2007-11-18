@@ -218,7 +218,7 @@ void BroadPhaseTest::Step(const Settings* settings)
 		}
 	}
 
-	m_broadPhase->Flush();
+	m_broadPhase->Commit();
 
 	for (int32 i = 0; i < k_actorCount; ++i)
 	{

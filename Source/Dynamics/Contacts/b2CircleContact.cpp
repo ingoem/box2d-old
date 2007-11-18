@@ -57,6 +57,8 @@ void b2CircleContact::Evaluate()
 
 	if (m_manifold.pointCount > 0)
 	{
+		// Should only be conservative on the initial contact.
+		m_flags &= ~e_conservativeFlag;
 		m_manifoldCount = 1;
 	}
 	else
@@ -64,6 +66,4 @@ void b2CircleContact::Evaluate()
 		m_manifoldCount = 0;
 	}
 
-	// Should only be conservative on the initial contact.
-	m_flags &= ~e_conservativeFlag;
 }

@@ -41,6 +41,12 @@ b2PolyContact::b2PolyContact(b2Shape* s1, b2Shape* s2)
 	b2Assert(m_shape1->m_type == e_polyShape);
 	b2Assert(m_shape2->m_type == e_polyShape);
 	m_manifold.pointCount = 0;
+
+	bool hit = b2Conservative(s1, s2);
+	if (hit)
+	{
+		m_flags |= e_conservativeFlag;
+	}
 }
 
 void b2PolyContact::Evaluate()
@@ -48,7 +54,8 @@ void b2PolyContact::Evaluate()
 	b2Manifold m0;
 	memcpy(&m0, &m_manifold, sizeof(b2Manifold));
 
-	b2CollidePoly(&m_manifold, (b2PolyShape*)m_shape1, (b2PolyShape*)m_shape2, false);
+	bool conservative = (m_flags & e_conservativeFlag) != 0;
+	b2CollidePoly(&m_manifold, (b2PolyShape*)m_shape1, (b2PolyShape*)m_shape2, conservative);
 
 	// Match contact ids to facilitate warm starting.
 	if (m_manifold.pointCount > 0)
@@ -83,6 +90,9 @@ void b2PolyContact::Evaluate()
 		}
 
 		m_manifoldCount = 1;
+
+		// Should only be conservative on the initial contact.
+		m_flags &= ~e_conservativeFlag;
 	}
 	else
 	{

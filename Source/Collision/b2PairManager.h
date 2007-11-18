@@ -28,6 +28,9 @@
 
 #include <limits.h>
 
+class b2BroadPhase;
+struct b2Proxy;
+
 const uint16 b2_nullPair = USHRT_MAX;
 const uint16 b2_nullProxy = USHRT_MAX;
 const int32 b2_tableCapacity = b2_maxPairs;	// must be a power of two
@@ -56,36 +59,62 @@ struct b2Pair
 	void* userData;
 	uint16 proxyId1;
 	uint16 proxyId2;
+	uint16 next;
 	uint16 status;
+};
+
+struct b2BufferedPair
+{
+	uint16 proxyId1;
+	uint16 proxyId2;
+};
+
+struct b2PairCallback
+{
+	virtual ~b2PairCallback() {}
+
+	// This should return the new pair user data. It is okay if the
+	// user data is null.
+	virtual void* PairAdded(void* proxyUserData1, void* proxyUserData2) = 0;
+
+	// This should free the pair's user data. In extreme circumstances, it is possible
+	// this will be called with null pairUserData because the pair never existed.
+	virtual void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData) = 0;
 };
 
 class b2PairManager
 {
 public:
 	b2PairManager();
-	~b2PairManager();
 
-	// Add a pair and return the new pair. If the pair already exists,
-	// no new pair is created and the old one is returned.
-	b2Pair* Add(int32 proxyId1, int32 proxyId2);
+	void Initialize(b2BroadPhase* broadPhase, b2PairCallback* callback);
 
-	// Remove a pair, return the pair's userData.
-	void* Remove(int32 proxyId1, int32 proxyId2);
+	void AddBufferedPair(int32 proxyId1, int32 proxyId2);
+	void RemoveBufferedPair(int32 proxyId1, int32 proxyId2);
 
-	b2Pair* Find(int32 proxyId1, int32 proxyId2);
-
-	int32 GetCount() const { return m_pairCount; }
-	b2Pair* GetPairs() { return m_pairs; }
+	void Commit();
 
 private:
+	b2Pair* Find(int32 proxyId1, int32 proxyId2);
 	b2Pair* Find(int32 proxyId1, int32 proxyId2, uint32 hashValue);
 
+	b2Pair* AddPair(int32 proxyId1, int32 proxyId2);
+	void* RemovePair(int32 proxyId1, int32 proxyId2);
+
+	void ValidateBuffer();
+	void ValidateTable();
+
 public:
+	b2BroadPhase *m_broadPhase;
+	b2PairCallback *m_callback;
 	b2Pair m_pairs[b2_maxPairs];
+	uint16 m_freePair;
 	int32 m_pairCount;
 
+	b2BufferedPair m_pairBuffer[b2_maxPairs];
+	int32 m_pairBufferCount;
+
 	uint16 m_hashTable[b2_tableCapacity];
-	uint16 m_next[b2_maxPairs];
 };
 
 #endif

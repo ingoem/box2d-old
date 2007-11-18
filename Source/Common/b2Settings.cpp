@@ -17,15 +17,3 @@
 */
 
 #include "b2Settings.h"
-
-#include <assert.h>
-
-// I wrote this because sometimes VC8 would not stop
-// correctly at an assert.
-void b2Assert(bool condition)
-{
-	if (condition == false)
-	{
-		assert(false);
-	}
-}

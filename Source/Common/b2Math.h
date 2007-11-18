@@ -223,6 +223,11 @@ inline b2Vec2 operator * (float32 s, const b2Vec2& a)
 	return v;
 }
 
+inline bool operator == (const b2Vec2& a, const b2Vec2& b)
+{
+	return a.x == b.x && a.y == b.y;
+}
+
 inline b2Mat22 operator + (const b2Mat22& A, const b2Mat22& B)
 {
 	b2Mat22 C;

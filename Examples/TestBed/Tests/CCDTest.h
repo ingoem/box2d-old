@@ -26,14 +26,16 @@ public:
 	CCDTest()
 	{
 		m_world->m_gravity.SetZero();
-#if 0
+#if 1
 		{
 			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.extents.Set(0.1f, 10.0f);
+			sd.density = 0.0f;
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
+			bd.position.Set(0.0f, 20.0f);
+			//bd.linearVelocity.Set(400.0f, 0.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
@@ -52,11 +54,13 @@ public:
 		}
 #endif
 
+#if 1
 		{
-			b2CircleDef sd;
-			sd.type = e_circleShape;
-			sd.radius = 1.0f;
+			b2BoxDef sd;
+			sd.type = e_boxShape;
+			sd.extents.Set(0.5f, 0.5f);
 			sd.density = 1.0f;
+			sd.restitution = 0.02f;
 
 			b2BodyDef bd;
 			bd.position.Set(50.0f, 20.0f);
@@ -64,6 +68,21 @@ public:
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
+#else
+		{
+			b2CircleDef sd;
+			sd.type = e_circleShape;
+			sd.radius = 0.5f;
+			sd.density = 1.0f;
+			sd.restitution = 0.02f;
+
+			b2BodyDef bd;
+			bd.position.Set(50.0f, 20.0f);
+			bd.linearVelocity.Set(-400.0f, 0.0f);
+			bd.AddShape(&sd);
+			m_world->CreateBody(&bd);
+		}
+#endif
 	}
 
 	static Test* Create()

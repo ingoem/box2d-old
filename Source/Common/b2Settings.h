@@ -19,7 +19,10 @@
 #ifndef B2_SETTINGS_H
 #define B2_SETTINGS_H
 
+#include <assert.h>
+
 #define NOT_USED(x) x
+#define b2Assert(A) assert((A))
 
 typedef signed char	int8;
 typedef signed short int16;
@@ -52,6 +55,8 @@ const int32 b2_maxShapesPerBody = 64;
 const int32 b2_maxPolyVertices = 8;
 const int32 b2_maxProxies = 512;				// this must be a power of two
 const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
+//const int32 b2_maxProxies = 8;				// this must be a power of two
+//const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
 
 // Dynamics
 const float32 b2_linearSlop = 0.005f * b2_lengthUnitsPerMeter;	// 0.5 cm
@@ -65,7 +70,5 @@ const float32 b2_contactBaumgarte = 0.2f;
 const float32 b2_timeToSleep = 0.5f * b2_timeUnitsPerSecond;	// half a second
 const float32 b2_linearSleepTolerance = 0.01f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;	// 1 cm/s
 const float32 b2_angularSleepTolerance = 2.0f / 180.0f / b2_timeUnitsPerSecond;					// 2 degrees/s
-
-void b2Assert(bool condition);
 
 #endif

@@ -213,10 +213,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Source\Common\b2Settings.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Source\Common\b2Settings.h"
 				>
 			</File>

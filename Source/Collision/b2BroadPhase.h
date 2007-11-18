@@ -33,7 +33,7 @@ Bullet (http:/www.bulletphysics.com).
 
 const uint16 b2_invalid = USHRT_MAX;
 const uint16 b2_nullEdge = USHRT_MAX;
-
+struct b2BoundValues;
 
 struct b2Bound
 {
@@ -60,25 +60,6 @@ struct b2Proxy
 	void* userData;
 };
 
-struct b2BufferedPair
-{
-	uint16 proxyId1;
-	uint16 proxyId2;
-};
-
-struct b2PairCallback
-{
-	virtual ~b2PairCallback() {}
-
-	// This should return the new pair user data. It is okay if the
-	// user data is null.
-	virtual void* PairAdded(void* proxyUserData1, void* proxyUserData2) = 0;
-
-	// This should free the pair's user data. In extreme circumstances, it is possible
-	// this will be called with null pairUserData because the pair never existed.
-	virtual void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData) = 0;
-};
-
 class b2BroadPhase
 {
 public:
@@ -95,9 +76,9 @@ public:
 	void DestroyProxy(int32 proxyId);
 
 	// Call MoveProxy as many times as you like, then when you are done
-	// call Flush to finalized the proxy pairs (for your time step).
+	// call Commit to finalized the proxy pairs (for your time step).
 	void MoveProxy(int32 proxyId, const b2AABB& aabb);
-	void Flush();
+	void Commit();
 
 	// Get a single proxy. Returns NULL if the id is invalid.
 	b2Proxy* GetProxy(int32 proxyId);
@@ -112,31 +93,25 @@ public:
 private:
 	void ComputeBounds(uint16* lowerValues, uint16* upperValues, const b2AABB& aabb);
 
-	void AddBufferedPair(int32 proxyId1, int32 proxyId2);
-	void RemoveBufferedPair(int32 proxyId1, int32 proxyId2);
-
 	bool TestOverlap(b2Proxy* p1, b2Proxy* p2);
+	bool TestOverlap(const b2BoundValues& b, b2Proxy* p);
+	bool ShouldCollide(b2Proxy* p1, b2Proxy* p2);
 
 	void Query(int32* lowerIndex, int32* upperIndex, uint16 lowerValue, uint16 upperValue,
-				b2Bound* edges, int32 edgeCount, int32 axis);
+				b2Bound* bounds, int32 boundCount, int32 axis);
 	void IncrementOverlapCount(int32 proxyId);
 	void IncrementTimeStamp();
 
-
-	bool ShouldCollide(int32 id1, int32 id2);
-
 public:
+	friend class b2PairManager;
+
 	b2PairManager m_pairManager;
 
 	b2Proxy m_proxyPool[b2_maxProxies];
 	uint16 m_freeProxy;
 
-	b2BufferedPair m_pairBuffer[b2_maxPairs];
-	int32 m_pairBufferCount;
-
 	b2Bound m_bounds[2][2*b2_maxProxies];
 
-	b2PairCallback* m_pairCallback;
 	uint16 m_queryResults[b2_maxProxies];
 	int32 m_queryResultCount;
 

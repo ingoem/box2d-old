@@ -43,8 +43,9 @@
 
 TestEntry g_testEntries[] =
 {
-	{"Newton's Cradle", Cradle::Create},
 	{"CCD Test", CCDTest::Create},
+	{"Newton's Cradle", Cradle::Create},
+	{"Broad Phase", BroadPhaseTest::Create},
 	{"Distance Test", DistanceTest::Create},
 	{"Chain", Chain::Create},
 	{"Bridge", Bridge::Create},
@@ -62,6 +63,5 @@ TestEntry g_testEntries[] =
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"PolyCollision", PolyCollision::Create},
-	{"Broad Phase", BroadPhaseTest::Create},
 	{NULL, NULL}
 };

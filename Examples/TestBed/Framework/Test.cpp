@@ -253,30 +253,36 @@ void Test::Step(const Settings* settings)
 		invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
 		glColor3f(0.9f, 0.9f, 0.3f);
 		glBegin(GL_LINES);
-		for (int32 i = 0; i < bp->m_pairManager.m_pairCount; ++i)
+
+		for (int32 i = 0; i < b2_tableCapacity; ++i)
 		{
-			b2Pair* pair = bp->m_pairManager.m_pairs + i;
-			uint16 id1 = pair->proxyId1;
-			uint16 id2 = pair->proxyId2;
-			b2Proxy* p1 = bp->m_proxyPool + id1;
-			b2Proxy* p2 = bp->m_proxyPool + id2;
+			uint16 index = bp->m_pairManager.m_hashTable[i];
+			while (index != b2_nullPair)
+			{
+				b2Pair* pair = bp->m_pairManager.m_pairs + index;
+				b2Proxy* p1 = bp->m_proxyPool + pair->proxyId1;
+				b2Proxy* p2 = bp->m_proxyPool + pair->proxyId2;
 
-			b2AABB b1, b2;
-			b1.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->lowerBounds[0]].value;
-			b1.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->lowerBounds[1]].value;
-			b1.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->upperBounds[0]].value;
-			b1.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->upperBounds[1]].value;
-			b2.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->lowerBounds[0]].value;
-			b2.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->lowerBounds[1]].value;
-			b2.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->upperBounds[0]].value;
-			b2.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->upperBounds[1]].value;
+				b2AABB b1, b2;
+				b1.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->lowerBounds[0]].value;
+				b1.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->lowerBounds[1]].value;
+				b1.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->upperBounds[0]].value;
+				b1.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->upperBounds[1]].value;
+				b2.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->lowerBounds[0]].value;
+				b2.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->lowerBounds[1]].value;
+				b2.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->upperBounds[0]].value;
+				b2.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->upperBounds[1]].value;
 
-			b2Vec2 x1 = 0.5f * (b1.minVertex + b1.maxVertex);
-			b2Vec2 x2 = 0.5f * (b2.minVertex + b2.maxVertex);
+				b2Vec2 x1 = 0.5f * (b1.minVertex + b1.maxVertex);
+				b2Vec2 x2 = 0.5f * (b2.minVertex + b2.maxVertex);
 
-			glVertex2f(x1.x, x1.y);
-			glVertex2f(x2.x, x2.y);
+				glVertex2f(x1.x, x1.y);
+				glVertex2f(x2.x, x2.y);
+
+				index = pair->next;
+			}
 		}
+
 		glEnd();
 	}
 
