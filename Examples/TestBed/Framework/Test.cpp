@@ -328,6 +328,9 @@ void Test::Step(const Settings* settings)
 
 		DrawString(5, m_textLine, "position iterations = %d", m_world->m_positionIterationCount);
 		m_textLine += 15;
+
+		DrawString(5, m_textLine, "heap bytes = %d", b2_byteCount);
+		m_textLine += 15;
 	}
 
 	if (m_mouseJoint)

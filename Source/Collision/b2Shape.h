@@ -219,6 +219,7 @@ struct b2PolyShape : public b2Shape
 
 	b2OBB m_localOBB;
 	b2Vec2 m_vertices[b2_maxPolyVertices];
+	b2Vec2 m_coreVertices[b2_maxPolyVertices];
 	int32 m_vertexCount;
 	b2Vec2 m_normals[b2_maxPolyVertices];
 	int32 m_next[b2_maxPolyVertices];

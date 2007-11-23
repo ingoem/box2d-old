@@ -43,16 +43,17 @@
 
 TestEntry g_testEntries[] =
 {
-	{"CCD Test", CCDTest::Create},
+	{"PolyCollision", PolyCollision::Create},
+	{"Varying Restitution", VaryingRestitution::Create},
+	//{"CCD Test", CCDTest::Create},
+	{"Vertical Stack", VerticalStack::Create},
 	{"Newton's Cradle", Cradle::Create},
 	{"Broad Phase", BroadPhaseTest::Create},
 	{"Distance Test", DistanceTest::Create},
 	{"Chain", Chain::Create},
 	{"Bridge", Bridge::Create},
-	{"Varying Restitution", VaryingRestitution::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Collision Processing", CollisionProcessing::Create},
-	{"Vertical Stack", VerticalStack::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Web", Web::Create},
 	{"Gears", Gears::Create},
@@ -62,6 +63,5 @@ TestEntry g_testEntries[] =
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Varying Friction", VaryingFriction::Create},
-	{"PolyCollision", PolyCollision::Create},
 	{NULL, NULL}
 };

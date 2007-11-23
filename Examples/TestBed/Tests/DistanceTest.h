@@ -118,40 +118,36 @@ public:
 	{
 		switch (key)
 		{
-		case 's':
+		case 'a':
 			m_body2->m_position.x -= 0.1f;
 			m_body2->SynchronizeShapes();
 			break;
 
-		case 'f':
+		case 'd':
 			m_body2->m_position.x += 0.1f;
 			m_body2->SynchronizeShapes();
 			break;
 
-		case 'd':
+		case 's':
 			m_body2->m_position.y -= 0.1f;
 			m_body2->SynchronizeShapes();
 			break;
 
-		case 'e':
+		case 'w':
 			m_body2->m_position.y += 0.1f;
 			m_body2->SynchronizeShapes();
 			break;
 
-		case 'c':
+		case 'q':
 			m_body2->m_rotation += 0.1f * b2_pi;
 			m_body2->m_R.Set(m_body2->m_rotation);
 			m_body2->SynchronizeShapes();
 			break;
 
-		case 'v':
+		case 'e':
 			m_body2->m_rotation -= 0.1f * b2_pi;
 			m_body2->m_R.Set(m_body2->m_rotation);
 			m_body2->SynchronizeShapes();
-			break;
-
-		case 'p':
-			b2World::s_enablePositionCorrection = !b2World::s_enablePositionCorrection;
 			break;
 		}
 	}

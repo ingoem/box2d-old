@@ -115,14 +115,14 @@ void Keyboard(unsigned char key, int x, int y)
 		exit(0);
 		break;
 
-		// Press 'a' to zoom in.
-	case 'a':
+		// Press 'z' to zoom in.
+	case 'z':
 		viewZoom = b2Max(viewZoom - 1.0f, 1.0f);
 		Resize(width, height);
 		break;
 
-		// Press 'z' to zoom out.
-	case 'z':
+		// Press 'x' to zoom out.
+	case 'x':
 		viewZoom = b2Min(viewZoom + 1.0f, 100.0f);
 		Resize(width, height);
 		break;
@@ -130,6 +130,7 @@ void Keyboard(unsigned char key, int x, int y)
 		// Press 'r' to reset.
 	case 'r':
 		delete test;
+		b2Assert(b2_byteCount == 0);
 		test = entry->createFcn();
 		break;
 

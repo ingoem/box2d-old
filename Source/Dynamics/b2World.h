@@ -50,6 +50,9 @@ struct b2World
 	// help prevent your code from crashing.
 	void SetListener(b2WorldListener* listener);
 
+	// Create and destroy rigid bodies. Destruction is deferred until the
+	// the next call to Step. This is done so that bodies may be destroyed
+	// while you iterate through the contact list.
 	b2Body* CreateBody(const b2BodyDef* def);
 	void DestroyBody(b2Body* body);
 
@@ -94,7 +97,7 @@ struct b2World
 	b2Body* m_bodyDestroyList;
 
 	b2Vec2 m_gravity;
-	bool m_doSleep;
+	bool m_allowSleep;
 
 	b2Body* m_groundBody;
 

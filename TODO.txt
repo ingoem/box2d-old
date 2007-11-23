@@ -67,14 +67,19 @@ Version 1.4.1
 Version 1.4.2
 - Improve joint stability.
 
+Version 1.4.3
+- Fix thin polygon collision.
+- Simplify broad-phase.
+- CMake files from forum.
+- OSX patch.
+
 Version 2.0.0
 - CCD.
-- Simplify broad-phase.
+- Fix bug with freezing compound bodies.
 
 Version 2.1.0
 - Meshes (segment soup).
 - Ray casts.
-- CMake files from forum.
 
 Version 2.2.0
 - Handle orphaned gear joint.

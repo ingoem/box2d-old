@@ -32,8 +32,8 @@ struct b2StackEntry
 };
 
 // This is a stack allocator used for fast per step allocations.
-// You must nest allocate/free pairs. The code will
-// b2Assert if you try to interleave multiple allocate/free pairs.
+// You must nest allocate/free pairs. The code will assert
+// if you try to interleave multiple allocate/free pairs.
 class b2StackAllocator
 {
 public:

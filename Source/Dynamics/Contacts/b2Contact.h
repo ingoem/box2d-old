@@ -67,7 +67,6 @@ struct b2Contact
 	{
 		e_islandFlag		= 0x0001,
 		e_destroyFlag		= 0x0002,
-		e_conservativeFlag	= 0x0004,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,

@@ -21,6 +21,7 @@
 #include "b2Island.h"
 #include "Joints/b2Joint.h"
 #include "Contacts/b2Contact.h"
+#include "Contacts/b2Conservative.h"
 #include "../Collision/b2Collision.h"
 #include "../Collision/b2Shape.h"
 #include <new.h>
@@ -42,12 +43,13 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 
 	m_bodyDestroyList = NULL;
 
-	m_doSleep = doSleep;
+	m_allowSleep = doSleep;
 
 	m_gravity = gravity;
 
 	m_contactManager.m_world = this;
-	m_broadPhase = new b2BroadPhase(worldAABB, &m_contactManager);
+	void* mem = b2Alloc(sizeof(b2BroadPhase));
+	m_broadPhase = new (mem) b2BroadPhase(worldAABB, &m_contactManager);
 
 	b2BodyDef bd;
 	m_groundBody = CreateBody(&bd);
@@ -56,7 +58,8 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 b2World::~b2World()
 {
 	DestroyBody(m_groundBody);
-	delete m_broadPhase;
+	m_broadPhase->~b2BroadPhase();
+	b2Free(m_broadPhase);
 }
 
 void b2World::SetListener(b2WorldListener* listener)
@@ -403,7 +406,7 @@ void b2World::Step(float32 dt, int32 iterations)
 
 		m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
 		
-		if (m_doSleep)
+		if (m_allowSleep)
 		{
 			island.UpdateSleep(dt);
 		}
@@ -435,6 +438,23 @@ void b2World::Step(float32 dt, int32 iterations)
 	m_stackAllocator.Free(stack);
 
 	m_broadPhase->Commit();
+
+#if 0
+	for (b2Contact* c = m_contactList; c; c = c->GetNext())
+	{
+		b2Shape* shape1 = c->GetShape1();
+		b2Shape* shape2 = c->GetShape2();
+		b2Body* body1 = shape1->GetBody();
+		b2Body* body2 = shape2->GetBody();
+
+		if (body1->IsSleeping() && body2->IsSleeping())
+		{
+			continue;
+		}
+
+		b2Conservative(shape1, shape2);
+	}
+#endif
 }
 
 int32 b2World::Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount)

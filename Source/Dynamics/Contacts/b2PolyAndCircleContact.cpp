@@ -17,7 +17,6 @@
 */
 
 #include "b2PolyAndCircleContact.h"
-#include "b2Conservative.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <new.h>
@@ -42,23 +41,14 @@ b2PolyAndCircleContact::b2PolyAndCircleContact(b2Shape* s1, b2Shape* s2)
 	m_manifold.pointCount = 0;
 	m_manifold.points[0].normalImpulse = 0.0f;
 	m_manifold.points[0].tangentImpulse = 0.0f;
-
-	bool hit = b2Conservative(s1, s2);
-	if (hit)
-	{
-		m_flags |= e_conservativeFlag;
-	}
 }
 
 void b2PolyAndCircleContact::Evaluate()
 {
-	bool conservative = (m_flags & e_conservativeFlag) != 0;
-	b2CollidePolyAndCircle(&m_manifold, (b2PolyShape*)m_shape1, (b2CircleShape*)m_shape2, conservative);
+	b2CollidePolyAndCircle(&m_manifold, (b2PolyShape*)m_shape1, (b2CircleShape*)m_shape2, false);
 
 	if (m_manifold.pointCount > 0)
 	{
-		// Should only be conservative on the initial contact.
-		m_flags &= ~e_conservativeFlag;
 		m_manifoldCount = 1;
 	}
 	else

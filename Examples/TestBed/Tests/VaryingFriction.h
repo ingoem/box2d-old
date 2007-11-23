@@ -25,9 +25,10 @@ public:
 
 	VaryingFriction()
 	{
+		float32 scale = 2.0f;
+
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(50.0f, 10.0f);
 
 			b2BodyDef bd;
@@ -38,11 +39,13 @@ public:
 
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(6.5f, 0.125f);
+			sd.extents *= scale;
 
 			b2BodyDef bd;
 			bd.position.Set(-2.0f, 11.0f);
+			bd.position *= scale;
+
 			bd.rotation = -0.25f;
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
@@ -50,22 +53,26 @@ public:
 
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(0.125f, 0.5f);
+			sd.extents *= scale;
 
 			b2BodyDef bd;
 			bd.position.Set(5.25f, 9.5f);
+			bd.position *= scale;
+
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
 
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(6.5f, 0.125f);
+			sd.extents *= scale;
 
 			b2BodyDef bd;
 			bd.position.Set(2.0f, 7.0f);
+			bd.position *= scale;
+
 			bd.rotation = 0.25f;
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
@@ -73,22 +80,26 @@ public:
 
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(0.125f, 0.5f);
+			sd.extents *= scale;
 
 			b2BodyDef bd;
 			bd.position.Set(-5.25f, 5.5f);
+			bd.position *= scale;
+
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
 
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(6.5f, 0.125f);
+			sd.extents *= scale;
 
 			b2BodyDef bd;
 			bd.position.Set(-2.0f, 3.0f);
+			bd.position *= scale;
+
 			bd.rotation = -0.25f;
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
@@ -96,8 +107,9 @@ public:
 
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(0.25f, 0.25f);
+			sd.extents *= scale;
+
 			sd.density = 25.0f;
 
 			b2BodyDef bd;
@@ -109,6 +121,7 @@ public:
 			{
 				sd.friction = friction[i];
 				bd.position.Set(-7.5f + 2.0f * i, 14.0f);
+				bd.position *= scale;
 				m_world->CreateBody(&bd);
 			}
 		}

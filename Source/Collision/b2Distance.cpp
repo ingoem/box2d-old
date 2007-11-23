@@ -161,8 +161,9 @@ float32 b2Distance(b2Vec2* p1Out, b2Vec2* p2Out, const b2Shape* shape1, const b2
 		b2Vec2 v = *p2Out - *p1Out;
 		b2Vec2 w1 = shape1->Support(v);
 		b2Vec2 w2 = shape2->Support(-v);
-		b2Vec2 w = w2 - w1;
+
 		vSqr = b2Dot(v, v);
+		b2Vec2 w = w2 - w1;
 		float32 vw = b2Dot(v, w);
 		if (vSqr - vw <= 0.01f * vSqr || InPoints(w, points, pointCount)) // or w in points
 		{
@@ -199,6 +200,13 @@ float32 b2Distance(b2Vec2* p1Out, b2Vec2* p2Out, const b2Shape* shape1, const b2
 			points[2] = w;
 			pointCount = ProcessThree(p1Out, p2Out, p1s, p2s, points);
 			break;
+		}
+
+		// If we have three points, then the origin is in the corresponding triangle.
+		if (pointCount == 3)
+		{
+			g_GJK_Iterations = iter;
+			return 0.0f;
 		}
 
 		float32 maxSqr = -FLT_MAX;

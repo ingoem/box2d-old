@@ -50,7 +50,7 @@ public:
 			bd.AddShape(&sd1);
 			bd.AddShape(&sd2);
 
-			for (int i = 0; i < 4; ++i)
+			for (int i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
@@ -74,7 +74,7 @@ public:
 			bd.AddShape(&sd1);
 			bd.AddShape(&sd2);
 
-			for (int i = 0; i < 4; ++i)
+			for (int i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
@@ -108,7 +108,7 @@ public:
 			bd.AddShape(&sd1);
 			bd.AddShape(&sd2);
 
-			for (int i = 0; i < 4; ++i)
+			for (int i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				bd.position.Set(x, 1.05f + 2.5f * i);

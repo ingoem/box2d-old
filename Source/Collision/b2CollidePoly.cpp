@@ -59,6 +59,7 @@ static int32 ClipSegmentToLine(ClipVertex vOut[2], ClipVertex vIn[2],
 	return numOut;
 }
 
+// Find the separation between poly1 and poly2 for a give edge normal on poly1.
 static float32 EdgeSeparation(const b2PolyShape* poly1, int32 edge1, const b2PolyShape* poly2)
 {
 	int32 count1 = poly1->m_vertexCount;
@@ -66,14 +67,9 @@ static float32 EdgeSeparation(const b2PolyShape* poly1, int32 edge1, const b2Pol
 	int32 count2 = poly2->m_vertexCount;
 	const b2Vec2* vert2s = poly2->m_vertices;
 
-	// Get the vertices associated with edge1.
-	int32 vertexIndex11 = edge1;
-	int32 vertexIndex12 = edge1 + 1 == count1 ? 0 : edge1 + 1;
-
-	// Get the normal of edge1.
-	b2Vec2 normalLocal1 = b2Cross(vert1s[vertexIndex12] - vert1s[vertexIndex11], 1.0f);
-	normalLocal1.Normalize();
-	b2Vec2 normal = b2Mul(poly1->m_R, normalLocal1);
+	// Convert normal from into poly2's frame.
+	b2Assert(edge1 < count1);
+	b2Vec2 normal = b2Mul(poly1->m_R, poly1->m_normals[edge1]);
 	b2Vec2 normalLocal2 = b2MulT(poly2->m_R, normal);
 
 	// Find support vertex on poly2 for -normal.
@@ -89,86 +85,95 @@ static float32 EdgeSeparation(const b2PolyShape* poly1, int32 edge1, const b2Pol
 		}
 	}
 
-	b2Vec2 v1 = poly1->m_position + b2Mul(poly1->m_R, vert1s[vertexIndex11]);
+	b2Vec2 v1 = poly1->m_position + b2Mul(poly1->m_R, vert1s[edge1]);
 	b2Vec2 v2 = poly2->m_position + b2Mul(poly2->m_R, vert2s[vertexIndex2]);
 	float32 separation = b2Dot(v2 - v1, normal);
 	return separation;
 }
 
-// Find the max separation between poly1 and poly2 using face normals
-// from poly1.
-static float32 FindMaxSeparation(int32* edge, const b2PolyShape* poly1, const b2PolyShape* poly2)
+// Find the max separation between poly1 and poly2 using edge normals from poly1.
+static float32 FindMaxSeparation(int32* edgeIndex, const b2PolyShape* poly1, const b2PolyShape* poly2, bool conservative)
 {
 	int32 count1 = poly1->m_vertexCount;
-	const b2Vec2* vert1s = poly1->m_vertices;
 
 	// Vector pointing from the origin of poly1 to the origin of poly2.
 	b2Vec2 d = poly2->m_position - poly1->m_position;
 	b2Vec2 dLocal1 = b2MulT(poly1->m_R, d);
 
-	// Get support vertex as a hint for our search
-	int32 vertexIndex1 = 0;
+	// Find edge normal on poly1 that has the largest projection onto d.
+	int32 edge = 0;
 	float32 maxDot = -FLT_MAX;
 	for (int32 i = 0; i < count1; ++i)
 	{
-		float32 dot = b2Dot(vert1s[i], dLocal1);
+		float32 dot = b2Dot(poly1->m_normals[i], dLocal1);
 		if (dot > maxDot)
 		{
 			maxDot = dot;
-			vertexIndex1 = i;
+			edge = i;
 		}
 	}
 
-	// Check the separation for the edges straddling the vertex.
-	int32 prevFaceIndex = vertexIndex1 - 1 >= 0 ? vertexIndex1 - 1 : count1 - 1;
-	float32 sPrev = EdgeSeparation(poly1, prevFaceIndex, poly2);
-	if (sPrev > 0.0f)
+	// Get the separation for the edge normal.
+	float32 s = EdgeSeparation(poly1, edge, poly2);
+	if (s > 0.0f && conservative == false)
+	{
+		return s;
+	}
+
+	// Check the separation for the neighboring edges.
+	int32 prevEdge = edge - 1 >= 0 ? edge - 1 : count1 - 1;
+	float32 sPrev = EdgeSeparation(poly1, prevEdge, poly2);
+	if (sPrev > 0.0f && conservative == false)
 	{
 		return sPrev;
 	}
 
-	int32 nextFaceIndex = vertexIndex1;
-	float32 sNext = EdgeSeparation(poly1, nextFaceIndex, poly2);
-	if (sNext > 0.0f)
+	int32 nextEdge = edge + 1 < count1 ? edge + 1 : 0;
+	float32 sNext = EdgeSeparation(poly1, nextEdge, poly2);
+	if (sNext > 0.0f && conservative == false)
 	{
 		return sNext;
 	}
 
 	// Find the best edge and the search direction.
-	int32 bestFaceIndex;
+	int32 bestEdge;
 	float32 bestSeparation;
 	int32 increment;
-	if (sPrev > sNext)
+	if (sPrev > s && sPrev > sNext)
 	{
 		increment = -1;
-		bestFaceIndex = prevFaceIndex;
+		bestEdge = prevEdge;
 		bestSeparation = sPrev;
+	}
+	else if (sNext > s)
+	{
+		increment = 1;
+		bestEdge = nextEdge;
+		bestSeparation = sNext;
 	}
 	else
 	{
-		increment = 1;
-		bestFaceIndex = nextFaceIndex;
-		bestSeparation = sNext;
+		*edgeIndex = edge;
+		return s;
 	}
 
 	for ( ; ; )
 	{
-		int32 edgeIndex;
 		if (increment == -1)
-			edgeIndex = bestFaceIndex - 1 >= 0 ? bestFaceIndex - 1 : count1 - 1;
+			edge = bestEdge - 1 >= 0 ? bestEdge - 1 : count1 - 1;
 		else
-			edgeIndex = bestFaceIndex + 1 < count1 ? bestFaceIndex + 1 : 0;
+			edge = bestEdge + 1 < count1 ? bestEdge + 1 : 0;
 
-		float32 separation = EdgeSeparation(poly1, edgeIndex, poly2);
-		if (separation > 0.0f)
+		s = EdgeSeparation(poly1, edge, poly2);
+		if (s > 0.0f && conservative == false)
 		{
-			return separation;
+			return s;
 		}
 
-		if (separation > bestSeparation)
+		if (s > bestSeparation)
 		{
-			bestFaceIndex = edgeIndex;
-			bestSeparation = separation;
+			bestEdge = edge;
+			bestSeparation = s;
 		}
 		else
 		{
@@ -176,7 +181,7 @@ static float32 FindMaxSeparation(int32* edge, const b2PolyShape* poly1, const b2
 		}
 	}
 
-	*edge = bestFaceIndex;
+	*edgeIndex = bestEdge;
 	return bestSeparation;
 }
 
@@ -242,13 +247,13 @@ void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* polyA, const b2PolyS
 	manifold->pointCount = 0;
 
 	int32 edgeA = 0;
-	float32 separationA = FindMaxSeparation(&edgeA, polyA, polyB);
-	if (separationA > 0.0f)
+	float32 separationA = FindMaxSeparation(&edgeA, polyA, polyB, conservative);
+	if (separationA > 0.0f && conservative == false)
 		return;
 
 	int32 edgeB = 0;
-	float32 separationB = FindMaxSeparation(&edgeB, polyB, polyA);
-	if (separationB > 0.0f)
+	float32 separationB = FindMaxSeparation(&edgeB, polyB, polyA, conservative);
+	if (separationB > 0.0f && conservative == false)
 		return;
 
 	const b2PolyShape* poly1;	// reference poly
@@ -320,7 +325,7 @@ void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* polyA, const b2PolyS
 	{
 		float32 separation = b2Dot(frontNormal, clipPoints2[i].v) - frontOffset;
 
-		if (separation <= 0.0f)
+		if (separation <= 0.0f || conservative == true)
 		{
 			b2ContactPoint* cp = manifold->points + pointCount;
 			cp->separation = separation;

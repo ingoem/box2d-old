@@ -57,7 +57,7 @@ b2BlockAllocator::b2BlockAllocator()
 
 	m_chunkSpace = b2_chunkArrayIncrement;
 	m_chunkCount = 0;
-	m_chunks = (b2Chunk*)malloc(m_chunkSpace * sizeof(b2Chunk));
+	m_chunks = (b2Chunk*)b2Alloc(m_chunkSpace * sizeof(b2Chunk));
 	
 	memset(m_chunks, 0, m_chunkSpace * sizeof(b2Chunk));
 	memset(m_freeLists, 0, sizeof(m_freeLists));
@@ -87,10 +87,10 @@ b2BlockAllocator::~b2BlockAllocator()
 {
 	for (int32 i = 0; i < m_chunkCount; ++i)
 	{
-		free(m_chunks[i].blocks);
+		b2Free(m_chunks[i].blocks);
 	}
 
-	free(m_chunks);
+	b2Free(m_chunks);
 }
 
 void* b2BlockAllocator::Allocate(int32 size)
@@ -113,13 +113,16 @@ void* b2BlockAllocator::Allocate(int32 size)
 	{
 		if (m_chunkCount == m_chunkSpace)
 		{
+			b2Chunk* oldChunks = m_chunks;
 			m_chunkSpace += b2_chunkArrayIncrement;
-			m_chunks = (b2Chunk*)realloc(m_chunks, m_chunkSpace * sizeof(b2Chunk));
+			m_chunks = (b2Chunk*)b2Alloc(m_chunkSpace * sizeof(b2Chunk));
+			memcpy(m_chunks, oldChunks, m_chunkCount * sizeof(b2Chunk));
 			memset(m_chunks + m_chunkCount, 0, b2_chunkArrayIncrement * sizeof(b2Chunk));
+			b2Free(oldChunks);
 		}
 
 		b2Chunk* chunk = m_chunks + m_chunkCount;
-		chunk->blocks = (b2Block*)malloc(b2_chunkSize);
+		chunk->blocks = (b2Block*)b2Alloc(b2_chunkSize);
 #if defined(_DEBUG)
 		memset(chunk->blocks, 0xcd, b2_chunkSize);
 #endif
@@ -191,7 +194,7 @@ void b2BlockAllocator::Clear()
 {
 	for (int32 i = 0; i < m_chunkCount; ++i)
 	{
-		free(m_chunks[i].blocks);
+		b2Free(m_chunks[i].blocks);
 	}
 
 	m_chunkCount = 0;

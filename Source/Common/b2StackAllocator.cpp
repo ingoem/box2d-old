@@ -18,7 +18,6 @@
 
 #include "b2StackAllocator.h"
 #include "b2Math.h"
-#include <stdlib.h>
 
 b2StackAllocator::b2StackAllocator()
 {
@@ -42,7 +41,7 @@ void* b2StackAllocator::Allocate(int32 size)
 	entry->size = size;
 	if (m_index + size > b2_stackSize)
 	{
-		entry->data = (char*)malloc(size);
+		entry->data = (char*)b2Alloc(size);
 		entry->usedMalloc = true;
 	}
 	else
@@ -66,7 +65,7 @@ void b2StackAllocator::Free(void* p)
 	b2Assert(p == entry->data);
 	if (entry->usedMalloc)
 	{
-		free(p);
+		b2Free(p);
 	}
 	else
 	{

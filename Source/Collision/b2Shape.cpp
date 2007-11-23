@@ -100,12 +100,59 @@ static void PolyMass(b2MassData* massData, const b2Vec2* vs, int32 count, float3
 	massData->mass = rho * area;
 
 	// Center of mass
+	b2Assert(area > FLT_EPSILON);
 	center *= 1.0f / area;
 	massData->center = center;
 
 	// Inertia tensor relative to the center.
 	I = rho * (I - area * b2Dot(center, center));
 	massData->I = I;
+}
+
+static b2Vec2 PolyCenter(const b2Vec2* vs, int32 count)
+{
+	b2Assert(count >= 3);
+
+	b2Vec2 c; c.Set(0.0f, 0.0f);
+	float32 area = 0.0f;
+
+	// pRef is the reference point for forming triangles.
+	// It's location doesn't change the result (except for rounding error).
+	b2Vec2 pRef(0.0f, 0.0f);
+#if 0
+	// This code would put the reference point inside the polygon.
+	for (int32 i = 0; i < count; ++i)
+	{
+		pRef += vs[i];
+	}
+	pRef *= 1.0f / count;
+#endif
+
+	const float32 inv3 = 1.0f / 3.0f;
+
+	for (int32 i = 0; i < count; ++i)
+	{
+		// Triangle vertices.
+		b2Vec2 p1 = pRef;
+		b2Vec2 p2 = vs[i];
+		b2Vec2 p3 = i + 1 < count ? vs[i+1] : vs[0];
+
+		b2Vec2 e1 = p2 - p1;
+		b2Vec2 e2 = p3 - p1;
+
+		float32 D = b2Cross(e1, e2);
+
+		float32 triangleArea = 0.5f * D;
+		area += triangleArea;
+
+		// Area weighted centroid
+		c += triangleArea * inv3 * (p1 + p2 + p3);
+	}
+
+	// Centroid
+	b2Assert(area > FLT_EPSILON);
+	c *= 1.0f / area;
+	return c;
 }
 
 void b2ShapeDef::ComputeMass(b2MassData* massData) const
@@ -294,7 +341,8 @@ b2Vec2 b2CircleShape::Support(const b2Vec2& d) const
 {
 	b2Vec2 u = d;
 	u.Normalize();
-	return m_position + m_radius * u;
+	float32 r = b2Max(0.0f, m_radius - 2.0f * b2_linearSlop);
+	return m_position + r * u;
 }
 
 bool b2CircleShape::TestPoint(const b2Vec2& p)
@@ -355,19 +403,37 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 		const b2BoxDef* box = (const b2BoxDef*)def;
 		m_vertexCount = 4;
 		b2Vec2 h = box->extents;
+		b2Vec2 hc = h;
+		hc.x = b2Max(0.0f, h.x - 2.0f * b2_linearSlop);
+		hc.y = b2Max(0.0f, h.y - 2.0f * b2_linearSlop);
 		m_vertices[0] = localPosition + b2Mul(localR, b2Vec2(h.x, h.y));
 		m_vertices[1] = localPosition + b2Mul(localR, b2Vec2(-h.x, h.y));
 		m_vertices[2] = localPosition + b2Mul(localR, b2Vec2(-h.x, -h.y));
 		m_vertices[3] = localPosition + b2Mul(localR, b2Vec2(h.x, -h.y));
+
+		m_coreVertices[0] = localPosition + b2Mul(localR, b2Vec2(hc.x, hc.y));
+		m_coreVertices[1] = localPosition + b2Mul(localR, b2Vec2(-hc.x, hc.y));
+		m_coreVertices[2] = localPosition + b2Mul(localR, b2Vec2(-hc.x, -hc.y));
+		m_coreVertices[3] = localPosition + b2Mul(localR, b2Vec2(hc.x, -hc.y));
 	}
 	else
 	{
 		const b2PolyDef* poly = (const b2PolyDef*)def;
 		m_vertexCount = poly->vertexCount;
 		b2Assert(3 <= m_vertexCount && m_vertexCount <= b2_maxPolyVertices);
+		b2Vec2 c = PolyCenter(poly->vertices, poly->vertexCount);
 		for (int32 i = 0; i < m_vertexCount; ++i)
 		{
 			m_vertices[i] = localPosition + b2Mul(localR, poly->vertices[i]);
+
+			b2Vec2 u = poly->vertices[i] - c;
+			float32 length = u.Length();
+			if (length > FLT_EPSILON)
+			{
+				u *= 1.0f / length;
+			}
+			
+			m_coreVertices[i] = localPosition + b2Mul(localR, poly->vertices[i] - 2.0f * b2_linearSlop * u);
 		}
 	}
 
@@ -489,10 +555,10 @@ b2Vec2 b2PolyShape::Support(const b2Vec2& d) const
 	b2Vec2 dLocal = b2MulT(m_R, d);
 
 	int32 bestIndex = 0;
-	float32 bestValue = b2Dot(m_vertices[0], dLocal);
+	float32 bestValue = b2Dot(m_coreVertices[0], dLocal);
 	for (int32 i = 1; i < m_vertexCount; ++i)
 	{
-		float32 value = b2Dot(m_vertices[i], dLocal);
+		float32 value = b2Dot(m_coreVertices[i], dLocal);
 		if (value > bestValue)
 		{
 			bestIndex = i;
@@ -500,7 +566,7 @@ b2Vec2 b2PolyShape::Support(const b2Vec2& d) const
 		}
 	}
 
-	return m_position + b2Mul(m_R, m_vertices[bestIndex]);
+	return m_position + b2Mul(m_R, m_coreVertices[bestIndex]);
 }
 
 bool b2PolyShape::TestPoint(const b2Vec2& p)

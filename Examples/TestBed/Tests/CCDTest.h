@@ -58,13 +58,16 @@ public:
 		{
 			b2BoxDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(0.5f, 0.5f);
+			sd.extents.Set(0.1f, 2.0f);
 			sd.density = 1.0f;
-			sd.restitution = 0.02f;
+			sd.restitution = 0.0f;
+
+			m_angularVelocity = -35.268715f; //b2Random(-50.0f, 50.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(50.0f, 20.0f);
-			bd.linearVelocity.Set(-400.0f, 0.0f);
+			bd.linearVelocity.Set(-200.0f, 0.0f);
+			bd.angularVelocity = m_angularVelocity;
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
@@ -89,6 +92,8 @@ public:
 	{
 		return new CCDTest;
 	}
+
+	float32 m_angularVelocity;
 };
 
 #endif

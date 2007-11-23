@@ -104,20 +104,15 @@ b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2Sta
 
 				// Setup a velocity bias for restitution.
 				ccp->velocityBias = 0.0f;
+				if (ccp->separation > 0.0f)
+				{
+					ccp->velocityBias = -60.0f * ccp->separation; // TODO_ERIN b2TimeStep
+				}
+
 				float32 vRel = b2Dot(c->normal, v2 + b2Cross(w2, r2) - v1 - b2Cross(w1, r1));
 				if (vRel < -b2_velocityThreshold)
 				{
-					ccp->velocityBias = -c->restitution * vRel;
-				}
-
-				if (ccp->separation > 0.0f)
-				{
-					ccp->separation += 0.0f;
-				}
-
-				if (ccp->separation > b2_linearSlop)
-				{
-					ccp->velocityBias = -0.0167f * ccp->separation; // TODO_ERIN b2TimeStep
+					ccp->velocityBias += -c->restitution * vRel;
 				}
 			}
 

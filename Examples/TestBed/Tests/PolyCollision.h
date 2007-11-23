@@ -25,10 +25,12 @@ public:
 	PolyCollision()
 	{
 		{
-			b2BoxDef sd;
-			sd.type = e_boxShape;
-			sd.extents.Set(0.375f, 0.125f);
-			sd.extents *= 10.0f;
+			b2PolyDef sd;
+			sd.vertices[0].Set(-9.0f, -0.1f);
+			sd.vertices[1].Set(11.0f, -0.1f);
+			sd.vertices[2].Set(9.0f, 0.1f);
+			sd.vertices[3].Set(-11.0f, 0.1f);
+			sd.vertexCount = 4;
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
@@ -39,10 +41,8 @@ public:
 
 		{
 			b2BoxDef sd;
-			float32 a = 0.5f;
-			sd.type = e_boxShape;
+			float32 a = 0.25f;
 			sd.extents.Set(a, a);
-			sd.extents *= 10.0f;
 			sd.density = 1.0f;
 
 			b2BodyDef bd;
@@ -151,10 +151,6 @@ public:
 			m_body2->m_rotation -= 0.1f * b2_pi;
 			m_body2->m_R.Set(m_body2->m_rotation);
 			m_body2->SynchronizeShapes();
-			break;
-
-		case 'p':
-			b2World::s_enablePositionCorrection = !b2World::s_enablePositionCorrection;
 			break;
 		}
 	}

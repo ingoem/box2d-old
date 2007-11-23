@@ -71,4 +71,10 @@ const float32 b2_timeToSleep = 0.5f * b2_timeUnitsPerSecond;	// half a second
 const float32 b2_linearSleepTolerance = 0.01f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;	// 1 cm/s
 const float32 b2_angularSleepTolerance = 2.0f / 180.0f / b2_timeUnitsPerSecond;					// 2 degrees/s
 
+
+// Memory Allocation
+extern int32 b2_byteCount;
+void* b2Alloc(int32 size);
+void b2Free(void* mem);
+
 #endif
