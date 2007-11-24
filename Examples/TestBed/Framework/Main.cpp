@@ -115,15 +115,15 @@ void Keyboard(unsigned char key, int x, int y)
 		exit(0);
 		break;
 
-		// Press 'z' to zoom in.
+		// Press 'z' to zoom out.
 	case 'z':
-		viewZoom = b2Max(viewZoom - 1.0f, 1.0f);
+		viewZoom = b2Max(viewZoom + 1.0f, 1.0f);
 		Resize(width, height);
 		break;
 
-		// Press 'x' to zoom out.
+		// Press 'x' to zoom in.
 	case 'x':
-		viewZoom = b2Min(viewZoom + 1.0f, 100.0f);
+		viewZoom = b2Min(viewZoom - 1.0f, 100.0f);
 		Resize(width, height);
 		break;
 

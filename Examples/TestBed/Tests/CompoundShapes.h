@@ -108,13 +108,39 @@ public:
 			bd.AddShape(&sd1);
 			bd.AddShape(&sd2);
 
-			for (int i = 0; i < 10; ++i)
+			for (int32 i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
-				bd.position.Set(x, 1.05f + 2.5f * i);
+				bd.position.Set(x, 2.05f + 2.5f * i);
 				bd.rotation = 0.0f;
 				m_world->CreateBody(&bd);
 			}
+		}
+
+		{
+			b2BoxDef sd_bottom;
+			sd_bottom.extents.Set( 1.5f, 0.15f );
+			sd_bottom.density = 4.0f;
+
+			b2BoxDef sd_left;
+			sd_left.extents.Set( 0.15f, 2.7f );
+			sd_left.localPosition.Set( -1.45f, 2.35f );
+			sd_left.localRotation = 0.2f;
+			sd_left.density = 4.0f;
+
+			b2BoxDef sd_right;
+			sd_right.extents.Set( 0.15f, 2.7f );
+			sd_right.localPosition.Set( 1.45f, 2.35f );
+			sd_right.localRotation = -0.2f;
+			sd_right.density = 4.0f;
+
+			b2BodyDef bd;
+			bd.position.Set( 0.0f, 2.0f );
+			bd.AddShape( &sd_bottom );
+			bd.AddShape( &sd_left );
+			bd.AddShape( &sd_right );
+
+			m_world->CreateBody(&bd);
 		}
 	}
 

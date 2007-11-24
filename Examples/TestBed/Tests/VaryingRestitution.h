@@ -28,7 +28,6 @@ public:
 #if 1
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(50.0f, 10.0f);
 
 			b2BodyDef bd;
@@ -54,11 +53,10 @@ public:
 				m_world->CreateBody(&bd);
 			}
 		}
-#elif 0
+#elif 1
 		// Test bug in poly collision
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(50.0f, 10.0f);
 
 			b2BodyDef bd;
@@ -69,16 +67,13 @@ public:
 
 		{
 			b2BoxDef sd_bottom;
-			sd_bottom.type = e_boxShape;
 			sd_bottom.extents.Set( 1.5f, 0.15f );
 
 			b2BoxDef sd_left;
-			sd_left.type = e_boxShape;
 			sd_left.extents.Set( 0.15f, 2.5f );
 			sd_left.localPosition.Set( -1.45f, 2.35f );
 
 			b2BoxDef sd_right;
-			sd_right.type = e_boxShape;
 			sd_right.extents.Set( 0.15f, 2.5f );
 			sd_right.localPosition.Set( 1.45f, 2.35f );
 
@@ -94,7 +89,6 @@ public:
 		// debug thing
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(3.0f, 0.5f);
 			sd.localRotation = 3.141596f * 0.25f;
 			sd.friction = 0.01f;
@@ -114,7 +108,7 @@ public:
 			penetrating_box.AddShape( &sd );
 			m_world->CreateBody( &penetrating_box );
 		}
-#else
+#elif 1
 		// Test bug in poly collision
 
 		m_world->m_gravity.Set(0.0f, 0.005f);
@@ -159,6 +153,54 @@ public:
 			body.AddShape(&box);
 
 			m_world->CreateBody(&body);
+		}
+#else
+		{
+			b2BoxDef sd;
+			sd.type = e_boxShape;
+			sd.extents.Set(50.0f, 10.0f);
+
+			b2BodyDef bd;
+			bd.position.Set(0.0f, -10.0f);
+			bd.AddShape(&sd);
+			m_world->CreateBody(&bd);
+		}
+
+		{
+			b2BoxDef sd_bottom;
+			sd_bottom.type = e_boxShape;
+			sd_bottom.extents.Set( 1.5f, 0.15f );
+
+			b2BoxDef sd_left;
+			sd_left.type = e_boxShape;
+			sd_left.extents.Set( 0.15f, 2.7f );
+			sd_left.localPosition.Set( -1.45f, 2.35f );
+
+			b2BoxDef sd_right;
+			sd_right.type = e_boxShape;
+			sd_right.extents.Set( 0.15f, 2.7f );
+			sd_right.localPosition.Set( 1.45f, 2.35f );
+
+			b2BodyDef bd;
+			bd.position.Set( 0.0f, 3.0f );
+			bd.AddShape( &sd_bottom );
+			bd.AddShape( &sd_left );
+			bd.AddShape( &sd_right );
+
+			m_world->CreateBody(&bd);
+		}
+
+		// debug thing
+		{
+			b2BoxDef sd;
+			sd.extents.Set( 0.5f, 0.5f );
+			sd.density = 5.0f;
+
+			b2BodyDef penetrating_box;
+			penetrating_box.position.Set( -0.80f, 20.0f );
+			penetrating_box.AddShape( &sd );
+			m_world->CreateBody( &penetrating_box );
+
 		}
 #endif
 	}

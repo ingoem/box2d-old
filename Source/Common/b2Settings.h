@@ -55,8 +55,6 @@ const int32 b2_maxShapesPerBody = 64;
 const int32 b2_maxPolyVertices = 8;
 const int32 b2_maxProxies = 512;				// this must be a power of two
 const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
-//const int32 b2_maxProxies = 8;				// this must be a power of two
-//const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
 
 // Dynamics
 const float32 b2_linearSlop = 0.005f * b2_lengthUnitsPerMeter;	// 0.5 cm

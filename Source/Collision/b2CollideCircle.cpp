@@ -97,7 +97,7 @@ void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const
 
 	// Project the circle center onto the edge segment.
 	int32 vertIndex1 = normalIndex;
-	int32 vertIndex2 = poly->m_next[vertIndex1];
+	int32 vertIndex2 = vertIndex1 + 1 < poly->m_vertexCount ? vertIndex1 + 1 : 0;
 	b2Vec2 e = poly->m_vertices[vertIndex2] - poly->m_vertices[vertIndex1];
 	float32 length = e.Normalize();
 

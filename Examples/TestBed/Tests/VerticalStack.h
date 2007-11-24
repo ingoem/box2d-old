@@ -35,7 +35,6 @@ public:
 			m_world->CreateBody(&bd);
 		}
 
-#if 1
 		{
 			b2BoxDef sd;
 			float32 a = 0.5f;
@@ -56,7 +55,6 @@ public:
 				m_world->CreateBody(&bd);
 			}
 		}
-#endif
 	}
 
 	static Test* Create()

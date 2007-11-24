@@ -109,7 +109,7 @@ static void PolyMass(b2MassData* massData, const b2Vec2* vs, int32 count, float3
 	massData->I = I;
 }
 
-static b2Vec2 PolyCenter(const b2Vec2* vs, int32 count)
+static b2Vec2 PolyCentroid(const b2Vec2* vs, int32 count)
 {
 	b2Assert(count >= 3);
 
@@ -389,51 +389,53 @@ void b2CircleShape::ResetProxy(b2BroadPhase* broadPhase)
 
 
 b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
-					 const b2Vec2& localCenter)
+					 const b2Vec2& newOrigin)
 : b2Shape(def, body)
 {
 	b2Assert(def->type == e_boxShape || def->type == e_polyShape);
 	m_type = e_polyShape;
 	b2Mat22 localR(def->localRotation);
-	b2Vec2 localPosition = def->localPosition - localCenter;
 
 	// Get the vertices transformed into the body frame.
 	if (def->type == e_boxShape)
 	{
+		m_localCentroid = def->localPosition - newOrigin;
+
 		const b2BoxDef* box = (const b2BoxDef*)def;
 		m_vertexCount = 4;
 		b2Vec2 h = box->extents;
 		b2Vec2 hc = h;
 		hc.x = b2Max(0.0f, h.x - 2.0f * b2_linearSlop);
 		hc.y = b2Max(0.0f, h.y - 2.0f * b2_linearSlop);
-		m_vertices[0] = localPosition + b2Mul(localR, b2Vec2(h.x, h.y));
-		m_vertices[1] = localPosition + b2Mul(localR, b2Vec2(-h.x, h.y));
-		m_vertices[2] = localPosition + b2Mul(localR, b2Vec2(-h.x, -h.y));
-		m_vertices[3] = localPosition + b2Mul(localR, b2Vec2(h.x, -h.y));
+		m_vertices[0] = b2Mul(localR, b2Vec2(h.x, h.y));
+		m_vertices[1] = b2Mul(localR, b2Vec2(-h.x, h.y));
+		m_vertices[2] = b2Mul(localR, b2Vec2(-h.x, -h.y));
+		m_vertices[3] = b2Mul(localR, b2Vec2(h.x, -h.y));
 
-		m_coreVertices[0] = localPosition + b2Mul(localR, b2Vec2(hc.x, hc.y));
-		m_coreVertices[1] = localPosition + b2Mul(localR, b2Vec2(-hc.x, hc.y));
-		m_coreVertices[2] = localPosition + b2Mul(localR, b2Vec2(-hc.x, -hc.y));
-		m_coreVertices[3] = localPosition + b2Mul(localR, b2Vec2(hc.x, -hc.y));
+		m_coreVertices[0] = b2Mul(localR, b2Vec2(hc.x, hc.y));
+		m_coreVertices[1] = b2Mul(localR, b2Vec2(-hc.x, hc.y));
+		m_coreVertices[2] = b2Mul(localR, b2Vec2(-hc.x, -hc.y));
+		m_coreVertices[3] = b2Mul(localR, b2Vec2(hc.x, -hc.y));
 	}
 	else
 	{
 		const b2PolyDef* poly = (const b2PolyDef*)def;
 		m_vertexCount = poly->vertexCount;
 		b2Assert(3 <= m_vertexCount && m_vertexCount <= b2_maxPolyVertices);
-		b2Vec2 c = PolyCenter(poly->vertices, poly->vertexCount);
+		b2Vec2 centroid = PolyCentroid(poly->vertices, poly->vertexCount);
+		m_localCentroid = def->localPosition + b2Mul(localR, centroid) - newOrigin;
 		for (int32 i = 0; i < m_vertexCount; ++i)
 		{
-			m_vertices[i] = localPosition + b2Mul(localR, poly->vertices[i]);
+			m_vertices[i] = b2Mul(localR, poly->vertices[i] - centroid);
 
-			b2Vec2 u = poly->vertices[i] - c;
+			b2Vec2 u = m_vertices[i];
 			float32 length = u.Length();
 			if (length > FLT_EPSILON)
 			{
 				u *= 1.0f / length;
 			}
 			
-			m_coreVertices[i] = localPosition + b2Mul(localR, poly->vertices[i] - 2.0f * b2_linearSlop * u);
+			m_coreVertices[i] = m_vertices[i] - 2.0f * b2_linearSlop * u;
 		}
 	}
 
@@ -443,9 +445,10 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	m_maxRadius = 0.0f;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
-		minVertex = b2Min(minVertex, m_vertices[i]);
-		maxVertex = b2Max(maxVertex, m_vertices[i]);
-		m_maxRadius = b2Max(m_maxRadius, m_vertices[i].Length());
+		b2Vec2 v = m_vertices[i];
+		minVertex = b2Min(minVertex, v);
+		maxVertex = b2Max(maxVertex, v);
+		m_maxRadius = b2Max(m_maxRadius, v.Length());
 	}
 
 	m_localOBB.R.SetIdentity();
@@ -455,8 +458,9 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	// Compute the edge normals and next index map.
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
-		m_next[i] = i + 1 < m_vertexCount ? i + 1 : 0;
-		b2Vec2 edge = m_vertices[m_next[i]] - m_vertices[i];
+		int32 i1 = i;
+		int32 i2 = i + 1 < m_vertexCount ? i + 1 : 0;
+		b2Vec2 edge = m_vertices[i2] - m_vertices[i1];
 		m_normals[i] = b2Cross(edge, 1.0f);
 		m_normals[i].Normalize();
 	}
@@ -464,12 +468,13 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	// Ensure the polygon in convex. TODO_ERIN compute convex hull.
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
-		b2Assert(b2Cross(m_normals[i], m_normals[m_next[i]]) > 0.0f);
+		int32 i1 = i;
+		int32 i2 = i + 1 < m_vertexCount ? i + 1 : 0;
+		b2Assert(b2Cross(m_normals[i1], m_normals[i2]) > 0.0f);
 	}
 
-	// The body transform is copied for convenience.
 	m_R = m_body->m_R;
-	m_position = m_body->m_position;
+	m_position = m_body->m_position + b2Mul(m_body->m_R, m_localCentroid);
 
 	b2Mat22 R = b2Mul(m_R, m_localOBB.R);
 	b2Mat22 absR = b2Abs(R);
@@ -500,7 +505,7 @@ void b2PolyShape::Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 {
 	// The body transform is copied for convenience.
 	m_R = R2;
-	m_position = position2;
+	m_position = position2 + b2Mul(R2, m_localCentroid);
 
 	if (m_proxyId == b2_nullProxy)
 	{	
@@ -513,7 +518,7 @@ void b2PolyShape::Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 		b2Mat22 obbR = b2Mul(R1, m_localOBB.R);
 		b2Mat22 absR = b2Abs(obbR);
 		b2Vec2 h = b2Mul(absR, m_localOBB.extents);
-		b2Vec2 center = position1 + b2Mul(R1, m_localOBB.center);
+		b2Vec2 center = position1 + b2Mul(R1, m_localCentroid + m_localOBB.center);
 		aabb1.minVertex = center - h;
 		aabb1.maxVertex = center + h;
 	}
@@ -522,7 +527,7 @@ void b2PolyShape::Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 		b2Mat22 obbR = b2Mul(R2, m_localOBB.R);
 		b2Mat22 absR = b2Abs(obbR);
 		b2Vec2 h = b2Mul(absR, m_localOBB.extents);
-		b2Vec2 center = position2 + b2Mul(R2, m_localOBB.center);
+		b2Vec2 center = position2 + b2Mul(R2, m_localCentroid + m_localOBB.center);
 		aabb2.minVertex = center - h;
 		aabb2.maxVertex = center + h;
 	}
@@ -547,7 +552,7 @@ void b2PolyShape::Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 void b2PolyShape::QuickSync(const b2Vec2& position, const b2Mat22& R)
 {
 	m_R = R;
-	m_position = position;
+	m_position = position + b2Mul(R, m_localCentroid);
 }
 
 b2Vec2 b2PolyShape::Support(const b2Vec2& d) const

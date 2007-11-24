@@ -147,7 +147,7 @@ struct b2Shape
 	//--------------- Internals Below -------------------
 
 	static b2Shape* Create(	const b2ShapeDef* def,
-							b2Body* body, const b2Vec2& localCenter);
+							b2Body* body, const b2Vec2& newOrigin);
 
 	static void Destroy(b2Shape*& shape);
 
@@ -188,7 +188,7 @@ struct b2CircleShape : public b2Shape
 
 	//--------------- Internals Below -------------------
 
-	b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);
+	b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& newOrigin);
 
 	void Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 						const b2Vec2& position2, const b2Mat22& R2);
@@ -201,6 +201,13 @@ struct b2CircleShape : public b2Shape
 	float32 m_radius;
 };
 
+// A convex polygon. The position of the polygon (m_position) is the
+// position of the centroid. The vertices of the incoming polygon are pre-rotated
+// according to the local rotation. The vertices are also shifted to be centered
+// on the centroid. Since the local rotation is absorbed into the vertex
+// coordinates, the polygon rotation is equal to the body rotation. However,
+// the polygon position is centered on the polygon centroid. This simplifies
+// some collision algorithms.
 struct b2PolyShape : public b2Shape
 {
 	bool TestPoint(const b2Vec2& p);
@@ -209,7 +216,7 @@ struct b2PolyShape : public b2Shape
 
 	//--------------- Internals Below -------------------
 	
-	b2PolyShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter);
+	b2PolyShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& newOrigin);
 
 	void Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 						const b2Vec2& position2, const b2Mat22& R2);
@@ -217,12 +224,16 @@ struct b2PolyShape : public b2Shape
 
 	b2Vec2 Support(const b2Vec2& d) const;
 
+	// Local position of the shape centroid in parent body frame.
+	b2Vec2 m_localCentroid;
+
+	// Local position oriented bounding box. The OBB center is relative to
+	// shape centroid.
 	b2OBB m_localOBB;
 	b2Vec2 m_vertices[b2_maxPolyVertices];
 	b2Vec2 m_coreVertices[b2_maxPolyVertices];
 	int32 m_vertexCount;
 	b2Vec2 m_normals[b2_maxPolyVertices];
-	int32 m_next[b2_maxPolyVertices];
 };
 
 inline b2ShapeType b2Shape::GetType() const

@@ -35,7 +35,8 @@ int32 b2BlockAllocator::s_blockSizes[b2_blockSizes] =
 	320,	// 9
 	384,	// 10
 	448,	// 11
-	512		// 12
+	512,	// 12
+	640,	// 13
 };
 uint8 b2BlockAllocator::s_blockSizeLookup[b2_maxBlockSize + 1];
 bool b2BlockAllocator::s_blockSizeLookupInitialized;

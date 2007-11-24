@@ -26,12 +26,14 @@ public:
 	{
 		{
 			b2PolyDef sd;
-			sd.vertices[0].Set(-9.0f, -0.1f);
-			sd.vertices[1].Set(11.0f, -0.1f);
-			sd.vertices[2].Set(9.0f, 0.1f);
-			sd.vertices[3].Set(-11.0f, 0.1f);
+			sd.vertices[0].Set(-9.0f, -1.1f);
+			sd.vertices[1].Set(7.0f, -1.1f);
+			sd.vertices[2].Set(5.0f, -0.9f);
+			sd.vertices[3].Set(-11.0f, -0.9f);
 			sd.vertexCount = 4;
 			sd.density = 0.0f;
+			sd.localPosition.Set(4.0f, 2.0f);
+			sd.localRotation = -2.0f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
@@ -41,9 +43,10 @@ public:
 
 		{
 			b2BoxDef sd;
-			float32 a = 0.25f;
-			sd.extents.Set(a, a);
+			sd.extents.Set(0.5f, 0.5f);
 			sd.density = 1.0f;
+			sd.localPosition.Set(-0.5f, 0.25f);
+			sd.localRotation = 0.4f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
@@ -73,6 +76,24 @@ public:
 
 		for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)
 		{
+			b2Vec2 v;
+			
+			v = b->GetCenterPosition();
+			glPointSize(8.0f);
+			glColor3f(1.0f, 1.0f, 1.0f);
+			glBegin(GL_POINTS);
+			glVertex2f(v.x, v.y);
+			glEnd();
+
+			v = b->GetOriginPosition();
+			glPointSize(6.0f);
+			glColor3f(0.0f, 0.0f, 1.0f);
+			glBegin(GL_POINTS);
+			glVertex2f(v.x, v.y);
+			glEnd();
+
+			glPointSize(1.0f);
+
 			for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
 			{
 				if (b->m_invMass == 0.0f)
@@ -83,6 +104,14 @@ public:
 				{
 					DrawShape(s, Color(0.9f, 0.9f, 0.9f));
 				}
+
+				glPointSize(4.0f);
+				glBegin(GL_POINTS);
+				b2Vec2 v = s->GetPosition();
+				glColor3f(1.0f, 0.0f, 1.0f);
+				glVertex2f(v.x, v.y);
+				glEnd();
+				glPointSize(1.0f);
 			}
 		}
 
@@ -112,6 +141,35 @@ public:
 					glVertex2f(v1.x, v1.y);
 					glVertex2f(v2.x, v2.y);
 				}
+				glEnd();
+			}
+		}
+
+		if (settings->drawAABBs)
+		{
+			b2BroadPhase* bp = m_world->m_broadPhase;
+			b2Vec2 invQ;
+			invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
+			glColor3f(0.9f, 0.3f, 0.9f);
+			for (int32 i = 0; i < b2_maxProxies; ++i)
+			{
+				b2Proxy* p = bp->m_proxyPool + i;
+				if (p->IsValid() == false)
+				{
+					continue;
+				}
+
+				b2AABB b;
+				b.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
+				b.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
+				b.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
+				b.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
+
+				glBegin(GL_LINE_LOOP);
+				glVertex2f(b.minVertex.x, b.minVertex.y);
+				glVertex2f(b.maxVertex.x, b.minVertex.y);
+				glVertex2f(b.maxVertex.x, b.maxVertex.y);
+				glVertex2f(b.minVertex.x, b.maxVertex.y);
 				glEnd();
 			}
 		}

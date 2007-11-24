@@ -22,8 +22,8 @@
 #include "b2Settings.h"
 
 const int32 b2_chunkSize = 4096;
-const int32 b2_maxBlockSize = 512;
-const int32 b2_blockSizes = 13;
+const int32 b2_maxBlockSize = 640;
+const int32 b2_blockSizes = 14;
 const int32 b2_chunkArrayIncrement = 128;
 
 struct b2Block;

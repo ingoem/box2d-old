@@ -20,6 +20,7 @@
 #include "../Framework/Render.h"
 #include "freeglut/GL/glut.h"
 
+#include "ApplyForce.h"
 #include "Bridge.h"
 #include "BroadPhaseTest.h"
 #include "CCDTest.h"
@@ -43,6 +44,8 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Apply Force", ApplyForce::Create},
+	{"Compound Shapes", CompoundShapes::Create},
 	{"PolyCollision", PolyCollision::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	//{"CCD Test", CCDTest::Create},
@@ -52,7 +55,6 @@ TestEntry g_testEntries[] =
 	{"Distance Test", DistanceTest::Create},
 	{"Chain", Chain::Create},
 	{"Bridge", Bridge::Create},
-	{"Compound Shapes", CompoundShapes::Create},
 	{"Collision Processing", CollisionProcessing::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Web", Web::Create},
