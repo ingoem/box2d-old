@@ -18,9 +18,14 @@
 
 #include "Render.h"
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include "freeglut/gl/glut.h"
+#endif
 
 #include <stdio.h>
+#include <stdarg.h>
 
 void DrawJoint(b2Joint* joint)
 {

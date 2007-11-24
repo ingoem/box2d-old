@@ -19,7 +19,12 @@
 #include "Test.h"
 #include "Render.h"
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#define APIENTRY
+#else
 #include "freeglut/gl/glut.h"
+#endif
 
 #include <stdio.h>
 

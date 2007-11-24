@@ -18,7 +18,12 @@
 
 #include "../Framework/Test.h"
 #include "../Framework/Render.h"
-#include "freeglut/GL/glut.h"
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include "freeglut/gl/glut.h"
+#endif
 
 #include "ApplyForce.h"
 #include "Bridge.h"

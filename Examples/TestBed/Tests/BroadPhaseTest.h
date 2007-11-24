@@ -21,7 +21,12 @@
 
 #include "../Framework/Test.h"
 #include "../Framework/Render.h"
-#include "freeglut/GL/glut.h"
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include "freeglut/gl/glut.h"
+#endif
 
 const int32 k_actorCount = 256;
 const float32 k_extent = 15.0f;

@@ -19,8 +19,8 @@
 #include "b2PolyContact.h"
 #include "../../Common/b2BlockAllocator.h"
 
-#include <memory.h>
-#include <new.h>
+#include <memory>
+#include <new>
 
 b2Contact* b2PolyContact::Create(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator)
 {

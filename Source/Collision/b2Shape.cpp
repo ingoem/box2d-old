@@ -21,7 +21,7 @@
 #include "../Dynamics/b2World.h"
 #include "../Common/b2BlockAllocator.h"
 
-#include <new.h>
+#include <new>
 
 // Polygon mass, centroid, and inertia.
 // Let rho be the polygon density in mass per unit area.
@@ -627,4 +627,5 @@ void b2PolyShape::ResetProxy(b2BroadPhase* broadPhase)
 		m_body->Freeze();
 	}
 }
+
 

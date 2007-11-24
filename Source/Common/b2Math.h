@@ -24,9 +24,14 @@
 #include <float.h>
 #include <stdlib.h>
 
+
 inline bool b2IsValid(float x)
 {
+#ifdef _MSC_VER
 	return _finite(x) != 0;
+#else
+	return finite(x) != 0;
+#endif
 }
 
 inline float32 b2InvSqrt(float32 x)
