@@ -477,7 +477,10 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	{
 		int32 i1 = i;
 		int32 i2 = i + 1 < m_vertexCount ? i + 1 : 0;
-		b2Assert(b2Cross(m_normals[i1], m_normals[i2]) > 0.0f);
+		if (b2Cross(m_normals[i1], m_normals[i2]) > 0.0f)
+		{
+			b2Assert(false);
+		}
 	}
 
 	m_R = m_body->m_R;

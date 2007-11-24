@@ -26,7 +26,7 @@
 #include "../Common/b2Settings.h"
 #include "../Common/b2Math.h"
 
-#include <limits.h>
+#include <climits>
 
 class b2BroadPhase;
 struct b2Proxy;

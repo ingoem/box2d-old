@@ -55,11 +55,11 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	const int32 maxIterations = 10;
 	b2Vec2 d;
 	float32 invRelativeVelocity = 0.0f;
-	bool hit = false;
+	bool hit = true;
+	b2Vec2 x1, x2;
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
 		// Get the accurate distance between shapes.
-		b2Vec2 x1, x2;
 		float32 distance = b2Distance(&x1, &x2, shape1, shape2);
 		if (distance < b2_linearSlop)
 		{
@@ -121,12 +121,34 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	if (hit)
 	{
 		// Hit, move bodies to safe position and re-sync shapes.
-		body1->m_position = p1;
+		b2Vec2 d = x2 - x1;
+		float32 length = d.Length();
+		if (length > FLT_EPSILON)
+		{
+			d *= b2_linearSlop / length;
+		}
+
+		if (body1->IsStatic())
+		{
+			body1->m_position = p1;
+		}
+		else
+		{
+			body1->m_position = p1 - d;
+		}
 		body1->m_rotation = a1;
 		body1->m_R.Set(a1);
 		body1->QuickSyncShapes();
 
-		body2->m_position = p2;
+		if (body2->IsStatic())
+		{
+			body2->m_position = p2;
+		}
+		else
+		{
+			body2->m_position = p2 + d;
+		}
+		body2->m_position = p2 + d;
 		body2->m_rotation = a2;
 		body2->m_R.Set(a2);
 		body2->QuickSyncShapes();

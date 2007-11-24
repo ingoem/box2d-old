@@ -22,8 +22,6 @@
 #include "../b2Body.h"
 #include "../b2World.h"
 
-#include <stdio.h>
-
 // Gear Joint:
 // C0 = (coordinate1 + ratio * coordinate2)_initial
 // C = C0 - (cordinate1 + ratio * coordinate2) = 0

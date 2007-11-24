@@ -20,8 +20,6 @@
 #include "../b2Body.h"
 #include "../b2World.h"
 
-#include <stdio.h>
-
 // Pulley:
 // length1 = norm(p1 - s1)
 // length2 = norm(p2 - s2)

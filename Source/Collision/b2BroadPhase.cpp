@@ -110,16 +110,14 @@ bool b2BroadPhase::ShouldCollide(b2Proxy* p1, b2Proxy* p2)
 // This one is only used for validation.
 bool b2BroadPhase::TestOverlap(b2Proxy* p1, b2Proxy* p2)
 {
-	const int32 boundCount = 2 * m_proxyCount;
-
 	for (int32 axis = 0; axis < 2; ++axis)
 	{
 		b2Bound* bounds = m_bounds[axis];
 
-		b2Assert(p1->lowerBounds[axis] < boundCount);
-		b2Assert(p1->upperBounds[axis] < boundCount);
-		b2Assert(p2->lowerBounds[axis] < boundCount);
-		b2Assert(p2->upperBounds[axis] < boundCount);
+		b2Assert(p1->lowerBounds[axis] < 2 * m_proxyCount);
+		b2Assert(p1->upperBounds[axis] < 2 * m_proxyCount);
+		b2Assert(p2->lowerBounds[axis] < 2 * m_proxyCount);
+		b2Assert(p2->upperBounds[axis] < 2 * m_proxyCount);
 
 		if (bounds[p1->lowerBounds[axis]].value > bounds[p2->upperBounds[axis]].value)
 			return false;
@@ -133,14 +131,12 @@ bool b2BroadPhase::TestOverlap(b2Proxy* p1, b2Proxy* p2)
 
 bool b2BroadPhase::TestOverlap(const b2BoundValues& b, b2Proxy* p)
 {
-	const int32 boundCount = 2 * m_proxyCount;
-
 	for (int32 axis = 0; axis < 2; ++axis)
 	{
 		b2Bound* bounds = m_bounds[axis];
 
-		b2Assert(p->lowerBounds[axis] < boundCount);
-		b2Assert(p->upperBounds[axis] < boundCount);
+		b2Assert(p->lowerBounds[axis] < 2 * m_proxyCount);
+		b2Assert(p->upperBounds[axis] < 2 * m_proxyCount);
 
 		if (b.lowerValues[axis] > bounds[p->upperBounds[axis]].value)
 			return false;
@@ -392,8 +388,7 @@ void b2BroadPhase::DestroyProxy(int32 proxyId)
 
 	for (int32 i = 0; i < m_queryResultCount; ++i)
 	{
-		b2Proxy* other = m_proxyPool + m_queryResults[i];
-		b2Assert(other->IsValid());
+		b2Assert(m_proxyPool[m_queryResults[i]].IsValid());
 		m_pairManager.RemoveBufferedPair(proxyId, m_queryResults[i]);
 	}
 
@@ -671,28 +666,18 @@ void b2BroadPhase::Validate()
 		for (int32 i = 0; i < boundCount; ++i)
 		{
 			b2Bound* bound = bounds + i;
-			if (i > 0)
-			{
-				b2Bound* prevBound = bound - 1;
-				b2Assert(prevBound->value <= bound->value);
-			}
-
-			uint16 proxyId = bound->proxyId;
-
-			b2Assert(proxyId != b2_nullProxy);
-
-			b2Proxy* proxy = m_proxyPool + bound->proxyId;
-
-			b2Assert(proxy->IsValid());
+			b2Assert(i == 0 || bounds[i-1].value <= bound->value);
+			b2Assert(bound->proxyId != b2_nullProxy);
+			b2Assert(m_proxyPool[bound->proxyId].IsValid());
 
 			if (bound->IsLower() == true)
 			{
-				b2Assert(proxy->lowerBounds[axis] == i);
+				b2Assert(m_proxyPool[bound->proxyId].lowerBounds[axis] == i);
 				++stabbingCount;
 			}
 			else
 			{
-				b2Assert(proxy->upperBounds[axis] == i);
+				b2Assert(m_proxyPool[bound->proxyId].upperBounds[axis] == i);
 				--stabbingCount;
 			}
 

@@ -83,6 +83,8 @@ static int32 ProcessThree(b2Vec2* p1Out, b2Vec2* p2Out, b2Vec2* p1s, b2Vec2* p2s
 	}
 
 	// Should not be in vertex a or b region.
+	NOT_USED(sd);
+	NOT_USED(sn);
 	b2Assert(sn > 0.0f || tn > 0.0f);
 	b2Assert(sd > 0.0f || un > 0.0f);
 

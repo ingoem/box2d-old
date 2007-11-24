@@ -335,6 +335,7 @@ void b2PairManager::Commit()
 
 void b2PairManager::ValidateBuffer()
 {
+#ifdef _DEBUG
 	b2Assert(m_pairBufferCount <= m_pairCount);
 
 	std::sort(m_pairBuffer, m_pairBuffer + m_pairBufferCount);
@@ -359,10 +360,12 @@ void b2PairManager::ValidateBuffer()
 		b2Assert(proxy1->IsValid() == true);
 		b2Assert(proxy2->IsValid() == true);
 	}
+#endif
 }
 
 void b2PairManager::ValidateTable()
 {
+#ifdef _DEBUG
 	for (int32 i = 0; i < b2_tableCapacity; ++i)
 	{
 		uint16 index = m_hashTable[i];
@@ -388,4 +391,5 @@ void b2PairManager::ValidateTable()
 			index = pair->next;
 		}
 	}
+#endif
 }

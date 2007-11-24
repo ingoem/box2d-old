@@ -17,7 +17,7 @@
 */
 
 #include "b2Settings.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 int32 b2_byteCount = 0;
 

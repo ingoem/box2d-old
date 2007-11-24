@@ -19,7 +19,7 @@
 #ifndef B2_SETTINGS_H
 #define B2_SETTINGS_H
 
-#include <assert.h>
+#include <cassert>
 
 #define NOT_USED(x) x
 #define b2Assert(A) assert((A))

@@ -20,7 +20,7 @@
 #define B2_COLLISION_H
 
 #include "../Common/b2Math.h"
-#include <limits.h>
+#include <climits>
 
 struct b2Shape;
 struct b2CircleShape;

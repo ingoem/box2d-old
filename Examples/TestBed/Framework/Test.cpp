@@ -26,7 +26,7 @@
 #include "freeglut/gl/glut.h"
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 
 void WorldListener::NotifyJointDestroyed(b2Joint* joint)
 {

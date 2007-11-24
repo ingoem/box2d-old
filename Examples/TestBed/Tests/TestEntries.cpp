@@ -49,11 +49,11 @@
 
 TestEntry g_testEntries[] =
 {
+	//{"CCD Test", CCDTest::Create},
 	{"Apply Force", ApplyForce::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"PolyCollision", PolyCollision::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
-	//{"CCD Test", CCDTest::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Newton's Cradle", Cradle::Create},
 	{"Broad Phase", BroadPhaseTest::Create},

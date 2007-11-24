@@ -20,9 +20,9 @@
 #define B2_MATH_H
 
 #include "b2Settings.h"
-#include <math.h>
-#include <float.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cfloat>
+#include <cstdlib>
 
 
 inline bool b2IsValid(float x)

@@ -24,8 +24,8 @@
 #include "freeglut/gl/glut.h"
 #endif
 
-#include <stdio.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstdarg>
 
 void DrawJoint(b2Joint* joint)
 {
