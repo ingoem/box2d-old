@@ -162,6 +162,8 @@ struct b2Shape
 	virtual b2Vec2 Support(const b2Vec2& d) const = 0;
 	float32 GetMaxRadius() const;
 
+	void DestroyProxy();
+
 	b2Mat22 m_R;
 	b2Vec2 m_position;
 

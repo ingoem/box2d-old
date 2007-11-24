@@ -28,8 +28,8 @@ public:
 
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(50.0f, 10.0f);
+			sd.restitution = 0.9f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
@@ -59,6 +59,7 @@ public:
 			b2Mat22 R1(sd1.localRotation);
 			sd1.localPosition = b2Mul(R1, b2Vec2(1.0f, 0.0f));
 			sd1.density = 2.0f;
+			sd1.restitution = 0.9f;
 
 			b2PolyDef sd2;
 			sd2.vertexCount = 3;
@@ -69,6 +70,7 @@ public:
 			b2Mat22 R2(sd2.localRotation);
 			sd2.localPosition = b2Mul(R2, b2Vec2(-1.0f, 0.0f));
 			sd2.density = 2.0f;
+			sd2.restitution = 0.9f;
 
 			b2BodyDef bd;
 			bd.AddShape(&sd1);

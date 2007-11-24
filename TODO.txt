@@ -69,13 +69,12 @@ Version 1.4.2
 
 Version 1.4.3
 - Fix thin polygon collision.
-- Simplify broad-phase.
-- CMake files from forum.
+- Simplify broad-phase internally.
 - OSX patch.
+- Fix compound body freezing.
 
 Version 2.0.0
 - CCD.
-- Fix bug with freezing compound bodies.
 
 Version 2.1.0
 - Meshes (segment soup).

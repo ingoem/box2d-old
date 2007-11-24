@@ -213,4 +213,8 @@ void b2Body::Freeze()
 	m_flags |= e_frozenFlag;
 	m_linearVelocity.SetZero();
 	m_angularVelocity = 0.0f;
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
+	{
+		s->DestroyProxy();
+	}
 }

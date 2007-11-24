@@ -263,6 +263,15 @@ b2Shape::~b2Shape()
 	}
 }
 
+void b2Shape::DestroyProxy()
+{
+	if (m_proxyId != b2_nullProxy)
+	{
+		m_body->m_world->m_broadPhase->DestroyProxy(m_proxyId);
+		m_proxyId = b2_nullProxy;
+	}
+}
+
 b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& localCenter)
 : b2Shape(def, body)
 {
@@ -325,8 +334,6 @@ void b2CircleShape::Synchronize(const b2Vec2& position1, const b2Mat22& R1,
 	}
 	else
 	{
-		broadPhase->DestroyProxy(m_proxyId);
-		m_proxyId = b2_nullProxy;
 		m_body->Freeze();
 	}
 }
@@ -543,8 +550,6 @@ void b2PolyShape::Synchronize(	const b2Vec2& position1, const b2Mat22& R1,
 	}
 	else
 	{
-		broadPhase->DestroyProxy(m_proxyId);
-		m_proxyId = b2_nullProxy;
 		m_body->Freeze();
 	}
 }
