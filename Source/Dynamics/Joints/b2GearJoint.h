@@ -21,9 +21,8 @@
 
 #include "b2Joint.h"
 
-struct b2Body;
-struct b2RevoluteJoint;
-struct b2PrismaticJoint;
+class b2RevoluteJoint;
+class b2PrismaticJoint;
 
 // A gear joint is used to connect two joints together. Either joint
 // can be a revolute or prismatic joint. You specify a gear ratio
@@ -51,8 +50,9 @@ struct b2GearJointDef : public b2JointDef
 	float32 ratio;
 };
 
-struct b2GearJoint : public b2Joint
+class b2GearJoint : public b2Joint
 {
+public:
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 

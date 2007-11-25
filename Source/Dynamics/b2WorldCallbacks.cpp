@@ -16,17 +16,21 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef B2_NULL_CONTACT_H
-#define B2_NULL_CONTACT_H
+#include "b2WorldCallbacks.h"
+#include "../Collision/b2Shape.h"
 
-#include "../../Common/b2Math.h"
-#include "b2Contact.h"
+b2CollisionFilter b2_defaultFilter;
 
-class b2NullContact : public b2Contact
+// Return true if contact calculations should be performed between these two shapes.
+// If you implement your own collision filter you may want to build from this implementation.
+bool b2CollisionFilter::ShouldCollide(b2Shape* shape1, b2Shape* shape2)
 {
-	b2NullContact() {}
-	void Evaluate() {}
-	b2Manifold* GetManifolds() { return NULL; }
-};
+	if (shape1->m_groupIndex == shape2->m_groupIndex && shape1->m_groupIndex != 0)
+	{
+		return shape1->m_groupIndex > 0;
+	}
 
-#endif
+	bool collide = (shape1->m_maskBits & shape2->m_categoryBits) != 0 && (shape1->m_categoryBits & shape2->m_maskBits) != 0;
+	return collide;
+}
+

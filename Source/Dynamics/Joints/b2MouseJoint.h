@@ -21,9 +21,6 @@
 
 #include "b2Joint.h"
 
-struct b2Body;
-class b2BlockAllocator;
-
 struct b2MouseJointDef : public b2JointDef
 {
 	b2MouseJointDef()
@@ -43,8 +40,9 @@ struct b2MouseJointDef : public b2JointDef
 	float32 timeStep;
 };
 
-struct b2MouseJoint : public b2Joint
+class b2MouseJoint : public b2Joint
 {
+public:
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 

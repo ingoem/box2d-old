@@ -72,6 +72,7 @@ Version 1.4.3
 - Simplify broad-phase internally.
 - OSX patch.
 - Fix compound body freezing.
+- Collision filter callback.
 
 Version 2.0.0
 - CCD.

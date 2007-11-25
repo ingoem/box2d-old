@@ -265,6 +265,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Source\Dynamics\b2WorldCallbacks.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Source\Dynamics\b2WorldCallbacks.h"
 				>
 			</File>

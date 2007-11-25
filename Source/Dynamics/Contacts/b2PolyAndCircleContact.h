@@ -23,8 +23,9 @@
 
 class b2BlockAllocator;
 
-struct b2PolyAndCircleContact : public b2Contact
+class b2PolyAndCircleContact : public b2Contact
 {
+public:
 	static b2Contact* Create(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator);
 	static void Destroy(b2Contact* contact, b2BlockAllocator* allocator);
 

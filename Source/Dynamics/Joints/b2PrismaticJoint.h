@@ -46,8 +46,9 @@ struct b2PrismaticJointDef : public b2JointDef
 	bool enableMotor;
 };
 
-struct b2PrismaticJoint : public b2Joint
+class b2PrismaticJoint : public b2Joint
 {
+public:
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 

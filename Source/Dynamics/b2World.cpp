@@ -32,6 +32,7 @@ int32 b2World::s_enableWarmStarting = 1;
 b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 {
 	m_listener = NULL;
+	m_filter = &b2_defaultFilter;
 
 	m_bodyList = NULL;
 	m_contactList = NULL;
@@ -65,6 +66,11 @@ b2World::~b2World()
 void b2World::SetListener(b2WorldListener* listener)
 {
 	m_listener = listener;
+}
+
+void b2World::SetFilter(b2CollisionFilter* filter)
+{
+	m_filter = filter;
 }
 
 b2Body* b2World::CreateBody(const b2BodyDef* def)

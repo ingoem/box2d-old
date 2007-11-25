@@ -25,6 +25,7 @@
 
 #include "../Source/Collision/b2Shape.h"
 #include "../Source/Collision/b2BroadPhase.h"
+#include "../Source/Dynamics/b2WorldCallbacks.h"
 #include "../Source/Dynamics/b2World.h"
 #include "../Source/Dynamics/b2Body.h"
 

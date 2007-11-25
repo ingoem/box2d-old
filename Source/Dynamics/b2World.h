@@ -28,10 +28,10 @@
 struct b2AABB;
 struct b2BodyDef;
 struct b2JointDef;
-struct b2Body;
-struct b2Joint;
-struct b2Shape;
-struct b2Contact;
+class b2Body;
+class b2Joint;
+class b2Shape;
+class b2Contact;
 class b2BroadPhase;
 
 struct b2TimeStep
@@ -41,14 +41,19 @@ struct b2TimeStep
 	int32 iterations;
 };
 
-struct b2World
+class b2World
 {
+public:
 	b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep);
 	~b2World();
 
 	// Register a world listener to receive important events that can
 	// help prevent your code from crashing.
 	void SetListener(b2WorldListener* listener);
+
+	// Register a collision filter to provide specific control over collision.
+	// Otherwise the default filter is used (b2CollisionFilter).
+	void SetFilter(b2CollisionFilter* filter);
 
 	// Create and destroy rigid bodies. Destruction is deferred until the
 	// the next call to Step. This is done so that bodies may be destroyed
@@ -102,6 +107,7 @@ struct b2World
 	b2Body* m_groundBody;
 
 	b2WorldListener* m_listener;
+	b2CollisionFilter* m_filter;
 
 	int32 m_positionIterationCount;
 

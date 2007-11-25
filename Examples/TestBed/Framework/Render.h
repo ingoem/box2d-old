@@ -21,8 +21,8 @@
 
 #include "Box2D.h"
 
-struct b2Joint;
-struct b2Shape;
+class b2Joint;
+class b2Shape;
 struct b2AABB;
 
 struct Color

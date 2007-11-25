@@ -40,16 +40,21 @@ void* b2ContactManager::PairAdded(void* proxyUserData1, void* proxyUserData2)
 		return &m_nullContact;
 	}
 
+	if (body2->IsConnected(body1))
+	{
+		return &m_nullContact;
+	}
+
+	if (m_world->m_filter != NULL && m_world->m_filter->ShouldCollide(shape1, shape2) == false)
+	{
+		return &m_nullContact;
+	}
+
 	// Ensure that body2 is dynamic (body1 is static or dynamic).
 	if (body2->m_invMass == 0.0f)
 	{
 		b2Swap(shape1, shape2);
 		b2Swap(body1, body2);
-	}
-
-	if (body2->IsConnected(body1))
-	{
-		return &m_nullContact;
 	}
 
 	// Call the factory.

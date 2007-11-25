@@ -22,13 +22,14 @@
 #include "../Common/b2Math.h"
 
 class b2StackAllocator;
-struct b2Contact;
-struct b2Body;
-struct b2Joint;
+class b2Contact;
+class b2Body;
+class b2Joint;
 struct b2TimeStep;
 
-struct b2Island
+class b2Island
 {
+public:
 	b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacity, b2StackAllocator* allocator);
 	~b2Island();
 

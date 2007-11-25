@@ -19,7 +19,11 @@
 #ifndef B2_WORLD_CALLBACKS_H
 #define B2_WORLD_CALLBACKS_H
 
-struct b2Joint;
+#include "../Common/b2Settings.h"
+
+class b2Body;
+class b2Joint;
+class b2Shape;
 
 enum b2BoundaryResponse
 {
@@ -52,4 +56,16 @@ public:
 	}
 };
 
+// Implement this class to provide collision filtering. In other words, you can implement
+// this class if you want finer control over contact creation.
+class b2CollisionFilter
+{
+public:
+	virtual ~b2CollisionFilter() {}
+
+	// Return true if contact calculations should be performed between these two shapes.
+	virtual bool ShouldCollide(b2Shape* shape1, b2Shape* shape2);
+};
+
+extern b2CollisionFilter b2_defaultFilter;
 #endif

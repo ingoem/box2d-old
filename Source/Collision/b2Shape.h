@@ -22,7 +22,7 @@
 #include "../Common/b2Math.h"
 #include "b2Collision.h"
 
-struct b2Body;
+class b2Body;
 class b2BroadPhase;
 
 struct b2MassData
@@ -120,8 +120,9 @@ struct b2PolyDef : public b2ShapeDef
 
 // Shapes are created automatically when a body is created.
 // Client code does not normally interact with shapes.
-struct b2Shape
+class b2Shape
 {
+public:
 	virtual bool TestPoint(const b2Vec2& p) = 0;
 	
 	void* GetUserData();
@@ -164,6 +165,8 @@ struct b2Shape
 
 	void DestroyProxy();
 
+	b2Shape* m_next;
+
 	b2Mat22 m_R;
 	b2Vec2 m_position;
 
@@ -172,18 +175,21 @@ struct b2Shape
 	void* m_userData;
 
 	b2Body* m_body;
-	uint16 m_proxyId;
 
 	float32 m_friction;
 	float32 m_restitution;
 
 	float32 m_maxRadius;
 
-	b2Shape* m_next;
+	uint16 m_proxyId;
+	uint16 m_categoryBits;
+	uint16 m_maskBits;
+	int16 m_groupIndex;
 };
 
-struct b2CircleShape : public b2Shape
+class b2CircleShape : public b2Shape
 {
+public:
 	bool TestPoint(const b2Vec2& p);
 
 	void ResetProxy(b2BroadPhase* broadPhase);
@@ -210,8 +216,9 @@ struct b2CircleShape : public b2Shape
 // coordinates, the polygon rotation is equal to the body rotation. However,
 // the polygon position is centered on the polygon centroid. This simplifies
 // some collision algorithms.
-struct b2PolyShape : public b2Shape
+class b2PolyShape : public b2Shape
 {
+public:
 	bool TestPoint(const b2Vec2& p);
 	
 	void ResetProxy(b2BroadPhase* broadPhase);

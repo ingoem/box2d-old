@@ -19,7 +19,7 @@
 #ifndef B2_CONSERVATIVE_H
 #define B2_CONSERVATIVE_H
 
-struct b2Shape;
+class b2Shape;
 
 // Move two bodies and their shapes forward in time conservatively.
 // Returns true if the shapes collide.

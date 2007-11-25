@@ -23,9 +23,9 @@
 #include "../../Collision/b2Collision.h"
 #include "../../Collision/b2Shape.h"
 
-struct b2Body;
-struct b2Contact;
-struct b2World;
+class b2Body;
+class b2Contact;
+class b2World;
 class b2BlockAllocator;
 
 typedef b2Contact* b2ContactCreateFcn(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator);
@@ -46,8 +46,9 @@ struct b2ContactRegister
 	bool primary;
 };
 
-struct b2Contact
+class b2Contact
 {
+public:
 	virtual b2Manifold* GetManifolds() = 0;
 	int32 GetManifoldCount() const
 	{

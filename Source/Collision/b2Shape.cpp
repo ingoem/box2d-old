@@ -253,6 +253,10 @@ b2Shape::b2Shape(const b2ShapeDef* def, b2Body* body)
 
 	m_proxyId = b2_nullProxy;
 	m_maxRadius = 0.0f;
+
+	m_categoryBits = def->categoryBits;
+	m_maskBits = def->maskBits;
+	m_groupIndex = def->groupIndex;
 }
 
 b2Shape::~b2Shape()
@@ -294,7 +298,7 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	b2BroadPhase* broadPhase = m_body->m_world->m_broadPhase;
 	if (broadPhase->InRange(aabb))
 	{
-		m_proxyId = broadPhase->CreateProxy(aabb, def->groupIndex, def->categoryBits, def->maskBits, this);
+		m_proxyId = broadPhase->CreateProxy(aabb, this);
 	}
 	else
 	{
@@ -366,9 +370,6 @@ void b2CircleShape::ResetProxy(b2BroadPhase* broadPhase)
 	}
 
 	b2Proxy* proxy = broadPhase->GetProxy(m_proxyId);
-	int16 groupIndex = proxy->groupIndex;
-	uint16 categoryBits = proxy->categoryBits;
-	uint16 maskBits = proxy->maskBits;
 
 	broadPhase->DestroyProxy(m_proxyId);
 	proxy = NULL;
@@ -379,7 +380,7 @@ void b2CircleShape::ResetProxy(b2BroadPhase* broadPhase)
 
 	if (broadPhase->InRange(aabb))
 	{
-		m_proxyId = broadPhase->CreateProxy(aabb, groupIndex, categoryBits, maskBits, this);
+		m_proxyId = broadPhase->CreateProxy(aabb, this);
 	}
 	else
 	{
@@ -477,10 +478,9 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	{
 		int32 i1 = i;
 		int32 i2 = i + 1 < m_vertexCount ? i + 1 : 0;
-		if (b2Cross(m_normals[i1], m_normals[i2]) > 0.0f)
-		{
-			b2Assert(false);
-		}
+		NOT_USED(i1);
+		NOT_USED(i2);
+		b2Assert(b2Cross(m_normals[i1], m_normals[i2]) > FLT_EPSILON);
 	}
 
 	m_R = m_body->m_R;
@@ -497,7 +497,7 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	b2BroadPhase* broadPhase = m_body->m_world->m_broadPhase;
 	if (broadPhase->InRange(aabb))
 	{
-		m_proxyId = broadPhase->CreateProxy(aabb, def->groupIndex, def->categoryBits, def->maskBits, this);
+		m_proxyId = broadPhase->CreateProxy(aabb, this);
 	}
 	else
 	{
@@ -606,9 +606,6 @@ void b2PolyShape::ResetProxy(b2BroadPhase* broadPhase)
 	}
 
 	b2Proxy* proxy = broadPhase->GetProxy(m_proxyId);
-	int16 groupIndex = proxy->groupIndex;
-	uint16 categoryBits = proxy->categoryBits;
-	uint16 maskBits = proxy->maskBits;
 
 	broadPhase->DestroyProxy(m_proxyId);
 	proxy = NULL;
@@ -623,7 +620,7 @@ void b2PolyShape::ResetProxy(b2BroadPhase* broadPhase)
 
 	if (broadPhase->InRange(aabb))
 	{
-		m_proxyId = broadPhase->CreateProxy(aabb, groupIndex, categoryBits, maskBits, this);
+		m_proxyId = broadPhase->CreateProxy(aabb, this);
 	}
 	else
 	{

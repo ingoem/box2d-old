@@ -21,8 +21,8 @@
 
 #include "../../Common/b2Math.h"
 
-struct b2Body;
-struct b2Joint;
+class b2Body;
+class b2Joint;
 struct b2TimeStep;
 class b2BlockAllocator;
 
@@ -83,8 +83,9 @@ struct b2JointDef
 	bool collideConnected;
 };
 
-struct b2Joint
+class b2Joint
 {
+public:
 	b2JointType GetType() const;
 
 	b2Body* GetBody1();

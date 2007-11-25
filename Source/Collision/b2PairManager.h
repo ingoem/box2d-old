@@ -69,8 +69,9 @@ struct b2BufferedPair
 	uint16 proxyId2;
 };
 
-struct b2PairCallback
+class b2PairCallback
 {
+public:
 	virtual ~b2PairCallback() {}
 
 	// This should return the new pair user data. It is okay if the

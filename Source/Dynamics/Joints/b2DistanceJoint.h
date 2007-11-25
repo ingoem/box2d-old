@@ -21,8 +21,6 @@
 
 #include "b2Joint.h"
 
-struct b2Body;
-
 struct b2DistanceJointDef : public b2JointDef
 {
 	b2DistanceJointDef()
@@ -36,8 +34,9 @@ struct b2DistanceJointDef : public b2JointDef
 	b2Vec2 anchorPoint2;
 };
 
-struct b2DistanceJoint : public b2Joint
+class b2DistanceJoint : public b2Joint
 {
+public:
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 

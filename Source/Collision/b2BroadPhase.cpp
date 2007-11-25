@@ -96,17 +96,6 @@ b2BroadPhase::~b2BroadPhase()
 {
 }
 
-bool b2BroadPhase::ShouldCollide(b2Proxy* p1, b2Proxy* p2)
-{
-	if (p1->groupIndex == p2->groupIndex && p1->groupIndex != 0)
-	{
-		return p1->groupIndex > 0;
-	}
-
-	bool doCollide = (p1->maskBits & p2->categoryBits) != 0 && (p1->categoryBits & p2->maskBits) != 0;
-	return doCollide;
-}
-
 // This one is only used for validation.
 bool b2BroadPhase::TestOverlap(b2Proxy* p1, b2Proxy* p2)
 {
@@ -245,7 +234,7 @@ void b2BroadPhase::Query(int32* lowerQueryOut, int32* upperQueryOut,
 	*upperQueryOut = upperQuery;
 }
 
-uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 categoryBits, uint16 maskBits, void* userData)
+uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, void* userData)
 {
 	b2Assert(m_proxyCount < b2_maxProxies);
 	b2Assert(m_freeProxy != b2_nullProxy);
@@ -255,9 +244,6 @@ uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 ca
 	m_freeProxy = proxy->GetNext();
 
 	proxy->overlapCount = 0;
-	proxy->groupIndex = groupIndex;
-	proxy->categoryBits	= categoryBits;
-	proxy->maskBits = maskBits;
 	proxy->userData = userData;
 
 	int32 boundCount = 2 * m_proxyCount;
@@ -315,13 +301,7 @@ uint16 b2BroadPhase::CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 ca
 	for (int32 i = 0; i < m_queryResultCount; ++i)
 	{
 		b2Assert(m_queryResults[i] < b2_maxProxies);
-		b2Proxy* other = m_proxyPool + m_queryResults[i];
-		b2Assert(other->IsValid());
-
-		if (ShouldCollide(proxy, other) == false)
-		{
-			continue;
-		}
+		b2Assert(m_proxyPool[m_queryResults[i]].IsValid());
 
 		m_pairManager.AddBufferedPair(proxyId, m_queryResults[i]);
 	}
@@ -482,7 +462,7 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 
 				if (prevBound->IsUpper() == true)
 				{
-					if (TestOverlap(newValues, prevProxy) && ShouldCollide(proxy, prevProxy))
+					if (TestOverlap(newValues, prevProxy))
 					{
 						m_pairManager.AddBufferedPair(proxyId, prevProxyId);
 					}
@@ -517,7 +497,7 @@ void b2BroadPhase::MoveProxy(int32 proxyId, const b2AABB& aabb)
 
 				if (nextBound->IsLower() == true)
 				{
-					if (TestOverlap(newValues, nextProxy) && ShouldCollide(proxy, nextProxy))
+					if (TestOverlap(newValues, nextProxy))
 					{
 						m_pairManager.AddBufferedPair(proxyId, nextProxyId);
 					}

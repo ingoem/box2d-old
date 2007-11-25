@@ -54,9 +54,6 @@ struct b2Proxy
 	uint16 lowerBounds[2], upperBounds[2];
 	uint16 overlapCount;
 	uint16 timeStamp;
-	uint16 categoryBits;
-	uint16 maskBits;
-	int16 groupIndex;
 	void* userData;
 };
 
@@ -72,7 +69,7 @@ public:
 	bool InRange(const b2AABB& aabb) const;
 
 	// Create and destroy proxies. These call Flush first.
-	uint16 CreateProxy(const b2AABB& aabb, int16 groupIndex, uint16 categoryBits, uint16 maskBits, void* userData);
+	uint16 CreateProxy(const b2AABB& aabb, void* userData);
 	void DestroyProxy(int32 proxyId);
 
 	// Call MoveProxy as many times as you like, then when you are done
@@ -95,7 +92,6 @@ private:
 
 	bool TestOverlap(b2Proxy* p1, b2Proxy* p2);
 	bool TestOverlap(const b2BoundValues& b, b2Proxy* p);
-	bool ShouldCollide(b2Proxy* p1, b2Proxy* p2);
 
 	void Query(int32* lowerIndex, int32* upperIndex, uint16 lowerValue, uint16 upperValue,
 				b2Bound* bounds, int32 boundCount, int32 axis);

@@ -25,9 +25,9 @@
 
 #include <memory>
 
-struct b2Joint;
-struct b2Contact;
-struct b2World;
+class b2Joint;
+class b2Contact;
+class b2World;
 struct b2JointNode;
 struct b2ContactNode;
 
@@ -66,8 +66,9 @@ struct b2BodyDef
 // A rigid body. Internal computation are done in terms
 // of the center of mass position. The center of mass may
 // be offset from the body's origin.
-struct b2Body
+class b2Body
 {
+public:
 	// Set the position of the body's origin and rotation (radians).
 	// This breaks any contacts and wakes the other bodies.
 	void SetOriginPosition(const b2Vec2& position, float32 rotation);

@@ -22,11 +22,12 @@
 #include "../Collision/b2BroadPhase.h"
 #include "../Dynamics/Contacts/b2NullContact.h"
 
-struct b2World;
-struct b2Contact;
+class b2World;
+class b2Contact;
 
-struct b2ContactManager : b2PairCallback
+class b2ContactManager : public b2PairCallback
 {
+public:
 	b2ContactManager() : m_world(NULL), m_destroyImmediate(false) {}
 
 	// Implements PairCallback

@@ -22,9 +22,9 @@
 #include "../../Common/b2Math.h"
 #include "../../Collision/b2Collision.h"
 
-struct b2Contact;
-struct b2Body;
-struct b2Island;
+class b2Contact;
+class b2Body;
+class b2Island;
 class b2StackAllocator;
 
 struct b2ContactConstraintPoint
@@ -52,8 +52,9 @@ struct b2ContactConstraint
 	int32 pointCount;
 };
 
-struct b2ContactSolver
+class b2ContactSolver
 {
+public:
 	b2ContactSolver(b2Contact** contacts, int32 contactCount, b2StackAllocator* allocator);
 	~b2ContactSolver();
 
