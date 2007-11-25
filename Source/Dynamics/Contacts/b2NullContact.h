@@ -24,6 +24,7 @@
 
 class b2NullContact : public b2Contact
 {
+public:
 	b2NullContact() {}
 	void Evaluate() {}
 	b2Manifold* GetManifolds() { return NULL; }
