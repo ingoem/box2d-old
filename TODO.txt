@@ -76,6 +76,7 @@ Version 1.4.3
 
 Version 2.0.0
 - CCD.
+- Contact callbacks.
 
 Version 2.1.0
 - Meshes (segment soup).
