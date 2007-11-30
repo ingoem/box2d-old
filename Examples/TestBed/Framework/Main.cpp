@@ -163,25 +163,25 @@ void KeyboardSpecial(int key, int x, int y)
 	{
 		// Press left to pan left.
 	case GLUT_KEY_LEFT:
-		viewX += 0.1f;
+		viewX -= 0.1f;
 		Resize(width, height);
 		break;
 
 		// Press right to pan right.
 	case GLUT_KEY_RIGHT:
-		viewX -= 0.1f;
+		viewX += 0.1f;
 		Resize(width, height);
 		break;
 
 		// Press down to pan down.
 	case GLUT_KEY_DOWN:
-		viewY += 0.1f;
+		viewY -= 0.1f;
 		Resize(width, height);
 		break;
 
 		// Press up to pan up.
 	case GLUT_KEY_UP:
-		viewY -= 0.1f;
+		viewY += 0.1f;
 		Resize(width, height);
 		break;
 

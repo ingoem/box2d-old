@@ -21,8 +21,10 @@
 #include "../../Collision/b2Shape.h"
 #include "../b2Body.h"
 
-
-bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
+// This algorithm uses conservative advancement to compute the time of
+// impact (TOI) of two shapes.
+// Refs: Bullet, Young Kim
+bool b2Conservative(b2Shape* shape1, b2Shape* shape2, bool touching)
 {
 	b2Body* body1 = shape1->GetBody();
 	b2Body* body2 = shape2->GetBody();
@@ -52,11 +54,12 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	shape2->QuickSync(p2, R2);
 
 	float32 s1 = 0.0f;
-	const int32 maxIterations = 10;
+	const int32 maxIterations = 1000;
 	b2Vec2 d;
 	float32 invRelativeVelocity = 0.0f;
 	bool hit = true;
 	b2Vec2 x1, x2;
+	NOT_USED(touching);
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
 		// Get the accurate distance between shapes.
@@ -125,30 +128,23 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 		float32 length = d.Length();
 		if (length > FLT_EPSILON)
 		{
-			d *= b2_linearSlop / length;
+			d *= 5.0f * b2_linearSlop / length;
 		}
 
-		if (body1->IsStatic())
-		{
-			body1->m_position = p1;
-		}
-		else
-		{
-			body1->m_position = p1 - d;
-		}
+		float32 m1 = body1->GetMass();
+		float32 m2 = body2->GetMass();
+		float32 m = m1 + m2;
+		b2Assert(m > 0.0f);
+		m = 1.0f / m;
+
+		body1->WakeUp();
+		body1->m_position = p1 - (m1 * m) * d;
 		body1->m_rotation = a1;
 		body1->m_R.Set(a1);
 		body1->QuickSyncShapes();
 
-		if (body2->IsStatic())
-		{
-			body2->m_position = p2;
-		}
-		else
-		{
-			body2->m_position = p2 + d;
-		}
-		body2->m_position = p2 + d;
+		body2->WakeUp();
+		body2->m_position = p2 + (m2 * m) * d;
 		body2->m_rotation = a2;
 		body2->m_R.Set(a2);
 		body2->QuickSyncShapes();

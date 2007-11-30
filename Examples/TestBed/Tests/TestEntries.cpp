@@ -49,7 +49,7 @@
 
 TestEntry g_testEntries[] =
 {
-	//{"CCD Test", CCDTest::Create},
+	{"CCD Test", CCDTest::Create},
 	{"Apply Force", ApplyForce::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"PolyCollision", PolyCollision::Create},

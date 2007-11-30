@@ -62,7 +62,8 @@ public:
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
 
-			m_angularVelocity = -35.268715f; //b2Random(-50.0f, 50.0f);
+			m_angularVelocity = b2Random(-50.0f, 50.0f);
+			//m_angularVelocity = -35.268715f;
 
 			b2BodyDef bd;
 			bd.position.Set(50.0f, 20.0f);

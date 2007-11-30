@@ -115,7 +115,7 @@
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName="$(OutDir)\box2d.pdb"
-				WarningLevel="4"
+				WarningLevel="3"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"

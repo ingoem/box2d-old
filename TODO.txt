@@ -109,6 +109,7 @@ Version 3+
 - Tree constraints.
 - Buoyancy.
 - Heightfields.
+- Circle-maps.
 - Revolute 3x3 effective mass.
 - Use velocity lambda to control NGS clamping.
 - Sensors.

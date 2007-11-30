@@ -220,6 +220,9 @@ float32 b2Distance(b2Vec2* p1Out, b2Vec2* p2Out, const b2Shape* shape1, const b2
 		if (pointCount == 3 || vSqr <= 100.0f * FLT_EPSILON * maxSqr)
 		{
 			g_GJK_Iterations = iter;
+			v = *p2Out - *p1Out;
+			vSqr = b2Dot(v, v);
+
 			return sqrtf(vSqr);
 		}
 	}

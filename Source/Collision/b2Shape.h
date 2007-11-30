@@ -179,6 +179,7 @@ public:
 	float32 m_friction;
 	float32 m_restitution;
 
+	float32 m_minRadius;
 	float32 m_maxRadius;
 
 	uint16 m_proxyId;

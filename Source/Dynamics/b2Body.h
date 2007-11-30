@@ -191,6 +191,10 @@ public:
 	b2Vec2 m_position0;
 	float32 m_rotation0;
 
+	float32 m_toi;
+	b2Vec2 m_toiPosition;
+	float32 m_toiRotation;
+
 	b2Vec2 m_linearVelocity;
 	float32 m_angularVelocity;
 

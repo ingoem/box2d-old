@@ -23,6 +23,8 @@
 
 #include <new>
 
+const float32 b2_ccdShrink = 10.0f * b2_linearSlop;
+
 // Polygon mass, centroid, and inertia.
 // Let rho be the polygon density in mass per unit area.
 // Then:
@@ -290,6 +292,7 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def, b2Body* body, const b2Vec2& 
 	b2Vec2 r = b2Mul(m_body->m_R, m_localPosition);
 	m_position = m_body->m_position + r;
 	m_maxRadius = r.Length() + m_radius;
+	m_minRadius = m_radius;
 
 	b2AABB aabb;
 	aabb.minVertex.Set(m_position.x - m_radius, m_position.y - m_radius);
@@ -352,7 +355,7 @@ b2Vec2 b2CircleShape::Support(const b2Vec2& d) const
 {
 	b2Vec2 u = d;
 	u.Normalize();
-	float32 r = b2Max(0.0f, m_radius - 2.0f * b2_linearSlop);
+	float32 r = b2Max(0.0f, m_radius - b2_ccdShrink);
 	return m_position + r * u;
 }
 
@@ -413,8 +416,8 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 		m_vertexCount = 4;
 		b2Vec2 h = box->extents;
 		b2Vec2 hc = h;
-		hc.x = b2Max(0.0f, h.x - 2.0f * b2_linearSlop);
-		hc.y = b2Max(0.0f, h.y - 2.0f * b2_linearSlop);
+		hc.x = b2Max(0.0f, h.x - b2_ccdShrink);
+		hc.y = b2Max(0.0f, h.y - b2_ccdShrink);
 		m_vertices[0] = b2Mul(localR, b2Vec2(h.x, h.y));
 		m_vertices[1] = b2Mul(localR, b2Vec2(-h.x, h.y));
 		m_vertices[2] = b2Mul(localR, b2Vec2(-h.x, -h.y));
@@ -438,32 +441,37 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 
 			b2Vec2 u = m_vertices[i];
 			float32 length = u.Length();
-			if (length > FLT_EPSILON)
+
+			if (length > b2_ccdShrink)
 			{
-				u *= 1.0f / length;
+				m_coreVertices[i] = (1.0f - b2_ccdShrink / length) * m_vertices[i];
 			}
-			
-			m_coreVertices[i] = m_vertices[i] - 2.0f * b2_linearSlop * u;
+			else
+			{
+				m_coreVertices[i].SetZero();
+			}
 		}
 	}
 
 	// Compute bounding box. TODO_ERIN optimize OBB
 	b2Vec2 minVertex(FLT_MAX, FLT_MAX);
 	b2Vec2 maxVertex(-FLT_MAX, -FLT_MAX);
-	m_maxRadius = 0.0f;
+	m_maxRadius = -FLT_MAX;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
 		b2Vec2 v = m_vertices[i];
 		minVertex = b2Min(minVertex, v);
 		maxVertex = b2Max(maxVertex, v);
-		m_maxRadius = b2Max(m_maxRadius, v.Length());
+		m_maxRadius = b2Max(m_maxRadius, m_coreVertices[i].Length());
 	}
+	m_maxRadius += m_localCentroid.Length();
 
 	m_localOBB.R.SetIdentity();
 	m_localOBB.center = 0.5f * (minVertex + maxVertex);
 	m_localOBB.extents = 0.5f * (maxVertex - minVertex);
 
 	// Compute the edge normals and next index map.
+	m_minRadius = FLT_MAX;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
 		int32 i1 = i;
@@ -471,6 +479,9 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 		b2Vec2 edge = m_vertices[i2] - m_vertices[i1];
 		m_normals[i] = b2Cross(edge, 1.0f);
 		m_normals[i].Normalize();
+		float32 s = b2Dot(m_normals[i], m_coreVertices[i]);
+		b2Assert(s >= 0.0f);
+		m_minRadius = b2Min(m_minRadius, s);
 	}
 
 	// Ensure the polygon in convex. TODO_ERIN compute convex hull.

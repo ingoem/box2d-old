@@ -445,7 +445,8 @@ void b2World::Step(float32 dt, int32 iterations)
 
 	m_broadPhase->Commit();
 
-#if 0
+#if 1
+	// TODO_ERIN find TOI for island? Just do DFS for lowest TOI?
 	for (b2Contact* c = m_contactList; c; c = c->GetNext())
 	{
 		b2Shape* shape1 = c->GetShape1();
@@ -458,7 +459,9 @@ void b2World::Step(float32 dt, int32 iterations)
 			continue;
 		}
 
-		b2Conservative(shape1, shape2);
+		bool touching = c->GetManifoldCount() > 0;
+
+		b2Conservative(shape1, shape2, touching);
 	}
 #endif
 }

@@ -152,6 +152,7 @@ void b2Island::Solve(const b2TimeStep* step, const b2Vec2& gravity)
 		b->m_angularVelocity *= b->m_angularDamping;
 
 		// Store positions for conservative advancement.
+		b->m_toi = 1.0f;
 		b->m_position0 = b->m_position;
 		b->m_rotation0 = b->m_rotation;
 	}
