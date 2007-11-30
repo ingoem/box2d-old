@@ -81,6 +81,7 @@ Version 2.0.0
 Version 2.1.0
 - Meshes (segment soup).
 - Ray casts.
+- Shape definition deep copy.
 
 Version 2.2.0
 - Handle orphaned gear joint.
@@ -113,3 +114,4 @@ Version 3+
 - Revolute 3x3 effective mass.
 - Use velocity lambda to control NGS clamping.
 - Sensors.
+- Add/remove shapes from a body.
