@@ -25,11 +25,11 @@ public:
 
 	CCDTest()
 	{
-		m_world->m_gravity.SetZero();
 #if 1
+		m_world->m_gravity.SetZero();
+
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(0.1f, 10.0f);
 			sd.density = 0.0f;
 
@@ -39,28 +39,12 @@ public:
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
-#else
-		{
-			b2CircleDef sd;
-			sd.type = e_circleShape;
-			sd.radius = 1.0f;
-			sd.density = 1.0f;
 
-			b2BodyDef bd;
-			bd.position.Set(-50.0f, 20.0f);
-			bd.linearVelocity.Set(400.0f, 0.0f);
-			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
-		}
-#endif
-
-#if 1
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(0.1f, 2.0f);
 			sd.density = 1.0f;
-			sd.restitution = 0.0f;
+			sd.restitution = 0.1f;
 
 			m_angularVelocity = b2Random(-50.0f, 50.0f);
 			//m_angularVelocity = -35.268715f;
@@ -74,15 +58,26 @@ public:
 		}
 #else
 		{
-			b2CircleDef sd;
-			sd.type = e_circleShape;
-			sd.radius = 0.5f;
-			sd.density = 1.0f;
-			sd.restitution = 0.02f;
+			b2BoxDef sd;
+			sd.extents.Set(10.0f, 0.1f);
+			sd.density = 0.0f;
 
 			b2BodyDef bd;
-			bd.position.Set(50.0f, 20.0f);
-			bd.linearVelocity.Set(-400.0f, 0.0f);
+			bd.position.Set(0.0f, -0.2f);
+			bd.AddShape(&sd);
+			m_world->CreateBody(&bd);
+		}
+
+		{
+			b2BoxDef sd;
+			sd.extents.Set(2.0f, 0.1f);
+			sd.density = 1.0f;
+			sd.restitution = 0.0f;
+
+			b2BodyDef bd;
+			bd.position.Set(0.0f, 20.0f);
+			bd.linearVelocity.Set(-200.0f, 0.0f);
+			bd.angularVelocity = m_angularVelocity;
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}

@@ -29,6 +29,11 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2, bool touching)
 	b2Body* body1 = shape1->GetBody();
 	b2Body* body2 = shape2->GetBody();
 
+	float32 toi1 = body1->m_toi;
+	float32 toi2 = body2->m_toi;
+	float32 bestTOI = b2Min(toi1, toi2);
+	NOT_USED(bestTOI);
+
 	b2Vec2 v1 = body1->m_position - body1->m_position0;
 	float32 omega1 = body1->m_rotation - body1->m_rotation0;
 	b2Vec2 v2 = body2->m_position - body2->m_position0;
@@ -130,6 +135,8 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2, bool touching)
 		{
 			d *= 5.0f * b2_linearSlop / length;
 		}
+
+		// TODO_ERIN include angular impulse.
 
 		float32 m1 = body1->GetMass();
 		float32 m2 = body2->GetMass();
