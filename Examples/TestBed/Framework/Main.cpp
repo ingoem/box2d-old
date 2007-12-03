@@ -254,6 +254,10 @@ int main(int argc, char** argv)
 		glui->add_spinner("Hertz", GLUI_SPINNER_FLOAT, &settings.hz);
 	hertzSpinner->set_float_limits(5.0f, 200.0f);
 
+	GLUI_Spinner* stepRateSpinner =
+		glui->add_spinner("Step Rate", GLUI_SPINNER_INT, &settings.stepRate);
+	stepRateSpinner->set_int_limits(1, 100);
+
 	glui->add_checkbox("Position Correction", &settings.enablePositionCorrection);
 	glui->add_checkbox("Warm Starting", &settings.enableWarmStarting);
 

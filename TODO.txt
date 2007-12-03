@@ -81,7 +81,8 @@ Version 2.0.0
 Version 2.1.0
 - Meshes (segment soup).
 - Ray casts.
-- Shape definition deep copy.
+- Allow user created shapes.
+- Allow unbound shapes to be used in collision queries.
 
 Version 2.2.0
 - Handle orphaned gear joint.

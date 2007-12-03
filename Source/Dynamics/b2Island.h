@@ -35,9 +35,9 @@ public:
 
 	void Clear();
 
-	void Solve(const b2TimeStep* step, const b2Vec2& gravity);
-
-	void UpdateSleep(float32 dt);
+	void Integrate(const b2TimeStep& step, const b2Vec2& gravity);
+	void SolvePositionConstraints(const b2TimeStep& step);
+	void UpdateSleep(const b2TimeStep& step);
 
 	void Add(b2Body* body)
 	{
@@ -71,8 +71,7 @@ public:
 	int32 m_contactCapacity;
 	int32 m_jointCapacity;
 
-	static int32 m_positionIterationCount;
-	float32 m_positionError;
+	int32 m_positionIterationCount;
 };
 
 #endif

@@ -205,6 +205,27 @@ void b2ContactManager::CleanContactList()
 // contact list.
 void b2ContactManager::Collide()
 {
+#if 0
+	if (b2World::s_enablePositionCorrection)
+	{
+		bool found = true;
+		while (found)
+		{
+			found = false;
+			for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
+			{
+				if (c->m_shape1->m_body->IsSleeping() &&
+					c->m_shape2->m_body->IsSleeping())
+				{
+					continue;
+				}
+
+				found = found || c->ContinuousCollision();
+			}
+		}
+	}
+#endif
+
 	for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
 	{
 		if (c->m_shape1->m_body->IsSleeping() &&

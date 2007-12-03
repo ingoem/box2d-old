@@ -23,8 +23,6 @@
 
 #include <new>
 
-const float32 b2_ccdShrink = 10.0f * b2_linearSlop;
-
 // Polygon mass, centroid, and inertia.
 // Let rho be the polygon density in mass per unit area.
 // Then:
@@ -355,7 +353,7 @@ b2Vec2 b2CircleShape::Support(const b2Vec2& d) const
 {
 	b2Vec2 u = d;
 	u.Normalize();
-	float32 r = b2Max(0.0f, m_radius - b2_ccdShrink);
+	float32 r = b2Max(0.0f, m_radius - b2_toiSlop);
 	return m_position + r * u;
 }
 
@@ -416,8 +414,8 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 		m_vertexCount = 4;
 		b2Vec2 h = box->extents;
 		b2Vec2 hc = h;
-		hc.x = b2Max(0.0f, h.x - b2_ccdShrink);
-		hc.y = b2Max(0.0f, h.y - b2_ccdShrink);
+		hc.x = b2Max(0.0f, h.x - b2_toiSlop);
+		hc.y = b2Max(0.0f, h.y - b2_toiSlop);
 		m_vertices[0] = b2Mul(localR, b2Vec2(h.x, h.y));
 		m_vertices[1] = b2Mul(localR, b2Vec2(-h.x, h.y));
 		m_vertices[2] = b2Mul(localR, b2Vec2(-h.x, -h.y));
@@ -442,9 +440,9 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 			b2Vec2 u = m_vertices[i];
 			float32 length = u.Length();
 
-			if (length > b2_ccdShrink)
+			if (length > b2_toiSlop)
 			{
-				m_coreVertices[i] = (1.0f - b2_ccdShrink / length) * m_vertices[i];
+				m_coreVertices[i] = (1.0f - b2_toiSlop / length) * m_vertices[i];
 			}
 			else
 			{

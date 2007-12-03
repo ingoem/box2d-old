@@ -288,30 +288,8 @@ void b2World::DestroyJoint(b2Joint* j)
 	}
 }
 
-void b2World::Step(float32 dt, int32 iterations)
+void b2World::Integrate(const b2TimeStep& step)
 {
-	b2TimeStep step;
-	step.dt = dt;
-	step.iterations	= iterations;
-	if (dt > 0.0f)
-	{
-		step.inv_dt = 1.0f / dt;
-	}
-	else
-	{
-		step.inv_dt = 0.0f;
-	}
-	
-	m_positionIterationCount = 0;
-
-	// Handle deferred contact destruction.
-	m_contactManager.CleanContactList();
-
-	// Handle deferred body destruction.
-	CleanBodyList();
-
-	// Update contacts.
-	m_contactManager.Collide();
 
 	// Size the island for the worst case.
 	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator);
@@ -329,7 +307,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	{
 		j->m_islandFlag = false;
 	}
-	
+
 	// Build and simulate all awake islands.
 	int32 stackSize = m_bodyCount;
 	b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
@@ -408,13 +386,129 @@ void b2World::Step(float32 dt, int32 iterations)
 			}
 		}
 
-		island.Solve(&step, m_gravity);
+		island.Integrate(step, m_gravity);
+
+		// Post solve cleanup.
+		for (int32 i = 0; i < island.m_bodyCount; ++i)
+		{
+			// Allow static bodies to participate in other islands.
+			b2Body* b = island.m_bodies[i];
+			if (b->m_flags & b2Body::e_staticFlag)
+			{
+				b->m_flags &= ~b2Body::e_islandFlag;
+			}
+		}
+	}
+
+	m_stackAllocator.Free(stack);
+}
+
+void b2World::SolvePositionConstraints(const b2TimeStep& step)
+{
+	m_positionIterationCount = 0;
+
+	// Size the island for the worst case.
+	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator);
+
+	// Clear all the island flags.
+	for (b2Body* b = m_bodyList; b; b = b->m_next)
+	{
+		b->m_flags &= ~b2Body::e_islandFlag;
+	}
+	for (b2Contact* c = m_contactList; c; c = c->m_next)
+	{
+		c->m_flags &= ~b2Contact::e_islandFlag;
+	}
+	for (b2Joint* j = m_jointList; j; j = j->m_next)
+	{
+		j->m_islandFlag = false;
+	}
+
+	// Build and simulate all awake islands.
+	int32 stackSize = m_bodyCount;
+	b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
+	for (b2Body* seed = m_bodyList; seed; seed = seed->m_next)
+	{
+		if (seed->m_flags & (b2Body::e_staticFlag | b2Body::e_islandFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag))
+		{
+			continue;
+		}
+
+		// Reset island and stack.
+		island.Clear();
+		int32 stackCount = 0;
+		stack[stackCount++] = seed;
+		seed->m_flags |= b2Body::e_islandFlag;
+
+		// Perform a depth first search (DFS) on the constraint graph.
+		while (stackCount > 0)
+		{
+			// Grab the next body off the stack and add it to the island.
+			b2Body* b = stack[--stackCount];
+			island.Add(b);
+
+			// Make sure the body is awake.
+			b->m_flags &= ~b2Body::e_sleepFlag;
+
+			// To keep islands as small as possible, we don't
+			// propagate islands across static bodies.
+			if (b->m_flags & b2Body::e_staticFlag)
+			{
+				continue;
+			}
+
+			// Search all contacts connected to this body.
+			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
+			{
+				if (cn->contact->m_flags & b2Contact::e_islandFlag)
+				{
+					continue;
+				}
+
+				island.Add(cn->contact);
+				cn->contact->m_flags |= b2Contact::e_islandFlag;
+
+				b2Body* other = cn->other;
+				if (other->m_flags & b2Body::e_islandFlag)
+				{
+					continue;
+				}
+
+				b2Assert(stackCount < stackSize);
+				stack[stackCount++] = other;
+				other->m_flags |= b2Body::e_islandFlag;
+			}
+
+			// Search all joints connect to this body.
+			for (b2JointNode* jn = b->m_jointList; jn; jn = jn->next)
+			{
+				if (jn->joint->m_islandFlag == true)
+				{
+					continue;
+				}
+
+				island.Add(jn->joint);
+				jn->joint->m_islandFlag = true;
+
+				b2Body* other = jn->other;
+				if (other->m_flags & b2Body::e_islandFlag)
+				{
+					continue;
+				}
+
+				b2Assert(stackCount < stackSize);
+				stack[stackCount++] = other;
+				other->m_flags |= b2Body::e_islandFlag;
+			}
+		}
+
+		island.SolvePositionConstraints(step);
 
 		m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
-		
+
 		if (m_allowSleep)
 		{
-			island.UpdateSleep(dt);
+			island.UpdateSleep(step);
 		}
 
 		// Post solve cleanup.
@@ -442,10 +536,60 @@ void b2World::Step(float32 dt, int32 iterations)
 	}
 
 	m_stackAllocator.Free(stack);
+}
+
+void b2World::Step(float32 dt, int32 iterations)
+{
+	b2TimeStep step;
+	step.dt = dt;
+	step.iterations	= iterations;
+	if (dt > 0.0f)
+	{
+		step.inv_dt = 1.0f / dt;
+	}
+	else
+	{
+		step.inv_dt = 0.0f;
+	}
+	
+	// Handle deferred contact destruction.
+	m_contactManager.CleanContactList();
+
+	// Handle deferred body destruction.
+	CleanBodyList();
+
+	// Integrate velocities, solve velocity constraints, and integrate positions.
+	Integrate(step);
 
 	m_broadPhase->Commit();
 
-#if 1
+	// Handle newly frozen bodies.
+	if (m_listener)
+	{
+		for (b2Body* b = m_bodyList; b; b = b->m_next)
+		{
+			if (b->IsFrozen())
+			{
+				b2BoundaryResponse response = m_listener->NotifyBoundaryViolated(b);
+				if (response == b2_destroyBody)
+				{
+					DestroyBody(b);
+					b = NULL;
+				}
+			}
+		}
+	}
+
+	// Update contacts.
+	m_contactManager.Collide();
+
+	// Project positions onto the constraint manifold.
+	if (s_enablePositionCorrection)
+	{
+		SolvePositionConstraints(step);
+	}
+
+#if 0
 	// TODO_ERIN find TOI for island? Just do DFS for lowest TOI?
 	for (b2Contact* c = m_contactList; c; c = c->GetNext())
 	{
@@ -459,9 +603,7 @@ void b2World::Step(float32 dt, int32 iterations)
 			continue;
 		}
 
-		bool touching = c->GetManifoldCount() > 0;
-
-		b2Conservative(shape1, shape2, touching);
+		b2Conservative(shape1, shape2);
 	}
 #endif
 }

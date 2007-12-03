@@ -66,6 +66,7 @@ Test::Test()
 	
 	m_listener.test = this;
 	m_world->SetListener(&m_listener);
+	m_step = 0;
 }
 
 Test::~Test()
@@ -171,7 +172,11 @@ void Test::Step(const Settings* settings)
 	b2World::s_enableWarmStarting = settings->enableWarmStarting;
 	b2World::s_enablePositionCorrection = settings->enablePositionCorrection;
 
-	m_world->Step(timeStep, settings->iterationCount);
+	if (m_step % settings->stepRate == 0)
+	{
+		m_world->Step(timeStep, settings->iterationCount);
+	}
+	++m_step;
 
 	m_world->m_broadPhase->Validate();
 

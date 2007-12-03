@@ -24,15 +24,10 @@
 // This algorithm uses conservative advancement to compute the time of
 // impact (TOI) of two shapes.
 // Refs: Bullet, Young Kim
-bool b2Conservative(b2Shape* shape1, b2Shape* shape2, bool touching)
+bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 {
 	b2Body* body1 = shape1->GetBody();
 	b2Body* body2 = shape2->GetBody();
-
-	float32 toi1 = body1->m_toi;
-	float32 toi2 = body2->m_toi;
-	float32 bestTOI = b2Min(toi1, toi2);
-	NOT_USED(bestTOI);
 
 	b2Vec2 v1 = body1->m_position - body1->m_position0;
 	float32 omega1 = body1->m_rotation - body1->m_rotation0;
@@ -64,7 +59,6 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2, bool touching)
 	float32 invRelativeVelocity = 0.0f;
 	bool hit = true;
 	b2Vec2 x1, x2;
-	NOT_USED(touching);
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
 		// Get the accurate distance between shapes.
@@ -128,30 +122,14 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2, bool touching)
 
 	if (hit)
 	{
-		// Hit, move bodies to safe position and re-sync shapes.
-		b2Vec2 d = x2 - x1;
-		float32 length = d.Length();
-		if (length > FLT_EPSILON)
-		{
-			d *= 5.0f * b2_linearSlop / length;
-		}
-
-		// TODO_ERIN include angular impulse.
-
-		float32 m1 = body1->GetMass();
-		float32 m2 = body2->GetMass();
-		float32 m = m1 + m2;
-		b2Assert(m > 0.0f);
-		m = 1.0f / m;
-
 		body1->WakeUp();
-		body1->m_position = p1 - (m1 * m) * d;
+		body1->m_position = p1;
 		body1->m_rotation = a1;
 		body1->m_R.Set(a1);
 		body1->QuickSyncShapes();
 
 		body2->WakeUp();
-		body2->m_position = p2 + (m2 * m) * d;
+		body2->m_position = p2;
 		body2->m_rotation = a2;
 		body2->m_R.Set(a2);
 		body2->QuickSyncShapes();

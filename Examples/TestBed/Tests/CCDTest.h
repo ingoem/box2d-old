@@ -25,7 +25,7 @@ public:
 
 	CCDTest()
 	{
-#if 1
+#if 0
 		m_world->m_gravity.SetZero();
 
 		{
@@ -59,11 +59,11 @@ public:
 #else
 		{
 			b2BoxDef sd;
-			sd.extents.Set(10.0f, 0.1f);
+			sd.extents.Set(10.0f, 1.0f);
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -0.2f);
+			bd.position.Set(0.0f, -2.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
@@ -76,10 +76,14 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 20.0f);
-			bd.linearVelocity.Set(-200.0f, 0.0f);
-			bd.angularVelocity = m_angularVelocity;
+			bd.linearVelocity.Set(0.0f, -200.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
+
+			sd.extents.Set(1.0f, 0.1f);
+			bd.position.Set(0.0f, 20.2f);
+			bd.linearVelocity.Set(0.0f, -201.0f);
+			//m_world->CreateBody(&bd);
 		}
 #endif
 	}

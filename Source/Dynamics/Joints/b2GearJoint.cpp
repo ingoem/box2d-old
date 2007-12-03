@@ -98,7 +98,7 @@ b2GearJoint::b2GearJoint(const b2GearJointDef* def)
 	m_impulse = 0.0f;
 }
 
-void b2GearJoint::PrepareVelocitySolver()
+void b2GearJoint::InitVelocityConstraints()
 {
 	b2Body* g1 = m_ground1;
 	b2Body* g2 = m_ground2;
@@ -149,7 +149,7 @@ void b2GearJoint::PrepareVelocitySolver()
 	b2->m_angularVelocity += b2->m_invI * m_impulse * m_J.angular2;
 }
 
-void b2GearJoint::SolveVelocityConstraints(const b2TimeStep* step)
+void b2GearJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
 	NOT_USED(step);
 

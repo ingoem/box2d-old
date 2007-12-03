@@ -80,6 +80,7 @@ public:
 	b2Contact(b2Shape* shape1, b2Shape* shape2);
 	virtual ~b2Contact() {}
 
+	bool ContinuousCollision();
 	virtual void Evaluate() = 0;
 	static b2ContactRegister s_registers[e_shapeTypeCount][e_shapeTypeCount];
 	static bool s_initialized;
@@ -102,6 +103,8 @@ public:
 	// Combined friction
 	float32 m_friction;
 	float32 m_restitution;
+
+	float32 m_toi;
 };
 
 inline b2Contact* b2Contact::GetNext()

@@ -64,8 +64,8 @@ public:
 
 	b2RevoluteJoint(const b2RevoluteJointDef* def);
 
-	void PrepareVelocitySolver();
-	void SolveVelocityConstraints(const b2TimeStep* step);
+	void InitVelocityConstraints();
+	void SolveVelocityConstraints(const b2TimeStep& step);
 
 	bool SolvePositionConstraints();
 

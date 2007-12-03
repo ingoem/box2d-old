@@ -103,8 +103,6 @@ probably default to the slower Full NGS and let the user select the faster
 Baumgarte method in performance critical scenarios.
 */
 
-int32 b2Island::m_positionIterationCount = 0;
-
 b2Island::b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacity, b2StackAllocator* allocator)
 {
 	m_bodyCapacity = bodyCapacity;
@@ -119,6 +117,8 @@ b2Island::b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacit
 	m_joints = (b2Joint**)allocator->Allocate(jointCapacity * sizeof(b2Joint*));
 
 	m_allocator = allocator;
+
+	m_positionIterationCount = 0;
 }
 
 b2Island::~b2Island()
@@ -136,39 +136,41 @@ void b2Island::Clear()
 	m_jointCount = 0;
 }
 
-void b2Island::Solve(const b2TimeStep* step, const b2Vec2& gravity)
+void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity)
 {
+	// Integrate velocities and apply damping.
 	for (int32 i = 0; i < m_bodyCount; ++i)
 	{
 		b2Body* b = m_bodies[i];
 
-		if (b->m_invMass == 0.0f)
+		if (b->IsStatic())
 			continue;
 
-		b->m_linearVelocity += step->dt * (gravity + b->m_invMass * b->m_force);
-		b->m_angularVelocity += step->dt * b->m_invI * b->m_torque;
+		// Integrate velocities.
+		b->m_linearVelocity += step.dt * (gravity + b->m_invMass * b->m_force);
+		b->m_angularVelocity += step.dt * b->m_invI * b->m_torque;
 
+		// Reset forces.
+		b->m_force.Set(0.0f, 0.0f);
+		b->m_torque = 0.0f;
+
+		// Apply damping.
 		b->m_linearVelocity *= b->m_linearDamping;
 		b->m_angularVelocity *= b->m_angularDamping;
-
-		// Store positions for conservative advancement.
-		b->m_toi = 1.0f;
-		b->m_position0 = b->m_position;
-		b->m_rotation0 = b->m_rotation;
 	}
 
 	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);
 
-	// Pre-solve
-	contactSolver.PreSolve();
+	// Initialize velocity constraints.
+	contactSolver.InitVelocityConstraints();
 
 	for (int32 i = 0; i < m_jointCount; ++i)
 	{
-		m_joints[i]->PrepareVelocitySolver();
+		m_joints[i]->InitVelocityConstraints();
 	}
 
 	// Solve velocity constraints.
-	for (int32 i = 0; i < step->iterations; ++i)
+	for (int32 i = 0; i < step.iterations; ++i)
 	{
 		contactSolver.SolveVelocityConstraints();
 
@@ -178,66 +180,64 @@ void b2Island::Solve(const b2TimeStep* step, const b2Vec2& gravity)
 		}
 	}
 
-	// Integrate positions.
+	// Post-solve (store impulses for warm starting).
+	contactSolver.FinalizeVelocityConstraints();
+
+	// Integrate positions, synchronize shapes, and reset forces.
 	for (int32 i = 0; i < m_bodyCount; ++i)
 	{
 		b2Body* b = m_bodies[i];
 
-		if (b->m_invMass == 0.0f)
+		if (b->IsStatic())
 			continue;
 
-		b->m_position += step->dt * b->m_linearVelocity;
-		b->m_rotation += step->dt * b->m_angularVelocity;
+		// Store positions for continuous collision.
+		b->m_position0 = b->m_position;
+		b->m_rotation0 = b->m_rotation;
 
-		b->m_R.Set(b->m_rotation);
-	}
-
-	for (int32 i = 0; i < m_jointCount; ++i)
-	{
-		m_joints[i]->PreparePositionSolver();
-	}
-
-	// Solve position constraints.
-	if (b2World::s_enablePositionCorrection)
-	{
-		for (m_positionIterationCount = 0; m_positionIterationCount < step->iterations; ++m_positionIterationCount)
-		{
-			bool contactsOkay = contactSolver.SolvePositionConstraints(b2_contactBaumgarte);
-
-			bool jointsOkay = true;
-			for (int i = 0; i < m_jointCount; ++i)
-			{
-				bool jointOkay = m_joints[i]->SolvePositionConstraints();
-				jointsOkay = jointsOkay && jointOkay;
-			}
-
-			if (contactsOkay && jointsOkay)
-			{
-				break;
-			}
-		}
-	}
-
-	// Post-solve.
-	contactSolver.PostSolve();
-
-	// Synchronize shapes and reset forces.
-	for (int32 i = 0; i < m_bodyCount; ++i)
-	{
-		b2Body* b = m_bodies[i];
-
-		if (b->m_invMass == 0.0f)
-			continue;
-
+		// Integrate
+		b->m_position += step.dt * b->m_linearVelocity;
+		b->m_rotation += step.dt * b->m_angularVelocity;
 		b->m_R.Set(b->m_rotation);
 
+		// Update shapes (for broad-phase).
 		b->SynchronizeShapes();
-		b->m_force.Set(0.0f, 0.0f);
-		b->m_torque = 0.0f;
 	}
 }
 
-void b2Island::UpdateSleep(float32 dt)
+void b2Island::SolvePositionConstraints(const b2TimeStep& step)
+{
+	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);
+
+	// Initialize position constraints
+	contactSolver.InitPositionConstraints();
+
+	for (int32 i = 0; i < m_jointCount; ++i)
+	{
+		m_joints[i]->InitPositionConstraints();
+	}
+
+	// Solve position constraints.
+	for (m_positionIterationCount = 0; m_positionIterationCount < step.iterations; ++m_positionIterationCount)
+	{
+		bool contactsOkay = contactSolver.SolvePositionConstraints();
+
+		bool jointsOkay = true;
+		for (int i = 0; i < m_jointCount; ++i)
+		{
+			bool jointOkay = m_joints[i]->SolvePositionConstraints();
+			jointsOkay = jointsOkay && jointOkay;
+		}
+
+		if (contactsOkay && jointsOkay)
+		{
+			break;
+		}
+	}
+}
+
+
+void b2Island::UpdateSleep(const b2TimeStep& step)
 {
 	float32 minSleepTime = FLT_MAX;
 
@@ -267,7 +267,7 @@ void b2Island::UpdateSleep(float32 dt)
 		}
 		else
 		{
-			b->m_sleepTime += dt;
+			b->m_sleepTime += step.dt;
 			minSleepTime = b2Min(minSleepTime, b->m_sleepTime);
 		}
 	}

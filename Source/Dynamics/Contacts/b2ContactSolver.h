@@ -58,10 +58,12 @@ public:
 	b2ContactSolver(b2Contact** contacts, int32 contactCount, b2StackAllocator* allocator);
 	~b2ContactSolver();
 
-	void PreSolve();
+	void InitVelocityConstraints();
 	void SolveVelocityConstraints();
-	bool SolvePositionConstraints(float32 beta);
-	void PostSolve();
+	void FinalizeVelocityConstraints();
+
+	void InitPositionConstraints();
+	bool SolvePositionConstraints();
 
 	b2StackAllocator* m_allocator;
 	b2ContactConstraint* m_constraints;

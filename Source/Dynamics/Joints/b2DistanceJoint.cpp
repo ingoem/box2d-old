@@ -39,7 +39,7 @@ b2DistanceJoint::b2DistanceJoint(const b2DistanceJointDef* def)
 	m_impulse = 0.0f;
 }
 
-void b2DistanceJoint::PrepareVelocitySolver()
+void b2DistanceJoint::InitVelocityConstraints()
 {
 	// Compute the effective mass matrix.
 	b2Vec2 r1 = b2Mul(m_body1->m_R, m_localAnchor1);
@@ -77,7 +77,7 @@ void b2DistanceJoint::PrepareVelocitySolver()
 	}
 }
 
-void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep* step)
+void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
 	NOT_USED(step);
 

@@ -66,8 +66,8 @@ public:
 
 	b2PrismaticJoint(const b2PrismaticJointDef* def);
 
-	void PrepareVelocitySolver();
-	void SolveVelocityConstraints(const b2TimeStep* step);
+	void InitVelocityConstraints();
+	void SolveVelocityConstraints(const b2TimeStep& step);
 	bool SolvePositionConstraints();
 
 	b2Vec2 m_localAnchor1;

@@ -20,6 +20,7 @@
 #include "b2CircleContact.h"
 #include "b2PolyAndCircleContact.h"
 #include "b2PolyContact.h"
+#include "b2Conservative.h"
 #include "../../Collision/b2Collision.h"
 #include "../../Collision/b2Shape.h"
 #include "../../Common/b2BlockAllocator.h"
@@ -135,4 +136,9 @@ b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 	m_node2.prev = NULL;
 	m_node2.next = NULL;
 	m_node2.other = NULL;
+}
+
+bool b2Contact::ContinuousCollision()
+{
+	return b2Conservative(m_shape1, m_shape2);
 }

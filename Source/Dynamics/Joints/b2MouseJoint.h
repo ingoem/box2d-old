@@ -55,8 +55,8 @@ public:
 
 	b2MouseJoint(const b2MouseJointDef* def);
 
-	void PrepareVelocitySolver();
-	void SolveVelocityConstraints(const b2TimeStep* step);
+	void InitVelocityConstraints();
+	void SolveVelocityConstraints(const b2TimeStep& step);
 	bool SolvePositionConstraints()
 	{
 		return true;

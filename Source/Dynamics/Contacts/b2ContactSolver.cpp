@@ -128,7 +128,7 @@ b2ContactSolver::~b2ContactSolver()
 	m_allocator->Free(m_constraints);
 }
 
-void b2ContactSolver::PreSolve()
+void b2ContactSolver::InitVelocityConstraints()
 {
 	// Warm start.
 	for (int32 i = 0; i < m_constraintCount; ++i)
@@ -253,7 +253,27 @@ void b2ContactSolver::SolveVelocityConstraints()
 	}
 }
 
-bool b2ContactSolver::SolvePositionConstraints(float32 beta)
+void b2ContactSolver::FinalizeVelocityConstraints()
+{
+	for (int32 i = 0; i < m_constraintCount; ++i)
+	{
+		b2ContactConstraint* c = m_constraints + i;
+		b2Manifold* m = c->manifold;
+
+		for (int32 j = 0; j < c->pointCount; ++j)
+		{
+			m->points[j].normalImpulse = c->points[j].normalImpulse;
+			m->points[j].tangentImpulse = c->points[j].tangentImpulse;
+		}
+	}
+}
+
+void b2ContactSolver::InitPositionConstraints()
+{
+	// TODO_ERIN anything here?
+}
+
+bool b2ContactSolver::SolvePositionConstraints()
 {
 	float32 minSeparation = 0.0f;
 
@@ -288,7 +308,7 @@ bool b2ContactSolver::SolvePositionConstraints(float32 beta)
 			minSeparation = b2Min(minSeparation, separation);
 
 			// Prevent large corrections and allow slop.
-			float32 C = beta * b2Clamp(separation + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
+			float32 C = b2_contactBaumgarte * b2Clamp(separation + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
 
 			// Compute normal impulse
 			float32 dImpulse = -ccp->normalMass * C;
@@ -311,19 +331,4 @@ bool b2ContactSolver::SolvePositionConstraints(float32 beta)
 	}
 
 	return minSeparation >= -b2_linearSlop;
-}
-
-void b2ContactSolver::PostSolve()
-{
-	for (int32 i = 0; i < m_constraintCount; ++i)
-	{
-		b2ContactConstraint* c = m_constraints + i;
-		b2Manifold* m = c->manifold;
-
-		for (int32 j = 0; j < c->pointCount; ++j)
-		{
-			m->points[j].normalImpulse = c->points[j].normalImpulse;
-			m->points[j].tangentImpulse = c->points[j].tangentImpulse;
-		}
-	}
 }

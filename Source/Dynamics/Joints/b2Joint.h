@@ -109,11 +109,11 @@ public:
 	b2Joint(const b2JointDef* def);
 	virtual ~b2Joint() {}
 
-	virtual void PrepareVelocitySolver() = 0;
-	virtual void SolveVelocityConstraints(const b2TimeStep* step) = 0;
+	virtual void InitVelocityConstraints() = 0;
+	virtual void SolveVelocityConstraints(const b2TimeStep& step) = 0;
 
 	// This returns true if the position errors are within tolerance.
-	virtual void PreparePositionSolver() {}
+	virtual void InitPositionConstraints() {}
 	virtual bool SolvePositionConstraints() = 0;
 
 	b2JointType m_type;

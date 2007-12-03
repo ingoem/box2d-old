@@ -66,7 +66,7 @@ b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 	m_limitImpulse2 = 0.0f;
 }
 
-void b2PulleyJoint::PrepareVelocitySolver()
+void b2PulleyJoint::InitVelocityConstraints()
 {
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
@@ -150,7 +150,7 @@ void b2PulleyJoint::PrepareVelocitySolver()
 	b2->m_angularVelocity += b2->m_invI * b2Cross(r2, P2);
 }
 
-void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep* step)
+void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
 	NOT_USED(step);
 

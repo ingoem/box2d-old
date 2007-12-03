@@ -38,6 +38,7 @@ struct Settings
 		drawPairs(0),
 		enableWarmStarting(1),
 		enablePositionCorrection(1),
+		stepRate(1),
 		pause(0)
 		{}
 
@@ -50,6 +51,7 @@ struct Settings
 	int drawPairs;
 	int enableWarmStarting;
 	int enablePositionCorrection;
+	int stepRate;
 	int pause;
 };
 
@@ -104,6 +106,7 @@ protected:
 	b2World* m_world;
 	b2Body* m_bomb;
 	b2MouseJoint* m_mouseJoint;
+	int32 m_step;
 };
 
 #endif

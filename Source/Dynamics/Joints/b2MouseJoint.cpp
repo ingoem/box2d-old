@@ -59,7 +59,7 @@ void b2MouseJoint::SetTarget(const b2Vec2& target)
 	m_target = target;
 }
 
-void b2MouseJoint::PrepareVelocitySolver()
+void b2MouseJoint::InitVelocityConstraints()
 {
 	b2Body* b = m_body2;
 
@@ -97,7 +97,7 @@ void b2MouseJoint::PrepareVelocitySolver()
 	b->m_angularVelocity += invI * b2Cross(r, P);
 }
 
-void b2MouseJoint::SolveVelocityConstraints(const b2TimeStep* step)
+void b2MouseJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
 	b2Body* body = m_body2;
 
@@ -105,14 +105,14 @@ void b2MouseJoint::SolveVelocityConstraints(const b2TimeStep* step)
 
 	// Cdot = v + cross(w, r)
 	b2Vec2 Cdot = body->m_linearVelocity + b2Cross(body->m_angularVelocity, r);
-	b2Vec2 impulse = -b2Mul(m_ptpMass, Cdot + (m_beta * step->inv_dt) * m_C + m_gamma * m_impulse);
+	b2Vec2 impulse = -b2Mul(m_ptpMass, Cdot + (m_beta * step.inv_dt) * m_C + m_gamma * m_impulse);
 
 	b2Vec2 oldImpulse = m_impulse;
 	m_impulse += impulse;
 	float32 length = m_impulse.Length();
-	if (length > step->dt * m_maxForce)
+	if (length > step.dt * m_maxForce)
 	{
-		m_impulse *= step->dt * m_maxForce / length;
+		m_impulse *= step.dt * m_maxForce / length;
 	}
 	impulse = m_impulse - oldImpulse;
 
