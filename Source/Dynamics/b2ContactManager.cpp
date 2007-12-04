@@ -208,19 +208,55 @@ void b2ContactManager::Collide()
 #if 0
 	if (b2World::s_enablePositionCorrection)
 	{
-		bool found = true;
-		while (found)
+		for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)
 		{
-			found = false;
-			for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
-			{
-				if (c->m_shape1->m_body->IsSleeping() &&
-					c->m_shape2->m_body->IsSleeping())
-				{
-					continue;
-				}
+			b->m_toi = 1.0f;
+			b->m_flags &= ~b2Body::e_toiResolved;
+		}
 
-				found = found || c->ContinuousCollision();
+		float32 minTOI = 1.0f;
+		b2Contact* toiContact = NULL;
+		for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
+		{
+			if (c->m_shape1->m_body->IsSleeping() &&
+				c->m_shape2->m_body->IsSleeping())
+			{
+				continue;
+			}
+
+			float32 toi = c->ComputeTOI();
+			if (toi < minTOI)
+			{
+				minTOI = toi;
+				toiContact = c;
+			}
+		}
+
+		if (toiContact != NULL)
+		{
+			toiContact->m_shape1->m_body->m_flags |= b2Body::e_toiResolved;
+			toiContact->m_shape2->m_body->m_flags |= b2Body::e_toiResolved;
+
+			bool found = true;
+			while (found)
+			{
+				found = false;
+
+				for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
+				{
+					if (c->m_shape1->m_body->IsSleeping() &&
+						c->m_shape2->m_body->IsSleeping())
+					{
+						continue;
+					}
+
+					float32 toi = c->ResolveTOI();
+					if (toi < minTOI)
+					{
+						minTOI = toi;
+						toiContact = c;
+					}
+				}
 			}
 		}
 	}

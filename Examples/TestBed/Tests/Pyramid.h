@@ -45,10 +45,10 @@ public:
 			b2BodyDef bd;
 			bd.AddShape(&sd);
 
-			b2Vec2 x = b2Vec2::Make(-10.0f, 0.75f);
+			b2Vec2 x(-10.0f, 0.75f);
 			b2Vec2 y;
-			b2Vec2 deltaX = b2Vec2::Make(0.5625f, 2.0f);
-			b2Vec2 deltaY = b2Vec2::Make(1.125f, 0.0f);
+			b2Vec2 deltaX(0.5625f, 2.0f);
+			b2Vec2 deltaY(1.125f, 0.0f);
 
 			for (int32 i = 0; i < 25; ++i)
 			{

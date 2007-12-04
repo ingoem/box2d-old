@@ -76,6 +76,7 @@ b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2Sta
 				ccp->normalImpulse = cp->normalImpulse;
 				ccp->tangentImpulse = cp->tangentImpulse;
 				ccp->separation = cp->separation;
+				ccp->positionImpulse = 0.0f;
 
 				b2Vec2 r1 = cp->position - b1->m_position;
 				b2Vec2 r2 = cp->position - b2->m_position;
@@ -156,8 +157,6 @@ void b2ContactSolver::InitVelocityConstraints()
 				b1->m_linearVelocity -= invMass1 * P;
 				b2->m_angularVelocity += invI2 * b2Cross(r2, P);
 				b2->m_linearVelocity += invMass2 * P;
-
-				ccp->positionImpulse = 0.0f;
 			}
 		}
 		else
@@ -167,8 +166,6 @@ void b2ContactSolver::InitVelocityConstraints()
 				b2ContactConstraintPoint* ccp = c->points + j;
 				ccp->normalImpulse = 0.0f;
 				ccp->tangentImpulse = 0.0f;
-
-				ccp->positionImpulse = 0.0f;
 			}
 		}
 	}

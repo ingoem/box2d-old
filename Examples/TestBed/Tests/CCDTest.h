@@ -59,7 +59,7 @@ public:
 #else
 		{
 			b2BoxDef sd;
-			sd.extents.Set(10.0f, 1.0f);
+			sd.extents.Set(10.0f, 2.0f);
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
@@ -70,7 +70,7 @@ public:
 
 		{
 			b2BoxDef sd;
-			sd.extents.Set(2.0f, 0.1f);
+			sd.extents.Set(2.0f, 1.0f);
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
 

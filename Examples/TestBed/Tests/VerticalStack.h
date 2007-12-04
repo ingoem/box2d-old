@@ -46,7 +46,7 @@ public:
 			b2BodyDef bd;
 			bd.AddShape(&sd);
 
-			for (int i = 0; i < 14; ++i)
+			for (int i = 0; i < 16; ++i)
 			{
 				//float32 x = b2Random(-0.1f, 0.1f);
 				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;

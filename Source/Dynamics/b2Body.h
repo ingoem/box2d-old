@@ -166,6 +166,7 @@ public:
 		e_sleepFlag			= 0x0008,
 		e_allowSleepFlag	= 0x0010,
 		e_destroyFlag		= 0x0020,
+		e_toiResolved		= 0x0040,
 	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);
@@ -188,6 +189,7 @@ public:
 	b2Mat22 m_R;
 
 	// Conservative advancement data.
+	float32 m_toi;
 	b2Vec2 m_position0;
 	float32 m_rotation0;
 
