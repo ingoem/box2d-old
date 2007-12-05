@@ -87,14 +87,14 @@ public:
 		}
 	}
 
-	void Step(const Settings* settings)
+	void Step(Settings* settings)
 	{
+		Test::Step(settings);
+
 		float32 ratio = m_joint1->GetRatio();
 		float32 L = m_joint1->GetLength1() + ratio * m_joint1->GetLength2();
 		DrawString(5, m_textLine, "L1 + %4.2f * L2 = %4.2f", ratio, L);
 		m_textLine += 15;
-
-		Test::Step(settings);
 	}
 
 	static Test* Create()

@@ -114,8 +114,10 @@ public:
 		}
 	}
 
-	void Step(const Settings* settings)
+	void Step(Settings* settings)
 	{
+		Test::Step(settings);
+
 		float32 ratio, value;
 		
 		ratio = m_joint4->GetRatio();
@@ -127,8 +129,6 @@ public:
 		value = m_joint2->GetJointAngle() + ratio * m_joint3->GetJointTranslation();
 		DrawString(5, m_textLine, "theta2 + %4.2f * delta = %4.2f", ratio, value);
 		m_textLine += 15;
-
-		Test::Step(settings);
 	}
 
 	static Test* Create()

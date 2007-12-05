@@ -19,10 +19,12 @@
 #ifndef B2_CONSERVATIVE_H
 #define B2_CONSERVATIVE_H
 
+#include "../../Common/b2Settings.h"
+
 class b2Shape;
 
 // Move two bodies and their shapes forward in time conservatively.
 // Returns true if the shapes collide.
-bool b2Conservative(b2Shape* shape1, b2Shape* shape2);
+float32 b2Conservative(b2Shape* shape1, b2Shape* shape2);
 
 #endif

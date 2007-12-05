@@ -122,14 +122,14 @@ public:
 		}
 	}
 
-	void Step(const Settings* settings)
+	void Step(Settings* settings)
 	{
+		Test::Step(settings);
 		DrawString(5, m_textLine, "Keys: (f) toggle friction, (m) toggle motor");
 		m_textLine += 15;
 		float32 torque = m_joint1->GetMotorTorque(settings->hz);
 		DrawString(5, m_textLine, "Motor Torque = %5.0f", torque);
 		m_textLine += 15;
-		Test::Step(settings);
 	}
 
 	static Test* Create()

@@ -25,6 +25,10 @@
 b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
 	m_flags = 0;
+	if (bd->isFast)
+	{
+		m_flags |= e_fastFlag;
+	}
 	m_position = bd->position;
 	m_rotation = bd->rotation;
 	m_R.Set(m_rotation);

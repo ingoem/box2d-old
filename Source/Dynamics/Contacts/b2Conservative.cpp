@@ -24,24 +24,58 @@
 // This algorithm uses conservative advancement to compute the time of
 // impact (TOI) of two shapes.
 // Refs: Bullet, Young Kim
-bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
+float32 b2Conservative(b2Shape* shape1, b2Shape* shape2)
 {
 	b2Body* body1 = shape1->GetBody();
 	b2Body* body2 = shape2->GetBody();
 
+	bool doTOI = (body1->m_flags & (b2Body::e_staticFlag | b2Body::e_fastFlag)) != 0;
+	doTOI = doTOI || (body2->m_flags & (b2Body::e_staticFlag | b2Body::e_fastFlag)) != 0;
+	if (doTOI == false)
+	{
+		return 1.0f;
+	}
+
+	bool resolved1 = (body1->m_flags & b2Body::e_toiResolved) != 0;
+	bool resolved2 = (body2->m_flags & b2Body::e_toiResolved) != 0;
+
+	if (resolved1 && resolved2)
+	{
+		return 1.0f;
+	}
+
 	b2Vec2 v1 = body1->m_position - body1->m_position0;
 	float32 omega1 = body1->m_rotation - body1->m_rotation0;
-	b2Vec2 v2 = body2->m_position - body2->m_position0;
-	float32 omega2 = body2->m_rotation - body2->m_rotation0;
-
-	float32 r1 = shape1->GetMaxRadius();
-	float32 r2 = shape2->GetMaxRadius();
-
 	b2Vec2 p1Start = body1->m_position0;
 	float32 a1Start = body1->m_rotation0;
 
+	if (resolved1)
+	{
+		// Make body seem static at its toi position
+		float32 toi1 = body1->m_toi;
+		v1.SetZero();
+		omega1 = 0.0f;
+		p1Start = (1.0f - toi1) * body1->m_position0 + toi1 * body1->m_position;
+		a1Start = (1.0f - toi1) * body1->m_rotation0 + toi1 * body1->m_rotation;
+	}
+
+	b2Vec2 v2 = body2->m_position - body2->m_position0;
+	float32 omega2 = body2->m_rotation - body2->m_rotation0;
 	b2Vec2 p2Start = body2->m_position0;
 	float32 a2Start = body2->m_rotation0;
+
+	if (resolved2)
+	{
+		// Make body seem static at its toi position
+		float32 toi2 = body2->m_toi;
+		v2.SetZero();
+		omega2 = 0.0f;
+		p2Start = (1.0f - toi2) * body2->m_position0 + toi2 * body2->m_position;
+		a2Start = (1.0f - toi2) * body2->m_rotation0 + toi2 * body2->m_rotation;
+	}
+
+	float32 r1 = shape1->GetMaxRadius();
+	float32 r2 = shape2->GetMaxRadius();
 
 	b2Vec2 p1 = p1Start;
 	float32 a1 = a1Start;
@@ -57,7 +91,6 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	const int32 maxIterations = 1000;
 	b2Vec2 d;
 	float32 invRelativeVelocity = 0.0f;
-	bool hit = true;
 	b2Vec2 x1, x2;
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
@@ -67,11 +100,7 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 		{
 			if (iter == 0)
 			{
-				hit = false;
-			}
-			else
-			{
-				hit = true;
+				s1 = 1.0f;
 			}
 			break;
 		}
@@ -83,7 +112,7 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 			float32 relativeVelocity = b2Dot(d, v1 - v2) + b2Abs(omega1) * r1 + b2Abs(omega2) * r2;
 			if (b2Abs(relativeVelocity) < FLT_EPSILON)
 			{
-				hit = false;
+				s1 = 1.0f;
 				break;
 			}
 
@@ -96,13 +125,12 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 
 		if (s2 < 0.0f || 1.0f < s2)
 		{
-			hit = false;
+			s1 = 1.0f;
 			break;
 		}
 
 		if (s2 < (1.0f + 100.0f * FLT_EPSILON) * s1)
 		{
-			hit = true;
 			break;
 		}
 
@@ -120,25 +148,8 @@ bool b2Conservative(b2Shape* shape1, b2Shape* shape2)
 		shape2->QuickSync(p2, R2);
 	}
 
-	if (hit)
-	{
-		body1->WakeUp();
-		body1->m_position = p1;
-		body1->m_rotation = a1;
-		body1->m_R.Set(a1);
-		body1->QuickSyncShapes();
+	body1->m_toi = b2Min(body1->m_toi, s1);
+	body2->m_toi = b2Min(body2->m_toi, s1);
 
-		body2->WakeUp();
-		body2->m_position = p2;
-		body2->m_rotation = a2;
-		body2->m_R.Set(a2);
-		body2->QuickSyncShapes();
-
-		return true;
-	}
-
-	// No hit, restore shapes.
-	shape1->QuickSync(body1->m_position, body1->m_R);
-	shape2->QuickSync(body2->m_position, body2->m_R);
-	return false;
+	return s1;
 }

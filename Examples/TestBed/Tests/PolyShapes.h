@@ -150,11 +150,11 @@ public:
 		}
 	}
 
-	void Step(const Settings* settings)
+	void Step(Settings* settings)
 	{
+		Test::Step(settings);
 		DrawString(5, m_textLine, "Press 1-5 to drop stuff");
 		m_textLine += 15;
-		Test::Step(settings);
 	}
 
 	static Test* Create()

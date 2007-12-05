@@ -205,59 +205,65 @@ void b2ContactManager::CleanContactList()
 // contact list.
 void b2ContactManager::Collide()
 {
-#if 0
+#if 1
 	if (b2World::s_enablePositionCorrection)
 	{
 		for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)
 		{
 			b->m_toi = 1.0f;
-			b->m_flags &= ~b2Body::e_toiResolved;
+
+			if (b->IsSleeping())
+			{
+				b->m_flags |= b2Body::e_toiResolved;
+			}
+			else
+			{
+				b->m_flags &= ~b2Body::e_toiResolved;
+			}
 		}
 
-		float32 minTOI = 1.0f;
-		b2Contact* toiContact = NULL;
-		for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
+		bool found = true;
+		while (found)
 		{
-			if (c->m_shape1->m_body->IsSleeping() &&
-				c->m_shape2->m_body->IsSleeping())
+			found = false;
+			float32 minTOI = 1.0f;
+			b2Contact* toiContact = NULL;
+			for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
+			{
+				if (c->m_shape1->m_body->IsSleeping() &&
+					c->m_shape2->m_body->IsSleeping())
+				{
+					continue;
+				}
+
+				float32 toi = c->ComputeTOI();
+				if (toi < minTOI)
+				{
+					minTOI = toi;
+					toiContact = c;
+					found = true;
+				}
+			}
+
+			if (toiContact)
+			{
+				toiContact->m_shape1->m_body->m_flags |= b2Body::e_toiResolved;
+				toiContact->m_shape2->m_body->m_flags |= b2Body::e_toiResolved;
+			}
+		}
+
+		for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)
+		{
+			if (b->IsSleeping() || b->IsFrozen())
 			{
 				continue;
 			}
 
-			float32 toi = c->ComputeTOI();
-			if (toi < minTOI)
-			{
-				minTOI = toi;
-				toiContact = c;
-			}
-		}
-
-		if (toiContact != NULL)
-		{
-			toiContact->m_shape1->m_body->m_flags |= b2Body::e_toiResolved;
-			toiContact->m_shape2->m_body->m_flags |= b2Body::e_toiResolved;
-
-			bool found = true;
-			while (found)
-			{
-				found = false;
-
-				for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
-				{
-					if (c->m_shape1->m_body->IsSleeping() &&
-						c->m_shape2->m_body->IsSleeping())
-					{
-						continue;
-					}
-
-					float32 toi = c->ResolveTOI();
-					if (toi < minTOI)
-					{
-						minTOI = toi;
-						toiContact = c;
-					}
-				}
-			}
+			float32 toi = b->m_toi;
+			b->m_position = (1.0f - toi) * b->m_position0 + toi * b->m_position;
+			b->m_rotation = (1.0f - toi) * b->m_rotation0 + toi * b->m_rotation;
+			b->m_R.Set(b->m_rotation);
+			b->QuickSyncShapes();
 		}
 	}
 #endif

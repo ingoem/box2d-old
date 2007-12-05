@@ -66,7 +66,6 @@ Test::Test()
 	
 	m_listener.test = this;
 	m_world->SetListener(&m_listener);
-	m_step = 0;
 }
 
 Test::~Test()
@@ -145,38 +144,45 @@ void Test::LaunchBomb()
 	float32 a = 0.5f;
 	sd.type = e_boxShape;
 	sd.extents.Set(a, a);
-	sd.density = 20.0f;
+	sd.density = 2.0f;
 
 	b2BodyDef bd;
 	bd.AddShape(&sd);
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
 	bd.rotation = b2Random(-1.5f, 1.5f);
-	bd.linearVelocity = -1.0f * bd.position;
+	bd.linearVelocity = -5.0f * bd.position;
 	bd.angularVelocity = b2Random(-20.0f, 20.0f);
+	bd.isFast = true;
 
 	m_bomb = m_world->CreateBody(&bd);
 }
 
 typedef const char *(APIENTRY * WGLGETEXTENSIONSSTRINGEXT_T)( void );
 
-void Test::Step(const Settings* settings)
+void Test::Step(Settings* settings)
 {
 	float32 timeStep = settings->hz > 0.0f ? 1.0f / settings->hz : 0.0f;
 
 	if (settings->pause)
 	{
-		timeStep = 0.0f;
+		if (settings->singleStep)
+		{
+			settings->singleStep = 0;
+		}
+		else
+		{
+			timeStep = 0.0f;
+		}
+
+		DrawString(5, m_textLine, "****PAUSED****");
+		m_textLine += 15;
 	}
 
 	b2World::s_enableWarmStarting = settings->enableWarmStarting;
 	b2World::s_enablePositionCorrection = settings->enablePositionCorrection;
 
-	if (m_step % settings->stepRate == 0)
-	{
-		m_world->Step(timeStep, settings->iterationCount);
-	}
-	++m_step;
+	m_world->Step(timeStep, settings->iterationCount);
 
 	m_world->m_broadPhase->Validate();
 

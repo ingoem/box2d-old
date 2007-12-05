@@ -290,7 +290,6 @@ void b2World::DestroyJoint(b2Joint* j)
 
 void b2World::Integrate(const b2TimeStep& step)
 {
-
 	// Size the island for the worst case.
 	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator);
 
@@ -406,6 +405,10 @@ void b2World::Integrate(const b2TimeStep& step)
 void b2World::SolvePositionConstraints(const b2TimeStep& step)
 {
 	m_positionIterationCount = 0;
+	if (step.dt == 0.0f)
+	{
+		return;
+	}
 
 	// Size the island for the worst case.
 	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator);
@@ -566,15 +569,18 @@ void b2World::Step(float32 dt, int32 iterations)
 	// Handle newly frozen bodies.
 	if (m_listener)
 	{
-		for (b2Body* b = m_bodyList; b; b = b->m_next)
+		b2Body* b = m_bodyList;
+		while (b)
 		{
-			if (b->IsFrozen())
+			b2Body* b0 = b;
+			b = b->m_next;
+			if (b0->IsFrozen())
 			{
-				b2BoundaryResponse response = m_listener->NotifyBoundaryViolated(b);
+				b2BoundaryResponse response = m_listener->NotifyBoundaryViolated(b0);
 				if (response == b2_destroyBody)
 				{
-					DestroyBody(b);
-					b = NULL;
+					DestroyBody(b0);
+					b0 = NULL;
 				}
 			}
 		}
@@ -588,24 +594,6 @@ void b2World::Step(float32 dt, int32 iterations)
 	{
 		SolvePositionConstraints(step);
 	}
-
-#if 0
-	// TODO_ERIN find TOI for island? Just do DFS for lowest TOI?
-	for (b2Contact* c = m_contactList; c; c = c->GetNext())
-	{
-		b2Shape* shape1 = c->GetShape1();
-		b2Shape* shape2 = c->GetShape2();
-		b2Body* body1 = shape1->GetBody();
-		b2Body* body2 = shape2->GetBody();
-
-		if (body1->IsSleeping() && body2->IsSleeping())
-		{
-			continue;
-		}
-
-		b2Conservative(shape1, shape2);
-	}
-#endif
 }
 
 int32 b2World::Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount)

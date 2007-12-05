@@ -46,6 +46,7 @@ struct b2BodyDef
 		allowSleep = true;
 		isSleeping = false;
 		preventRotation = false;
+		isFast = false;
 	}
 
 	void* userData;
@@ -59,6 +60,7 @@ struct b2BodyDef
 	bool allowSleep;
 	bool isSleeping;
 	bool preventRotation;
+	bool isFast;
 
 	void AddShape(b2ShapeDef* shape);
 };
@@ -166,7 +168,8 @@ public:
 		e_sleepFlag			= 0x0008,
 		e_allowSleepFlag	= 0x0010,
 		e_destroyFlag		= 0x0020,
-		e_toiResolved		= 0x0040,
+		e_fastFlag			= 0x0040,
+		e_toiResolved		= 0x0080,
 	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);

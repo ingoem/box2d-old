@@ -44,7 +44,7 @@ public:
 			b2BoxDef sd;
 			sd.extents.Set(0.1f, 2.0f);
 			sd.density = 1.0f;
-			sd.restitution = 0.1f;
+			sd.restitution = 0.0f;
 
 			m_angularVelocity = b2Random(-50.0f, 50.0f);
 			//m_angularVelocity = -35.268715f;
@@ -59,22 +59,23 @@ public:
 #else
 		{
 			b2BoxDef sd;
-			sd.extents.Set(10.0f, 2.0f);
+			sd.extents.Set(10.0f, 0.1f);
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -2.0f);
+			bd.position.Set(0.0f, -0.2f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
 
 		{
 			b2BoxDef sd;
-			sd.extents.Set(2.0f, 1.0f);
+			sd.extents.Set(2.0f, 0.1f);
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
 
 			b2BodyDef bd;
+			bd.isFast = true;
 			bd.position.Set(0.0f, 20.0f);
 			bd.linearVelocity.Set(0.0f, -200.0f);
 			bd.AddShape(&sd);
@@ -83,7 +84,12 @@ public:
 			sd.extents.Set(1.0f, 0.1f);
 			bd.position.Set(0.0f, 20.2f);
 			bd.linearVelocity.Set(0.0f, -201.0f);
-			//m_world->CreateBody(&bd);
+			m_world->CreateBody(&bd);
+
+			sd.extents.Set(0.5f, 0.1f);
+			bd.position.Set(0.0f, 20.4f);
+			bd.linearVelocity.Set(0.0f, -202.0f);
+			m_world->CreateBody(&bd);
 		}
 #endif
 	}

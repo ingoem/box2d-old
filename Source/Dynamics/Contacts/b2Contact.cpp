@@ -138,7 +138,7 @@ b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 	m_node2.other = NULL;
 }
 
-bool b2Contact::ContinuousCollision()
+float32 b2Contact::ComputeTOI()
 {
 	return b2Conservative(m_shape1, m_shape2);
 }

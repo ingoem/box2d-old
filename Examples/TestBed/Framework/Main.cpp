@@ -142,10 +142,6 @@ void Keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
-	case 'h':
-		settings.pause = !settings.pause;
-		break;
-
 	default:
 		if (test)
 		{
@@ -219,6 +215,17 @@ void MouseMotion(int32 x, int32 y)
 	test->MouseMove(p);
 }
 
+void Pause(int)
+{
+	settings.pause = !settings.pause;
+}
+
+void SingleStep(int)
+{
+	settings.pause = 1;
+	settings.singleStep = 1;
+}
+
 int main(int argc, char** argv)
 {
 	entry = g_testEntries + testIndex;
@@ -254,10 +261,6 @@ int main(int argc, char** argv)
 		glui->add_spinner("Hertz", GLUI_SPINNER_FLOAT, &settings.hz);
 	hertzSpinner->set_float_limits(5.0f, 200.0f);
 
-	GLUI_Spinner* stepRateSpinner =
-		glui->add_spinner("Step Rate", GLUI_SPINNER_INT, &settings.stepRate);
-	stepRateSpinner->set_int_limits(1, 100);
-
 	glui->add_checkbox("Position Correction", &settings.enablePositionCorrection);
 	glui->add_checkbox("Warm Starting", &settings.enableWarmStarting);
 
@@ -278,6 +281,9 @@ int main(int argc, char** argv)
 		++testCount;
 		++e;
 	}
+
+	glui->add_button("Pause", 0, Pause);
+	glui->add_button("Single Step", 0, SingleStep);
 
 	glui->add_button("Quit", 0,(GLUI_Update_CB)exit);
 	glui->set_main_gfx_window( mainWindow );

@@ -38,8 +38,8 @@ struct Settings
 		drawPairs(0),
 		enableWarmStarting(1),
 		enablePositionCorrection(1),
-		stepRate(1),
-		pause(0)
+		pause(0),
+		singleStep(0)
 		{}
 
 	float hz;
@@ -51,8 +51,8 @@ struct Settings
 	int drawPairs;
 	int enableWarmStarting;
 	int enablePositionCorrection;
-	int stepRate;
 	int pause;
+	int singleStep;
 };
 
 struct TestEntry
@@ -83,7 +83,7 @@ public:
 	virtual ~Test();
 
 	void SetTextLine(int32 line) { m_textLine = line; }
-	virtual void Step(const Settings* settings);
+	virtual void Step(Settings* settings);
 	virtual void Keyboard(unsigned char key) { NOT_USED(key); }
 	void MouseDown(const b2Vec2& p);
 	void MouseUp();
@@ -106,7 +106,6 @@ protected:
 	b2World* m_world;
 	b2Body* m_bomb;
 	b2MouseJoint* m_mouseJoint;
-	int32 m_step;
 };
 
 #endif

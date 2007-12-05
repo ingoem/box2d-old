@@ -141,11 +141,11 @@ public:
 		}
 	}
 
-	void Step(const Settings* settings)
+	void Step(Settings* settings)
 	{
+		Test::Step(settings);
 		DrawString(5, m_textLine, "Press: (b) to delete a body, (j) to delete a joint");
 		m_textLine += 15;
-		Test::Step(settings);
 	}
 
 	void JointDestroyed(b2Joint* joint)

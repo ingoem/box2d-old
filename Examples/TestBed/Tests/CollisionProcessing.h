@@ -96,7 +96,7 @@ public:
 		m_world->CreateBody(&circleBodyDef);
 	}
 
-	void Step(const Settings* settings)
+	void Step(Settings* settings)
 	{
 		Test::Step(settings);
 
