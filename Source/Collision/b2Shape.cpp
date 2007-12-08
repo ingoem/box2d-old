@@ -436,18 +436,6 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 		for (int32 i = 0; i < m_vertexCount; ++i)
 		{
 			m_vertices[i] = b2Mul(localR, poly->vertices[i] - centroid);
-
-			b2Vec2 u = m_vertices[i];
-			float32 length = u.Length();
-
-			if (length > b2_toiSlop)
-			{
-				m_coreVertices[i] = (1.0f - b2_toiSlop / length) * m_vertices[i];
-			}
-			else
-			{
-				m_coreVertices[i].SetZero();
-			}
 		}
 	}
 
@@ -477,12 +465,40 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 		b2Vec2 edge = m_vertices[i2] - m_vertices[i1];
 		m_normals[i] = b2Cross(edge, 1.0f);
 		m_normals[i].Normalize();
-		float32 s = b2Dot(m_normals[i], m_coreVertices[i]);
-		b2Assert(s >= 0.0f);
 		m_minRadius = b2Min(m_minRadius, s);
 	}
 
+	// Create core polygon shape by shifting edges inward.
+	if (def->type == e_polyShape)
+	{
+		for (int32 i = 0; i < m_vertexCount; ++i)
+		{
+			int32 i1 = i - 1 >= 0 ? i - 1 : m_vertexCount - 1;
+			int32 i2 = i;
+
+			b2Vec2 n1 = m_normals[i1];
+			b2Vec2 n2 = m_normals[i2];
+			b2Vec2 v = m_vertices[i];
+
+			// dot(n1, vc) = d.x
+			// dot(n2, vc) = d.y
+			b2Vec2 d;
+			d.x = b2Dot(n1, v) - b2_toiSlop;
+			d.y = b2Dot(n2, v) - b2_toiSlop;
+
+			// Shifting the edge inward by b2_toiSlop should
+			// not cause the plane to pass the centroid.
+			b2Assert(d.x >= 0.0f);
+			b2Assert(d.y >= 0.0f);
+			b2Mat22 A;
+			A.col1.x = n1.x; A.col2.x = n1.y;
+			A.col1.y = n2.x; A.col2.y = n2.y;
+			m_coreVertices[i] = A.Solve(d);
+		}
+	}
+
 	// Ensure the polygon in convex. TODO_ERIN compute convex hull.
+	// TODO_ERIN check each vertex against each edge.
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
 		int32 i1 = i;
