@@ -98,11 +98,11 @@ public:
 			{
 				if (b->m_invMass == 0.0f)
 				{
-					DrawShape(s, Color(0.5f, 0.9f, 0.5f));
+					DrawShape(s, Color(0.5f, 0.9f, 0.5f), settings->drawCores == 1);
 				}
 				else
 				{
-					DrawShape(s, Color(0.9f, 0.9f, 0.9f));
+					DrawShape(s, Color(0.9f, 0.9f, 0.9f), settings->drawCores == 1);
 				}
 
 				glPointSize(4.0f);

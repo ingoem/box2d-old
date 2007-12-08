@@ -271,6 +271,7 @@ int main(int argc, char** argv)
 	glui->add_checkbox_to_panel(drawPanel, "Pairs", &settings.drawPairs);
 	glui->add_checkbox_to_panel(drawPanel, "Contacts", &settings.drawContacts);
 	glui->add_checkbox_to_panel(drawPanel, "Impulses", &settings.drawImpulses);
+	glui->add_checkbox_to_panel(drawPanel, "Core Shapes", &settings.drawCores);
 	glui->add_checkbox_to_panel(drawPanel, "Statistics", &settings.drawStats);
 
 	int32 testCount = 0;

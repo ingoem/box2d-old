@@ -31,7 +31,6 @@ public:
 		// Ground body
 		{
 			b2BoxDef sd;
-			sd.type = e_boxShape;
 			sd.extents.Set(50.0f, 10.0f);
 			sd.friction = 0.3f;
 			sd.categoryBits = 0x0001;

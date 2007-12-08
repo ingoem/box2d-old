@@ -24,6 +24,7 @@
 
 class b2World;
 class b2Contact;
+struct b2TimeStep;
 
 class b2ContactManager : public b2PairCallback
 {
@@ -36,7 +37,7 @@ public:
 	// Implements PairCallback
 	void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData);
 
-	void Collide();
+	void Collide(const b2TimeStep& step);
 
 	void CleanContactList();
 

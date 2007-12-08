@@ -36,6 +36,7 @@ struct Settings
 		drawImpulses(0),
 		drawAABBs(0),
 		drawPairs(0),
+		drawCores(0),
 		enableWarmStarting(1),
 		enablePositionCorrection(1),
 		pause(0),
@@ -49,6 +50,7 @@ struct Settings
 	int drawImpulses;
 	int drawAABBs;
 	int drawPairs;
+	int drawCores;
 	int enableWarmStarting;
 	int enablePositionCorrection;
 	int pause;

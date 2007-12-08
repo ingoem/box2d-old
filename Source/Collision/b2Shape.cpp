@@ -413,18 +413,10 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 		const b2BoxDef* box = (const b2BoxDef*)def;
 		m_vertexCount = 4;
 		b2Vec2 h = box->extents;
-		b2Vec2 hc = h;
-		hc.x = b2Max(0.0f, h.x - b2_toiSlop);
-		hc.y = b2Max(0.0f, h.y - b2_toiSlop);
 		m_vertices[0] = b2Mul(localR, b2Vec2(h.x, h.y));
 		m_vertices[1] = b2Mul(localR, b2Vec2(-h.x, h.y));
 		m_vertices[2] = b2Mul(localR, b2Vec2(-h.x, -h.y));
 		m_vertices[3] = b2Mul(localR, b2Vec2(h.x, -h.y));
-
-		m_coreVertices[0] = b2Mul(localR, b2Vec2(hc.x, hc.y));
-		m_coreVertices[1] = b2Mul(localR, b2Vec2(-hc.x, hc.y));
-		m_coreVertices[2] = b2Mul(localR, b2Vec2(-hc.x, -hc.y));
-		m_coreVertices[3] = b2Mul(localR, b2Vec2(hc.x, -hc.y));
 	}
 	else
 	{
@@ -442,22 +434,18 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	// Compute bounding box. TODO_ERIN optimize OBB
 	b2Vec2 minVertex(FLT_MAX, FLT_MAX);
 	b2Vec2 maxVertex(-FLT_MAX, -FLT_MAX);
-	m_maxRadius = -FLT_MAX;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
 		b2Vec2 v = m_vertices[i];
 		minVertex = b2Min(minVertex, v);
 		maxVertex = b2Max(maxVertex, v);
-		m_maxRadius = b2Max(m_maxRadius, m_coreVertices[i].Length());
 	}
-	m_maxRadius += m_localCentroid.Length();
 
 	m_localOBB.R.SetIdentity();
 	m_localOBB.center = 0.5f * (minVertex + maxVertex);
 	m_localOBB.extents = 0.5f * (maxVertex - minVertex);
 
 	// Compute the edge normals and next index map.
-	m_minRadius = FLT_MAX;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
 		int32 i1 = i;
@@ -465,36 +453,39 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 		b2Vec2 edge = m_vertices[i2] - m_vertices[i1];
 		m_normals[i] = b2Cross(edge, 1.0f);
 		m_normals[i].Normalize();
-		m_minRadius = b2Min(m_minRadius, s);
 	}
 
 	// Create core polygon shape by shifting edges inward.
-	if (def->type == e_polyShape)
+	m_minRadius = FLT_MAX;
+	m_maxRadius = -FLT_MAX;
+	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
-		for (int32 i = 0; i < m_vertexCount; ++i)
-		{
-			int32 i1 = i - 1 >= 0 ? i - 1 : m_vertexCount - 1;
-			int32 i2 = i;
+		int32 i1 = i - 1 >= 0 ? i - 1 : m_vertexCount - 1;
+		int32 i2 = i;
 
-			b2Vec2 n1 = m_normals[i1];
-			b2Vec2 n2 = m_normals[i2];
-			b2Vec2 v = m_vertices[i];
+		b2Vec2 n1 = m_normals[i1];
+		b2Vec2 n2 = m_normals[i2];
+		b2Vec2 v = m_vertices[i];
 
-			// dot(n1, vc) = d.x
-			// dot(n2, vc) = d.y
-			b2Vec2 d;
-			d.x = b2Dot(n1, v) - b2_toiSlop;
-			d.y = b2Dot(n2, v) - b2_toiSlop;
+		// dot(n1, vc) = d.x
+		// dot(n2, vc) = d.y
+		b2Vec2 d;
+		d.x = b2Dot(n1, v) - b2_toiSlop;
+		d.y = b2Dot(n2, v) - b2_toiSlop;
 
-			// Shifting the edge inward by b2_toiSlop should
-			// not cause the plane to pass the centroid.
-			b2Assert(d.x >= 0.0f);
-			b2Assert(d.y >= 0.0f);
-			b2Mat22 A;
-			A.col1.x = n1.x; A.col2.x = n1.y;
-			A.col1.y = n2.x; A.col2.y = n2.y;
-			m_coreVertices[i] = A.Solve(d);
-		}
+		// Shifting the edge inward by b2_toiSlop should
+		// not cause the plane to pass the centroid.
+		b2Assert(d.x >= 0.0f);
+		b2Assert(d.y >= 0.0f);
+		b2Mat22 A;
+		A.col1.x = n1.x; A.col2.x = n1.y;
+		A.col1.y = n2.x; A.col2.y = n2.y;
+		m_coreVertices[i] = A.Solve(d);
+		
+		m_minRadius = b2Min(m_minRadius, b2Min(d.x, d.y));
+		
+		b2Vec2 p = m_coreVertices[i] + m_localCentroid;
+		m_maxRadius = b2Max(m_maxRadius, p.Length());
 	}
 
 	// Ensure the polygon in convex. TODO_ERIN compute convex hull.

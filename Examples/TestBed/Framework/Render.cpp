@@ -68,7 +68,7 @@ void DrawJoint(b2Joint* joint)
 	glEnd();
 }
 
-void DrawShape(const b2Shape* shape, const Color& c)
+void DrawShape(const b2Shape* shape, const Color& c, bool core)
 {
 	switch (shape->m_type)
 	{
@@ -79,9 +79,9 @@ void DrawShape(const b2Shape* shape, const Color& c)
 			float32 r = circle->m_radius;
 			const float32 k_segments = 16.0f;
 			const float32 k_increment = 2.0f * b2_pi / k_segments;
+			float32 theta = 0.0f;
 			glColor4f(c.cx, c.cy, c.cz, 1.0f);
 			glBegin(GL_LINE_LOOP);
-			float32 theta = 0.0f;
 			for (int32 i = 0; i < k_segments; ++i)
 			{
 				b2Vec2 d(r * cosf(theta), r * sinf(theta));
@@ -96,6 +96,22 @@ void DrawShape(const b2Shape* shape, const Color& c)
 			b2Vec2 ax = circle->m_R.col1;
 			glVertex2f(x.x + r * ax.x, x.y + r * ax.y);
 			glEnd();
+
+			if (core)
+			{
+				float32 r = circle->m_radius - b2_toiSlop;
+				float32 theta = 0.0f;
+				glColor4f(0.9f, 0.1f, 0.1f, 1.0f);
+				glBegin(GL_LINE_LOOP);
+				for (int32 i = 0; i < k_segments; ++i)
+				{
+					b2Vec2 d(r * cosf(theta), r * sinf(theta));
+					b2Vec2 v = x + d;
+					glVertex2f(v.x, v.y);
+					theta += k_increment;
+				}
+				glEnd();
+			}
 		}
 		break;
 
@@ -111,6 +127,17 @@ void DrawShape(const b2Shape* shape, const Color& c)
 			}
 			glEnd();
 
+			if (core)
+			{
+				glColor4f(0.9f, 0.1f, 0.1f, 1.0f);
+				glBegin(GL_LINE_LOOP);
+				for (int32 i = 0; i < poly->m_vertexCount; ++i)
+				{
+					b2Vec2 v = poly->m_position + b2Mul(poly->m_R, poly->m_coreVertices[i]);
+					glVertex2f(v.x, v.y);
+				}
+				glEnd();
+			}
 		}
 		break;
 	}

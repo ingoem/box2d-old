@@ -203,10 +203,9 @@ void b2ContactManager::CleanContactList()
 // This is the top level collision call for the time step. Here
 // all the narrow phase collision is processed for the world
 // contact list.
-void b2ContactManager::Collide()
+void b2ContactManager::Collide(const b2TimeStep& step)
 {
-#if 1
-	if (b2World::s_enablePositionCorrection)
+	if (step.dt > 0.0f && b2World::s_enablePositionCorrection)
 	{
 		for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)
 		{
@@ -266,7 +265,6 @@ void b2ContactManager::Collide()
 			b->QuickSyncShapes();
 		}
 	}
-#endif
 
 	for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
 	{

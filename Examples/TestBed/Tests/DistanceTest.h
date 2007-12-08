@@ -24,6 +24,19 @@ class DistanceTest : public Test
 public:
 	DistanceTest()
 	{
+#if 1
+		{
+			b2BoxDef sd;
+			sd.extents.Set(50.0f, 10.0f);
+			sd.friction = 0.3f;
+
+			b2BodyDef bd;
+			bd.position.Set(0.0f, -10.0f);
+			bd.AddShape(&sd);
+			m_body1 = m_world->CreateBody(&bd);
+			m_shape1 = m_body1->m_shapeList;
+		}
+#else
 		{
 			b2BoxDef sd;
 			sd.extents.Set(0.5f, 0.5f);
@@ -36,6 +49,7 @@ public:
 			m_body1 = m_world->CreateBody(&bd);
 			m_shape1 = m_body1->m_shapeList;
 		}
+#endif
 
 		{
 #if 0
@@ -44,10 +58,9 @@ public:
 			sd.extents.Set(a, a);
 			sd.extents *= 10.0f;
 			sd.density = 1.0f;
-#elif 0
+#elif 1
 			b2CircleDef sd;
-			sd.radius = 0.125f;
-			sd.radius *= 10.0f;
+			sd.radius = 0.5f;
 			sd.density = 1.0f;
 #else
 			b2PolyDef sd;
@@ -59,7 +72,12 @@ public:
 #endif
 
 			b2BodyDef bd;
+#if 1
+			bd.position.Set(-48.377853f, 0.49244255f);
+			bd.rotation = 90.475891f;
+#else
 			bd.position.Set(0.0f, 10.0f);
+#endif
 			bd.AddShape(&sd);
 			m_body2 = m_world->CreateBody(&bd);
 			m_shape2 = m_body2->m_shapeList;
@@ -79,14 +97,14 @@ public:
 		return new DistanceTest;
 	}
 
-	void Step(const Settings* settings)
+	void Step(Settings* settings)
 	{
 		NOT_USED(settings);
 
 		m_world->Step(0.0f, 1);
 
-		DrawShape(m_shape1, Color(0.5f, 0.9f, 0.5f));
-		DrawShape(m_shape2, Color(0.9f, 0.9f, 0.9f));
+		DrawShape(m_shape1, Color(0.5f, 0.9f, 0.5f), settings->drawCores == 1);
+		DrawShape(m_shape2, Color(0.9f, 0.9f, 0.9f), settings->drawCores == 1);
 
 		b2Vec2 x1, x2;
 		float32 distance = b2Distance(&x1, &x2, m_shape1, m_shape2);

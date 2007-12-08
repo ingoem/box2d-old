@@ -587,7 +587,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	}
 
 	// Update contacts.
-	m_contactManager.Collide();
+	m_contactManager.Collide(step);
 
 	// Project positions onto the constraint manifold.
 	if (s_enablePositionCorrection)

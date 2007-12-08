@@ -25,7 +25,7 @@ public:
 
 	CCDTest()
 	{
-#if 0
+#if 1
 		m_world->m_gravity.SetZero();
 
 		{
@@ -35,7 +35,6 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 20.0f);
-			//bd.linearVelocity.Set(400.0f, 0.0f);
 			bd.AddShape(&sd);
 			m_world->CreateBody(&bd);
 		}
@@ -46,8 +45,8 @@ public:
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
 
-			m_angularVelocity = b2Random(-50.0f, 50.0f);
-			//m_angularVelocity = -35.268715f;
+			//m_angularVelocity = b2Random(-50.0f, 50.0f);
+			m_angularVelocity = -35.268715f;
 
 			b2BodyDef bd;
 			bd.position.Set(50.0f, 20.0f);

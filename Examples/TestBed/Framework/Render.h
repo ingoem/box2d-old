@@ -33,7 +33,7 @@ struct Color
 };
 
 void DrawJoint(b2Joint* joint);
-void DrawShape(const b2Shape* shape, const Color& color);
+void DrawShape(const b2Shape* shape, const Color& color, bool core);
 void DrawString(int x, int y, const char* string, ...);
 void DrawAABB(b2AABB* aabb, const Color& c);
 

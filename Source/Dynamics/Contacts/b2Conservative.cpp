@@ -88,7 +88,7 @@ float32 b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	shape2->QuickSync(p2, R2);
 
 	float32 s1 = 0.0f;
-	const int32 maxIterations = 1000;
+	const int32 maxIterations = 50;
 	b2Vec2 d;
 	float32 invRelativeVelocity = 0.0f;
 	b2Vec2 x1, x2;

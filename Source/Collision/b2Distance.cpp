@@ -136,9 +136,14 @@ static int32 ProcessThree(b2Vec2* p1Out, b2Vec2* p2Out, b2Vec2* p1s, b2Vec2* p2s
 
 static bool InPoints(const b2Vec2& w, const b2Vec2* points, int32 pointCount)
 {
+	const float32 k_tolerance = 100.0f * FLT_EPSILON;
 	for (int32 i = 0; i < pointCount; ++i)
 	{
-		if (w == points[i])
+		b2Vec2 d = b2Abs(w - points[i]);
+		b2Vec2 m = b2Max(b2Abs(w), b2Abs(points[i]));
+		
+		if (d.x < k_tolerance * (m.x + 1.0f) &&
+			d.y < k_tolerance * (m.y + 1.0f))
 		{
 			return true;
 		}

@@ -192,19 +192,19 @@ void Test::Step(Settings* settings)
 		{
 			if (b->IsStatic())
 			{
-				DrawShape(s, Color(0.5f, 0.9f, 0.5f));
+				DrawShape(s, Color(0.5f, 0.9f, 0.5f), settings->drawCores == 1);
 			}
 			else if (b->IsSleeping())
 			{
-				DrawShape(s, Color(0.5f, 0.5f, 0.9f));
+				DrawShape(s, Color(0.5f, 0.5f, 0.9f), settings->drawCores == 1);
 			}
 			else if (b == m_bomb)
 			{
-				DrawShape(s, Color(0.9f, 0.9f, 0.4f));
+				DrawShape(s, Color(0.9f, 0.9f, 0.4f), settings->drawCores == 1);
 			}
 			else
 			{
-				DrawShape(s, Color(0.9f, 0.9f, 0.9f));
+				DrawShape(s, Color(0.9f, 0.9f, 0.9f), settings->drawCores == 1);
 			}
 		}
 	}
