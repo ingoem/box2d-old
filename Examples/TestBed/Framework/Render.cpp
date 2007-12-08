@@ -80,6 +80,18 @@ void DrawShape(const b2Shape* shape, const Color& c, bool core)
 			const float32 k_segments = 16.0f;
 			const float32 k_increment = 2.0f * b2_pi / k_segments;
 			float32 theta = 0.0f;
+			glColor4f(c.cx*0.5f, c.cy*0.5f, c.cz*0.5f, 0.5f);
+			glBegin(GL_TRIANGLE_FAN);
+			for (int32 i = 0; i < k_segments; ++i)
+			{
+				b2Vec2 d(r * cosf(theta), r * sinf(theta));
+				b2Vec2 v = x + d;
+				glVertex2f(v.x, v.y);
+				theta += k_increment;
+			}
+			glEnd();
+
+			theta = 0.0f;
 			glColor4f(c.cx, c.cy, c.cz, 1.0f);
 			glBegin(GL_LINE_LOOP);
 			for (int32 i = 0; i < k_segments; ++i)
@@ -101,7 +113,7 @@ void DrawShape(const b2Shape* shape, const Color& c, bool core)
 			{
 				float32 r = circle->m_radius - b2_toiSlop;
 				float32 theta = 0.0f;
-				glColor4f(0.9f, 0.1f, 0.1f, 1.0f);
+				glColor4f(0.9f, 0.6f, 0.6f, 1.0f);
 				glBegin(GL_LINE_LOOP);
 				for (int32 i = 0; i < k_segments; ++i)
 				{
@@ -118,6 +130,16 @@ void DrawShape(const b2Shape* shape, const Color& c, bool core)
 	case e_polyShape:
 		{
 			const b2PolyShape* poly = (const b2PolyShape*)shape;
+
+			glColor4f(c.cx*0.5f, c.cy*0.5f, c.cz*0.5f, 1.0f);
+			glBegin(GL_TRIANGLE_FAN);
+			for (int32 i = 0; i < poly->m_vertexCount; ++i)
+			{
+				b2Vec2 v = poly->m_position + b2Mul(poly->m_R, poly->m_vertices[i]);
+				glVertex2f(v.x, v.y);
+			}
+			glEnd();
+
 			glColor4f(c.cx, c.cy, c.cz, 1.0f);
 			glBegin(GL_LINE_LOOP);
 			for (int32 i = 0; i < poly->m_vertexCount; ++i)
@@ -129,7 +151,7 @@ void DrawShape(const b2Shape* shape, const Color& c, bool core)
 
 			if (core)
 			{
-				glColor4f(0.9f, 0.1f, 0.1f, 1.0f);
+				glColor4f(0.9f, 0.6f, 0.6f, 1.0f);
 				glBegin(GL_LINE_LOOP);
 				for (int32 i = 0; i < poly->m_vertexCount; ++i)
 				{

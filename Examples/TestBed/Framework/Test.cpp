@@ -141,10 +141,9 @@ void Test::LaunchBomb()
 	}
 
 	b2BoxDef sd;
-	float32 a = 0.5f;
 	sd.type = e_boxShape;
-	sd.extents.Set(a, a);
-	sd.density = 2.0f;
+	sd.extents.Set(0.25f, 0.25f);
+	sd.density = 10.0f;
 
 	b2BodyDef bd;
 	bd.AddShape(&sd);
