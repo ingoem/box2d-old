@@ -429,9 +429,18 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 <p>What does sleep mean? Well it is expensive to simulate bodies, so the less we have to simulate the better. When a body comes to rest we would like to stop simulating it.</p>
 <p>When Box2D determines that a body (or group of bodies) has come to rest, the body enters a sleep state which has very little CPU overhead. If an awake body collides with a sleeping body, then the sleeping body wakes up. Bodies will also wake up if a joint or contact attached to them is destroyed. You can also wakeup a body manually.</p>
 <p>The body definition lets you specify whether a body can <em>sleep</em> and whether a body is created sleeping.</p>
- <pre class="code">
+<pre class="code">
     bodyDef.allowSleep = true;
     bodyDef.isSleeping = false;
+</pre>
+
+<h3>Continuous Collision Detection</h3>
+<p>Continuous collision detection (CCD) is used to prevent bodies from tunneling through other bodies. This is done by sweeping shapes from their old position to their new positions. The engine looks for new collisions during the sweep and computes the time of impact (TOI) for these collisions. Bodies are moved to their first TOI and fixed there for the remainder of the time step. This is done iteratively so that chain reactions are propagated correctly.</p>
+<p>Since bodies are frozen at their TOI for the remainder of the time step, some interactions between multiple bodies may appear delayed. This approach is done for performance and code complexity reasons.</p>
+<p>CCD is expensive so you probably don't want all moving bodies to compute TOIs with all other moving bodies. So by default Box2D only uses CCD between moving bodies and static bodies. This is an effective to prevent bodies from escaping your game world. However, you may have some fast moving bodies that that require CCD all the time.</p>
+<p>Fast moving objects in Box2D are called bullets. You should decide based on your game design if something should be a bullet or not. If you decide a body should be treated as a bullet, use the following setting.</p>
+<pre class="code">
+    bodyDef.isBullet = true;
 </pre>
 
 <h2>Creating and Destroying a Body</h2>
@@ -565,12 +574,13 @@ When a body is destroyed, any joints attached to the body are automatically dest
 <h3>Prismatic Joint</h3>
 <p>A prismatic joint allows for relative translation of two bodies along a specified local axis. A prismatic joint prevents relative rotation. Therefore, a prismatic joint has a single degree of freedom.</p>
 <img src="images/prismaticJoint.gif" class="figure"/><br/>
-<p>The prismatic joint definition is similar to the revolute joint description; just substitute translation for angle and force for torque. Using this analogy proved an example prismatic joint definition with a joint limit and a friction motor:</p>
+<p>The prismatic joint definition is similar to the revolute joint description; just substitute translation for angle and force for torque. Using this analogy provides an example prismatic joint definition with a joint limit and a friction motor:</p>
 <pre class="code">
     b2PrismaticJointDef jointDef;
     jointDef.body1 = myBody1;
     jointDef.body2 = myBody2;
     jointDef.anchorPoint = myBody1->GetCenterPosition();
+    jointDef.axis.Set(1.0f, 0.0f);
     jointDef.lowerTranslation = -5.0f;
     jointDef.upperTranslation = 2.5f;
     jointDef.enableLimit = true;
@@ -578,6 +588,7 @@ When a body is destroyed, any joints attached to the body are automatically dest
     jointDef.motorSpeed = 0.0f;
     jointDef.enableMotor = true;
 </pre>
+<p>The revolute joint has an implicit axis coming out of the screen. The prismatic joint needs an explicit axis parallel to the screen. This axis is fixed in the two bodies and follows their motion.</p>
 <p>Like the revolute joint, the prismatic joint translation is zero when the joint is created. So be sure zero is between your lower and upper translation limits.</p>
 
 <h3>Pulley Joint</h3>

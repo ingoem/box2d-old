@@ -204,7 +204,7 @@ void BroadPhaseTest::Action()
 	}
 }
 
-void BroadPhaseTest::Step(const Settings* settings)
+void BroadPhaseTest::Step(Settings* settings)
 {
 	NOT_USED(settings);
 

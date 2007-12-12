@@ -26,6 +26,10 @@ class b2Shape;
 class b2CircleShape;
 class b2PolyShape;
 
+struct b2SegmentPrimitive;
+struct b2CirclePrimitive;
+struct b2PolygonPrimitive;
+
 // We use contact ids to facilitate warm starting.
 const uint8 b2_nullFeature = UCHAR_MAX;
 
@@ -72,11 +76,18 @@ struct b2OBB
 	b2Vec2 extents;
 };
 
-void b2CollideCircle(b2Manifold* manifold, b2CircleShape* circle1, b2CircleShape* circle2, bool conservative);
-void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const b2CircleShape* circle, bool conservative);
-void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* poly1, const b2PolyShape* poly2, bool conservative);
+void b2CollideCircle(b2Manifold* manifold, b2CircleShape* circle1, b2CircleShape* circle2);
+void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const b2CircleShape* circle);
+void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* poly1, const b2PolyShape* poly2);
 
 float32 b2Distance(b2Vec2* x1, b2Vec2* x2, const b2Shape* shape1, const b2Shape* shape2);
+
+void b2CollideCircles(b2Manifold* manifold, const b2CirclePrimitive* circle1, const b2CirclePrimitive* circle2);
+void b2CollidePolygonAndCircle(b2Manifold* manifold, const b2PolygonPrimitive* polygon, const b2CirclePrimitive* circle);
+void b2CollidePolygons(b2Manifold* manifold, const b2PolygonPrimitive* polygon1, const b2PolygonPrimitive* polygon2);
+
+template <typename T1, typename T2>
+float32 b2Distance(b2Vec2* x1, b2Vec2* x2, const T1* primitive1, const T2* primitive2);
 
 inline bool b2AABB::IsValid() const
 {

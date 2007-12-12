@@ -422,7 +422,7 @@ b2PolyShape::b2PolyShape(const b2ShapeDef* def, b2Body* body,
 	{
 		const b2PolyDef* poly = (const b2PolyDef*)def;
 		m_vertexCount = poly->vertexCount;
-		b2Assert(3 <= m_vertexCount && m_vertexCount <= b2_maxPolyVertices);
+		b2Assert(3 <= m_vertexCount && m_vertexCount <= b2_maxPolygonVertices);
 		b2Vec2 centroid = PolyCentroid(poly->vertices, poly->vertexCount);
 		m_localCentroid = def->localPosition + b2Mul(localR, centroid) - newOrigin;
 		for (int32 i = 0; i < m_vertexCount; ++i)

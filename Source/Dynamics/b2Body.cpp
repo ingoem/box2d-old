@@ -25,9 +25,9 @@
 b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
 	m_flags = 0;
-	if (bd->isFast)
+	if (bd->isBullet)
 	{
-		m_flags |= e_fastFlag;
+		m_flags |= e_bulletFlag;
 	}
 	m_position = bd->position;
 	m_rotation = bd->rotation;

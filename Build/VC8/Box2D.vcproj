@@ -189,6 +189,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Source\Collision\b2Primitive.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Source\Collision\b2Primitive.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Source\Collision\b2Shape.cpp"
 				>
 			</File>

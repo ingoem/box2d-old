@@ -46,7 +46,7 @@ struct b2BodyDef
 		allowSleep = true;
 		isSleeping = false;
 		preventRotation = false;
-		isFast = false;
+		isBullet = false;
 	}
 
 	void* userData;
@@ -60,7 +60,7 @@ struct b2BodyDef
 	bool allowSleep;
 	bool isSleeping;
 	bool preventRotation;
-	bool isFast;
+	bool isBullet;
 
 	void AddShape(b2ShapeDef* shape);
 };
@@ -128,6 +128,12 @@ public:
 	// Returns a local vector given a world vector.
 	b2Vec2 GetLocalVector(const b2Vec2& worldVector);
 
+	// Is this body treated like a bullet for continuous collision detection?
+	bool IsBullet() const;
+
+	// Should this body be treated like a bullet for continuous collision detection?
+	void SetBullet(bool flag);
+
 	// Is this body static (immovable)?
 	bool IsStatic() const;
 
@@ -168,7 +174,7 @@ public:
 		e_sleepFlag			= 0x0008,
 		e_allowSleepFlag	= 0x0010,
 		e_destroyFlag		= 0x0020,
-		e_fastFlag			= 0x0040,
+		e_bulletFlag		= 0x0040,
 		e_toiResolved		= 0x0080,
 	};
 
@@ -331,6 +337,23 @@ inline b2Vec2 b2Body::GetLocalPoint(const b2Vec2& worldPoint)
 inline b2Vec2 b2Body::GetLocalVector(const b2Vec2& worldVector)
 {
 	return b2MulT(m_R, worldVector);
+}
+
+inline bool b2Body::IsBullet() const
+{
+	return (m_flags & e_bulletFlag) == e_bulletFlag;
+}
+
+inline void b2Body::SetBullet(bool flag)
+{
+	if (flag)
+	{
+		m_flags |= e_bulletFlag;
+	}
+	else
+	{
+		m_flags &= ~e_bulletFlag;
+	}
 }
 
 inline bool b2Body::IsStatic() const

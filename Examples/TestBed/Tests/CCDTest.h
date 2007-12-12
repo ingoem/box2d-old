@@ -74,7 +74,7 @@ public:
 			sd.restitution = 0.0f;
 
 			b2BodyDef bd;
-			bd.isFast = true;
+			bd.isBullet = true;
 			bd.position.Set(0.0f, 20.0f);
 			bd.linearVelocity.Set(0.0f, -200.0f);
 			bd.AddShape(&sd);

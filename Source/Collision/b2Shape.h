@@ -114,7 +114,7 @@ struct b2PolyDef : public b2ShapeDef
 		vertexCount = 0;
 	}
 
-	b2Vec2 vertices[b2_maxPolyVertices];
+	b2Vec2 vertices[b2_maxPolygonVertices];
 	int32 vertexCount;
 };
 
@@ -240,10 +240,10 @@ public:
 	// Local position oriented bounding box. The OBB center is relative to
 	// shape centroid.
 	b2OBB m_localOBB;
-	b2Vec2 m_vertices[b2_maxPolyVertices];
-	b2Vec2 m_coreVertices[b2_maxPolyVertices];
+	b2Vec2 m_vertices[b2_maxPolygonVertices];
+	b2Vec2 m_coreVertices[b2_maxPolygonVertices];
 	int32 m_vertexCount;
-	b2Vec2 m_normals[b2_maxPolyVertices];
+	b2Vec2 m_normals[b2_maxPolygonVertices];
 };
 
 inline b2ShapeType b2Shape::GetType() const

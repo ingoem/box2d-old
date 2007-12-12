@@ -152,7 +152,7 @@ void Test::LaunchBomb()
 	bd.rotation = b2Random(-1.5f, 1.5f);
 	bd.linearVelocity = -5.0f * bd.position;
 	bd.angularVelocity = b2Random(-20.0f, 20.0f);
-	bd.isFast = true;
+	bd.isBullet = true;
 
 	m_bomb = m_world->CreateBody(&bd);
 }

@@ -217,6 +217,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\Car.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\CCDTest.h"
 				>
 			</File>

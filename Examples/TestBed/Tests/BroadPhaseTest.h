@@ -59,7 +59,7 @@ public:
 	~BroadPhaseTest();
 
 	float GetExtent() { return 1.5f * k_extent; }
-	void Step(const Settings* settings);
+	void Step(Settings* settings);
 
 	void Keyboard(unsigned char key);
 

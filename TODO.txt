@@ -77,9 +77,16 @@ Version 1.4.3
 Version 2.0.0
 - CCD.
 - Contact callbacks.
+- Contact callback documentation.
 - Primitives for collision queries.
 - Get rid of deferred destruction.
 - JointDefs in local coordinates so that save/load works with limits.
+- Apply impulse at TOI.
+- Debug display interface.
+- Primitive ray casts.
+- No static pairs.
+- Car example.
+- Sensors.
 
 Version 2.1.0
 - Meshes (segment soup).
@@ -94,6 +101,7 @@ Version 2.2.0
 Version 2.3.0
 - Convex hull tool.
 - Angle joint.
+- Weld joint.
 
 Version 2.4.0
 - Spline joints.

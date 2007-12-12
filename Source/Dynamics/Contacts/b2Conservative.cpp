@@ -29,8 +29,8 @@ float32 b2Conservative(b2Shape* shape1, b2Shape* shape2)
 	b2Body* body1 = shape1->GetBody();
 	b2Body* body2 = shape2->GetBody();
 
-	bool doTOI = (body1->m_flags & (b2Body::e_staticFlag | b2Body::e_fastFlag)) != 0;
-	doTOI = doTOI || (body2->m_flags & (b2Body::e_staticFlag | b2Body::e_fastFlag)) != 0;
+	bool doTOI = (body1->m_flags & (b2Body::e_staticFlag | b2Body::e_bulletFlag)) != 0;
+	doTOI = doTOI || (body2->m_flags & (b2Body::e_staticFlag | b2Body::e_bulletFlag)) != 0;
 	if (doTOI == false)
 	{
 		return 1.0f;
