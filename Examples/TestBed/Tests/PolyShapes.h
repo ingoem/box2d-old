@@ -163,7 +163,7 @@ public:
 
 	int32 bodyIndex;
 	b2Body* bodies[k_maxBodies];
-	b2PolyDef sds[4];
+	b2PolygonDef sds[4];
 	b2CircleDef circleDef;
 };
 

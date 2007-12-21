@@ -45,7 +45,10 @@ b2CircleContact::b2CircleContact(b2Shape* s1, b2Shape* s2)
 
 void b2CircleContact::Evaluate()
 {
-	b2CollideCircle(&m_manifold, (b2CircleShape*)m_shape1, (b2CircleShape*)m_shape2);
+	b2Body* b1 = m_shape1->m_body;
+	b2Body* b2 = m_shape2->m_body;
+
+	b2CollideCircles(&m_manifold, (b2CircleShape*)m_shape1, b1->m_xf, (b2CircleShape*)m_shape2, b2->m_xf);
 
 	if (m_manifold.pointCount > 0)
 	{
@@ -55,5 +58,4 @@ void b2CircleContact::Evaluate()
 	{
 		m_manifoldCount = 0;
 	}
-
 }

@@ -20,8 +20,8 @@
 #define B2_BODY_H
 
 #include "../Common/b2Math.h"
-#include "../Dynamics/Joints/b2Joint.h"
-#include "../Collision/b2Shape.h"
+#include "../Collision/Shapes/b2Shape.h"
+#include "Joints/b2Joint.h"
 
 #include <memory>
 
@@ -31,16 +31,17 @@ class b2World;
 struct b2JointNode;
 struct b2ContactNode;
 
+/// A body definition holds all the data needed to
+/// construct a rigid body.
 struct b2BodyDef
 {
+	/// This constructor sets the body definition default values.
 	b2BodyDef()
 	{
 		userData = NULL;
-		memset(shapes, 0, sizeof(shapes));
+		shapes = NULL;
 		position.Set(0.0f, 0.0f);
 		rotation = 0.0f;
-		linearVelocity.Set(0.0f, 0.0f);
-		angularVelocity = 0.0f;
 		linearDamping = 0.0f;
 		angularDamping = 0.0f;
 		allowSleep = true;
@@ -49,118 +50,190 @@ struct b2BodyDef
 		isBullet = false;
 	}
 
-	void* userData;
-	b2ShapeDef* shapes[b2_maxShapesPerBody];
-	b2Vec2 position;
-	float32 rotation;
-	b2Vec2 linearVelocity;
-	float32 angularVelocity;
-	float32 linearDamping;
-	float32 angularDamping;
-	bool allowSleep;
-	bool isSleeping;
-	bool preventRotation;
-	bool isBullet;
+	/// Add a shape to the shape list.
+	/// @param shape a shape created using b2World::Create.
+	void AddShape(b2Shape* shape);
 
-	void AddShape(b2ShapeDef* shape);
+	/// Use this to store application specific body data.
+	void* userData;
+
+	/// The shape list. Do no manipulate this directly, instead use AddShape.
+	b2Shape* shapes;
+
+	/// The world position of the body. Avoid using creating bodies at the origin
+	/// since this can lead to many overlapping shapes.
+	b2Vec2 position;
+
+	/// The world rotation of the body in radians.
+	float32 rotation;
+
+	/// Linear damping is use to reduce the linear velocity and should be in
+	/// the range [0,1], where 0 means no damping and 1 means full damping.
+	float32 linearDamping;
+
+	/// Angular damping is use to reduce the angular velocity and should be in
+	/// the range [0,1], where 0 means no damping and 1 means full damping.
+	float32 angularDamping;
+
+	/// Set this flag to false if this body should never fall asleep. Note that
+	/// this increases CPU usage.
+	bool allowSleep;
+
+	/// Is this body initially sleeping?
+	bool isSleeping;
+
+	/// Should this body be prevented from rotating? Useful for characters.
+	bool preventRotation;
+
+	/// Is this a fast moving body that should be prevented from passing through
+	/// other moving bodies?
+	bool isBullet;
 };
 
-// A rigid body. Internal computation are done in terms
-// of the center of mass position. The center of mass may
-// be offset from the body's origin.
+/// A rigid body.
 class b2Body
 {
 public:
-	// Set the position of the body's origin and rotation (radians).
-	// This breaks any contacts and wakes the other bodies.
-	void SetOriginPosition(const b2Vec2& position, float32 rotation);
+	/// Add a shape. The shape must be created with b2World::Create.
+	/// The shape must have not been already added to this or any other
+	/// body. This function may be expensive so you should try to add
+	/// shapes using the body definition.
+	/// @param shape the shape to be added.
+	/// @param recomputeMass set to true if you want the body's mass to be recomputed
+	/// based on the inclusion of this new shape.
+	void AddShape(b2Shape* shape, bool recomputeMass);
 
-	// Get the position of the body's origin. The body's origin does not
-	// necessarily coincide with the center of mass. It depends on how the
-	// shapes are created.
-	b2Vec2 GetOriginPosition() const;
+	/// Remove a shape. It is up to you to destroy the shape with
+	/// b2World::Destroy. This removes the shape from the broad-phase and
+	/// therefore destroys any contacts associated with this shape.
+	/// @param shape the shape to be removed.
+	/// @param recomputeMass set to true if you want the body's mass to be recomputed
+	/// based on the remaining shapes.
+	void RemoveShape(b2Shape* shape, bool recomputeMass);
 
-	// Set the position of the body's center of mass and rotation (radians).
-	// This breaks any contacts and wakes the other bodies.
-	void SetCenterPosition(const b2Vec2& position, float32 rotation);
+	/// Set the position of the body's origin and rotation (radians).
+	/// This breaks any contacts and wakes the other bodies.
+	/// @param position the new world position of the body's origin (not necessarily
+	/// the center of mass).
+	/// @param rotation the new world rotation of the body in radians.
+	/// @return false if the movement put a shape outside the world. In this case the
+	/// body is automatically frozen.
+	bool SetPosition(const b2Vec2& position, float32 rotation);
 
-	// Get the position of the body's center of mass. The body's center of mass
-	// does not necessarily coincide with the body's origin. It depends on how the
-	// shapes are created.
+	/// Get the position of the body's origin. The body's origin does not
+	/// necessarily coincide with the center of mass. It depends on how the
+	/// shapes are created.
+	/// @return the world position of the body's origin.
+	b2Vec2 GetPosition() const;
+
+	/// Get the rotation matrix. This is used to transform local
+	/// vectors into world vectors.
+	/// @return the world rotation matrix.
+	const b2Mat22& GetRotation() const;
+
+	/// Get the position of the body's center of mass. The body's center of mass
+	/// does not necessarily coincide with the body's origin.
+	/// @return the world position of the center of mass.
 	b2Vec2 GetCenterPosition() const;
 
-	// Get the rotation in radians.
-	float32 GetRotation() const;
+	/// Get the rotation in radians.
+	/// @return the world rotation angle in radians.
+	float32 GetRotationAngle() const;
 
-	const b2Mat22& GetRotationMatrix() const;
-
-	// Set/Get the linear velocity of the center of mass.
+	/// Set the linear velocity of the center of mass.
+	/// @param v the new linear velocity of the center of mass.
 	void SetLinearVelocity(const b2Vec2& v);
+
+	/// Get the linear velocity of the center of mass.
+	/// @return the linear velocity of the center of mass.
 	b2Vec2 GetLinearVelocity() const;
 
-	// Set/Get the angular velocity.
-	void SetAngularVelocity(float32 w);
+	/// Set the angular velocity.
+	/// @param omega the new angular velocity in radians/second.
+	void SetAngularVelocity(float32 omega);
+
+	/// Get the angular velocity.
+	/// @return the angular velocity in radians/second.
 	float32 GetAngularVelocity() const;
 
-	// Apply a force at a world point. Additive.
+	/// Apply a force at a world point. Additive. If the force is not
+	/// applied at the center of mass, it will generate a torque and
+	/// affect the angular velocity. This wakes up the body.
+	/// @param force the world force vector, usually in Newtons (N).
+	/// @param point the world position of the point of application.
 	void ApplyForce(const b2Vec2& force, const b2Vec2& point);
 
-	// Apply a torque. Additive.
+	/// Apply a torque. Additive. This affects the angular velocity
+	/// without affecting the linear velocity of the center of mass.
+	/// This wakes up the body.
+	/// @param torque about the z-axis (out of the screen), usually in N-m.
 	void ApplyTorque(float32 torque);
 
-	// Apply an impulse at a point. This immediately modifies the velocity.
+	/// Apply an impulse at a point. This immediately modifies the velocity.
+	/// It also modifies the angular velocity if the point of application
+	/// is not at the center of mass. This wakes up the body.
+	/// @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
+	/// @param point the world position of the point of application.
 	void ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point);
 
+	/// Get the total mass of the body.
+	/// @return the mass, usually in kilograms (kg).
 	float32 GetMass() const;
 
+	/// Get the central rotational inertia of the body.
+	/// @return the rotational inertia, usually in kg-m^2.
 	float32 GetInertia() const;
 
-	// Get the world coordinates of a point give the local coordinates
-	// relative to the body's center of mass.
+	/// Get the world coordinates of a point given the local coordinates.
+	/// @param localPoint a point on the body measured relative the the body's origin.
+	/// @return the same point expressed in world coordinates.
 	b2Vec2 GetWorldPoint(const b2Vec2& localPoint);
 
-	// Get the world coordinates of a vector given the local coordinates.
+	/// Get the world coordinates of a vector given the local coordinates.
+	/// @param localVector a vector fixed in the body.
+	/// @return the same vector expressed in world coordinates.
 	b2Vec2 GetWorldVector(const b2Vec2& localVector);
 
-	// Returns a local point relative to the center of mass given a world point.
+	/// Returns a local point relative to the center of mass given a world point.
 	b2Vec2 GetLocalPoint(const b2Vec2& worldPoint);
 
-	// Returns a local vector given a world vector.
+	/// Returns a local vector given a world vector.
 	b2Vec2 GetLocalVector(const b2Vec2& worldVector);
 
-	// Is this body treated like a bullet for continuous collision detection?
+	/// Is this body treated like a bullet for continuous collision detection?
 	bool IsBullet() const;
 
-	// Should this body be treated like a bullet for continuous collision detection?
+	/// Should this body be treated like a bullet for continuous collision detection?
 	void SetBullet(bool flag);
 
-	// Is this body static (immovable)?
+	/// Is this body static (immovable)?
 	bool IsStatic() const;
 
-	// Is this body frozen?
+	/// Is this body frozen?
 	bool IsFrozen() const;
 
-	// Is this body sleeping (not simulating).
+	/// Is this body sleeping (not simulating).
 	bool IsSleeping() const;
 
-	// You can disable sleeping on this particular body.
+	/// You can disable sleeping on this body.
 	void AllowSleeping(bool flag);
 
-	// Wake up this body so it will begin simulating.
+	/// Wake up this body so it will begin simulating.
 	void WakeUp();
 
-	// Get the list of all shapes attached to this body.
+	/// Get the list of all shapes attached to this body.
 	b2Shape* GetShapeList();
 
-	// Get the list of all contacts attached to this body.
-	b2ContactNode* GetContactList();
-
-	// Get the list of all joints attached to this body.
+	/// Get the list of all joints attached to this body.
 	b2JointNode* GetJointList();
 
-	// Get the next body in the world's body list.
+	/// Get the list of all contacts attached to this body.
+	b2ContactNode* GetContactList();
+
+	/// Get the next body in the world's body list.
 	b2Body* GetNext();
 
+	/// Get the user data pointer that was provided in the body definition.
 	void* GetUserData();
 
 	//--------------- Internals Below -------------------
@@ -181,21 +254,18 @@ public:
 	b2Body(const b2BodyDef* bd, b2World* world);
 	~b2Body();
 
-	void SynchronizeShapes();
-	void QuickSyncShapes();
+	void RecomputeMass();
+
+	bool SynchronizeShapes();
 
 	// This is used to prevent connected bodies from colliding.
 	// It may lie, depending on the collideConnected flag.
 	bool IsConnected(const b2Body* other) const;
 
-	// This is called when the child shape has no proxy.
-	void Freeze();
-
 	uint32 m_flags;
 
-	b2Vec2 m_position;	// center of mass position
+	b2XForm m_xf;	// center of mass transform
 	float32 m_rotation;
-	b2Mat22 m_R;
 
 	// Conservative advancement data.
 	float32 m_toi;
@@ -231,36 +301,30 @@ public:
 	void* m_userData;
 };
 
-inline void b2BodyDef::AddShape(b2ShapeDef* shape)
+inline void b2BodyDef::AddShape(b2Shape* shape)
 {
-	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
-	{
-		if (shapes[i] == NULL)
-		{
-			shapes[i] = shape;
-			break;
-		}
-	}
+	shape->m_bodyNext = shapes;
+	shapes = shape;
 }
 
-inline b2Vec2 b2Body::GetOriginPosition() const
+inline b2Vec2 b2Body::GetPosition() const
 {
-	return m_position - b2Mul(m_R, m_center);
+	return b2Mul(m_xf, -m_center);
+}
+
+inline const b2Mat22& b2Body::GetRotation() const
+{
+	return m_xf.R;
 }
 
 inline b2Vec2 b2Body::GetCenterPosition() const
 {
-	return m_position;
+	return m_xf.position;
 }
 
-inline float32 b2Body::GetRotation() const
+inline float32 b2Body::GetRotationAngle() const
 {
 	return m_rotation;
-}
-
-inline const b2Mat22& b2Body::GetRotationMatrix() const
-{
-	return m_R;
 }
 
 inline void b2Body::SetLinearVelocity(const b2Vec2& v)
@@ -283,32 +347,6 @@ inline float32 b2Body::GetAngularVelocity() const
 	return m_angularVelocity;
 }
 
-inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point)
-{
-	if (IsSleeping() == false)
-	{
-		m_force += force;
-		m_torque += b2Cross(point - m_position, force);
-	}
-}
-
-inline void b2Body::ApplyTorque(float32 torque)
-{
-	if (IsSleeping() == false)
-	{
-		m_torque += torque;
-	}
-}
-
-inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
-{
-	if (IsSleeping() == false)
-	{
-		m_linearVelocity += m_invMass * impulse;
-		m_angularVelocity += m_invI * b2Cross(point - m_position, impulse);
-	}
-}
-
 inline float32 b2Body::GetMass() const
 {
 	return m_mass;
@@ -321,22 +359,22 @@ inline float32 b2Body::GetInertia() const
 
 inline b2Vec2 b2Body::GetWorldPoint(const b2Vec2& localPoint)
 {
-	return m_position + b2Mul(m_R, localPoint);
+	return b2Mul(m_xf, localPoint);
 }
 
 inline b2Vec2 b2Body::GetWorldVector(const b2Vec2& localVector)
 {
-	return b2Mul(m_R, localVector);
+	return b2Mul(m_xf.R, localVector);
 }
 
 inline b2Vec2 b2Body::GetLocalPoint(const b2Vec2& worldPoint)
 {
-	return b2MulT(m_R, worldPoint - m_position);
+	return b2MulT(m_xf, worldPoint);
 }
 
 inline b2Vec2 b2Body::GetLocalVector(const b2Vec2& worldVector)
 {
-	return b2MulT(m_R, worldVector);
+	return b2MulT(m_xf.R, worldVector);
 }
 
 inline bool b2Body::IsBullet() const
@@ -424,6 +462,26 @@ inline bool b2Body::IsConnected(const b2Body* other) const
 	}
 
 	return false;
+}
+
+inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point)
+{
+	WakeUp();
+	m_force += force;
+	m_torque += b2Cross(point - m_xf.position, force);
+}
+
+inline void b2Body::ApplyTorque(float32 torque)
+{
+	WakeUp();
+	m_torque += torque;
+}
+
+inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
+{
+	WakeUp();
+	m_linearVelocity += m_invMass * impulse;
+	m_angularVelocity += m_invI * b2Cross(point - m_xf.position, impulse);
 }
 
 #endif

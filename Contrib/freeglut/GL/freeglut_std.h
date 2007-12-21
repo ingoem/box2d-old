@@ -50,7 +50,6 @@
 #   undef max
 
 /* Windows static library */
-#define FREEGLUT_STATIC
 #   ifdef FREEGLUT_STATIC
 
 #    define FGAPI
@@ -58,7 +57,7 @@
 
         /* Link with Win32 static freeglut lib */
 #       if defined(_MSC_VER)
-//#           pragma comment (lib, "freeglut_static.lib")
+#           pragma comment (lib, "freeglut_static.lib")
 #       endif
 
 /* Windows shared library (DLL) */
@@ -74,7 +73,7 @@
 #               ifndef _WIN32_WCE
 #                   pragma comment (lib, "freeglut.lib")
 #               endif
-#			endif
+#        endif
 
 #       endif
 

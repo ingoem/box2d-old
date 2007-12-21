@@ -54,7 +54,7 @@ struct b2Vec2
 	void SetZero() { x = 0.0f; y = 0.0f; }
 	void Set(float32 x_, float32 y_) { x = x_; y = y_; }
 
-	b2Vec2 operator -() { b2Vec2 v; v.Set(-x, -y); return v; }
+	b2Vec2 operator -() const { b2Vec2 v; v.Set(-x, -y); return v; }
 	
 	static b2Vec2 Make(float32 x_, float32 y_)
 	{
@@ -81,6 +81,11 @@ struct b2Vec2
 	float32 Length() const
 	{
 		return sqrtf(x * x + y * y);
+	}
+
+	float32 LengthSquared() const
+	{
+		return x * x + y * y;
 	}
 
 	float32 Normalize()
@@ -146,6 +151,11 @@ struct b2Mat22
 		col1.y = 0.0f; col2.y = 0.0f;
 	}
 
+	float32 GetAngle() const
+	{
+		return atan2f(col1.y, col1.x);
+	}
+
 	b2Mat22 Invert() const
 	{
 		float32 a = col1.x, b = col2.x, c = col1.y, d = col2.y;
@@ -172,6 +182,14 @@ struct b2Mat22
 	}
 
 	b2Vec2 col1, col2;
+};
+
+struct b2XForm
+{
+	b2XForm() {}
+	b2XForm(const b2Vec2& position, const b2Mat22& R) : position(position), R(R) {}
+	b2Vec2 position;
+	b2Mat22 R;
 };
 
 inline float32 b2Dot(const b2Vec2& a, const b2Vec2& b)
@@ -233,6 +251,18 @@ inline bool operator == (const b2Vec2& a, const b2Vec2& b)
 	return a.x == b.x && a.y == b.y;
 }
 
+inline float32 b2Distance(const b2Vec2& a, const b2Vec2& b)
+{
+	b2Vec2 c = a - b;
+	return c.Length();
+}
+
+inline float32 b2DistanceSquared(const b2Vec2& a, const b2Vec2& b)
+{
+	b2Vec2 c = a - b;
+	return b2Dot(c, c);
+}
+
 inline b2Mat22 operator + (const b2Mat22& A, const b2Mat22& B)
 {
 	b2Mat22 C;
@@ -256,6 +286,16 @@ inline b2Mat22 b2MulT(const b2Mat22& A, const b2Mat22& B)
 	b2Mat22 C;
 	C.Set(c1, c2);
 	return C;
+}
+
+inline b2Vec2 b2Mul(const b2XForm& T, const b2Vec2& v)
+{
+	return T.position + b2Mul(T.R, v);
+}
+
+inline b2Vec2 b2MulT(const b2XForm& T, const b2Vec2& v)
+{
+	return b2MulT(T.R, v - T.position);
 }
 
 inline float32 b2Abs(float32 a)

@@ -103,7 +103,11 @@ probably default to the slower Full NGS and let the user select the faster
 Baumgarte method in performance critical scenarios.
 */
 
-b2Island::b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacity, b2StackAllocator* allocator)
+b2Island::b2Island(
+	int32 bodyCapacity,
+	int32 contactCapacity,
+	int32 jointCapacity,
+	b2World* world)
 {
 	m_bodyCapacity = bodyCapacity;
 	m_contactCapacity = contactCapacity;
@@ -112,11 +116,11 @@ b2Island::b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacit
 	m_contactCount = 0;
 	m_jointCount = 0;
 
-	m_bodies = (b2Body**)allocator->Allocate(bodyCapacity * sizeof(b2Body*));
-	m_contacts = (b2Contact**)allocator->Allocate(contactCapacity	 * sizeof(b2Contact*));
-	m_joints = (b2Joint**)allocator->Allocate(jointCapacity * sizeof(b2Joint*));
+	m_bodies = (b2Body**)m_world->m_stackAllocator.Allocate(bodyCapacity * sizeof(b2Body*));
+	m_contacts = (b2Contact**)m_world->m_stackAllocator.Allocate(contactCapacity	 * sizeof(b2Contact*));
+	m_joints = (b2Joint**)m_world->m_stackAllocator.Allocate(jointCapacity * sizeof(b2Joint*));
 
-	m_allocator = allocator;
+	m_world = world;
 
 	m_positionIterationCount = 0;
 }
@@ -124,9 +128,9 @@ b2Island::b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacit
 b2Island::~b2Island()
 {
 	// Warning: the order should reverse the constructor order.
-	m_allocator->Free(m_joints);
-	m_allocator->Free(m_contacts);
-	m_allocator->Free(m_bodies);
+	m_world->m_stackAllocator.Free(m_joints);
+	m_world->m_stackAllocator.Free(m_contacts);
+	m_world->m_stackAllocator.Free(m_bodies);
 }
 
 void b2Island::Clear()
@@ -159,7 +163,7 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity)
 		b->m_angularVelocity *= b->m_angularDamping;
 	}
 
-	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);
+	b2ContactSolver contactSolver(m_contacts, m_contactCount, &m_world->m_stackAllocator);
 
 	// Initialize velocity constraints.
 	contactSolver.InitVelocityConstraints();
@@ -201,13 +205,26 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity)
 		b->m_R.Set(b->m_rotation);
 
 		// Update shapes (for broad-phase).
-		b->SynchronizeShapes();
+		bool success = b->SynchronizeShapes();
+
+		// Did the body's shapes leave the world?
+		if (success == false && m_world->m_boundaryListener != NULL)
+		{
+			b2BoundaryListener::Response response = m_world->m_boundaryListener->NotifyBoundaryViolated(b);
+			if (response == b2BoundaryListener::e_destroyBody)
+			{
+				m_world->Destroy(b);
+				m_bodies[i] = NULL;
+				m_bodies[i] = m_bodies[m_bodyCount - 1];
+				--m_bodyCount;
+			}
+		}
 	}
 }
 
 void b2Island::SolvePositionConstraints(const b2TimeStep& step)
 {
-	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);
+	b2ContactSolver contactSolver(m_contacts, m_contactCount, &m_world->m_stackAllocator);
 
 	// Initialize position constraints
 	contactSolver.InitPositionConstraints();

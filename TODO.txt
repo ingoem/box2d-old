@@ -68,33 +68,42 @@ Version 1.4.2
 - Improve joint stability.
 
 Version 1.4.3
-- Fix thin polygon collision.
-- Simplify broad-phase internally.
-- OSX patch.
-- Fix compound body freezing.
-- Collision filter callback.
+- Fix thin polygon collision. DONE
+- Simplify broad-phase internally. DONE
+- OSX patch. DONE
+- Fix compound body freezing. DONE
+- Collision filter callback. DONE
 
 Version 2.0.0
 - CCD.
-- Contact callbacks.
-- Contact callback documentation.
-- Primitives for collision queries.
-- Get rid of deferred destruction.
-- JointDefs in local coordinates so that save/load works with limits.
 - Apply impulse at TOI.
+- Collision doesn't include any files from Dynamics.
+- User created shapes.
+- Shape ray casts.
+- Contact callbacks.
+- Doxygen.
+- Deferred body destruction is gone.
+- JointDefs in local coordinates so that save/load works with limits.
 - Debug display interface.
-- Primitive ray casts.
 - No static pairs.
-- Car example.
 - Sensors.
+- Wake up on apply force.
+- Per body disable warm starting.
+- Improve polygon collision performance. DONE.
+- Access version number.
+- Car example.
+- Ragdoll contribution.
+- CMake contribution.
+- Verify CCW polygon.
 
 Version 2.1.0
 - Meshes (segment soup).
 - Ray casts.
+- Wiki
 
 Version 2.2.0
 - Handle orphaned gear joint.
-- Friction joint for top down games.
+- Friction/motor joint for top down games.
 - Rolling resistance for circles.
 - Re-filter function.
 

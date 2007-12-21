@@ -19,8 +19,8 @@
 #include "b2Body.h"
 #include "b2World.h"
 #include "Joints/b2Joint.h"
-#include "Contacts/b2Contact.h"
-#include "../Collision/b2Shape.h"
+//#include "Contacts/b2Contact.h"
+#include "../Collision/Shapes/b2Shape.h"
 
 b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
@@ -29,10 +29,10 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	{
 		m_flags |= e_bulletFlag;
 	}
-	m_position = bd->position;
+	m_xf.position = bd->position;
 	m_rotation = bd->rotation;
-	m_R.Set(m_rotation);
-	m_position0 = m_position;
+	m_xf.R.Set(m_rotation);
+	m_position0 = m_xf.position;
 	m_rotation0 = m_rotation;
 	m_world = world;
 
@@ -42,21 +42,19 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_force.Set(0.0f, 0.0f);
 	m_torque = 0.0f;
 
-	m_mass = 0.0f;
-
-	b2MassData massDatas[b2_maxShapesPerBody];
-
-	// Compute the shape mass properties, the bodies total mass and COM.
+	// Compute the total mass and COM.
+	m_shapeList = bd->shapes;
 	m_shapeCount = 0;
-	m_center.Set(0.0f, 0.0f);
-	for (int32 i = 0; i < b2_maxShapesPerBody; ++i)
+	m_mass = 0.0f;
+	m_I = 0.0f;
+	m_center.SetZero();
+	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		const b2ShapeDef* sd = bd->shapes[i];
-		if (sd == NULL) break;
-		b2MassData* massData = massDatas + i;
-		sd->ComputeMass(massData);
-		m_mass += massData->mass;
-		m_center += massData->mass * (sd->localPosition + massData->center);
+		b2MassData massData;
+		s->ComputeMass(&massData);
+		m_mass += massData.mass;
+		m_center += massData.mass * massData.center;
+		m_I += massData.I;
 		++m_shapeCount;
 	}
 
@@ -64,61 +62,42 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	if (m_mass > 0.0f)
 	{
 		m_center *= 1.0f / m_mass;
-		m_position += b2Mul(m_R, m_center);
+		m_xf.position += b2Mul(m_xf.R, m_center);
+
+		b2Vec2 offset = -m_center;
+		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+		{
+			s->Attach(this, offset);
+			s->CreateProxy(m_world->m_broadPhase, m_xf);
+		}
+
+		m_I -= m_mass * b2Dot(m_center, m_center);
+		b2Assert(m_I > 0.0f);
+
+		m_invMass = 1.0f / m_mass;
+		m_invI = 1.0f / m_I;
 	}
 	else
 	{
 		m_flags |= e_staticFlag;
-	}
-
-	// Compute the moment of inertia.
-	m_I = 0.0f;
-	for (int32 i = 0; i < m_shapeCount; ++i)
-	{
-		const b2ShapeDef* sd = bd->shapes[i];
-		b2MassData* massData = massDatas + i;
-		m_I += massData->I;
-		b2Vec2 r = sd->localPosition + massData->center - m_center;
-		m_I += massData->mass * b2Dot(r, r);
-	}
-
-	if (m_mass > 0.0f)
-	{
-		m_invMass = 1.0f / m_mass;
-	}
-	else
-	{
 		m_invMass = 0.0f;
+		m_invI = 0.0f;
 	}
 
-	if (m_I > 0.0f && bd->preventRotation == false)
-	{
-		m_invI = 1.0f / m_I;
-	}
-	else
+	if (bd->preventRotation == true)
 	{
 		m_I = 0.0f;
 		m_invI = 0.0f;
 	}
 
 	// Compute the center of mass velocity.
-	m_linearVelocity = bd->linearVelocity + b2Cross(bd->angularVelocity, m_center);
-	m_angularVelocity = bd->angularVelocity;
+	m_linearVelocity.SetZero();
+	m_angularVelocity = 0.0f;
 
 	m_jointList = NULL;
 	m_contactList = NULL;
 	m_prev = NULL;
 	m_next = NULL;
-
-	// Create the shapes.
-	m_shapeList = NULL;
-	for (int32 i = 0; i < m_shapeCount; ++i)
-	{
-		const b2ShapeDef* sd = bd->shapes[i];
-		b2Shape* shape = b2Shape::Create(sd, this, m_center);
-		shape->m_next = m_shapeList;
-		m_shapeList = shape;
-	}
 
 	m_sleepTime = 0.0f;
 	if (bd->allowSleep)
@@ -130,95 +109,127 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		m_flags |= e_sleepFlag;
 	}
 
-	if ((m_flags & e_sleepFlag)  || m_invMass == 0.0f)
-	{
-		m_linearVelocity.Set(0.0f, 0.0f);
-		m_angularVelocity = 0.0f;
-	}
-
 	m_userData = bd->userData;
 }
 
 b2Body::~b2Body()
 {
-	b2Shape* s = m_shapeList;
-	while (s)
-	{
-		b2Shape* s0 = s;
-		s = s->m_next;
-
-		b2Shape::Destroy(s0);
-	}
+	// shapes and joints are destroyed in b2World::Destroy
 }
 
-void b2Body::SetOriginPosition(const b2Vec2& position, float rotation)
+void b2Body::AddShape(b2Shape* shape, bool recomputeMass)
 {
-	if (IsFrozen())
+	b2Assert(m_world->m_lock == false);
+	if (m_world->m_lock == true)
 	{
 		return;
 	}
 
-	m_rotation = rotation;
-	m_R.Set(m_rotation);
-	m_position = position + b2Mul(m_R, m_center);
-
-	m_position0 = m_position;
-	m_rotation0 = m_rotation;
-
-	for (b2Shape* s = m_shapeList; s; s = s->m_next)
-	{
-		s->Synchronize(m_position, m_R, m_position, m_R);
-	}
-
-	m_world->m_broadPhase->Commit();
+	b2Assert(shape->m_body == NULL);
+	b2Assert(shape->m_bodyNext == NULL);
+	B2_NOT_USED(shape);
+	B2_NOT_USED(recomputeMass);
+	// TODO_ERIN
 }
 
-void b2Body::SetCenterPosition(const b2Vec2& position, float rotation)
+void b2Body::RemoveShape(b2Shape* shape, bool recomputeMass)
 {
-	if (IsFrozen())
+	b2Assert(m_world->m_lock == false);
+	if (m_world->m_lock == true)
 	{
 		return;
 	}
 
-	m_rotation = rotation;
-	m_R.Set(m_rotation);
-	m_position = position;
+	B2_NOT_USED(shape);
+	B2_NOT_USED(recomputeMass);
+	// TODO_ERIN
+}
 
-	m_position0 = m_position;
+void b2Body::RecomputeMass()
+{
+	// TODO_ERIN
+}
+
+bool b2Body::SetPosition(const b2Vec2& position, float rotation)
+{
+	b2Assert(m_world->m_lock == false);
+	if (m_world->m_lock == true)
+	{
+		return true;
+	}
+
+	if (IsFrozen())
+	{
+		return false;
+	}
+
+	m_rotation = rotation;
+	m_xf.R.Set(m_rotation);
+	m_xf.position = position + b2Mul(m_xf.R, m_center);
+
+	m_position0 = m_xf.position;
 	m_rotation0 = m_rotation;
 
-	for (b2Shape* s = m_shapeList; s; s = s->m_next)
+	bool freeze = false;
+	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		s->Synchronize(m_position, m_R, m_position, m_R);
+		bool inRange = s->Synchronize(m_world->m_broadPhase, m_xf, m_xf);
+
+		if (inRange == false)
+		{
+			freeze = true;
+			break;
+		}
 	}
 
+	if (freeze == true)
+	{
+		m_flags |= e_frozenFlag;
+		m_linearVelocity.SetZero();
+		m_angularVelocity = 0.0f;
+		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+		{
+			s->DestroyProxy(m_world->m_broadPhase);
+		}
+
+		// Failure
+		return false;
+	}
+
+	// Success
 	m_world->m_broadPhase->Commit();
+	return true;
 }
 
-void b2Body::SynchronizeShapes()
+bool b2Body::SynchronizeShapes()
 {
-	b2Mat22 R0(m_rotation0);
-	for (b2Shape* s = m_shapeList; s; s = s->m_next)
-	{
-		s->Synchronize(m_position0, R0, m_position, m_R);
-	}
-}
+	b2XForm xf0(m_position0, b2Mat22(m_rotation0));
 
-void b2Body::QuickSyncShapes()
-{
-	for (b2Shape* s = m_shapeList; s; s = s->m_next)
+	bool freeze = false;
+	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		s->QuickSync(m_position, m_R);
+		bool inRange = s->Synchronize(m_world->m_broadPhase, xf0, m_xf);
+		if (inRange == false)
+		{
+			freeze = true;
+			break;
+		}
 	}
-}
 
-void b2Body::Freeze()
-{
-	m_flags |= e_frozenFlag;
-	m_linearVelocity.SetZero();
-	m_angularVelocity = 0.0f;
-	for (b2Shape* s = m_shapeList; s; s = s->m_next)
+	if (freeze == true)
 	{
-		s->DestroyProxy();
+		m_flags |= e_frozenFlag;
+		m_linearVelocity.SetZero();
+		m_angularVelocity = 0.0f;
+		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+		{
+			s->DestroyProxy(m_world->m_broadPhase);
+		}
+
+		// Failure
+		return false;
 	}
+
+	// Success
+	return true;
 }

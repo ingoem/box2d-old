@@ -22,17 +22,12 @@
 #include "../Common/b2Math.h"
 #include <climits>
 
-class b2Shape;
 class b2CircleShape;
-class b2PolyShape;
+class b2PolygonShape;
 
-struct b2SegmentPrimitive;
-struct b2CirclePrimitive;
-struct b2PolygonPrimitive;
-
-// We use contact ids to facilitate warm starting.
 const uint8 b2_nullFeature = UCHAR_MAX;
 
+/// Contact ids to facilitate warm starting.
 union b2ContactID
 {
 	struct Features
@@ -62,6 +57,11 @@ struct b2Manifold
 	int32 pointCount;
 };
 
+struct b2Segment
+{
+	b2Vec2 p1, p2;
+};
+
 struct b2AABB
 {
 	bool IsValid() const;
@@ -76,18 +76,40 @@ struct b2OBB
 	b2Vec2 extents;
 };
 
-void b2CollideCircle(b2Manifold* manifold, b2CircleShape* circle1, b2CircleShape* circle2);
-void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const b2CircleShape* circle);
-void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* poly1, const b2PolyShape* poly2);
+struct b2Sweep
+{
+	b2Vec2 position, velocity;
+	float32 theta, omega;
+};
 
-float32 b2Distance(b2Vec2* x1, b2Vec2* x2, const b2Shape* shape1, const b2Shape* shape2);
+/// Compute the collision manifold between two circles.
+void b2CollideCircles(b2Manifold* manifold,
+					  const b2CircleShape* circle1, const b2XForm& xf1,
+					  const b2CircleShape* circle2, const b2XForm& xf2);
 
-void b2CollideCircles(b2Manifold* manifold, const b2CirclePrimitive* circle1, const b2CirclePrimitive* circle2);
-void b2CollidePolygonAndCircle(b2Manifold* manifold, const b2PolygonPrimitive* polygon, const b2CirclePrimitive* circle);
-void b2CollidePolygons(b2Manifold* manifold, const b2PolygonPrimitive* polygon1, const b2PolygonPrimitive* polygon2);
+/// Compute the collision manifold between a polygon and a circle.
+void b2CollidePolygonAndCircle(b2Manifold* manifold,
+							   const b2PolygonShape* polygon, const b2XForm& xf1,
+							   const b2CircleShape* circle, const b2XForm& xf2);
 
+/// Compute the collision manifold between two circles.
+void b2CollidePolygons(b2Manifold* manifold,
+					   const b2PolygonShape* polygon1, const b2XForm& xf1,
+					   const b2PolygonShape* polygon2, const b2XForm& xf2);
+
+/// Compute the distance between two shapes and the closest points.
+/// @return the distance between the shapes or zero if they are overlapped/touching.
 template <typename T1, typename T2>
-float32 b2Distance(b2Vec2* x1, b2Vec2* x2, const T1* primitive1, const T2* primitive2);
+float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
+				   const T1* shape1, const b2XForm& xf1,
+				   const T2* shape2, const b2XForm& xf2);
+
+/// Compute the distance between two shapes and the closest points.
+/// @return the fraction between [0,1] in which the shapes first touch.
+/// t=0 means the shapes begin touching/overlapped, and t=1 means the shapes don't touch.
+template <typename T1, typename T2>
+float32 b2TimeOfImpact(const T1* shape1, const b2Sweep& sweep1,
+					   const T2* shape2, const b2Sweep& sweep2);
 
 inline bool b2AABB::IsValid() const
 {

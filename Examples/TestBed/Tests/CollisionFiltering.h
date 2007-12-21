@@ -56,7 +56,7 @@ public:
 		}
 
 		// Small triangle
-		b2PolyDef triangleShapeDef;
+		b2PolygonDef triangleShapeDef;
 		triangleShapeDef.vertexCount = 3;
 		triangleShapeDef.vertices[0].Set(-1.0f, 0.0f);
 		triangleShapeDef.vertices[1].Set(1.0f, 0.0f);

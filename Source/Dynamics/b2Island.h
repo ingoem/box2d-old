@@ -21,16 +21,16 @@
 
 #include "../Common/b2Math.h"
 
-class b2StackAllocator;
 class b2Contact;
 class b2Body;
 class b2Joint;
+class b2World;
 struct b2TimeStep;
 
 class b2Island
 {
 public:
-	b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacity, b2StackAllocator* allocator);
+	b2Island(int32 bodyCapacity, int32 contactCapacity, int32 jointCapacity, b2World* world);
 	~b2Island();
 
 	void Clear();
@@ -57,7 +57,7 @@ public:
 		m_joints[m_jointCount++] = joint;
 	}
 
-	b2StackAllocator* m_allocator;
+	b2World* m_world;
 
 	b2Body** m_bodies;
 	b2Contact** m_contacts;

@@ -21,9 +21,8 @@
 #include "b2Island.h"
 #include "Joints/b2Joint.h"
 #include "Contacts/b2Contact.h"
-#include "Contacts/b2Conservative.h"
 #include "../Collision/b2Collision.h"
-#include "../Collision/b2Shape.h"
+#include "../Collision/Shapes/b2Shape.h"
 #include <new>
 
 int32 b2World::s_enablePositionCorrection = 1;
@@ -31,21 +30,22 @@ int32 b2World::s_enableWarmStarting = 1;
 
 b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 {
-	m_listener = NULL;
-	m_filter = &b2_defaultFilter;
+	m_destructionListener = NULL;
+	m_boundaryListener = NULL;
+	m_contactFilter = &b2_defaultFilter;
+	m_contactListener = NULL;
 
+	m_shapeList = NULL;
 	m_bodyList = NULL;
 	m_contactList = NULL;
 	m_jointList = NULL;
 
+	m_shapeCount = 0;
 	m_bodyCount = 0;
 	m_contactCount = 0;
 	m_jointCount = 0;
 
-	m_bodyDestroyList = NULL;
-
 	m_allowSleep = doSleep;
-
 	m_gravity = gravity;
 
 	m_contactManager.m_world = this;
@@ -53,32 +53,128 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_broadPhase = new (mem) b2BroadPhase(worldAABB, &m_contactManager);
 
 	b2BodyDef bd;
-	m_groundBody = CreateBody(&bd);
+	m_groundBody = Create(&bd);
 }
 
 b2World::~b2World()
 {
-	DestroyBody(m_groundBody);
+	Destroy(m_groundBody);
 	m_broadPhase->~b2BroadPhase();
 	b2Free(m_broadPhase);
 }
 
-void b2World::SetListener(b2WorldListener* listener)
+void b2World::SetListener(b2DestructionListener* listener)
 {
-	m_listener = listener;
+	m_destructionListener = listener;
 }
 
-void b2World::SetFilter(b2CollisionFilter* filter)
+void b2World::SetListener(b2BoundaryListener* listener)
 {
-	m_filter = filter;
+	m_boundaryListener = listener;
 }
 
-b2Body* b2World::CreateBody(const b2BodyDef* def)
+void b2World::SetFilter(b2ContactFilter* filter)
 {
+	m_contactFilter = filter;
+}
+
+void b2World::SetListener(b2ContactListener* listener)
+{
+	m_contactListener = listener;
+}
+
+b2Shape* b2World::Create(const b2ShapeDef* def)
+{
+	b2Assert(m_lock == false);
+	if (m_lock == true)
+	{
+		return NULL;
+	}
+
+	b2Shape* s = b2Shape::Create(def, &m_blockAllocator);
+
+	// Connect to doubly linked shape list.
+	s->m_worldPrev = NULL;
+	s->m_worldNext = m_shapeList;
+
+	if (m_shapeList)
+	{
+		m_shapeList->m_worldPrev = s;
+	}
+
+	m_shapeList = s;
+	
+	++m_shapeCount;
+
+	return s;
+}
+
+void b2World::Destroy(b2Shape* s)
+{
+	b2Assert(m_shapeCount > 0);
+	b2Assert(m_lock == false);
+	if (m_lock == true)
+	{
+		return;
+	}
+
+	// Remove from doubly linked list.
+	if (s->m_worldPrev)
+	{
+		s->m_worldPrev->m_worldNext = s->m_worldNext;
+	}
+
+	if (s->m_worldNext)
+	{
+		s->m_worldNext->m_worldPrev = s->m_worldPrev;
+	}
+
+	if (s == m_shapeList)
+	{
+		m_shapeList = s->m_worldNext;
+	}
+
+	--m_shapeCount;
+
+	if (s->m_body != NULL)
+	{
+		// Remove from the body's singly linked list.
+		b2Assert(s->m_body->m_shapeCount > 0);
+		b2Shape** node = &s->m_body->m_shapeList;
+		bool found = false;
+		while (*node != NULL)
+		{
+			if (*node == s)
+			{
+				*node = s->m_bodyNext;
+				found = true;
+				break;
+			}
+
+			node = &(*node)->m_bodyNext;
+		}
+		b2Assert(found);
+
+		--s->m_body->m_shapeCount;
+	}
+
+	b2Shape::Destroy(s, &m_blockAllocator);
+	s = NULL;
+}
+
+b2Body* b2World::Create(const b2BodyDef* def)
+{
+	b2Assert(m_lock == false);
+	if (m_lock == true)
+	{
+		return NULL;
+	}
+
 	void* mem = m_blockAllocator.Allocate(sizeof(b2Body));
 	b2Body* b = new (mem) b2Body(def, this);
+
+	// Add to doubly linked list.
 	b->m_prev = NULL;
-	
 	b->m_next = m_bodyList;
 	if (m_bodyList)
 	{
@@ -90,12 +186,43 @@ b2Body* b2World::CreateBody(const b2BodyDef* def)
 	return b;
 }
 
-// Body destruction is deferred to make contact processing more robust.
-void b2World::DestroyBody(b2Body* b)
+void b2World::Destroy(b2Body* b)
 {
-	if (b->m_flags & b2Body::e_destroyFlag)
+	b2Assert(m_bodyCount > 0);
+	b2Assert(m_lock == false);
+	if (m_lock == true)
 	{
 		return;
+	}
+
+	// Delete the attached joints.
+	b2JointNode* jn = b->m_jointList;
+	while (jn)
+	{
+		b2JointNode* jn0 = jn;
+		jn = jn->next;
+
+		if (m_destructionListener)
+		{
+			m_destructionListener->SayGoodbye(jn0->joint);
+		}
+
+		Destroy(jn0->joint);
+	}
+
+	// Delete the attached shapes.
+	b2Shape* s = b->m_shapeList;
+	while (s)
+	{
+		b2Shape* s0 = s;
+		s = s->m_bodyNext;
+
+		if (m_destructionListener)
+		{
+			m_destructionListener->SayGoodbye(s0);
+		}
+
+		Destroy(s0);
 	}
 
 	// Remove from normal body list.
@@ -115,55 +242,16 @@ void b2World::DestroyBody(b2Body* b)
 	}
 
 	b->m_flags |= b2Body::e_destroyFlag;
-	b2Assert(m_bodyCount > 0);
 	--m_bodyCount;
 
-	// Add to the deferred destruction list.
-	b->m_prev = NULL;
-	b->m_next = m_bodyDestroyList;
-	m_bodyDestroyList = b;
+	b->~b2Body();
+	m_blockAllocator.Free(b, sizeof(b2Body));
 }
 
-void b2World::CleanBodyList()
+b2Joint* b2World::Create(const b2JointDef* def)
 {
-	m_contactManager.m_destroyImmediate = true;
+	b2Assert(m_lock == false);
 
-	b2Body* b = m_bodyDestroyList;
-	while (b)
-	{
-		b2Assert((b->m_flags & b2Body::e_destroyFlag) != 0);
-
-		// Preserve the next pointer.
-		b2Body* b0 = b;
-		b = b->m_next;
-
-		// Delete the attached joints
-		b2JointNode* jn = b0->m_jointList;
-		while (jn)
-		{
-			b2JointNode* jn0 = jn;
-			jn = jn->next;
-
-			if (m_listener)
-			{
-				m_listener->NotifyJointDestroyed(jn0->joint);
-			}
-
-			DestroyJoint(jn0->joint);
-		}
-
-		b0->~b2Body();
-		m_blockAllocator.Free(b0, sizeof(b2Body));
-	}
-
-	// Reset the list.
-	m_bodyDestroyList = NULL;
-
-	m_contactManager.m_destroyImmediate = false;
-}
-
-b2Joint* b2World::CreateJoint(const b2JointDef* def)
-{
 	b2Joint* j = b2Joint::Create(def, &m_blockAllocator);
 
 	// Connect to the world list.
@@ -176,7 +264,7 @@ b2Joint* b2World::CreateJoint(const b2JointDef* def)
 	m_jointList = j;
 	++m_jointCount;
 
-	// Connect to the bodies
+	// Connect to the bodies' doubly linked lists.
 	j->m_node1.joint = j;
 	j->m_node1.other = j->m_body2;
 	j->m_node1.prev = NULL;
@@ -196,20 +284,23 @@ b2Joint* b2World::CreateJoint(const b2JointDef* def)
 	{
 		// Reset the proxies on the body with the minimum number of shapes.
 		b2Body* b = def->body1->m_shapeCount < def->body2->m_shapeCount ? def->body1 : def->body2;
-		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
+		b2XForm xf(b->m_position, b->m_R);
+		for (b2Shape* s = b->m_shapeList; s; s = s->m_bodyNext)
 		{
-			s->ResetProxy(m_broadPhase);
+			s->ResetProxy(m_broadPhase, xf);
 		}
 	}
 
 	return j;
 }
 
-void b2World::DestroyJoint(b2Joint* j)
+void b2World::Destroy(b2Joint* j)
 {
+	b2Assert(m_lock == false);
+
 	bool collideConnected = j->m_collideConnected;
 
-	// Remove from the world.
+	// Remove from the doubly linked list.
 	if (j->m_prev)
 	{
 		j->m_prev->m_next = j->m_next;
@@ -229,11 +320,11 @@ void b2World::DestroyJoint(b2Joint* j)
 	b2Body* body1 = j->m_body1;
 	b2Body* body2 = j->m_body2;
 
-	// Wake up touching bodies.
+	// Wake up connected bodies.
 	body1->WakeUp();
 	body2->WakeUp();
 
-	// Remove from body 1
+	// Remove from body 1.
 	if (j->m_node1.prev)
 	{
 		j->m_node1.prev->next = j->m_node1.next;
@@ -281,9 +372,10 @@ void b2World::DestroyJoint(b2Joint* j)
 	{
 		// Reset the proxies on the body with the minimum number of shapes.
 		b2Body* b = body1->m_shapeCount < body2->m_shapeCount ? body1 : body2;
-		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
+		b2XForm xf(b->m_position, b->m_R);
+		for (b2Shape* s = b->m_shapeList; s; s = s->m_bodyNext)
 		{
-			s->ResetProxy(m_broadPhase);
+			s->ResetProxy(m_broadPhase, xf);
 		}
 	}
 }
@@ -291,7 +383,7 @@ void b2World::DestroyJoint(b2Joint* j)
 void b2World::Integrate(const b2TimeStep& step)
 {
 	// Size the island for the worst case.
-	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator);
+	b2Island island(m_bodyCount, m_contactCount, m_jointCount, this);
 
 	// Clear all the island flags.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
@@ -411,7 +503,7 @@ void b2World::SolvePositionConstraints(const b2TimeStep& step)
 	}
 
 	// Size the island for the worst case.
-	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator);
+	b2Island island(m_bodyCount, m_contactCount, m_jointCount, this);
 
 	// Clear all the island flags.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
@@ -523,18 +615,6 @@ void b2World::SolvePositionConstraints(const b2TimeStep& step)
 			{
 				b->m_flags &= ~b2Body::e_islandFlag;
 			}
-
-			// Handle newly frozen bodies.
-			if (b->IsFrozen() && m_listener)
-			{
-				b2BoundaryResponse response = m_listener->NotifyBoundaryViolated(b);
-				if (response == b2_destroyBody)
-				{
-					DestroyBody(b);
-					b = NULL;
-					island.m_bodies[i] = NULL;
-				}
-			}
 		}
 	}
 
@@ -555,36 +635,11 @@ void b2World::Step(float32 dt, int32 iterations)
 		step.inv_dt = 0.0f;
 	}
 	
-	// Handle deferred contact destruction.
-	m_contactManager.CleanContactList();
-
-	// Handle deferred body destruction.
-	CleanBodyList();
-
 	// Integrate velocities, solve velocity constraints, and integrate positions.
 	Integrate(step);
 
+	// Commit proxy movements to the broad-phase so that new contacts are created.
 	m_broadPhase->Commit();
-
-	// Handle newly frozen bodies.
-	if (m_listener)
-	{
-		b2Body* b = m_bodyList;
-		while (b)
-		{
-			b2Body* b0 = b;
-			b = b->m_next;
-			if (b0->IsFrozen())
-			{
-				b2BoundaryResponse response = m_listener->NotifyBoundaryViolated(b0);
-				if (response == b2_destroyBody)
-				{
-					DestroyBody(b0);
-					b0 = NULL;
-				}
-			}
-		}
-	}
 
 	// Update contacts.
 	m_contactManager.Collide(step);

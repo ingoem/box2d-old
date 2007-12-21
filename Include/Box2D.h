@@ -23,7 +23,8 @@
 
 #include "../Source/Common/b2Settings.h"
 
-#include "../Source/Collision/b2Shape.h"
+#include "../Source/Collision/Shapes/b2CircleShape.h"
+#include "../Source/Collision/Shapes/b2PolygonShape.h"
 #include "../Source/Collision/b2BroadPhase.h"
 #include "../Source/Dynamics/b2WorldCallbacks.h"
 #include "../Source/Dynamics/b2World.h"

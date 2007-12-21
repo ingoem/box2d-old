@@ -115,7 +115,7 @@ public:
 		m_world->m_allowSleep = false;
 
 		{
-			b2PolyDef box;
+			b2PolygonDef box;
 			box.vertexCount = 4;
 			box.vertices[0].Set(2.0f, 1.2f);
 			box.vertices[1].Set(-2.0f, 1.2f);
@@ -138,7 +138,7 @@ public:
 		}
 
 		{
-			b2PolyDef box;
+			b2PolygonDef box;
 			box.vertexCount = 4;
 			box.vertices[0].Set(20.1f, 0.22f);
 			box.vertices[1].Set(-20.03f, 0.23f);

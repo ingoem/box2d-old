@@ -84,7 +84,7 @@ public:
 		}
 
 		{
-			b2PolyDef sd1;
+			b2PolygonDef sd1;
 			sd1.vertexCount = 3;
 			sd1.vertices[0].Set(-1.0f, 0.0f);
 			sd1.vertices[1].Set(1.0f, 0.0f);
@@ -94,7 +94,7 @@ public:
 			sd1.localPosition = b2Mul(R1, b2Vec2(1.0f, 0.0f));
 			sd1.density = 2.0f;
 
-			b2PolyDef sd2;
+			b2PolygonDef sd2;
 			sd2.vertexCount = 3;
 			sd2.vertices[0].Set(-1.0f, 0.0f);
 			sd2.vertices[1].Set(1.0f, 0.0f);

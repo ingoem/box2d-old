@@ -71,7 +71,7 @@ void* Callback::PairAdded(void* proxyUserData1, void* proxyUserData2)
 
 void Callback::PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData)
 {
-	NOT_USED(pairUserData);
+	B2_NOT_USED(pairUserData);
 
 	Actor* actor1 = (Actor*)proxyUserData1;
 	Actor* actor2 = (Actor*)proxyUserData2;
@@ -206,7 +206,7 @@ void BroadPhaseTest::Action()
 
 void BroadPhaseTest::Step(Settings* settings)
 {
-	NOT_USED(settings);
+	B2_NOT_USED(settings);
 
 	if (m_automated == true)
 	{

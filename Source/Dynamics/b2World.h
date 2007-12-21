@@ -26,6 +26,7 @@
 #include "b2WorldCallbacks.h"
 
 struct b2AABB;
+struct b2ShapeDef;
 struct b2BodyDef;
 struct b2JointDef;
 class b2Body;
@@ -41,76 +42,148 @@ struct b2TimeStep
 	int32 iterations;
 };
 
+/// The world class manages all physics entities, dynamic simulation,
+/// and asynchronous queries. The world also contains efficient memory
+/// management facilities.
 class b2World
 {
 public:
+	/// Construct a world object.
+	/// @param worldAABB a bounding box that completely encompasses all your shapes.
+	/// @param gravity the world gravity vector.
+	/// @param doSleep improve performance by not simulating inactive bodies.
 	b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep);
+
+	/// Destruct the world. All physics entities are destroyed and all heap memory is released.
 	~b2World();
 
-	// Register a world listener to receive important events that can
-	// help prevent your code from crashing.
-	void SetListener(b2WorldListener* listener);
+	/// Register a destruction listener.
+	void SetListener(b2DestructionListener* listener);
 
-	// Register a collision filter to provide specific control over collision.
-	// Otherwise the default filter is used (b2CollisionFilter).
-	void SetFilter(b2CollisionFilter* filter);
+	/// Register a broad-phase boundary listener.
+	void SetListener(b2BoundaryListener* listener);
 
-	// Create and destroy rigid bodies. Destruction is deferred until the
-	// the next call to Step. This is done so that bodies may be destroyed
-	// while you iterate through the contact list.
-	b2Body* CreateBody(const b2BodyDef* def);
-	void DestroyBody(b2Body* body);
+	/// Register a contact filter to provide specific control over collision.
+	/// Otherwise the default filter is used (b2_defaultFilter).
+	void SetFilter(b2ContactFilter* filter);
 
-	b2Joint* CreateJoint(const b2JointDef* def);
-	void DestroyJoint(b2Joint* joint);
+	/// Register a contact event listener
+	void SetListener(b2ContactListener* listener);
 
-	// The world provides a single ground body with no collision shapes. You
-	// can use this to simplify the creation of joints.
+	/// Register a routine for debug drawing. The debug draw functions are called
+	/// inside the b2World::Step method, so make sure your renderer is ready to
+	/// consume draw commands when you call Step().
+	void SetDebugDraw(b2DebugDraw* debugDraw);
+
+	/// Create a rigid body given a definition. No reference to the definition
+	/// is retained.
+	/// @warning This function is locked during callbacks.
+	b2Shape* Create(const b2ShapeDef* def);
+
+	/// Destroy a rigid body given a definition. No reference to the definition
+	/// is retained. This function is locked during callbacks. This automatically
+	/// deletes all associated shapes and joints.
+	/// @warning This function is locked during callbacks.
+	void Destroy(b2Shape* shape);
+
+	/// Create a rigid body given a definition. No reference to the definition
+	/// is retained.
+	/// @warning This function is locked during callbacks.
+	b2Body* Create(const b2BodyDef* def);
+
+	/// Destroy a rigid body given a definition. No reference to the definition
+	/// is retained. This function is locked during callbacks.
+	/// @warning This automatically deletes all associated shapes and joints.
+	/// @warning This function is locked during callbacks.
+	void Destroy(b2Body* body);
+
+	/// Create a joint to constrain bodies together. No reference to the definition
+	/// is retained. This may cause the connected bodies to cease colliding.
+	/// @warning This function is locked during callbacks.
+	b2Joint* Create(const b2JointDef* def);
+
+	/// Destroy a joint. This may cause the connected bodies to begin colliding.
+	/// @warning This function is locked during callbacks.
+	void Destroy(b2Joint* joint);
+
+	/// The world provides a single static ground body with no collision shapes.
+	/// You can use this to simplify the creation of joints.
 	b2Body* GetGroundBody();
 
+	/// Take a time step. This performs collision detection, integration,
+	/// and constraint solution.
+	/// @param timeStep the amount of time to simulate, this should not vary.
+	/// @param iterations the number of iterations to be used by the constraint solver.
 	void Step(float32 timeStep, int32 iterations);
 
-	// Query the world for all shapes that potentially overlap the
-	// provided AABB. You provide a shape pointer buffer of specified
-	// size. The number of shapes found is returned.
+	/// Query the world for all shapes that potentially overlap the
+	/// provided AABB. You provide a shape pointer buffer of specified
+	/// size. The number of shapes found is returned.
+	/// @param aabb the query box.
+	/// @param shapes a user allocated shape pointer array of size maxCount (or greater).
+	/// @param maxCount the capacity of the shapes array.
+	/// @return the number of shapes found in aabb.
 	int32 Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount);
 
-	// You can use these to iterate over all the bodies, joints, and contacts.
+	/// Get the world shape list. These shapes may or may not be attached to bodies.
+	/// With the returned shape, use b2Shape::GetWorldNext to get the next shape in
+	/// the world list. A NULL shape indicates the end of the list.
+	/// @return the head of the world shape list.
+	b2Shape* GetShapeList();
+
+	/// Get the world shape list. These shapes may or may not be attached to bodies.
+	/// With the returned shape, use b2Shape::GetWorldNext to get the next shape in
+	/// the world list. A NULL shape indicates the end of the list.
+	/// @return the head of the world shape list.
 	b2Body* GetBodyList();
+
+	/// Get the world shape list. These shapes may or may not be attached to bodies.
+	/// With the returned shape, use b2Shape::GetWorldNext to get the next shape in
+	/// the world list. A NULL shape indicates the end of the list.
+	/// @return the head of the world shape list.
 	b2Joint* GetJointList();
+
+	/// Get the world shape list. These shapes may or may not be attached to bodies.
+	/// With the returned shape, use b2Shape::GetWorldNext to get the next shape in
+	/// the world list. A NULL shape indicates the end of the list.
+	/// @return the head of the world shape list.
 	b2Contact* GetContactList();
 
 	//--------------- Internals Below -------------------
 
-	void CleanBodyList();
-
 	void Integrate(const b2TimeStep& step);
 	void SolvePositionConstraints(const b2TimeStep& step);
+
+	void DebugDraw();
 
 	b2BlockAllocator m_blockAllocator;
 	b2StackAllocator m_stackAllocator;
 
+	bool m_lock;
+
 	b2BroadPhase* m_broadPhase;
 	b2ContactManager m_contactManager;
 
+	b2Shape* m_shapeList;
 	b2Body* m_bodyList;
 	b2Contact* m_contactList;
 	b2Joint* m_jointList;
 
+	int32 m_shapeCount;
 	int32 m_bodyCount;
 	int32 m_contactCount;
 	int32 m_jointCount;
-
-	// These bodies will be destroyed at the next time step.
-	b2Body* m_bodyDestroyList;
 
 	b2Vec2 m_gravity;
 	bool m_allowSleep;
 
 	b2Body* m_groundBody;
 
-	b2WorldListener* m_listener;
-	b2CollisionFilter* m_filter;
+	b2DestructionListener* m_destructionListener;
+	b2BoundaryListener* m_boundaryListener;
+	b2ContactFilter* m_contactFilter;
+	b2ContactListener* m_contactListener;
+	b2DebugDraw* m_debugDraw;
 
 	int32 m_positionIterationCount;
 
@@ -121,6 +194,11 @@ public:
 inline b2Body* b2World::GetGroundBody()
 {
 	return m_groundBody;
+}
+
+inline b2Shape* b2World::GetShapeList()
+{
+	return m_shapeList;
 }
 
 inline b2Body* b2World::GetBodyList()

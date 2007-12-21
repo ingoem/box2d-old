@@ -79,7 +79,7 @@ void b2DistanceJoint::InitVelocityConstraints()
 
 void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
-	NOT_USED(step);
+	B2_NOT_USED(step);
 
 	b2Vec2 r1 = b2Mul(m_body1->m_R, m_localAnchor1);
 	b2Vec2 r2 = b2Mul(m_body2->m_R, m_localAnchor2);
@@ -141,6 +141,6 @@ b2Vec2 b2DistanceJoint::GetReactionForce(float32 invTimeStep) const
 
 float32 b2DistanceJoint::GetReactionTorque(float32 invTimeStep) const
 {
-	NOT_USED(invTimeStep);
+	B2_NOT_USED(invTimeStep);
 	return 0.0f;
 }

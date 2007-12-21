@@ -106,8 +106,8 @@ void SimulationLoop()
 
 void Keyboard(unsigned char key, int x, int y)
 {
-	NOT_USED(x);
-	NOT_USED(y);
+	B2_NOT_USED(x);
+	B2_NOT_USED(y);
 
 	switch (key)
 	{
@@ -152,8 +152,8 @@ void Keyboard(unsigned char key, int x, int y)
 
 void KeyboardSpecial(int key, int x, int y)
 {
-	NOT_USED(x);
-	NOT_USED(y);
+	B2_NOT_USED(x);
+	B2_NOT_USED(y);
 
 	switch (key)
 	{

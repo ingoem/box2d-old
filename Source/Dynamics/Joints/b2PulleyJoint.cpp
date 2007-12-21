@@ -152,7 +152,7 @@ void b2PulleyJoint::InitVelocityConstraints()
 
 void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
-	NOT_USED(step);
+	B2_NOT_USED(step);
 
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
@@ -349,14 +349,14 @@ b2Vec2 b2PulleyJoint::GetGroundPoint2() const
 
 b2Vec2 b2PulleyJoint::GetReactionForce(float32 invTimeStep) const
 {
-	NOT_USED(invTimeStep);
+	B2_NOT_USED(invTimeStep);
 	b2Vec2 F(0.0f, 0.0f); // = (m_pulleyImpulse * invTimeStep) * m_u;
 	return F;
 }
 
 float32 b2PulleyJoint::GetReactionTorque(float32 invTimeStep) const
 {
-	NOT_USED(invTimeStep);
+	B2_NOT_USED(invTimeStep);
 	return 0.0f;
 }
 

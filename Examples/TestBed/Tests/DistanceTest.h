@@ -63,7 +63,7 @@ public:
 			sd.radius = 0.5f;
 			sd.density = 1.0f;
 #else
-			b2PolyDef sd;
+			b2PolygonDef sd;
 			sd.vertexCount = 3;
 			sd.vertices[0].Set(-1.0f, 0.0f);
 			sd.vertices[1].Set(1.0f, 0.0f);
@@ -99,7 +99,7 @@ public:
 
 	void Step(Settings* settings)
 	{
-		NOT_USED(settings);
+		B2_NOT_USED(settings);
 
 		m_world->Step(0.0f, 1);
 

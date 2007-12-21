@@ -25,7 +25,7 @@ public:
 	PolyCollision()
 	{
 		{
-			b2PolyDef sd;
+			b2PolygonDef sd;
 			sd.vertices[0].Set(-9.0f, -1.1f);
 			sd.vertices[1].Set(7.0f, -1.1f);
 			sd.vertices[2].Set(5.0f, -0.9f);
@@ -70,7 +70,7 @@ public:
 
 	void Step(const Settings* settings)
 	{
-		NOT_USED(settings);
+		B2_NOT_USED(settings);
 
 		m_world->Step(0.0f, 1);
 

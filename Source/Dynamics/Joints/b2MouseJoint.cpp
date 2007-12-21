@@ -138,6 +138,6 @@ b2Vec2 b2MouseJoint::GetReactionForce(float32 invTimeStep) const
 
 float32 b2MouseJoint::GetReactionTorque(float32 invTimeStep) const
 {
-	NOT_USED(invTimeStep);
+	B2_NOT_USED(invTimeStep);
 	return 0.0f;
 }

@@ -173,6 +173,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Source\Collision\b2Collision.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Source\Collision\b2Collision.h"
 				>
 			</File>
@@ -189,21 +193,37 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Source\Collision\b2Primitive.cpp"
+				RelativePath="..\..\Source\Collision\b2TimeOfImpact.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\Source\Collision\b2Primitive.h"
+			<Filter
+				Name="Shapes"
 				>
-			</File>
-			<File
-				RelativePath="..\..\Source\Collision\b2Shape.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Source\Collision\b2Shape.h"
-				>
-			</File>
+				<File
+					RelativePath="..\..\Source\Collision\Shapes\b2CircleShape.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Collision\Shapes\b2CircleShape.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Collision\Shapes\b2PolygonShape.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Collision\Shapes\b2PolygonShape.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Collision\Shapes\b2Shape.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Collision\Shapes\b2Shape.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Common"
@@ -289,14 +309,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Source\Dynamics\Contacts\b2CircleContact.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Source\Dynamics\Contacts\b2Conservative.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Source\Dynamics\Contacts\b2Conservative.h"
 					>
 				</File>
 				<File

@@ -21,51 +21,164 @@
 
 #include "../Common/b2Settings.h"
 
+struct b2Manifold;
+struct b2Vec2;
+class b2Shape;
 class b2Body;
 class b2Joint;
-class b2Shape;
 
-enum b2BoundaryResponse
-{
-	b2_freezeBody,
-	b2_destroyBody,
-};
-
-class b2WorldListener
+/// Joints and shapes are destroyed when their associated
+/// body is destroyed. Implement this listener so that you
+/// may nullify references to these joints and shapes.
+class b2DestructionListener
 {
 public:
-	virtual ~b2WorldListener() {}
+	virtual ~b2DestructionListener() {}
 
-	// If a body is destroyed, then any joints attached to it are also destroyed.
-	// This prevents memory leaks, but you may unexpectedly be left with an
-	// orphaned joint pointer.
-	// Box2D will notify you when a joint is implicitly destroyed.
-	// It is NOT called if you directly destroy a joint.
-	// Implement this abstract class and provide it to b2World via
-	// b2World::SetListener(). 
-	// DO NOT modify the Box2D world inside this callback.
-	virtual void NotifyJointDestroyed(b2Joint* joint) = 0;
+	/// Called when any joint is about to be destroyed due
+	/// to the destruction of one of its attached bodies.
+	virtual void SayGoodbye(b2Joint* joint) = 0;
 
-	// This is called when a body's shape passes outside of the world boundary. If you
-	// override this and pass back e_destroyBody, you must nullify your copies of the
-	// body pointer.
-	virtual b2BoundaryResponse NotifyBoundaryViolated(b2Body* body)
+	/// Called when any shape is about to be destroyed due
+	/// to the destruction of its parent body.
+	virtual void SayGoodbye(b2Shape* shape) = 0;
+};
+
+
+/// This is called when a body's shape passes outside of the world boundary. If you
+/// override this and pass back e_destroyBody, you must nullify your copies of the
+/// body pointer.
+class b2BoundaryListener
+{
+public:
+	enum Response
 	{
-		NOT_USED(body);
-		return b2_freezeBody;
-	}
+		e_freezeBody,
+		e_destroyBody,
+	};
+
+	virtual ~b2BoundaryListener() {}
+
+	/// This is called for each body that leaves the world boundary.
+	virtual Response NotifyBoundaryViolated(b2Body* body) = 0;
 };
 
-// Implement this class to provide collision filtering. In other words, you can implement
-// this class if you want finer control over contact creation.
-class b2CollisionFilter
+
+/// Implement this class to provide collision filtering. In other words, you can implement
+/// this class if you want finer control over contact creation.
+class b2ContactFilter
 {
 public:
-	virtual ~b2CollisionFilter() {}
+	virtual ~b2ContactFilter() {}
 
-	// Return true if contact calculations should be performed between these two shapes.
+	/// Return true if contact calculations should be performed between these two shapes.
 	virtual bool ShouldCollide(b2Shape* shape1, b2Shape* shape2);
 };
 
-extern b2CollisionFilter b2_defaultFilter;
+/// The default contact filter.
+extern b2ContactFilter b2_defaultFilter;
+
+
+/// This structure allows you to tweak the contact solver behavior.
+struct b2SolverTweaks
+{
+	/// Set this to true if you want the contact solver to ignore this contact.
+	bool nonSolid;
+
+	/// Override the default friction determined from the shapes.
+	float32 friction;
+
+	/// Override the default restitution determined from the shapes.
+	float32 restitution;
+};
+
+/// Implement this class to provide collision filtering. In other words, you can implement
+/// this class if you want finer control over contact creation.
+class b2ContactListener
+{
+public:
+	virtual ~b2ContactListener() {}
+
+	/// Called when a TOI event occurs. The manifold normal points from shape1 to shape2.
+	/// @param tweaks allows you to adjust the contact solver behavior.
+	/// @param manifold the contact geometry. You may adjust this, but be careful.
+	/// @param shape1 the first shape in the contact.
+	/// @param shape2 the second shape in the contact.
+	virtual void TOI(b2SolverTweaks* tweaks, b2Manifold* manifold, const b2Shape* shape1, const b2Shape* shape2) = 0;
+
+	/// Called when a new non-empty contact manifold is created. The manifold normal points from shape1 to shape2.
+	/// @param tweaks allows you to adjust the contact solver behavior.
+	/// @param manifold the contact geometry. You may adjust this, but be careful.
+	/// @param shape1 the first shape in the contact.
+	/// @param shape2 the second shape in the contact.
+	virtual void Begin(b2SolverTweaks* tweaks, b2Manifold* manifold, const b2Shape* shape1, const b2Shape* shape2) = 0;
+
+	/// Called when contact persists. The manifold normal points from shape1 to shape2.
+	/// @param tweaks allows you to adjust the contact solver behavior.
+	/// @param manifold the contact geometry. You may adjust this, but be careful.
+	/// @param shape1 the first shape in the contact.
+	/// @param shape2 the second shape in the contact.
+	virtual void Persist(b2SolverTweaks* tweaks, b2Manifold* manifold, const b2Shape* shape1, const b2Shape* shape2) = 0;
+
+	/// Called when contact ends.
+	/// @param shape1 the first shape in the contact.
+	/// @param shape2 the second shape in the contact.
+	virtual void End(const b2Shape* shape1, const b2Shape* shape2) = 0;
+};
+
+/// Color for debug drawing. Each value has the range [0,1].
+struct b2Color
+{
+	float32 x, y, z;
+};
+
+/// Implement and register this class with a b2World to provide debug drawing of physics
+/// entities in your game.
+class b2DebugDraw
+{
+public:
+	b2DebugDraw::b2DebugDraw();
+
+	virtual ~b2DebugDraw() {}
+
+	enum
+	{
+		e_shapeBit				= 0x0001, ///< draw shapes
+		e_pairBit				= 0x0002,
+		e_aabbBit				= 0x0004,
+		e_obbBit				= 0x0008,
+		e_jointBit				= 0x0010,
+		e_contactPointBit		= 0x0020,
+		e_contactImpulseBit		= 0x0040,
+		e_frictionImpulseBit	= 0x0080,
+	};
+
+	/// Set the drawing flags.
+	void SetFlags(uint32 flags);
+
+	/// Get the drawing flags.
+	uint32 GetFlags() const;
+	
+	/// Append flags to the current flags.
+	void AppendFlags(uint32 flags);
+
+	/// Clear flags from the current flags.
+	void ClearFlags(uint32 flags);
+
+	/// Draw a closed polygon provided in CCW order.
+	virtual void DrawPolygon(const b2Vec2* points, int32 pointCount, const b2Color& color) = 0;
+
+	/// Draw a circle.
+	virtual void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) = 0;
+	
+	/// Draw a line segment.
+	virtual void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) = 0;
+
+	/// Draw a point. For example, a contact point.
+	virtual void DrawPoint(const b2Vec2& p, const b2Color& color) = 0;
+
+protected:
+	uint32 m_drawFlags;
+};
+
 #endif

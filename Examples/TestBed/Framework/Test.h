@@ -86,17 +86,17 @@ public:
 
 	void SetTextLine(int32 line) { m_textLine = line; }
 	virtual void Step(Settings* settings);
-	virtual void Keyboard(unsigned char key) { NOT_USED(key); }
+	virtual void Keyboard(unsigned char key) { B2_NOT_USED(key); }
 	void MouseDown(const b2Vec2& p);
 	void MouseUp();
 	void MouseMove(const b2Vec2& p);
 	void LaunchBomb();
 
 	// Let derived tests know that a joint was destroyed.
-	virtual void JointDestroyed(b2Joint* joint) { NOT_USED(joint); }
+	virtual void JointDestroyed(b2Joint* joint) { B2_NOT_USED(joint); }
 	virtual b2BoundaryResponse BoundaryViolated(b2Body* body)
 	{
-		NOT_USED(body);
+		B2_NOT_USED(body);
 		return b2_freezeBody;
 	}
 

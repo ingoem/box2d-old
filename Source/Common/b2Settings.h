@@ -21,7 +21,7 @@
 
 #include <cassert>
 
-#define NOT_USED(x) x
+#define B2_NOT_USED(x) x
 #define b2Assert(A) assert((A))
 
 typedef signed char	int8;

@@ -25,8 +25,8 @@
 // box.
 int main(int argc, char** argv)
 {
-	NOT_USED(argc);
-	NOT_USED(argv);
+	B2_NOT_USED(argc);
+	B2_NOT_USED(argv);
 
 	// Define the size of the world. Simulation will still work
 	// if bodies reach the end of the world, but it will be slower.

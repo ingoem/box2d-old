@@ -45,7 +45,7 @@ void* b2ContactManager::PairAdded(void* proxyUserData1, void* proxyUserData2)
 		return &m_nullContact;
 	}
 
-	if (m_world->m_filter != NULL && m_world->m_filter->ShouldCollide(shape1, shape2) == false)
+	if (m_world->m_contactFilter != NULL && m_world->m_contactFilter->ShouldCollide(shape1, shape2) == false)
 	{
 		return &m_nullContact;
 	}
@@ -84,8 +84,8 @@ void* b2ContactManager::PairAdded(void* proxyUserData1, void* proxyUserData2)
 // to overlap. We destroy the b2Contact.
 void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData)
 {
-	NOT_USED(proxyUserData1);
-	NOT_USED(proxyUserData2);
+	B2_NOT_USED(proxyUserData1);
+	B2_NOT_USED(proxyUserData2);
 
 	if (pairUserData == NULL)
 	{
@@ -205,6 +205,10 @@ void b2ContactManager::CleanContactList()
 // contact list.
 void b2ContactManager::Collide(const b2TimeStep& step)
 {
+	// Continuous physics.
+	// TODO_ERIN build TOI islands based on proxy pairs.
+	// TODO_ERIN invalidate TOIs based on proxy pairs. Preserve
+	// valid TOIs.
 	if (step.dt > 0.0f && b2World::s_enablePositionCorrection)
 	{
 		for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)
@@ -259,10 +263,9 @@ void b2ContactManager::Collide(const b2TimeStep& step)
 			}
 
 			float32 toi = b->m_toi;
-			b->m_position = (1.0f - toi) * b->m_position0 + toi * b->m_position;
+			b->m_xf.position = (1.0f - toi) * b->m_position0 + toi * b->m_xf.position;
 			b->m_rotation = (1.0f - toi) * b->m_rotation0 + toi * b->m_rotation;
-			b->m_R.Set(b->m_rotation);
-			b->QuickSyncShapes();
+			b->m_xf.R.Set(b->m_rotation);
 		}
 	}
 
@@ -275,7 +278,7 @@ void b2ContactManager::Collide(const b2TimeStep& step)
 		}
 
 		int32 oldCount = c->GetManifoldCount();
-		c->Evaluate();
+		c->Update(m_world->m_contactListener);
 
 		int32 newCount = c->GetManifoldCount();
 

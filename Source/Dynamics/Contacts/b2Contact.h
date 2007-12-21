@@ -21,12 +21,13 @@
 
 #include "../../Common/b2Math.h"
 #include "../../Collision/b2Collision.h"
-#include "../../Collision/b2Shape.h"
+#include "../../Collision/Shapes/b2Shape.h"
 
 class b2Body;
 class b2Contact;
 class b2World;
 class b2BlockAllocator;
+class b2ContactListener;
 
 typedef b2Contact* b2ContactCreateFcn(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator);
 typedef void b2ContactDestroyFcn(b2Contact* contact, b2BlockAllocator* allocator);
@@ -46,19 +47,30 @@ struct b2ContactRegister
 	bool primary;
 };
 
+/// The class manages contact between two shapes. If the shapes touch then
+/// the contact is connected to the two associated bodies.
 class b2Contact
 {
 public:
+
+	/// Get the manifold array.
 	virtual b2Manifold* GetManifolds() = 0;
+
+	/// Get the number of manifolds. This is 0 or 1 between convex shapes.
+	/// This may be greater than 1 for convex-vs-concave shapes. Each
+	/// manifold holds up to two contact points with a shared contact normal.
 	int32 GetManifoldCount() const
 	{
 		return m_manifoldCount;
 	}
 
+	/// Get the next contact in the world's contact list.
 	b2Contact* GetNext();
 
+	/// Get the first shape in this contact.
 	b2Shape* GetShape1();
 
+	/// Get the second shape in this contact.
 	b2Shape* GetShape2();
 
 	//--------------- Internals Below -------------------
@@ -66,8 +78,9 @@ public:
 	// m_flags
 	enum
 	{
-		e_islandFlag		= 0x0001,
-		e_destroyFlag		= 0x0002,
+		e_nonSolidFlag		= 0x0001,
+		e_islandFlag		= 0x0002,
+		e_destroyFlag		= 0x0004,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
@@ -80,7 +93,8 @@ public:
 	b2Contact(b2Shape* shape1, b2Shape* shape2);
 	virtual ~b2Contact() {}
 
-	float32 ComputeTOI();
+	float32 ComputeTOI(b2ContactListener* listener);
+	void Update(b2ContactListener* listener);
 	virtual void Evaluate() = 0;
 	static b2ContactRegister s_registers[e_shapeTypeCount][e_shapeTypeCount];
 	static bool s_initialized;

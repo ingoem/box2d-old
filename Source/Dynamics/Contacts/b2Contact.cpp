@@ -20,9 +20,8 @@
 #include "b2CircleContact.h"
 #include "b2PolyAndCircleContact.h"
 #include "b2PolyContact.h"
-#include "b2Conservative.h"
 #include "../../Collision/b2Collision.h"
-#include "../../Collision/b2Shape.h"
+#include "../../Collision/Shapes/b2Shape.h"
 #include "../../Common/b2BlockAllocator.h"
 #include "../../Dynamics/b2World.h"
 #include "../../Dynamics/b2Body.h"
@@ -33,8 +32,8 @@ bool b2Contact::s_initialized = false;
 void b2Contact::InitializeRegisters()
 {
 	AddType(b2CircleContact::Create, b2CircleContact::Destroy, e_circleShape, e_circleShape);
-	AddType(b2PolyAndCircleContact::Create, b2PolyAndCircleContact::Destroy, e_polyShape, e_circleShape);
-	AddType(b2PolyContact::Create, b2PolyContact::Destroy, e_polyShape, e_polyShape);
+	AddType(b2PolyAndCircleContact::Create, b2PolyAndCircleContact::Destroy, e_polygonShape, e_circleShape);
+	AddType(b2PolyContact::Create, b2PolyContact::Destroy, e_polygonShape, e_polygonShape);
 }
 
 void b2Contact::AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destoryFcn,
@@ -138,7 +137,45 @@ b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 	m_node2.other = NULL;
 }
 
+void b2Contact::Update(b2ContactListener* listener)
+{
+	int32 oldCount = m_manifoldCount;
+
+	Evaluate();
+
+	if (listener)
+	{
+		b2SolverTweaks tweaks;
+		tweaks.friction = m_friction;
+		tweaks.restitution = m_restitution;
+		tweaks.nonSolid = bool(m_flags & e_nonSolidFlag);
+		if (oldCount == 0 && m_manifoldCount > 0)
+		{
+			listener->Begin(&tweaks, GetManifolds(), m_shape1, m_shape2);
+		}
+		else if (oldCount > 0 && m_manifoldCount == 0)
+		{
+			listener->End(m_shape1, m_shape2);
+		}
+		else if (m_manifoldCount > 0)
+		{
+			listener->Persist(&tweaks, GetManifolds(), m_shape1, m_shape2);
+		}
+
+		m_friction = tweaks.friction;
+		m_restitution = tweaks.restitution;
+		if (tweaks.nonSolid)
+		{
+			m_flags |= e_nonSolidFlag;
+		}
+		else
+		{
+			m_flags &= ~e_nonSolidFlag;
+		}
+	}
+}
+
 float32 b2Contact::ComputeTOI()
 {
-	return b2Conservative(m_shape1, m_shape2);
+	return b2TimeOfImpact(m_shape1, m_shape2);
 }
