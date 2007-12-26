@@ -68,11 +68,19 @@ extern TestEntry g_testEntries[];
 // This is called when a joint in the world is implicitly destroyed
 // because an attached body is destroyed. This gives us a chance to
 // nullify the mouse joint.
-class WorldListener : public b2WorldListener
+class DestructionListener : public b2DestructionListener
 {
 public:
-	void NotifyJointDestroyed(b2Joint* joint);
-	b2BoundaryResponse NotifyBoundaryViolated(b2Body* body);
+	void SayGoodbye(b2Shape* shape) { B2_NOT_USED(shape); }
+	void SayGoodbye(b2Joint* joint);
+
+	Test* test;
+};
+
+class BoundaryListener : public b2BoundaryListener	
+{
+public:
+	Response Violation(b2Body* body);
 
 	Test* test;
 };
@@ -94,16 +102,18 @@ public:
 
 	// Let derived tests know that a joint was destroyed.
 	virtual void JointDestroyed(b2Joint* joint) { B2_NOT_USED(joint); }
-	virtual b2BoundaryResponse BoundaryViolated(b2Body* body)
+	virtual b2BoundaryListener::Response BoundaryViolated(b2Body* body)
 	{
 		B2_NOT_USED(body);
-		return b2_freezeBody;
+		return b2BoundaryListener::e_freezeBody;
 	}
 
 protected:
-	friend class WorldListener;
+	friend class DestructionListener;
+	friend class BoundaryListener;
 
-	WorldListener m_listener;
+	DestructionListener m_destructionListener;
+	BoundaryListener m_boundaryListener;
 	int32 m_textLine;
 	b2World* m_world;
 	b2Body* m_bomb;

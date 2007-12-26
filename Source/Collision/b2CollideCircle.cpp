@@ -125,7 +125,7 @@ void b2CollidePolygonAndCircle(
 		}
 
 		manifold->pointCount = 1;
-		manifold->normal = b2Mul(xf2.R, d);
+		manifold->normal = b2Mul(xf1.R, d);
 		manifold->points[0].id.features.incidentEdge = b2_nullFeature;
 		manifold->points[0].id.features.incidentVertex = (uint8)vertIndex1;
 		manifold->points[0].id.features.referenceFace = b2_nullFeature;
@@ -166,7 +166,7 @@ void b2CollidePolygonAndCircle(
 	}
 
 	manifold->pointCount = 1;
-	manifold->normal = b2Mul(xf2.R, d);
+	manifold->normal = b2Mul(xf1.R, d);
 	manifold->points[0].position = c - radius * manifold->normal;
 	manifold->points[0].separation = dist - radius;
 }

@@ -22,6 +22,7 @@
 #include "../Common/b2Math.h"
 #include <climits>
 
+class b2Shape;
 class b2CircleShape;
 class b2PolygonShape;
 
@@ -59,6 +60,8 @@ struct b2Manifold
 
 struct b2Segment
 {
+	bool TestSegment(float32* lambda, b2Vec2* normal, const b2Segment& segment, float32 maxLambda) const;
+
 	b2Vec2 p1, p2;
 };
 
@@ -76,6 +79,7 @@ struct b2OBB
 	b2Vec2 extents;
 };
 
+/// This describes the motion of a body/shape for TOI computation.
 struct b2Sweep
 {
 	b2Vec2 position, velocity;
@@ -99,17 +103,17 @@ void b2CollidePolygons(b2Manifold* manifold,
 
 /// Compute the distance between two shapes and the closest points.
 /// @return the distance between the shapes or zero if they are overlapped/touching.
-template <typename T1, typename T2>
 float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
-				   const T1* shape1, const b2XForm& xf1,
-				   const T2* shape2, const b2XForm& xf2);
+				   const b2Shape* shape1, const b2XForm& xf1,
+				   const b2Shape* shape2, const b2XForm& xf2);
 
 /// Compute the distance between two shapes and the closest points.
 /// @return the fraction between [0,1] in which the shapes first touch.
 /// t=0 means the shapes begin touching/overlapped, and t=1 means the shapes don't touch.
-template <typename T1, typename T2>
-float32 b2TimeOfImpact(const T1* shape1, const b2Sweep& sweep1,
-					   const T2* shape2, const b2Sweep& sweep2);
+float32 b2TimeOfImpact(b2Vec2* point1, b2Vec2* point2,
+					   const b2Shape* shape1, const b2Sweep& sweep1,
+					   const b2Shape* shape2, const b2Sweep& sweep2,
+					   float32 maxTOI);
 
 inline bool b2AABB::IsValid() const
 {

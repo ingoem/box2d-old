@@ -25,6 +25,7 @@
 #include "freeglut/gl/glut.h"
 #endif
 
+#if 0
 #include "ApplyForce.h"
 #include "Bridge.h"
 #include "BroadPhaseTest.h"
@@ -43,19 +44,21 @@
 #include "Pyramid.h"
 #include "SliderCrank.h"
 #include "VaryingFriction.h"
+#endif
 #include "VaryingRestitution.h"
-#include "VerticalStack.h"
-#include "Web.h"
+//#include "VerticalStack.h"
+//#include "Web.h"
 
 TestEntry g_testEntries[] =
 {
+	{"Varying Restitution", VaryingRestitution::Create},
+#if 0
 	{"CCD Test", CCDTest::Create},
 	{"Distance Test", DistanceTest::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Apply Force", ApplyForce::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"PolyCollision", PolyCollision::Create},
-	{"Varying Restitution", VaryingRestitution::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Newton's Cradle", Cradle::Create},
 	{"Broad Phase", BroadPhaseTest::Create},
@@ -70,5 +73,6 @@ TestEntry g_testEntries[] =
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Varying Friction", VaryingFriction::Create},
+#endif
 	{NULL, NULL}
 };

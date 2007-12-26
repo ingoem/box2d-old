@@ -27,6 +27,7 @@ class b2Body;
 class b2Contact;
 class b2World;
 class b2BlockAllocator;
+class b2StackAllocator;
 class b2ContactListener;
 
 typedef b2Contact* b2ContactCreateFcn(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator);
@@ -80,7 +81,6 @@ public:
 	{
 		e_nonSolidFlag		= 0x0001,
 		e_islandFlag		= 0x0002,
-		e_destroyFlag		= 0x0004,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
@@ -93,7 +93,8 @@ public:
 	b2Contact(b2Shape* shape1, b2Shape* shape2);
 	virtual ~b2Contact() {}
 
-	float32 ComputeTOI(b2ContactListener* listener);
+	float32 TimeOfImpact(b2ContactListener* listener);
+	void ResolveTOI(b2ContactListener* listener, b2StackAllocator* allocator, float32 toi);
 	void Update(b2ContactListener* listener);
 	virtual void Evaluate() = 0;
 	static b2ContactRegister s_registers[e_shapeTypeCount][e_shapeTypeCount];
@@ -118,6 +119,8 @@ public:
 	float32 m_friction;
 	float32 m_restitution;
 
+	b2Vec2 m_toiPoint1;
+	b2Vec2 m_toiPoint2;
 	float32 m_toi;
 };
 

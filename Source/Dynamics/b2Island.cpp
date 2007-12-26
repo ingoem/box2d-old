@@ -116,11 +116,11 @@ b2Island::b2Island(
 	m_contactCount = 0;
 	m_jointCount = 0;
 
+	m_world = world;
+
 	m_bodies = (b2Body**)m_world->m_stackAllocator.Allocate(bodyCapacity * sizeof(b2Body*));
 	m_contacts = (b2Contact**)m_world->m_stackAllocator.Allocate(contactCapacity	 * sizeof(b2Contact*));
 	m_joints = (b2Joint**)m_world->m_stackAllocator.Allocate(jointCapacity * sizeof(b2Joint*));
-
-	m_world = world;
 
 	m_positionIterationCount = 0;
 }
@@ -196,29 +196,15 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity)
 			continue;
 
 		// Store positions for continuous collision.
-		b->m_position0 = b->m_position;
-		b->m_rotation0 = b->m_rotation;
+		b->m_position0 = b->m_xf.position;
+		b->m_angle0 = b->m_angle;
 
 		// Integrate
-		b->m_position += step.dt * b->m_linearVelocity;
-		b->m_rotation += step.dt * b->m_angularVelocity;
-		b->m_R.Set(b->m_rotation);
+		b->m_xf.position += step.dt * b->m_linearVelocity;
+		b->m_angle += step.dt * b->m_angularVelocity;
+		b->m_xf.R.Set(b->m_angle);
 
-		// Update shapes (for broad-phase).
-		bool success = b->SynchronizeShapes();
-
-		// Did the body's shapes leave the world?
-		if (success == false && m_world->m_boundaryListener != NULL)
-		{
-			b2BoundaryListener::Response response = m_world->m_boundaryListener->NotifyBoundaryViolated(b);
-			if (response == b2BoundaryListener::e_destroyBody)
-			{
-				m_world->Destroy(b);
-				m_bodies[i] = NULL;
-				m_bodies[i] = m_bodies[m_bodyCount - 1];
-				--m_bodyCount;
-			}
-		}
+		// Note: shapes are synchronized later.
 	}
 }
 
@@ -227,8 +213,6 @@ void b2Island::SolvePositionConstraints(const b2TimeStep& step)
 	b2ContactSolver contactSolver(m_contacts, m_contactCount, &m_world->m_stackAllocator);
 
 	// Initialize position constraints
-	contactSolver.InitPositionConstraints();
-
 	for (int32 i = 0; i < m_jointCount; ++i)
 	{
 		m_joints[i]->InitPositionConstraints();
@@ -237,7 +221,7 @@ void b2Island::SolvePositionConstraints(const b2TimeStep& step)
 	// Solve position constraints.
 	for (m_positionIterationCount = 0; m_positionIterationCount < step.iterations; ++m_positionIterationCount)
 	{
-		bool contactsOkay = contactSolver.SolvePositionConstraints();
+		bool contactsOkay = contactSolver.SolvePositionConstraints(b2_contactBaumgarte);
 
 		bool jointsOkay = true;
 		for (int i = 0; i < m_jointCount; ++i)

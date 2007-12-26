@@ -65,12 +65,30 @@ public:
 	/// @see b2Shape::ComputeMass
 	void ComputeMass(b2MassData* massData) const;
 
+	/// Get the oriented bounding box relative to the parent body.
+	const b2OBB& GetOBB() const;
+
+	/// Get local centroid relative to the parent body.
+	const b2Vec2& GetCentroid() const;
+
+	/// Get the vertex count.
+	int32 GetVertexCount() const;
+
+	/// Get the vertices in local coordinates.
+	const b2Vec2* GetVertices() const;
+
+	/// Get the core vertices in local coordinates. These vertices
+	/// represent a smaller polygon that is used for time of impact
+	/// computations.
+	const b2Vec2* GetCoreVertices() const;
+
 	//--------------- Internals Below -------------------
 	
 	b2PolygonShape(const b2ShapeDef* def);
 
 	void ApplyOffset(const b2Vec2& offset);
 
+	b2Vec2 GetFirstVertex(const b2XForm& xf) const;
 	b2Vec2 Centroid(const b2XForm& xf) const;
 	b2Vec2 Support(const b2XForm& xf, const b2Vec2& d) const;
 
@@ -84,5 +102,35 @@ public:
 	b2Vec2 m_coreVertices[b2_maxPolygonVertices];
 	int32 m_vertexCount;
 };
+
+inline b2Vec2 b2PolygonShape::GetFirstVertex(const b2XForm& xf) const
+{
+	return b2Mul(xf, m_coreVertices[0]);
+}
+
+inline const b2OBB& b2PolygonShape::GetOBB() const
+{
+	return m_obb;
+}
+
+inline const b2Vec2& b2PolygonShape::GetCentroid() const
+{
+	return m_centroid;
+}
+
+inline int32 b2PolygonShape::GetVertexCount() const
+{
+	return m_vertexCount;
+}
+
+inline const b2Vec2* b2PolygonShape::GetVertices() const
+{
+	return m_vertices;
+}
+
+inline const b2Vec2* b2PolygonShape::GetCoreVertices() const
+{
+	return m_coreVertices;
+}
 
 #endif

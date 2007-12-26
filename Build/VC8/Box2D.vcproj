@@ -237,6 +237,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Source\Common\b2Math.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Source\Common\b2Math.h"
 				>
 			</File>

@@ -21,19 +21,37 @@
 
 #include "b2Joint.h"
 
+/// Distance joint definition. This requires defining an
+/// anchor point on both bodies and the non-zero length of the
+/// distance joint. The definition uses local anchor points
+/// so that the initial configuration can violate the constraint
+/// slightly. This helps when saving and loading a game.
+/// @warning Do not use a zero or short length.
 struct b2DistanceJointDef : public b2JointDef
 {
 	b2DistanceJointDef()
 	{
 		type = e_distanceJoint;
-		anchorPoint1.Set(0.0f, 0.0f);
-		anchorPoint2.Set(0.0f, 0.0f);
+		localAnchor1.Set(0.0f, 0.0f);
+		localAnchor2.Set(0.0f, 0.0f);
 	}
 
-	b2Vec2 anchorPoint1;
-	b2Vec2 anchorPoint2;
+	/// Build anchor points and length from world transforms and world anchor points.
+	/// @param xf1 transform of body 1.
+	/// @param xf2 transform of body 2.
+	/// @param anchor1 world position of anchor1.
+	/// @param anchor2 world position of anchor2.
+	void Build(	const b2XForm& xf1, const b2XForm& xf2,
+				const b2Vec2& anchor1, const b2Vec2& anchor2);
+
+	float32 length;
+	b2Vec2 localAnchor1;
+	b2Vec2 localAnchor2;
 };
 
+/// A distance joint constrains two points on two bodies
+/// to remain at a fixed distance from each other. You can view
+/// this as a massless, rigid rod.
 class b2DistanceJoint : public b2Joint
 {
 public:

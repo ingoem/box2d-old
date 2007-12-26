@@ -50,6 +50,7 @@
 #   undef max
 
 /* Windows static library */
+//#define FREEGLUT_STATIC
 #   ifdef FREEGLUT_STATIC
 
 #    define FGAPI
@@ -73,7 +74,7 @@
 #               ifndef _WIN32_WCE
 #                   pragma comment (lib, "freeglut.lib")
 #               endif
-#        endif
+#			endif
 
 #       endif
 

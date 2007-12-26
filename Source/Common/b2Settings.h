@@ -57,23 +57,70 @@ const int32 b2_maxProxies = 512;				// this must be a power of two
 const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
 
 // Dynamics
+
+/// A small length used as a collision and constraint tolerance. Usually it is
+/// chosen to be numerically significant, but visually insignificant.
 const float32 b2_linearSlop = 0.005f * b2_lengthUnitsPerMeter;	// 0.5 cm
+
+/// A small angle used as a collision and constraint tolerance. Usually it is
+/// chosen to be numerically significant, but visually insignificant.
 const float32 b2_angularSlop = 2.0f / 180.0f * b2_pi;			// 2 degrees
+
+/// Continuous collision detection (CCD) works with core, shrunken shapes. This is amount
+/// by which shapes are automatically shrunk to work with CCD. This must be larger than
+/// b2_linearSlop.
 const float32 b2_toiSlop = 8.0f * b2_linearSlop;
+
+/// A velocity threshold for elastic collisions. Any collision with a relative linear
+/// velocity below this threshold will be treated as inelastic.
 const float32 b2_velocityThreshold = 1.0f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;		// 1 m/s
+
+/// The maximum linear position correction used when solving constraints. This helps to
+/// prevent overshoot.
 const float32 b2_maxLinearCorrection = 0.2f * b2_lengthUnitsPerMeter;	// 20 cm
+
+/// The maximum angular position correction used when solving constraints. This helps to
+/// prevent overshoot.
 const float32 b2_maxAngularCorrection = 8.0f / 180.0f * b2_pi;			// 8 degrees
+
+/// This scale factor controls how fast overlap is resolved. Ideally this would be 1 so
+/// that overlap is removed in one time step. However using values close to 1 often lead
+/// to overshoot.
 const float32 b2_contactBaumgarte = 0.2f;
 
 // Sleep
-const float32 b2_timeToSleep = 0.5f * b2_timeUnitsPerSecond;	// half a second
+
+/// The time that a body must be still before it will go to sleep.
+const float32 b2_timeToSleep = 0.5f * b2_timeUnitsPerSecond;									// half a second
+
+/// A body cannot sleep if its linear velocity is above this tolerance.
 const float32 b2_linearSleepTolerance = 0.01f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;	// 1 cm/s
+
+/// A body cannot sleep if its angular velocity is above this tolerance.
 const float32 b2_angularSleepTolerance = 2.0f / 180.0f / b2_timeUnitsPerSecond;					// 2 degrees/s
 
-
 // Memory Allocation
+
+/// The current number of bytes allocated through b2Alloc.
 extern int32 b2_byteCount;
+
+/// Implement this function to use your own memory allocator.
 void* b2Alloc(int32 size);
+
+/// If you implement b2Alloc, you should also implement this function.
 void b2Free(void* mem);
+
+/// Version numbering scheme.
+/// See http://en.wikipedia.org/wiki/Software_versioning
+struct b2Version
+{
+	int32 major;
+	int32 minor;
+	int32 revision;
+};
+
+/// Current version.
+extern b2Version b2_currentVersion;
+
 
 #endif

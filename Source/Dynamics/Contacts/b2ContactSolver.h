@@ -62,12 +62,10 @@ public:
 	void SolveVelocityConstraints();
 	void FinalizeVelocityConstraints();
 
-	void InitPositionConstraints();
-	bool SolvePositionConstraints();
+	bool SolvePositionConstraints(float32 beta);
 
 	b2StackAllocator* m_allocator;
 	b2ContactConstraint* m_constraints;
 	int m_constraintCount;
 };
-
 #endif

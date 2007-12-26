@@ -17,6 +17,7 @@
 */
 
 #include "b2CircleContact.h"
+#include "../b2Body.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <new>

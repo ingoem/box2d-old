@@ -30,10 +30,10 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		m_flags |= e_bulletFlag;
 	}
 	m_xf.position = bd->position;
-	m_rotation = bd->rotation;
-	m_xf.R.Set(m_rotation);
+	m_angle = bd->rotation;
+	m_xf.R.Set(m_angle);
 	m_position0 = m_xf.position;
-	m_rotation0 = m_rotation;
+	m_angle0 = m_angle;
 	m_world = world;
 
 	m_linearDamping = b2Clamp(1.0f - bd->linearDamping, 0.0f, 1.0f);
@@ -79,6 +79,12 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	}
 	else
 	{
+		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+		{
+			s->Attach(this, b2Vec2::s_zero);
+			s->CreateProxy(m_world->m_broadPhase, m_xf);
+		}
+
 		m_flags |= e_staticFlag;
 		m_invMass = 0.0f;
 		m_invI = 0.0f;
@@ -150,7 +156,7 @@ void b2Body::RecomputeMass()
 	// TODO_ERIN
 }
 
-bool b2Body::SetPosition(const b2Vec2& position, float rotation)
+bool b2Body::SetOriginPosition(const b2Vec2& position, float angle)
 {
 	b2Assert(m_world->m_lock == false);
 	if (m_world->m_lock == true)
@@ -163,12 +169,12 @@ bool b2Body::SetPosition(const b2Vec2& position, float rotation)
 		return false;
 	}
 
-	m_rotation = rotation;
-	m_xf.R.Set(m_rotation);
+	m_angle = angle;
+	m_xf.R.Set(m_angle);
 	m_xf.position = position + b2Mul(m_xf.R, m_center);
 
 	m_position0 = m_xf.position;
-	m_rotation0 = m_rotation;
+	m_angle0 = m_angle;
 
 	bool freeze = false;
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
@@ -203,20 +209,19 @@ bool b2Body::SetPosition(const b2Vec2& position, float rotation)
 
 bool b2Body::SynchronizeShapes()
 {
-	b2XForm xf0(m_position0, b2Mat22(m_rotation0));
+	b2XForm xf0(m_position0, b2Mat22(m_angle0));
 
-	bool freeze = false;
+	bool inRange = true;
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		bool inRange = s->Synchronize(m_world->m_broadPhase, xf0, m_xf);
+		inRange = s->Synchronize(m_world->m_broadPhase, xf0, m_xf);
 		if (inRange == false)
 		{
-			freeze = true;
 			break;
 		}
 	}
 
-	if (freeze == true)
+	if (inRange == false)
 	{
 		m_flags |= e_frozenFlag;
 		m_linearVelocity.SetZero();

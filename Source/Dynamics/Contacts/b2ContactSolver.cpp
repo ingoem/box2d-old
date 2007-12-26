@@ -78,11 +78,11 @@ b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2Sta
 				ccp->separation = cp->separation;
 				ccp->positionImpulse = 0.0f;
 
-				b2Vec2 r1 = cp->position - b1->m_position;
-				b2Vec2 r2 = cp->position - b2->m_position;
+				b2Vec2 r1 = cp->position - b1->m_xf.position;
+				b2Vec2 r2 = cp->position - b2->m_xf.position;
 
-				ccp->localAnchor1 = b2MulT(b1->m_R, r1);
-				ccp->localAnchor2 = b2MulT(b2->m_R, r2);
+				ccp->localAnchor1 = b2MulT(b1->m_xf.R, r1);
+				ccp->localAnchor2 = b2MulT(b2->m_xf.R, r2);
 
 				float32 r1Sqr = b2Dot(r1, r1);
 				float32 r2Sqr = b2Dot(r2, r2);
@@ -151,8 +151,8 @@ void b2ContactSolver::InitVelocityConstraints()
 			{
 				b2ContactConstraintPoint* ccp = c->points + j;
 				b2Vec2 P = ccp->normalImpulse * normal + ccp->tangentImpulse * tangent;
-				b2Vec2 r1 = b2Mul(b1->m_R, ccp->localAnchor1);
-				b2Vec2 r2 = b2Mul(b2->m_R, ccp->localAnchor2);
+				b2Vec2 r1 = b2Mul(b1->m_xf.R, ccp->localAnchor1);
+				b2Vec2 r2 = b2Mul(b2->m_xf.R, ccp->localAnchor2);
 				b1->m_angularVelocity -= invI1 * b2Cross(r1, P);
 				b1->m_linearVelocity -= invMass1 * P;
 				b2->m_angularVelocity += invI2 * b2Cross(r2, P);
@@ -190,8 +190,8 @@ void b2ContactSolver::SolveVelocityConstraints()
 		{
 			b2ContactConstraintPoint* ccp = c->points + j;
 
-			b2Vec2 r1 = b2Mul(b1->m_R, ccp->localAnchor1);
-			b2Vec2 r2 = b2Mul(b2->m_R, ccp->localAnchor2);
+			b2Vec2 r1 = b2Mul(b1->m_xf.R, ccp->localAnchor1);
+			b2Vec2 r2 = b2Mul(b2->m_xf.R, ccp->localAnchor2);
 
 			// Relative velocity at contact
 			b2Vec2 dv = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
@@ -221,8 +221,8 @@ void b2ContactSolver::SolveVelocityConstraints()
 		{
 			b2ContactConstraintPoint* ccp = c->points + j;
 
-			b2Vec2 r1 = b2Mul(b1->m_R, ccp->localAnchor1);
-			b2Vec2 r2 = b2Mul(b2->m_R, ccp->localAnchor2);
+			b2Vec2 r1 = b2Mul(b1->m_xf.R, ccp->localAnchor1);
+			b2Vec2 r2 = b2Mul(b2->m_xf.R, ccp->localAnchor2);
 
 			// Relative velocity at contact
 			b2Vec2 dv = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
@@ -265,12 +265,7 @@ void b2ContactSolver::FinalizeVelocityConstraints()
 	}
 }
 
-void b2ContactSolver::InitPositionConstraints()
-{
-	// TODO_ERIN anything here?
-}
-
-bool b2ContactSolver::SolvePositionConstraints()
+bool b2ContactSolver::SolvePositionConstraints(float32 beta)
 {
 	float32 minSeparation = 0.0f;
 
@@ -291,11 +286,11 @@ bool b2ContactSolver::SolvePositionConstraints()
 		{
 			b2ContactConstraintPoint* ccp = c->points + j;
 
-			b2Vec2 r1 = b2Mul(b1->m_R, ccp->localAnchor1);
-			b2Vec2 r2 = b2Mul(b2->m_R, ccp->localAnchor2);
+			b2Vec2 r1 = b2Mul(b1->m_xf.R, ccp->localAnchor1);
+			b2Vec2 r2 = b2Mul(b2->m_xf.R, ccp->localAnchor2);
 
-			b2Vec2 p1 = b1->m_position + r1;
-			b2Vec2 p2 = b2->m_position + r2;
+			b2Vec2 p1 = b1->m_xf.position + r1;
+			b2Vec2 p2 = b2->m_xf.position + r2;
 			b2Vec2 dp = p2 - p1;
 
 			// Approximate the current separation.
@@ -305,7 +300,7 @@ bool b2ContactSolver::SolvePositionConstraints()
 			minSeparation = b2Min(minSeparation, separation);
 
 			// Prevent large corrections and allow slop.
-			float32 C = b2_contactBaumgarte * b2Clamp(separation + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
+			float32 C = beta * b2Clamp(separation + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
 
 			// Compute normal impulse
 			float32 dImpulse = -ccp->normalMass * C;
@@ -317,13 +312,13 @@ bool b2ContactSolver::SolvePositionConstraints()
 
 			b2Vec2 impulse = dImpulse * normal;
 
-			b1->m_position -= invMass1 * impulse;
-			b1->m_rotation -= invI1 * b2Cross(r1, impulse);
-			b1->m_R.Set(b1->m_rotation);
+			b1->m_xf.position -= invMass1 * impulse;
+			b1->m_angle -= invI1 * b2Cross(r1, impulse);
+			b1->m_xf.R.Set(b1->m_angle);
 
-			b2->m_position += invMass2 * impulse;
-			b2->m_rotation += invI2 * b2Cross(r2, impulse);
-			b2->m_R.Set(b2->m_rotation);
+			b2->m_xf.position += invMass2 * impulse;
+			b2->m_angle += invI2 * b2Cross(r2, impulse);
+			b2->m_xf.R.Set(b2->m_angle);
 		}
 	}
 

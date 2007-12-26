@@ -17,37 +17,41 @@
 */
 
 #include "b2PolyContact.h"
+#include "../b2Body.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <memory>
 #include <new>
 
-b2Contact* b2PolyContact::Create(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator)
+b2Contact* b2PolygonContact::Create(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator)
 {
-	void* mem = allocator->Allocate(sizeof(b2PolyContact));
-	return new (mem) b2PolyContact(shape1, shape2);
+	void* mem = allocator->Allocate(sizeof(b2PolygonContact));
+	return new (mem) b2PolygonContact(shape1, shape2);
 }
 
-void b2PolyContact::Destroy(b2Contact* contact, b2BlockAllocator* allocator)
+void b2PolygonContact::Destroy(b2Contact* contact, b2BlockAllocator* allocator)
 {
-	((b2PolyContact*)contact)->~b2PolyContact();
-	allocator->Free(contact, sizeof(b2PolyContact));
+	((b2PolygonContact*)contact)->~b2PolygonContact();
+	allocator->Free(contact, sizeof(b2PolygonContact));
 }
 
-b2PolyContact::b2PolyContact(b2Shape* s1, b2Shape* s2)
+b2PolygonContact::b2PolygonContact(b2Shape* s1, b2Shape* s2)
 	: b2Contact(s1, s2)
 {
-	b2Assert(m_shape1->m_type == e_polyShape);
-	b2Assert(m_shape2->m_type == e_polyShape);
+	b2Assert(m_shape1->m_type == e_polygonShape);
+	b2Assert(m_shape2->m_type == e_polygonShape);
 	m_manifold.pointCount = 0;
 }
 
-void b2PolyContact::Evaluate()
+void b2PolygonContact::Evaluate()
 {
+	b2Body* b1 = m_shape1->GetBody();
+	b2Body* b2 = m_shape2->GetBody();
+
 	b2Manifold m0;
 	memcpy(&m0, &m_manifold, sizeof(b2Manifold));
 
-	b2CollidePoly(&m_manifold, (b2PolyShape*)m_shape1, (b2PolyShape*)m_shape2);
+	b2CollidePolygons(&m_manifold, (b2PolygonShape*)m_shape1, b1->m_xf, (b2PolygonShape*)m_shape2, b2->m_xf);
 
 	// Match contact ids to facilitate warm starting.
 	if (m_manifold.pointCount > 0)

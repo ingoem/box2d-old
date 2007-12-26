@@ -27,13 +27,14 @@ public:
 	{
 #if 1
 		{
-			b2BoxDef sd;
-			sd.extents.Set(50.0f, 10.0f);
-
+			b2PolygonDef sd;
+			b2Vec2 extents(50.0f, 10.0f);
+			sd.SetAsBox(extents, b2XForm::s_identity);
+			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			bd.AddShape(m_world->Create(&sd));
+			m_world->Create(&bd);
 		}
 
 		{
@@ -41,16 +42,15 @@ public:
 			sd.radius = 1.0f;
 			sd.density = 1.0f;
 
-			b2BodyDef bd;
-			bd.AddShape(&sd);
-
 			float32 restitution[7] = {0.0f, 0.1f, 0.3f, 0.5f, 0.75f, 0.9f, 1.0f};
 
-			for (int32 i = 0; i < 7; ++i)
+			for (int32 i = 0; i < 1; ++i)
 			{
 				sd.restitution = restitution[i];
+				b2BodyDef bd;
+				bd.AddShape(m_world->Create(&sd));
 				bd.position.Set(-10.0f + 3.0f * i, 20.0f);
-				m_world->CreateBody(&bd);
+				m_world->Create(&bd);
 			}
 		}
 #elif 1

@@ -48,6 +48,8 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_allowSleep = doSleep;
 	m_gravity = gravity;
 
+	m_lock = false;
+
 	m_contactManager.m_world = this;
 	void* mem = b2Alloc(sizeof(b2BroadPhase));
 	m_broadPhase = new (mem) b2BroadPhase(worldAABB, &m_contactManager);
@@ -158,6 +160,7 @@ void b2World::Destroy(b2Shape* s)
 		--s->m_body->m_shapeCount;
 	}
 
+	s->DestroyProxy(m_broadPhase);
 	b2Shape::Destroy(s, &m_blockAllocator);
 	s = NULL;
 }
@@ -241,9 +244,7 @@ void b2World::Destroy(b2Body* b)
 		m_bodyList = b->m_next;
 	}
 
-	b->m_flags |= b2Body::e_destroyFlag;
 	--m_bodyCount;
-
 	b->~b2Body();
 	m_blockAllocator.Free(b, sizeof(b2Body));
 }
@@ -284,10 +285,9 @@ b2Joint* b2World::Create(const b2JointDef* def)
 	{
 		// Reset the proxies on the body with the minimum number of shapes.
 		b2Body* b = def->body1->m_shapeCount < def->body2->m_shapeCount ? def->body1 : def->body2;
-		b2XForm xf(b->m_position, b->m_R);
 		for (b2Shape* s = b->m_shapeList; s; s = s->m_bodyNext)
 		{
-			s->ResetProxy(m_broadPhase, xf);
+			s->ResetProxy(m_broadPhase, b->m_xf);
 		}
 	}
 
@@ -372,10 +372,9 @@ void b2World::Destroy(b2Joint* j)
 	{
 		// Reset the proxies on the body with the minimum number of shapes.
 		b2Body* b = body1->m_shapeCount < body2->m_shapeCount ? body1 : body2;
-		b2XForm xf(b->m_position, b->m_R);
 		for (b2Shape* s = b->m_shapeList; s; s = s->m_bodyNext)
 		{
-			s->ResetProxy(m_broadPhase, xf);
+			s->ResetProxy(m_broadPhase, b->m_xf);
 		}
 	}
 }
@@ -492,6 +491,41 @@ void b2World::Integrate(const b2TimeStep& step)
 	}
 
 	m_stackAllocator.Free(stack);
+
+	// Synchronize shapes.
+	b2Body* b = m_bodyList;
+	while (b)
+	{
+		uint32 skipFlags = b2Body::e_sleepFlag | b2Body::e_staticFlag | b2Body::e_frozenFlag;
+		if (b->m_flags & skipFlags)
+		{
+			b = b->GetNext();
+			continue;
+		}
+		
+		// Update shapes (for broad-phase). If the shapes go out of
+		// the world AABB then shapes and contacts may be destroyed,
+		// including contacts that are
+		bool inRange = b->SynchronizeShapes();
+
+		// Did the body's shapes leave the world?
+		if (inRange == false && m_boundaryListener != NULL)
+		{
+			b2BoundaryListener::Response response = m_boundaryListener->Violation(b);
+			if (response == b2BoundaryListener::e_destroyBody)
+			{
+				b2Body* bNuke = b;
+				b = b->GetNext();
+				Destroy(bNuke);
+				continue;
+			}
+		}
+
+		b = b->GetNext();
+	}
+
+	// Commit shape proxy movements to the broad-phase so that new contacts are created.
+	m_broadPhase->Commit();
 }
 
 void b2World::SolvePositionConstraints(const b2TimeStep& step)
@@ -637,9 +671,6 @@ void b2World::Step(float32 dt, int32 iterations)
 	
 	// Integrate velocities, solve velocity constraints, and integrate positions.
 	Integrate(step);
-
-	// Commit proxy movements to the broad-phase so that new contacts are created.
-	m_broadPhase->Commit();
 
 	// Update contacts.
 	m_contactManager.Collide(step);

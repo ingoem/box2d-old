@@ -60,7 +60,7 @@ public:
 	virtual ~b2BoundaryListener() {}
 
 	/// This is called for each body that leaves the world boundary.
-	virtual Response NotifyBoundaryViolated(b2Body* body) = 0;
+	virtual Response Violation(b2Body* body) = 0;
 };
 
 
@@ -94,17 +94,20 @@ struct b2SolverTweaks
 
 /// Implement this class to provide collision filtering. In other words, you can implement
 /// this class if you want finer control over contact creation.
+/// You can also use this class to tweak contact settings. These tweaks persist until
+/// you tweak the settings again or the contact is destroyed.
 class b2ContactListener
 {
 public:
 	virtual ~b2ContactListener() {}
 
-	/// Called when a TOI event occurs. The manifold normal points from shape1 to shape2.
-	/// @param tweaks allows you to adjust the contact solver behavior.
-	/// @param manifold the contact geometry. You may adjust this, but be careful.
+	/// Called when a time of impact (TOI) event occurs.
+	/// @param point1 closest point on shape1.
+	/// @param point2 closest point on shape2.
 	/// @param shape1 the first shape in the contact.
 	/// @param shape2 the second shape in the contact.
-	virtual void TOI(b2SolverTweaks* tweaks, b2Manifold* manifold, const b2Shape* shape1, const b2Shape* shape2) = 0;
+	/// @return false if this TOI event should be ignored.
+	virtual bool TOI(const b2Vec2& point1, const b2Vec2& point2, const b2Shape* shape1, const b2Shape* shape2) = 0;
 
 	/// Called when a new non-empty contact manifold is created. The manifold normal points from shape1 to shape2.
 	/// @param tweaks allows you to adjust the contact solver behavior.
@@ -120,7 +123,8 @@ public:
 	/// @param shape2 the second shape in the contact.
 	virtual void Persist(b2SolverTweaks* tweaks, b2Manifold* manifold, const b2Shape* shape1, const b2Shape* shape2) = 0;
 
-	/// Called when contact ends.
+	/// Called when contact ends. This does not mean the contact object is destroyed, it just
+	/// means that there are no contact points.
 	/// @param shape1 the first shape in the contact.
 	/// @param shape2 the second shape in the contact.
 	virtual void End(const b2Shape* shape1, const b2Shape* shape2) = 0;
@@ -144,13 +148,14 @@ public:
 	enum
 	{
 		e_shapeBit				= 0x0001, ///< draw shapes
-		e_pairBit				= 0x0002,
-		e_aabbBit				= 0x0004,
-		e_obbBit				= 0x0008,
-		e_jointBit				= 0x0010,
-		e_contactPointBit		= 0x0020,
-		e_contactImpulseBit		= 0x0040,
-		e_frictionImpulseBit	= 0x0080,
+		e_pairBit				= 0x0002, ///< draw broad-phase pairs
+		e_aabbBit				= 0x0004, ///< draw axis aligned bounding boxes
+		e_obbBit				= 0x0008, ///< draw oriented bounding boxes
+		e_jointBit				= 0x0010, ///< draw joint connections
+		e_contactPointBit		= 0x0020, ///< draw contact points
+		e_contactNormalsBit		= 0x0040, ///< draw contact normals
+		e_contactImpulseBit		= 0x0080, ///< draw contact impulses
+		e_frictionImpulseBit	= 0x0100, ///< draw friction impulses
 	};
 
 	/// Set the drawing flags.

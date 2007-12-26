@@ -17,6 +17,7 @@
 */
 
 #include "b2PolyAndCircleContact.h"
+#include "../b2Body.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <new>
@@ -36,7 +37,7 @@ void b2PolyAndCircleContact::Destroy(b2Contact* contact, b2BlockAllocator* alloc
 b2PolyAndCircleContact::b2PolyAndCircleContact(b2Shape* s1, b2Shape* s2)
 : b2Contact(s1, s2)
 {
-	b2Assert(m_shape1->m_type == e_polyShape);
+	b2Assert(m_shape1->m_type == e_polygonShape);
 	b2Assert(m_shape2->m_type == e_circleShape);
 	m_manifold.pointCount = 0;
 	m_manifold.points[0].normalImpulse = 0.0f;
@@ -45,7 +46,10 @@ b2PolyAndCircleContact::b2PolyAndCircleContact(b2Shape* s1, b2Shape* s2)
 
 void b2PolyAndCircleContact::Evaluate()
 {
-	b2CollidePolyAndCircle(&m_manifold, (b2PolyShape*)m_shape1, (b2CircleShape*)m_shape2);
+	b2Body* b1 = m_shape1->GetBody();
+	b2Body* b2 = m_shape2->GetBody();
+
+	b2CollidePolygonAndCircle(&m_manifold, (b2PolygonShape*)m_shape1, b1->m_xf, (b2CircleShape*)m_shape2, b2->m_xf);
 
 	if (m_manifold.pointCount > 0)
 	{

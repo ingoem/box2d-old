@@ -77,18 +77,17 @@ Version 1.4.3
 Version 2.0.0
 - CCD.
 - Apply impulse at TOI.
-- Collision doesn't include any files from Dynamics.
-- User created shapes.
-- Shape ray casts.
+- Collision doesn't include any files from Dynamics. DONE
+- User created shapes. DONE
+- Shape ray casts. DONE
 - Contact callbacks.
 - Doxygen.
-- Deferred body destruction is gone.
-- JointDefs in local coordinates so that save/load works with limits.
+- Deferred body destruction is gone. DONE
+- JointDefs in local coordinates so that save/load works with limits. DONE
 - Debug display interface.
 - No static pairs.
 - Sensors.
-- Wake up on apply force.
-- Per body disable warm starting.
+- Wake up on apply force. DONE
 - Improve polygon collision performance. DONE.
 - Access version number.
 - Car example.
@@ -111,12 +110,15 @@ Version 2.3.0
 - Convex hull tool.
 - Angle joint.
 - Weld joint.
+- Speculative contacts.
 
 Version 2.4.0
 - Spline joints.
+- Contact block solver.
 
 Version 2.5.0
 - Convex decomposition.
+- Handle variable time steps.
 
 Version 2.6.0
 - Ropes and particles.

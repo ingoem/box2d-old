@@ -115,30 +115,29 @@ public:
 	/// This breaks any contacts and wakes the other bodies.
 	/// @param position the new world position of the body's origin (not necessarily
 	/// the center of mass).
-	/// @param rotation the new world rotation of the body in radians.
+	/// @param angle the new world rotation angle of the body in radians.
 	/// @return false if the movement put a shape outside the world. In this case the
 	/// body is automatically frozen.
-	bool SetPosition(const b2Vec2& position, float32 rotation);
+	bool SetOriginPosition(const b2Vec2& position, float32 angle);
 
 	/// Get the position of the body's origin. The body's origin does not
 	/// necessarily coincide with the center of mass. It depends on how the
 	/// shapes are created.
 	/// @return the world position of the body's origin.
-	b2Vec2 GetPosition() const;
+	b2Vec2 GetOriginPosition() const;
 
-	/// Get the rotation matrix. This is used to transform local
-	/// vectors into world vectors.
+	/// Get the angle in radians.
+	/// @return the current world rotation angle in radians.
+	float32 GetAngle() const;
+
+	/// Get the rotation matrix.
 	/// @return the world rotation matrix.
-	const b2Mat22& GetRotation() const;
+	const b2Mat22& GetRotationMatrix() const;
 
-	/// Get the position of the body's center of mass. The body's center of mass
-	/// does not necessarily coincide with the body's origin.
-	/// @return the world position of the center of mass.
-	b2Vec2 GetCenterPosition() const;
-
-	/// Get the rotation in radians.
-	/// @return the world rotation angle in radians.
-	float32 GetRotationAngle() const;
+	/// Get the body's transform, which includes the center of mass position.
+	/// The body's center of mass does not necessarily coincide with the body's origin.
+	/// @return the world transform of the center of mass frame.
+	const b2XForm& GetXForm() const;
 
 	/// Set the linear velocity of the center of mass.
 	/// @param v the new linear velocity of the center of mass.
@@ -185,7 +184,7 @@ public:
 	float32 GetInertia() const;
 
 	/// Get the world coordinates of a point given the local coordinates.
-	/// @param localPoint a point on the body measured relative the the body's origin.
+	/// @param localPoint a point on the body measured relative the the body's center of mass.
 	/// @return the same point expressed in world coordinates.
 	b2Vec2 GetWorldPoint(const b2Vec2& localPoint);
 
@@ -194,10 +193,14 @@ public:
 	/// @return the same vector expressed in world coordinates.
 	b2Vec2 GetWorldVector(const b2Vec2& localVector);
 
-	/// Returns a local point relative to the center of mass given a world point.
+	/// Gets a local point relative to the center of mass given a world point.
+	/// @param a point in world coordinates.
+	/// @return the corresponding local point relative to the center of mass.
 	b2Vec2 GetLocalPoint(const b2Vec2& worldPoint);
 
-	/// Returns a local vector given a world vector.
+	/// Gets a local vector given a world vector.
+	/// @param a vector in world coordinates.
+	/// @return the corresponding local vector.
 	b2Vec2 GetLocalVector(const b2Vec2& worldVector);
 
 	/// Is this body treated like a bullet for continuous collision detection?
@@ -246,9 +249,8 @@ public:
 		e_islandFlag		= 0x0004,
 		e_sleepFlag			= 0x0008,
 		e_allowSleepFlag	= 0x0010,
-		e_destroyFlag		= 0x0020,
-		e_bulletFlag		= 0x0040,
-		e_toiResolved		= 0x0080,
+		e_bulletFlag		= 0x0020,
+		e_toiResolved		= 0x0040,
 	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);
@@ -262,15 +264,23 @@ public:
 	// It may lie, depending on the collideConnected flag.
 	bool IsConnected(const b2Body* other) const;
 
+	void GetSweep(b2Sweep* sweep) const;
+
+	void SetTOI(float32 toi);
+	float32 GetTOI() const;
+
+	void ResetTOI();
+	void ResolveTOI();
+
 	uint32 m_flags;
 
 	b2XForm m_xf;	// center of mass transform
-	float32 m_rotation;
+	float32 m_angle;
 
 	// Conservative advancement data.
-	float32 m_toi;
 	b2Vec2 m_position0;
-	float32 m_rotation0;
+	float32 m_angle0;
+	float32 m_toi;
 
 	b2Vec2 m_linearVelocity;
 	float32 m_angularVelocity;
@@ -307,24 +317,24 @@ inline void b2BodyDef::AddShape(b2Shape* shape)
 	shapes = shape;
 }
 
-inline b2Vec2 b2Body::GetPosition() const
+inline b2Vec2 b2Body::GetOriginPosition() const
 {
 	return b2Mul(m_xf, -m_center);
 }
 
-inline const b2Mat22& b2Body::GetRotation() const
+inline const b2Mat22& b2Body::GetRotationMatrix() const
 {
 	return m_xf.R;
 }
 
-inline b2Vec2 b2Body::GetCenterPosition() const
+inline float32 b2Body::GetAngle() const
 {
-	return m_xf.position;
+	return m_angle;
 }
 
-inline float32 b2Body::GetRotationAngle() const
+inline const b2XForm& b2Body::GetXForm() const
 {
-	return m_rotation;
+	return m_xf;
 }
 
 inline void b2Body::SetLinearVelocity(const b2Vec2& v)
@@ -482,6 +492,53 @@ inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
 	WakeUp();
 	m_linearVelocity += m_invMass * impulse;
 	m_angularVelocity += m_invI * b2Cross(point - m_xf.position, impulse);
+}
+
+inline void b2Body::GetSweep(b2Sweep* sweep) const
+{
+	if (m_flags & e_toiResolved)
+	{
+		sweep->position = (1.0f - m_toi) * m_position0 + m_toi * m_xf.position;
+		sweep->theta = (1.0f - m_toi) * m_angle0 + m_toi * m_angle;
+		sweep->velocity.SetZero();
+		sweep->omega = 0.0f;
+	}
+	else
+	{
+		sweep->position = m_position0;
+		sweep->theta = m_angle0;
+		sweep->velocity = m_xf.position - m_position0;
+		sweep->omega = m_angle - m_angle0;
+	}
+}
+
+inline void b2Body::SetTOI(float32 toi)
+{
+	m_toi = toi;
+}
+
+inline float32 b2Body::GetTOI() const
+{
+	return m_toi;
+}
+
+inline void b2Body::ResetTOI()
+{
+	m_flags &= ~e_toiResolved;
+	m_toi = 1.0f;
+}
+
+inline void b2Body::ResolveTOI()
+{
+	m_flags |= e_toiResolved;
+
+	// Commit body1 to toi position.
+	m_xf.position = (1.0f - m_toi) * m_position0 + m_toi * m_xf.position;
+	m_angle = (1.0f - m_toi) * m_angle0 + m_toi * m_angle;
+	m_xf.R.Set(m_angle);
+
+	m_position0 = m_xf.position;
+	m_angle0 = m_angle;
 }
 
 #endif

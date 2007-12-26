@@ -22,9 +22,10 @@
 // This algorithm uses conservative advancement to compute the time of
 // impact (TOI) of two shapes.
 // Refs: Bullet, Young Kim
-template <typename T1, typename T2>
-float32 b2TimeOfImpact(const T1* shape1, const b2Sweep& sweep1,
-					   const T2* shape2, const b2Sweep& sweep2)
+float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
+					   const b2Shape* shape1, const b2Sweep& sweep1,
+					   const b2Shape* shape2, const b2Sweep& sweep2,
+					   float32 maxTOI)
 {
 	b2Vec2 p1Start = sweep1.position;
 	float32 a1Start = sweep1.theta;
@@ -56,25 +57,26 @@ float32 b2TimeOfImpact(const T1* shape1, const b2Sweep& sweep1,
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
 		// Get the accurate distance between shapes.
-		b2Vec2 x1, x2;
-		float32 distance = b2Distance(&x1, &x2, shape1, xf1, shape2, xf2);
+		float32 distance = b2Distance(x1, x2, shape1, xf1, shape2, xf2);
 		if (distance < b2_linearSlop)
 		{
+			// Need a non-zero distance to form a contact normal.
+			b2Assert(t1 == 0.0f || distance > FLT_EPSILON);
 			break;
 		}
 
 		// Compute upper bound on remaining movement.
-		b2Vec2 d = x2 - x1;
-		d.Normalize();
-		float32 relativeVelocity = (1.0f - t1) * (b2Dot(d, v1 - v2) + b2Abs(omega1) * r1 + b2Abs(omega2) * r2);
+		b2Vec2 n = *x2 - *x1;
+		n.Normalize();
+		float32 relativeVelocity = (1.0f - t1) * (b2Dot(n, v1 - v2) + b2Abs(omega1) * r1 + b2Abs(omega2) * r2);
 		if (b2Abs(relativeVelocity) < FLT_EPSILON)
 		{
 			t1 = 1.0f;
 			break;
 		}
 
-		// Get the conservative time increment.
-		float32 dt = distance / relativeVelocity;
+		// Get the conservative time increment. Don't advance all the way.
+		float32 dt = (distance - 0.25f * b2_linearSlop) / relativeVelocity;
 		float32 t2 = t1 + dt;
 
 		// The shapes may be moving apart.
@@ -88,6 +90,11 @@ float32 b2TimeOfImpact(const T1* shape1, const b2Sweep& sweep1,
 		if (t2 < (1.0f + 100.0f * FLT_EPSILON) * t1)
 		{
 			break;
+		}
+
+		if (t2 > maxTOI)
+		{
+			return t2;
 		}
 
 		t1 = t2;

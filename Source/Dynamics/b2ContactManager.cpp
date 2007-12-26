@@ -96,16 +96,7 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 	if (c != &m_nullContact)
 	{
 		b2Assert(m_world->m_contactCount > 0);
-
-		if (m_destroyImmediate == true)
-		{
-			DestroyContact(c);
-			c = NULL;
-		}
-		else
-		{
-			c->m_flags |= b2Contact::e_destroyFlag;
-		}
+		DestroyContact(c);
 	}
 }
 
@@ -183,23 +174,6 @@ void b2ContactManager::DestroyContact(b2Contact* c)
 	--m_world->m_contactCount;
 }
 
-// Destroy any contacts marked for deferred destruction.
-void b2ContactManager::CleanContactList()
-{
-	b2Contact* c = m_world->m_contactList;
-	while (c != NULL)
-	{
-		b2Contact* c0 = c;
-		c = c->m_next;
-
-		if (c0->m_flags & b2Contact::e_destroyFlag)
-		{
-			DestroyContact(c0);
-			c0 = NULL;
-		}
-	}
-}
-
 // This is the top level collision call for the time step. Here
 // all the narrow phase collision is processed for the world
 // contact list.
@@ -209,6 +183,8 @@ void b2ContactManager::Collide(const b2TimeStep& step)
 	// TODO_ERIN build TOI islands based on proxy pairs.
 	// TODO_ERIN invalidate TOIs based on proxy pairs. Preserve
 	// valid TOIs.
+	step;
+#if 0
 	if (step.dt > 0.0f && b2World::s_enablePositionCorrection)
 	{
 		for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)
@@ -268,6 +244,7 @@ void b2ContactManager::Collide(const b2TimeStep& step)
 			b->m_xf.R.Set(b->m_rotation);
 		}
 	}
+#endif
 
 	for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
 	{

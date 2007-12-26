@@ -65,6 +65,7 @@ struct b2JointNode
 	b2JointNode* next;
 };
 
+/// Joint definitions are used to construct joints.
 struct b2JointDef
 {
 	b2JointDef()
@@ -76,13 +77,24 @@ struct b2JointDef
 		collideConnected = false;
 	}
 
+	/// The joint type is set automatically for concrete joint types.
 	b2JointType type;
+
+	/// Use this to attach application specific data to your joints.
 	void* userData;
+
+	/// The first attached body.
 	b2Body* body1;
+
+	/// The second attached body.
 	b2Body* body2;
+
+	/// Set this flag to true if the attached bodies should collide.
 	bool collideConnected;
 };
 
+/// The base joint class. Joints are used to constraint two bodies together in
+/// various fashions. Some joints also feature limits and motors.
 class b2Joint
 {
 public:

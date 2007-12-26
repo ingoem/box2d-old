@@ -154,7 +154,7 @@ static bool InPoints(const b2Vec2& w, const b2Vec2* points, int32 pointCount)
 }
 
 template <typename T1, typename T2>
-float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
+float32 DistanceGeneric(b2Vec2* x1, b2Vec2* x2,
 				   const T1* shape1, const b2XForm& xf1,
 				   const T2* shape2, const b2XForm& xf2)
 {
@@ -162,8 +162,8 @@ float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
 	b2Vec2 points[3];
 	int32 pointCount = 0;
 
-	*x1 = shape1->Centroid(xf1);
-	*x2 = shape2->Centroid(xf2);
+	*x1 = shape1->GetFirstVertex(xf1);
+	*x2 = shape2->GetFirstVertex(xf2);
 
 	float32 vSqr = 0.0f;
 	const int32 maxIterations = 20;
@@ -240,7 +240,7 @@ float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
 	return sqrtf(vSqr);
 }
 
-float32 b2Distance(
+static float32 DistanceCC(
 	b2Vec2* x1, b2Vec2* x2,
 	const b2CircleShape* circle1, const b2XForm& xf1,
 	const b2CircleShape* circle2, const b2XForm& xf2)
@@ -280,7 +280,7 @@ struct Point
 		return p;
 	}
 
-	b2Vec2 Centroid(const b2XForm&) const
+	b2Vec2 GetFirstVertex(const b2XForm&) const
 	{
 		return p;
 	}
@@ -290,7 +290,7 @@ struct Point
 
 // GJK is more robust with polygon-vs-point than polygon-vs-circle.
 // So we convert polygon-vs-circle to polygon-vs-point.
-float32 b2Distance(
+static float32 DistancePC(
 	b2Vec2* x1, b2Vec2* x2,
 	const b2PolygonShape* polygon, const b2XForm& xf1,
 	const b2CircleShape* circle, const b2XForm& xf2)
@@ -302,7 +302,7 @@ float32 b2Distance(
 	xfp.position.SetZero();
 	xfp.R.SetIdentity();
 
-	float32 distance = b2Distance(x1, x2, polygon, xf1, &point, xfp);
+	float32 distance = DistanceGeneric(x1, x2, polygon, xf1, &point, xfp);
 
 	if (distance > circle->m_radius)
 	{
@@ -320,4 +320,32 @@ float32 b2Distance(
 	return distance;
 }
 
+float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
+				   const b2Shape* shape1, const b2XForm& xf1,
+				   const b2Shape* shape2, const b2XForm& xf2)
+{
+	b2ShapeType type1 = shape1->GetType();
+	b2ShapeType type2 = shape2->GetType();
 
+	if (type1 == e_circleShape && type2 == e_circleShape)
+	{
+		return DistanceCC(x1, x2, (b2CircleShape*)shape1, xf1, (b2CircleShape*)shape2, xf2);
+	}
+	
+	if (type1 == e_polygonShape && type2 == e_circleShape)
+	{
+		return DistancePC(x1, x2, (b2PolygonShape*)shape1, xf1, (b2CircleShape*)shape2, xf2);
+	}
+
+	if (type1 == e_circleShape && type2 == e_polygonShape)
+	{
+		return DistancePC(x2, x1, (b2PolygonShape*)shape2, xf2, (b2CircleShape*)shape1, xf1);
+	}
+
+	if (type1 == e_polygonShape && type2 == e_polygonShape)
+	{
+		return DistanceGeneric(x1, x2, (b2PolygonShape*)shape1, xf1, (b2PolygonShape*)shape2, xf2);
+	}
+
+	return 0.0f;
+}

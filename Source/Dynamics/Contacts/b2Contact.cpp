@@ -20,6 +20,7 @@
 #include "b2CircleContact.h"
 #include "b2PolyAndCircleContact.h"
 #include "b2PolyContact.h"
+#include "b2ContactSolver.h"
 #include "../../Collision/b2Collision.h"
 #include "../../Collision/Shapes/b2Shape.h"
 #include "../../Common/b2BlockAllocator.h"
@@ -33,7 +34,7 @@ void b2Contact::InitializeRegisters()
 {
 	AddType(b2CircleContact::Create, b2CircleContact::Destroy, e_circleShape, e_circleShape);
 	AddType(b2PolyAndCircleContact::Create, b2PolyAndCircleContact::Destroy, e_polygonShape, e_circleShape);
-	AddType(b2PolyContact::Create, b2PolyContact::Destroy, e_polygonShape, e_polygonShape);
+	AddType(b2PolygonContact::Create, b2PolygonContact::Destroy, e_polygonShape, e_polygonShape);
 }
 
 void b2Contact::AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destoryFcn,
@@ -175,7 +176,53 @@ void b2Contact::Update(b2ContactListener* listener)
 	}
 }
 
-float32 b2Contact::ComputeTOI()
+float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 {
-	return b2TimeOfImpact(m_shape1, m_shape2);
+	b2Body* b1 = m_shape1->GetBody();
+	b2Body* b2 = m_shape2->GetBody();
+	b2Sweep sweep1, sweep2;
+	b1->GetSweep(&sweep1);
+	b2->GetSweep(&sweep2);
+	float32 toi1 = b1->GetTOI();
+	float32 toi2 = b2->GetTOI();
+	b2Vec2 point1, point2;
+	float32 maxTOI = b2Max(toi1, toi2);
+
+	float32 toi = b2TimeOfImpact(&point1, &point2, m_shape1, sweep1, m_shape2, sweep2, maxTOI);
+	if (toi > 0.0f && toi < toi1 && toi < toi2)
+	{
+		bool apply = true;
+		if (listener)
+		{
+			apply = listener->TOI(point1, point2, m_shape1, m_shape2);
+		}
+
+		if (apply)
+		{
+			b1->SetTOI(toi);
+			b2->SetTOI(toi);
+		}
+	}
+
+	return toi;
+}
+
+void b2Contact::ResolveTOI(b2ContactListener* listener, b2StackAllocator* allocator, float32 toi)
+{
+	b2Body* b1 = m_shape1->GetBody();
+	b2Body* b2 = m_shape2->GetBody();
+
+	b2Assert(b1->m_toi == toi);
+	b2Assert(b2->m_toi == toi);
+
+	b1->ResolveTOI();
+	b2->ResolveTOI();
+
+	Update(listener);
+
+	b2Contact* contact = this;
+	b2ContactSolver solver(&contact, 1, allocator);
+	solver.InitVelocityConstraints();
+	solver.SolveVelocityConstraints();
+	solver.SolvePositionConstraints(0.8f);
 }

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -16,36 +16,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "b2Settings.h"
-#include <cstdlib>
+#include "b2Math.h"
 
-b2Version b2_currentVersion = {2, 0, 0};
-
-int32 b2_byteCount = 0;
-
-
-
-// Memory allocators. Modify these to use your own allocator.
-void* b2Alloc(int32 size)
-{
-	size += 4;
-	b2_byteCount += size;
-	char* bytes = (char*)malloc(size);
-	*(int32*)bytes = size;
-	return bytes + 4;
-}
-
-void b2Free(void* mem)
-{
-	if (mem == NULL)
-	{
-		return;
-	}
-
-	char* bytes = (char*)mem;
-	bytes -= 4;
-	int32 size = *(int32*)bytes;
-	b2Assert(b2_byteCount >= size);
-	b2_byteCount -= size;
-	free(bytes);
-}
+b2Vec2 b2Vec2::s_zero(0.0f, 0.0f);
+b2Mat22 b2Mat22::s_identity(1.0f, 0.0f, 0.0f, 1.0f);
+b2XForm b2XForm::s_identity(b2Vec2::s_zero, b2Mat22::s_identity);

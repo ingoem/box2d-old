@@ -31,8 +31,8 @@ void DrawJoint(b2Joint* joint)
 {
 	b2Body* b1 = joint->m_body1;
 	b2Body* b2 = joint->m_body2;
-	b2Vec2 x1 = b1->m_position;
-	b2Vec2 x2 = b2->m_position;
+	b2Vec2 x1 = b1->m_xf.position;
+	b2Vec2 x2 = b2->m_xf.position;
 	b2Vec2 p1 = joint->GetAnchor1();
 	b2Vec2 p2 = joint->GetAnchor2();
 
@@ -49,8 +49,8 @@ void DrawJoint(b2Joint* joint)
 	case e_pulleyJoint:
 		{
 			b2PulleyJoint* pulley = (b2PulleyJoint*)joint;
-			b2Vec2 s1 = pulley->GetGroundPoint1();
-			b2Vec2 s2 = pulley->GetGroundPoint2();
+			b2Vec2 s1 = pulley->GetGroundAnchor1();
+			b2Vec2 s2 = pulley->GetGroundAnchor2();
 			glVertex2f(s1.x, s1.y);
 			glVertex2f(p1.x, p1.y);
 			glVertex2f(s2.x, s2.y);
@@ -68,15 +68,18 @@ void DrawJoint(b2Joint* joint)
 	glEnd();
 }
 
-void DrawShape(const b2Shape* shape, const Color& c, bool core)
+void DrawShape(b2Shape* shape, const Color& c, bool core)
 {
+	const b2Body* body = shape->GetBody();
+	const b2XForm& xf = body->GetXForm();
+
 	switch (shape->m_type)
 	{
 	case e_circleShape:
 		{
 			const b2CircleShape* circle = (const b2CircleShape*)shape;
-			b2Vec2 x = circle->m_position;
-			float32 r = circle->m_radius;
+			b2Vec2 x = b2Mul(xf, circle->GetLocalPosition());
+			float32 r = circle->GetRadius();
 			const float32 k_segments = 16.0f;
 			const float32 k_increment = 2.0f * b2_pi / k_segments;
 			float32 theta = 0.0f;
@@ -105,7 +108,7 @@ void DrawShape(const b2Shape* shape, const Color& c, bool core)
 
 			glBegin(GL_LINES);
 			glVertex2f(x.x, x.y);
-			b2Vec2 ax = circle->m_R.col1;
+			b2Vec2 ax = xf.R.col1;
 			glVertex2f(x.x + r * ax.x, x.y + r * ax.y);
 			glEnd();
 
@@ -127,24 +130,27 @@ void DrawShape(const b2Shape* shape, const Color& c, bool core)
 		}
 		break;
 
-	case e_polyShape:
+	case e_polygonShape:
 		{
-			const b2PolyShape* poly = (const b2PolyShape*)shape;
+			const b2PolygonShape* poly = (const b2PolygonShape*)shape;
+			int32 vertexCount = poly->GetVertexCount();
+			const b2Vec2* vertices = poly->GetVertices();
+			const b2Vec2* coreVertices = poly->GetCoreVertices();
 
 			glColor4f(c.cx*0.5f, c.cy*0.5f, c.cz*0.5f, 1.0f);
 			glBegin(GL_TRIANGLE_FAN);
-			for (int32 i = 0; i < poly->m_vertexCount; ++i)
+			for (int32 i = 0; i < vertexCount; ++i)
 			{
-				b2Vec2 v = poly->m_position + b2Mul(poly->m_R, poly->m_vertices[i]);
+				b2Vec2 v = b2Mul(xf, vertices[i]);
 				glVertex2f(v.x, v.y);
 			}
 			glEnd();
 
 			glColor4f(c.cx, c.cy, c.cz, 1.0f);
 			glBegin(GL_LINE_LOOP);
-			for (int32 i = 0; i < poly->m_vertexCount; ++i)
+			for (int32 i = 0; i < vertexCount; ++i)
 			{
-				b2Vec2 v = poly->m_position + b2Mul(poly->m_R, poly->m_vertices[i]);
+				b2Vec2 v = b2Mul(xf, vertices[i]);
 				glVertex2f(v.x, v.y);
 			}
 			glEnd();
@@ -153,9 +159,9 @@ void DrawShape(const b2Shape* shape, const Color& c, bool core)
 			{
 				glColor4f(0.9f, 0.6f, 0.6f, 1.0f);
 				glBegin(GL_LINE_LOOP);
-				for (int32 i = 0; i < poly->m_vertexCount; ++i)
+				for (int32 i = 0; i < vertexCount; ++i)
 				{
-					b2Vec2 v = poly->m_position + b2Mul(poly->m_R, poly->m_coreVertices[i]);
+					b2Vec2 v = b2Mul(xf, coreVertices[i]);
 					glVertex2f(v.x, v.y);
 				}
 				glEnd();

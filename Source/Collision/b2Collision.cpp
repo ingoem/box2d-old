@@ -18,7 +18,6 @@
 
 #include "b2Collision.h"
 
-#if 0 // TODO_ERIN save this for mesh
 // Collision Detection in Interactive 3D Environments by Gino van den Bergen
 // From Section 3.4.1
 // x = mu1 * p1 + mu2 * p2
@@ -69,4 +68,4 @@ bool b2Segment::TestSegment(float32* lambda, b2Vec2* normal, const b2Segment& se
 
 	return false;
 }
-#endif
+

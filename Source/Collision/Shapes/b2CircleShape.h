@@ -60,6 +60,11 @@ public:
 	/// @see b2Shape::ComputeMass
 	void ComputeMass(b2MassData* massData) const;
 
+	/// Get the local position of this circle in its parent body.
+	const b2Vec2& GetLocalPosition() const;
+
+	/// Get the radius of this circle.
+	float32 GetRadius() const;
 
 	//--------------- Internals Below -------------------
 
@@ -71,5 +76,15 @@ public:
 	b2Vec2 m_localPosition;
 	float32 m_radius;
 };
+
+inline const b2Vec2& b2CircleShape::GetLocalPosition() const
+{
+	return m_localPosition;
+}
+
+inline float32 b2CircleShape::GetRadius() const
+{
+	return m_radius;
+}
 
 #endif

@@ -230,7 +230,7 @@ static void FindIncidentEdge(ClipVertex c[2],
 // Clip
 
 // The normal points from 1 to 2
-void b2CollidePolygon(b2Manifold* manifold,
+void b2CollidePolygons(b2Manifold* manifold,
 					  const b2PolygonShape* polyA, const b2XForm& xfA,
 					  const b2PolygonShape* polyB, const b2XForm& xfB)
 {

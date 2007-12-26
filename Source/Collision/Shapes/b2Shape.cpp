@@ -27,20 +27,18 @@
 
 b2Shape* b2Shape::Create(const b2ShapeDef* def, b2BlockAllocator* allocator)
 {
-	b2Shape* s = NULL;
-
 	switch (def->type)
 	{
 	case e_circleShape:
 		{
 			void* mem = allocator->Allocate(sizeof(b2CircleShape));
-			s =  new (mem) b2CircleShape(def);
+			return new (mem) b2CircleShape(def);
 		}
 
 	case e_polygonShape:
 		{
 			void* mem = allocator->Allocate(sizeof(b2PolygonShape));
-			s =  new (mem) b2PolygonShape(def);
+			return new (mem) b2PolygonShape(def);
 		}
 
 	default:
@@ -51,9 +49,7 @@ b2Shape* b2Shape::Create(const b2ShapeDef* def, b2BlockAllocator* allocator)
 
 void b2Shape::Destroy(b2Shape* s, b2BlockAllocator* allocator)
 {
-	b2ShapeType type = s->m_type;
-
-	switch (type)
+	switch (s->m_type)
 	{
 	case e_circleShape:
 		s->~b2Shape();
@@ -75,6 +71,7 @@ b2Shape::b2Shape(const b2ShapeDef* def)
 	m_userData = def->userData;
 	m_friction = def->friction;
 	m_restitution = def->restitution;
+	m_density = def->density;
 	m_body = NULL;
 
 	m_bodyNext = NULL;
@@ -88,6 +85,8 @@ b2Shape::b2Shape(const b2ShapeDef* def)
 	m_categoryBits = def->categoryBits;
 	m_maskBits = def->maskBits;
 	m_groupIndex = def->groupIndex;
+
+	m_isSensor = def->isSensor;
 }
 
 b2Shape::~b2Shape()
@@ -104,6 +103,8 @@ void b2Shape::Attach(b2Body* body, const b2Vec2& offset)
 
 void b2Shape::CreateProxy(b2BroadPhase* broadPhase, const b2XForm& transform)
 {
+	b2Assert(m_proxyId == b2_nullProxy);
+
 	b2AABB aabb;
 	ComputeAABB(&aabb, transform);
 

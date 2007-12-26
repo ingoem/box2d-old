@@ -44,43 +44,51 @@ int main(int argc, char** argv)
 	b2World world(worldAABB, gravity, doSleep);
 
 	// Define the ground box shape.
-	b2BoxDef groundBoxDef;
+	b2PolygonDef groundShapeDef;
 
 	// The extents are the half-widths of the box.
-	groundBoxDef.extents.Set(50.0f, 10.0f);
+	b2Vec2 extents(50.0f, 10.0f);
+	groundShapeDef.SetAsBox(extents, b2XForm::s_identity);
 
 	// Set the density of the ground box to zero. This will
 	// make the ground body static (fixed).
-	groundBoxDef.density = 0.0f;
+	groundShapeDef.density = 0.0f;
+
+	// Create the ground shape;
+	b2Shape* groundShape = world.Create(&groundShapeDef);
 
 	// Define the ground body.
 	b2BodyDef groundBodyDef;
 	groundBodyDef.position.Set(0.0f, -10.0f);
 
 	// Part of a body's def is its list of shapes.
-	groundBodyDef.AddShape(&groundBoxDef);
+	groundBodyDef.AddShape(groundShape);
 
 	// Call the body factory which allocates memory for the ground body
 	// from a pool and creates the ground box shape (also from a pool).
 	// The body is also added to the world.
-	world.CreateBody(&groundBodyDef);
+	world.Create(&groundBodyDef);
 
 	// Define another box shape for our dynamic body.
-	b2BoxDef boxDef;
-	boxDef.extents.Set(1.0f, 1.0f);
+	b2PolygonDef shapeDef;
+	extents.Set(1.0f, 1.0f);
+	shapeDef.SetAsBox(extents, b2XForm::s_identity);
 
 	// Set the box density to be non-zero, so it will be dynamic.
-	boxDef.density = 1.0f;
+	shapeDef.density = 1.0f;
 
 	// Override the default friction.
-	boxDef.friction = 0.3f;
+	shapeDef.friction = 0.3f;
+
+	// Create the box shape.
+	b2Shape* boxShape = world.Create(&shapeDef);
 
 	// Define the dynamic body. We set its position,
 	// add the box shape, and call the body factory.
 	b2BodyDef bodyDef;
 	bodyDef.position.Set(0.0f, 4.0f);
-	bodyDef.AddShape(&boxDef);
-	b2Body* body = world.CreateBody(&bodyDef);
+	bodyDef.AddShape(boxShape);
+	b2Body* body = world.Create(&bodyDef);
 
 	// Prepare for simulation. Typically we use a time step of 1/60 of a
 	// second (60Hz) and 10 iterations. This provides a high quality simulation
@@ -97,9 +105,9 @@ int main(int argc, char** argv)
 
 		// Now print the position and rotation of the body.
 		b2Vec2 position = body->GetOriginPosition();
-		float32 rotation = body->GetRotation();
+		float32 angle = body->GetAngle();
 
-		printf("%4.2f %4.2f %4.2f\n", position.x, position.y, rotation);
+		printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
 	}
 
 	// When the world destructor is called, all memory is freed. This can

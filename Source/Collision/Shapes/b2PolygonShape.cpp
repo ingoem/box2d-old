@@ -1,3 +1,4 @@
+
 /*
 * Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
@@ -202,6 +203,18 @@ b2PolygonShape::b2PolygonShape(const b2ShapeDef* def)
 		m_minRadius = b2Min(m_minRadius, b2Min(d.x, d.y));
 		m_maxRadius = b2Max(m_maxRadius, m_coreVertices[i].Length());
 	}
+}
+
+void b2PolygonShape::ApplyOffset(const b2Vec2& offset)
+{
+	for (int32 i = 0; i < m_vertexCount; ++i)
+	{
+		m_vertices[i] += offset;
+		m_coreVertices[i] += offset;
+	}
+
+	m_centroid += offset;
+	m_obb.center += offset;
 }
 
 bool b2PolygonShape::TestPoint(const b2XForm& transform, const b2Vec2& p) const

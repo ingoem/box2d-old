@@ -28,7 +28,7 @@
 
 #include <cstdio>
 
-void WorldListener::NotifyJointDestroyed(b2Joint* joint)
+void DestructionListener::SayGoodbye(b2Joint* joint)
 {
 	if (test->m_mouseJoint == joint)
 	{
@@ -40,12 +40,12 @@ void WorldListener::NotifyJointDestroyed(b2Joint* joint)
 	}
 }
 
-b2BoundaryResponse WorldListener::NotifyBoundaryViolated(b2Body* body)
+b2BoundaryListener::Response BoundaryListener::Violation(b2Body* body)
 {
 	if (test->m_bomb == body)
 	{
 		test->m_bomb = NULL;
-		return b2_destroyBody;
+		return e_destroyBody;
 	}
 
 	return test->BoundaryViolated(body);
@@ -64,8 +64,10 @@ Test::Test()
 	m_textLine = 30;
 	m_mouseJoint = NULL;
 	
-	m_listener.test = this;
-	m_world->SetListener(&m_listener);
+	m_destructionListener.test = this;
+	m_boundaryListener.test = this;
+	m_world->SetListener(&m_destructionListener);
+	m_world->SetListener(&m_boundaryListener);
 }
 
 Test::~Test()
@@ -92,9 +94,10 @@ void Test::MouseDown(const b2Vec2& p)
 	b2Body* body = NULL;
 	for (int32 i = 0; i < count; ++i)
 	{
-		if (shapes[i]->m_body->IsStatic() == false)
+		b2Body* shapeBody = shapes[i]->GetBody();
+		if (shapeBody->IsStatic() == false)
 		{
-			bool inside = shapes[i]->TestPoint(p);
+			bool inside = shapes[i]->TestPoint(shapeBody->GetXForm(), p);
 			if (inside)
 			{
 				body = shapes[i]->m_body;
@@ -110,7 +113,7 @@ void Test::MouseDown(const b2Vec2& p)
 		md.body2 = body;
 		md.target = p;
 		md.maxForce = 1000.0f * body->m_mass;
-		m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
+		m_mouseJoint = (b2MouseJoint*)m_world->Create(&md);
 		body->WakeUp();
 	}
 }
@@ -119,7 +122,7 @@ void Test::MouseUp()
 {
 	if (m_mouseJoint)
 	{
-		m_world->DestroyJoint(m_mouseJoint);
+		m_world->Destroy(m_mouseJoint);
 		m_mouseJoint = NULL;
 	}
 }
@@ -136,25 +139,26 @@ void Test::LaunchBomb()
 {
 	if (m_bomb)
 	{
-		m_world->DestroyBody(m_bomb);
+		m_world->Destroy(m_bomb);
 		m_bomb = NULL;
 	}
 
-	b2BoxDef sd;
-	sd.type = e_boxShape;
-	sd.extents.Set(0.25f, 0.25f);
+	b2PolygonDef sd;
+	b2Vec2 extents(0.25, 0.25f);
+	sd.SetAsBox(extents, b2XForm::s_identity);
 	sd.density = 10.0f;
+	b2Shape* shape = m_world->Create(&sd);
 
 	b2BodyDef bd;
-	bd.AddShape(&sd);
+	bd.AddShape(shape);
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
 	bd.rotation = b2Random(-1.5f, 1.5f);
-	bd.linearVelocity = -5.0f * bd.position;
-	bd.angularVelocity = b2Random(-20.0f, 20.0f);
 	bd.isBullet = true;
 
-	m_bomb = m_world->CreateBody(&bd);
+	m_bomb = m_world->Create(&bd);
+	m_bomb->SetLinearVelocity(-5.0f * bd.position);
+	m_bomb->SetAngularVelocity(b2Random(-20.0f, 20.0f));
 }
 
 typedef const char *(APIENTRY * WGLGETEXTENSIONSSTRINGEXT_T)( void );
@@ -185,9 +189,9 @@ void Test::Step(Settings* settings)
 
 	m_world->m_broadPhase->Validate();
 
-	for (b2Body* b = m_world->m_bodyList; b; b = b->m_next)
+	for (b2Body* b = m_world->GetBodyList(); b; b = b->GetNext())
 	{
-		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
+		for (b2Shape* s = b->GetShapeList(); s; s = s->GetBodyNext())
 		{
 			if (b->IsStatic())
 			{
@@ -208,7 +212,7 @@ void Test::Step(Settings* settings)
 		}
 	}
 
-	for (b2Joint* j = m_world->m_jointList; j; j = j->m_next)
+	for (b2Joint* j = m_world->GetJointList(); j; j = j->GetNext())
 	{
 		if (j != m_mouseJoint)
 		{
@@ -351,7 +355,7 @@ void Test::Step(Settings* settings)
 	if (m_mouseJoint)
 	{
 		b2Body* body = m_mouseJoint->m_body2;
-		b2Vec2 p1 = body->m_position + b2Mul(body->m_R, m_mouseJoint->m_localAnchor);
+		b2Vec2 p1 = body->m_xf.position + b2Mul(body->m_xf.R, m_mouseJoint->m_localAnchor);
 		b2Vec2 p2 = m_mouseJoint->m_target;
 
 		glPointSize(4.0f);

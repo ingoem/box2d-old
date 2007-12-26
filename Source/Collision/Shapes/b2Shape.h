@@ -63,6 +63,7 @@ struct b2ShapeDef
 		categoryBits = 0x0001;
 		maskBits = 0xFFFF;
 		groupIndex = 0;
+		isSensor = false;
 	}
 
 	virtual ~b2ShapeDef() {}
@@ -93,6 +94,10 @@ struct b2ShapeDef
 	/// or always collide (positive). Zero means no collision group. Non-zero group
 	/// filtering always wins against the mask bits.
 	int16 groupIndex;
+
+	/// A sensor shape collects contact information but never generates a collision
+	/// response.
+	bool isSensor;
 };
 
 /// A shape is used for collision detection. Shapes are created in b2World.
@@ -186,8 +191,10 @@ public:
 					const b2XForm& xf1,
 					const b2XForm& xf2);
 	bool ResetProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
-
 	virtual void ApplyOffset(const b2Vec2& offset) = 0;
+
+	float32 GetMinRadius() const;
+	float32 GetMaxRadius() const;
 
 	b2Shape* m_bodyNext;
 
@@ -213,6 +220,8 @@ public:
 	uint16 m_categoryBits;
 	uint16 m_maskBits;
 	int16 m_groupIndex;
+
+	bool m_isSensor;
 };
 
 inline b2ShapeType b2Shape::GetType() const
@@ -238,6 +247,11 @@ inline b2Shape* b2Shape::GetWorldNext()
 inline b2Shape* b2Shape::GetBodyNext()
 {
 	return m_bodyNext;
+}
+
+inline float32 b2Shape::GetMaxRadius() const
+{
+	return m_maxRadius;
 }
 
 #endif
