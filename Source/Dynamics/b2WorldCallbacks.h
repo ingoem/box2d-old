@@ -133,7 +133,9 @@ public:
 /// Color for debug drawing. Each value has the range [0,1].
 struct b2Color
 {
-	float32 x, y, z;
+	b2Color() {}
+	b2Color(float32 r, float32 g, float32 b) : r(r), g(g), b(b) {}
+	float32 r, g, b;
 };
 
 /// Implement and register this class with a b2World to provide debug drawing of physics
@@ -148,14 +150,15 @@ public:
 	enum
 	{
 		e_shapeBit				= 0x0001, ///< draw shapes
-		e_pairBit				= 0x0002, ///< draw broad-phase pairs
-		e_aabbBit				= 0x0004, ///< draw axis aligned bounding boxes
-		e_obbBit				= 0x0008, ///< draw oriented bounding boxes
-		e_jointBit				= 0x0010, ///< draw joint connections
-		e_contactPointBit		= 0x0020, ///< draw contact points
-		e_contactNormalsBit		= 0x0040, ///< draw contact normals
-		e_contactImpulseBit		= 0x0080, ///< draw contact impulses
-		e_frictionImpulseBit	= 0x0100, ///< draw friction impulses
+		e_jointBit				= 0x0002, ///< draw joint connections
+		e_coreShapeBit			= 0x0004, ///< draw core (TOI) shapes
+		e_aabbBit				= 0x0008, ///< draw axis aligned bounding boxes
+		e_obbBit				= 0x0010, ///< draw oriented bounding boxes
+		e_pairBit				= 0x0020, ///< draw broad-phase pairs
+		e_contactPointBit		= 0x0040, ///< draw contact points
+		e_contactNormalBit		= 0x0080, ///< draw contact normals
+		e_contactImpulseBit		= 0x0100, ///< draw contact impulses
+		e_frictionImpulseBit	= 0x0200, ///< draw friction impulses
 	};
 
 	/// Set the drawing flags.
@@ -171,16 +174,32 @@ public:
 	void ClearFlags(uint32 flags);
 
 	/// Draw a closed polygon provided in CCW order.
-	virtual void DrawPolygon(const b2Vec2* points, int32 pointCount, const b2Color& color) = 0;
+	virtual void DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) = 0;
+
+	/// Draw a solid closed polygon provided in CCW order.
+	virtual void DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) = 0;
 
 	/// Draw a circle.
 	virtual void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) = 0;
 	
+	/// Draw a solid circle.
+	virtual void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) = 0;
+	
+	/// Draw a point. For example, a contact point.
+	virtual void DrawPoint(const b2Vec2& p, const b2Color& color) = 0;
+
 	/// Draw a line segment.
 	virtual void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) = 0;
 
-	/// Draw a point. For example, a contact point.
-	virtual void DrawPoint(const b2Vec2& p, const b2Color& color) = 0;
+	/// Draw a unit length axis. Choose your own length scale.
+	/// @param point the axis origin in world coordinates.
+	/// @param axis a unit vector in world coordinates.
+	virtual void DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color& color) = 0;
+
+	/// Draw an impulse. Choose your own length scale.
+	/// @param point the impulse point of application in world coordinates.
+	/// @param axis the impulse vector in world coordinates.
+	virtual void DrawImpulse(const b2Vec2& point, const b2Vec2& impulse, const b2Color& color) = 0;
 
 protected:
 	uint32 m_drawFlags;

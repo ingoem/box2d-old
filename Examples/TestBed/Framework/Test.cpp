@@ -68,6 +68,7 @@ Test::Test()
 	m_boundaryListener.test = this;
 	m_world->SetListener(&m_destructionListener);
 	m_world->SetListener(&m_boundaryListener);
+	m_world->SetDebugDraw(&m_debugDraw);
 }
 
 Test::~Test()
@@ -182,157 +183,25 @@ void Test::Step(Settings* settings)
 		m_textLine += 15;
 	}
 
+	uint32 flags = 0;
+	flags += settings->drawShapes			* b2DebugDraw::e_shapeBit;
+	flags += settings->drawJoints			* b2DebugDraw::e_jointBit;
+	flags += settings->drawCoreShapes		* b2DebugDraw::e_coreShapeBit;
+	flags += settings->drawAABBs			* b2DebugDraw::e_aabbBit;
+	flags += settings->drawOBBs				* b2DebugDraw::e_obbBit;
+	flags += settings->drawPairs			* b2DebugDraw::e_pairBit;
+	flags += settings->drawContactPoints	* b2DebugDraw::e_contactPointBit;
+	flags += settings->drawContactNormals	* b2DebugDraw::e_contactNormalBit;
+	flags += settings->drawContactImpulses	* b2DebugDraw::e_contactImpulseBit;
+	flags += settings->drawFrictionImpulses	* b2DebugDraw::e_frictionImpulseBit;
+	m_debugDraw.SetFlags(flags);
+
 	b2World::s_enableWarmStarting = settings->enableWarmStarting;
 	b2World::s_enablePositionCorrection = settings->enablePositionCorrection;
 
 	m_world->Step(timeStep, settings->iterationCount);
 
 	m_world->m_broadPhase->Validate();
-
-	for (b2Body* b = m_world->GetBodyList(); b; b = b->GetNext())
-	{
-		for (b2Shape* s = b->GetShapeList(); s; s = s->GetBodyNext())
-		{
-			if (b->IsStatic())
-			{
-				DrawShape(s, Color(0.5f, 0.9f, 0.5f), settings->drawCores == 1);
-			}
-			else if (b->IsSleeping())
-			{
-				DrawShape(s, Color(0.5f, 0.5f, 0.9f), settings->drawCores == 1);
-			}
-			else if (b == m_bomb)
-			{
-				DrawShape(s, Color(0.9f, 0.9f, 0.4f), settings->drawCores == 1);
-			}
-			else
-			{
-				DrawShape(s, Color(0.9f, 0.9f, 0.9f), settings->drawCores == 1);
-			}
-		}
-	}
-
-	for (b2Joint* j = m_world->GetJointList(); j; j = j->GetNext())
-	{
-		if (j != m_mouseJoint)
-		{
-			DrawJoint(j);
-		}
-	}
-
-	if (settings->drawContacts)
-	{
-		for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				glPointSize(4.0f);
-				glColor3f(1.0f, 0.0f, 0.0f);
-				glBegin(GL_POINTS);
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					b2Vec2 v = m->points[j].position;
-					glVertex2f(v.x, v.y);
-				}
-				glEnd();
-				glPointSize(1.0f);
-			}
-		}
-	}
-
-	if (settings->drawImpulses)
-	{
-		for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-
-				glColor3f(0.9f, 0.9f, 0.3f);
-				glBegin(GL_LINES);
-				for (int32 j = 0; j < m->pointCount; ++j)
-				{
-					b2Vec2 v1 = m->points[j].position;
-					b2Vec2 v2 = v1 + m->points[j].normalImpulse * m->normal;
-					glVertex2f(v1.x, v1.y);
-					glVertex2f(v2.x, v2.y);
-				}
-				glEnd();
-			}
-		}
-	}
-
-	if (settings->drawPairs)
-	{
-		b2BroadPhase* bp = m_world->m_broadPhase;
-		b2Vec2 invQ;
-		invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
-		glColor3f(0.9f, 0.9f, 0.3f);
-		glBegin(GL_LINES);
-
-		for (int32 i = 0; i < b2_tableCapacity; ++i)
-		{
-			uint16 index = bp->m_pairManager.m_hashTable[i];
-			while (index != b2_nullPair)
-			{
-				b2Pair* pair = bp->m_pairManager.m_pairs + index;
-				b2Proxy* p1 = bp->m_proxyPool + pair->proxyId1;
-				b2Proxy* p2 = bp->m_proxyPool + pair->proxyId2;
-
-				b2AABB b1, b2;
-				b1.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->lowerBounds[0]].value;
-				b1.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->lowerBounds[1]].value;
-				b1.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->upperBounds[0]].value;
-				b1.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->upperBounds[1]].value;
-				b2.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->lowerBounds[0]].value;
-				b2.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->lowerBounds[1]].value;
-				b2.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->upperBounds[0]].value;
-				b2.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->upperBounds[1]].value;
-
-				b2Vec2 x1 = 0.5f * (b1.minVertex + b1.maxVertex);
-				b2Vec2 x2 = 0.5f * (b2.minVertex + b2.maxVertex);
-
-				glVertex2f(x1.x, x1.y);
-				glVertex2f(x2.x, x2.y);
-
-				index = pair->next;
-			}
-		}
-
-		glEnd();
-	}
-
-	if (settings->drawAABBs)
-	{
-		b2BroadPhase* bp = m_world->m_broadPhase;
-		b2Vec2 invQ;
-		invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
-		glColor3f(0.9f, 0.3f, 0.9f);
-		for (int32 i = 0; i < b2_maxProxies; ++i)
-		{
-			b2Proxy* p = bp->m_proxyPool + i;
-			if (p->IsValid() == false)
-			{
-				continue;
-			}
-
-			b2AABB b;
-			b.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
-			b.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
-			b.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
-			b.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
-
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(b.minVertex.x, b.minVertex.y);
-			glVertex2f(b.maxVertex.x, b.minVertex.y);
-			glVertex2f(b.maxVertex.x, b.maxVertex.y);
-			glVertex2f(b.minVertex.x, b.maxVertex.y);
-			glEnd();
-		}
-	}
 
 	if (settings->drawStats)
 	{

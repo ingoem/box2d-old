@@ -154,6 +154,8 @@ public:
 	void Integrate(const b2TimeStep& step);
 	void SolvePositionConstraints(const b2TimeStep& step);
 
+	void DrawJoint(b2Joint* joint);
+	void DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color, bool core);
 	void DebugDraw();
 
 	b2BlockAllocator m_blockAllocator;
@@ -187,7 +189,10 @@ public:
 
 	int32 m_positionIterationCount;
 
+	// This is for debugging the solver.
 	static int32 s_enablePositionCorrection;
+
+	// This is for debugging the solver.
 	static int32 s_enableWarmStarting;
 };
 

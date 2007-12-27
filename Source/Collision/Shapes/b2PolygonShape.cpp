@@ -161,10 +161,25 @@ b2PolygonShape::b2PolygonShape(const b2ShapeDef* def)
 			{
 				continue;
 			}
-
+			
+			// Your polygon is non-convex (it has an indentation).
+			// Or your polygon is too skinny.
 			float32 s = b2Dot(m_normals[i], m_vertices[j] - m_vertices[i]);
 			b2Assert(s < -b2_linearSlop);
 		}
+	}
+
+	// Ensure the polygon is counter-clockwise.
+	for (int32 i = 1; i < m_vertexCount; ++i)
+	{
+		float32 cross = b2Cross(m_normals[i-1], m_normals[i]);
+
+		// Keep asinf happy.
+		cross = b2Clamp(cross, -1.0f, 1.0f);
+
+		// You have consecutive edges that are almost parallel on your polygon.
+		float32 angle = asinf(cross);
+		b2Assert(angle > b2_angularSlop);
 	}
 #endif
 

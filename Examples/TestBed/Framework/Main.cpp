@@ -234,7 +234,9 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize(width, height);
-	mainWindow = glutCreateWindow("Box2D Version 2.0.0");
+	char title[32];
+	sprintf(title, "Box2D Version %d.%d.%d", b2_version.major, b2_version.minor, b2_version.revision);
+	mainWindow = glutCreateWindow(title);
 	//glutSetOption (GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 
 	glutDisplayFunc(SimulationLoop);
@@ -267,11 +269,16 @@ int main(int argc, char** argv)
 	glui->add_separator();
 
 	GLUI_Panel* drawPanel =	glui->add_panel("Draw");
+	glui->add_checkbox_to_panel(drawPanel, "Shapes", &settings.drawShapes);
+	glui->add_checkbox_to_panel(drawPanel, "Joints", &settings.drawJoints);
+	glui->add_checkbox_to_panel(drawPanel, "Core Shapes", &settings.drawCoreShapes);
 	glui->add_checkbox_to_panel(drawPanel, "AABBs", &settings.drawAABBs);
+	glui->add_checkbox_to_panel(drawPanel, "OBBs", &settings.drawOBBs);
 	glui->add_checkbox_to_panel(drawPanel, "Pairs", &settings.drawPairs);
-	glui->add_checkbox_to_panel(drawPanel, "Contacts", &settings.drawContacts);
-	glui->add_checkbox_to_panel(drawPanel, "Impulses", &settings.drawImpulses);
-	glui->add_checkbox_to_panel(drawPanel, "Core Shapes", &settings.drawCores);
+	glui->add_checkbox_to_panel(drawPanel, "Contact Points", &settings.drawContactPoints);
+	glui->add_checkbox_to_panel(drawPanel, "Contact Normals", &settings.drawContactNormals);
+	glui->add_checkbox_to_panel(drawPanel, "Contact Impulses", &settings.drawContactImpulses);
+	glui->add_checkbox_to_panel(drawPanel, "Friction Impulses", &settings.drawFrictionImpulses);
 	glui->add_checkbox_to_panel(drawPanel, "Statistics", &settings.drawStats);
 
 	int32 testCount = 0;

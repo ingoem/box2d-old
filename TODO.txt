@@ -75,25 +75,28 @@ Version 1.4.3
 - Collision filter callback. DONE
 
 Version 2.0.0
-- CCD.
-- Apply impulse at TOI.
 - Collision doesn't include any files from Dynamics. DONE
 - User created shapes. DONE
 - Shape ray casts. DONE
-- Contact callbacks.
-- Doxygen.
+- Verify polygon convex and CCW. DONE
+- Use pristine freeglut. DONE
 - Deferred body destruction is gone. DONE
 - JointDefs in local coordinates so that save/load works with limits. DONE
-- Debug display interface.
+- Wake up on apply force. DONE
+- Improve polygon collision performance. DONE
+- OBBs for polygons. DONE
+- Debug display interface. DONE
+- Access version number. DONE
+- CCD.
+- Apply impulse at TOI.
+- Contact callbacks with impulses.
+- Safe contact callback example.
+- Doxygen.
 - No static pairs.
 - Sensors.
-- Wake up on apply force. DONE
-- Improve polygon collision performance. DONE.
-- Access version number.
 - Car example.
 - Ragdoll contribution.
 - CMake contribution.
-- Verify CCW polygon.
 
 Version 2.1.0
 - Meshes (segment soup).

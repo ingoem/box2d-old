@@ -27,148 +27,118 @@
 #include <cstdio>
 #include <cstdarg>
 
-void DrawJoint(b2Joint* joint)
+void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
-	b2Body* b1 = joint->m_body1;
-	b2Body* b2 = joint->m_body2;
-	b2Vec2 x1 = b1->m_xf.position;
-	b2Vec2 x2 = b2->m_xf.position;
-	b2Vec2 p1 = joint->GetAnchor1();
-	b2Vec2 p2 = joint->GetAnchor2();
-
-	glColor3f(0.5f, 0.8f, 0.8f);
-	glBegin(GL_LINES);
-
-	switch (joint->m_type)
+	glColor3f(color.r, color.g, color.b);
+	glBegin(GL_LINE_LOOP);
+	for (int32 i = 0; i < vertexCount; ++i)
 	{
-	case e_distanceJoint:
-		glVertex2f(p1.x, p1.y);
-		glVertex2f(p2.x, p2.y);
-		break;
-
-	case e_pulleyJoint:
-		{
-			b2PulleyJoint* pulley = (b2PulleyJoint*)joint;
-			b2Vec2 s1 = pulley->GetGroundAnchor1();
-			b2Vec2 s2 = pulley->GetGroundAnchor2();
-			glVertex2f(s1.x, s1.y);
-			glVertex2f(p1.x, p1.y);
-			glVertex2f(s2.x, s2.y);
-			glVertex2f(p2.x, p2.y);
-		}
-		break;
-
-	default:
-		glVertex2f(x1.x, x1.y);
-		glVertex2f(p1.x, p1.y);
-		glVertex2f(x2.x, x2.y);
-		glVertex2f(p2.x, p2.y);
+		glVertex2f(vertices[i].x, vertices[i].y);
 	}
-
 	glEnd();
 }
 
-void DrawShape(b2Shape* shape, const Color& c, bool core)
+void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
-	const b2Body* body = shape->GetBody();
-	const b2XForm& xf = body->GetXForm();
-
-	switch (shape->m_type)
+	glColor3f(0.5f * color.r, 0.5f * color.g, 0.5f * color.b);
+	glBegin(GL_TRIANGLE_FAN);
+	for (int32 i = 0; i < vertexCount; ++i)
 	{
-	case e_circleShape:
-		{
-			const b2CircleShape* circle = (const b2CircleShape*)shape;
-			b2Vec2 x = b2Mul(xf, circle->GetLocalPosition());
-			float32 r = circle->GetRadius();
-			const float32 k_segments = 16.0f;
-			const float32 k_increment = 2.0f * b2_pi / k_segments;
-			float32 theta = 0.0f;
-			glColor4f(c.cx*0.5f, c.cy*0.5f, c.cz*0.5f, 0.5f);
-			glBegin(GL_TRIANGLE_FAN);
-			for (int32 i = 0; i < k_segments; ++i)
-			{
-				b2Vec2 d(r * cosf(theta), r * sinf(theta));
-				b2Vec2 v = x + d;
-				glVertex2f(v.x, v.y);
-				theta += k_increment;
-			}
-			glEnd();
-
-			theta = 0.0f;
-			glColor4f(c.cx, c.cy, c.cz, 1.0f);
-			glBegin(GL_LINE_LOOP);
-			for (int32 i = 0; i < k_segments; ++i)
-			{
-				b2Vec2 d(r * cosf(theta), r * sinf(theta));
-				b2Vec2 v = x + d;
-				glVertex2f(v.x, v.y);
-				theta += k_increment;
-			}
-			glEnd();
-
-			glBegin(GL_LINES);
-			glVertex2f(x.x, x.y);
-			b2Vec2 ax = xf.R.col1;
-			glVertex2f(x.x + r * ax.x, x.y + r * ax.y);
-			glEnd();
-
-			if (core)
-			{
-				float32 r = circle->m_radius - b2_toiSlop;
-				float32 theta = 0.0f;
-				glColor4f(0.9f, 0.6f, 0.6f, 1.0f);
-				glBegin(GL_LINE_LOOP);
-				for (int32 i = 0; i < k_segments; ++i)
-				{
-					b2Vec2 d(r * cosf(theta), r * sinf(theta));
-					b2Vec2 v = x + d;
-					glVertex2f(v.x, v.y);
-					theta += k_increment;
-				}
-				glEnd();
-			}
-		}
-		break;
-
-	case e_polygonShape:
-		{
-			const b2PolygonShape* poly = (const b2PolygonShape*)shape;
-			int32 vertexCount = poly->GetVertexCount();
-			const b2Vec2* vertices = poly->GetVertices();
-			const b2Vec2* coreVertices = poly->GetCoreVertices();
-
-			glColor4f(c.cx*0.5f, c.cy*0.5f, c.cz*0.5f, 1.0f);
-			glBegin(GL_TRIANGLE_FAN);
-			for (int32 i = 0; i < vertexCount; ++i)
-			{
-				b2Vec2 v = b2Mul(xf, vertices[i]);
-				glVertex2f(v.x, v.y);
-			}
-			glEnd();
-
-			glColor4f(c.cx, c.cy, c.cz, 1.0f);
-			glBegin(GL_LINE_LOOP);
-			for (int32 i = 0; i < vertexCount; ++i)
-			{
-				b2Vec2 v = b2Mul(xf, vertices[i]);
-				glVertex2f(v.x, v.y);
-			}
-			glEnd();
-
-			if (core)
-			{
-				glColor4f(0.9f, 0.6f, 0.6f, 1.0f);
-				glBegin(GL_LINE_LOOP);
-				for (int32 i = 0; i < vertexCount; ++i)
-				{
-					b2Vec2 v = b2Mul(xf, coreVertices[i]);
-					glVertex2f(v.x, v.y);
-				}
-				glEnd();
-			}
-		}
-		break;
+		glVertex2f(vertices[i].x, vertices[i].y);
 	}
+	glEnd();
+
+	glColor3f(color.r, color.g, color.b);
+	glBegin(GL_LINE_LOOP);
+	for (int32 i = 0; i < vertexCount; ++i)
+	{
+		glVertex2f(vertices[i].x, vertices[i].y);
+	}
+	glEnd();
+}
+
+void DebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color)
+{
+	const float32 k_segments = 16.0f;
+	const float32 k_increment = 2.0f * b2_pi / k_segments;
+	float32 theta = 0.0f;
+	glColor3f(color.r, color.g, color.b);
+	glBegin(GL_LINE_LOOP);
+	for (int32 i = 0; i < k_segments; ++i)
+	{
+		b2Vec2 v = center + radius * b2Vec2(cosf(theta), sinf(theta));
+		glVertex2f(v.x, v.y);
+		theta += k_increment;
+	}
+	glEnd();
+}
+
+void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
+{
+	const float32 k_segments = 16.0f;
+	const float32 k_increment = 2.0f * b2_pi / k_segments;
+	float32 theta = 0.0f;
+	glColor3f(0.5f * color.r, 0.5f * color.g, 0.5f * color.b);
+	glBegin(GL_TRIANGLE_FAN);
+	for (int32 i = 0; i < k_segments; ++i)
+	{
+		b2Vec2 v = center + radius * b2Vec2(cosf(theta), sinf(theta));
+		glVertex2f(v.x, v.y);
+		theta += k_increment;
+	}
+	glEnd();
+
+	theta = 0.0f;
+	glColor3f(color.r, color.g, color.b);
+	glBegin(GL_LINE_LOOP);
+	for (int32 i = 0; i < k_segments; ++i)
+	{
+		b2Vec2 v = center + radius * b2Vec2(cosf(theta), sinf(theta));
+		glVertex2f(v.x, v.y);
+		theta += k_increment;
+	}
+	glEnd();
+
+	b2Vec2 p = center + radius * axis;
+	glBegin(GL_LINES);
+	glVertex2f(center.x, center.y);
+	glVertex2f(p.x, p.y);
+	glEnd();
+}
+
+void DebugDraw::DrawPoint(const b2Vec2& p, const b2Color& color)
+{
+	glColor3f(color.r, color.g, color.b);
+	glPointSize(4.0f);
+	glBegin(GL_POINTS);
+	glVertex2f(p.x, p.y);
+	glEnd();
+	glPointSize(1.0f);
+}
+
+void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
+{
+	glColor3f(color.r, color.g, color.b);
+	glBegin(GL_LINES);
+	glVertex2f(p1.x, p1.y);
+	glVertex2f(p2.x, p2.y);
+	glEnd();
+}
+
+void DebugDraw::DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color& color)
+{
+	const float32 k_axisScale = 1.0f;
+	b2Vec2 p1 = point;
+	b2Vec2 p2 = point + k_axisScale	* axis;
+	DrawSegment(p1, p2, color);
+}
+
+void DebugDraw::DrawImpulse(const b2Vec2& point, const b2Vec2& impulse, const b2Color& color)
+{
+	const float32 k_impulseScale = 1.0f;
+	b2Vec2 p1 = point;
+	b2Vec2 p2 = point + k_impulseScale * impulse;
+	DrawSegment(p1, p2, color);
 }
 
 void DrawString(int x, int y, const char *string, ...)
@@ -204,9 +174,9 @@ void DrawString(int x, int y, const char *string, ...)
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void DrawAABB(b2AABB* aabb, const Color& c)
+void DrawAABB(b2AABB* aabb, const b2Color& c)
 {
-	glColor4f(c.cx, c.cy, c.cz, 1.0f);
+	glColor3f(c.r, c.g, c.b);
 	glBegin(GL_LINE_LOOP);
 	glVertex2f(aabb->minVertex.x, aabb->minVertex.y);
 	glVertex2f(aabb->maxVertex.x, aabb->minVertex.y);

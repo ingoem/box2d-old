@@ -21,20 +21,29 @@
 
 #include "Box2D.h"
 
-class b2Joint;
-class b2Shape;
 struct b2AABB;
 
-struct Color
+class DebugDraw : public b2DebugDraw
 {
-	Color() { cx = 1.0f; cy = 1.0f; cz = 1.0f; }
-	Color(float32 x, float32 y, float32 z) { cx = x; cy = y; cz = z; }
-	float32 cx, cy, cz;
+public:
+	void DrawPolygon(const b2Vec2* points, int32 pointCount, const b2Color& color);
+
+	void DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
+
+	void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color);
+
+	void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color);
+
+	void DrawPoint(const b2Vec2& p, const b2Color& color);
+
+	void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color);
+
+	void DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color& color);
+
+	void DrawImpulse(const b2Vec2& point, const b2Vec2& impulse, const b2Color& color);
 };
 
-void DrawJoint(b2Joint* joint);
-void DrawShape(b2Shape* shape, const Color& color, bool core);
 void DrawString(int x, int y, const char* string, ...);
-void DrawAABB(b2AABB* aabb, const Color& c);
+void DrawAABB(b2AABB* aabb, const b2Color& color);
 
 #endif

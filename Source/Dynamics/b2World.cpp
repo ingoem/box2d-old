@@ -19,10 +19,11 @@
 #include "b2World.h"
 #include "b2Body.h"
 #include "b2Island.h"
-#include "Joints/b2Joint.h"
+#include "Joints/b2PulleyJoint.h"
 #include "Contacts/b2Contact.h"
 #include "../Collision/b2Collision.h"
-#include "../Collision/Shapes/b2Shape.h"
+#include "../Collision/Shapes/b2CircleShape.h"
+#include "../Collision/Shapes/b2PolygonShape.h"
 #include <new>
 
 int32 b2World::s_enablePositionCorrection = 1;
@@ -34,6 +35,7 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_boundaryListener = NULL;
 	m_contactFilter = &b2_defaultFilter;
 	m_contactListener = NULL;
+	m_debugDraw = NULL;
 
 	m_shapeList = NULL;
 	m_bodyList = NULL;
@@ -83,6 +85,11 @@ void b2World::SetFilter(b2ContactFilter* filter)
 void b2World::SetListener(b2ContactListener* listener)
 {
 	m_contactListener = listener;
+}
+
+void b2World::SetDebugDraw(b2DebugDraw* debugDraw)
+{
+	m_debugDraw = debugDraw;
 }
 
 b2Shape* b2World::Create(const b2ShapeDef* def)
@@ -680,6 +687,8 @@ void b2World::Step(float32 dt, int32 iterations)
 	{
 		SolvePositionConstraints(step);
 	}
+
+	DebugDraw();
 }
 
 int32 b2World::Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount)
@@ -695,4 +704,314 @@ int32 b2World::Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount)
 
 	m_stackAllocator.Free(results);
 	return count;
+}
+
+void b2World::DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color, bool core)
+{
+	b2Color coreColor(0.9f, 0.6f, 0.6f);
+
+	switch (shape->m_type)
+	{
+	case e_circleShape:
+		{
+			b2CircleShape* circle = (b2CircleShape*)shape;
+
+			b2Vec2 center = b2Mul(xf, circle->GetLocalPosition());
+			float32 radius = circle->GetRadius();
+			b2Vec2 axis = xf.R.col1;
+
+			m_debugDraw->DrawSolidCircle(center, radius, axis, color);
+
+			if (core)
+			{
+				m_debugDraw->DrawCircle(center, radius - b2_toiSlop, coreColor);
+			}
+		}
+		break;
+
+	case e_polygonShape:
+		{
+			b2PolygonShape* poly = (b2PolygonShape*)shape;
+			int32 vertexCount = poly->GetVertexCount();
+			const b2Vec2* localVertices = poly->GetVertices();
+
+			b2Assert(vertexCount < b2_maxPolygonVertices);
+			b2Vec2 vertices[b2_maxPolygonVertices];
+
+			for (int32 i = 0; i < vertexCount; ++i)
+			{
+				vertices[i] = b2Mul(xf, localVertices[i]);
+			}
+
+			m_debugDraw->DrawSolidPolygon(vertices, vertexCount, color);
+
+			if (core)
+			{
+				const b2Vec2* localCoreVertices = poly->GetCoreVertices();
+				for (int32 i = 0; i < vertexCount; ++i)
+				{
+					vertices[i] = b2Mul(xf, localCoreVertices[i]);
+				}
+				m_debugDraw->DrawPolygon(vertices, vertexCount, coreColor);
+			}
+		}
+		break;
+	}
+}
+
+void b2World::DrawJoint(b2Joint* joint)
+{
+	b2Body* b1 = joint->GetBody1();
+	b2Body* b2 = joint->GetBody2();
+	const b2XForm& xf1 = b1->GetXForm();
+	const b2XForm& xf2 = b2->GetXForm();
+	b2Vec2 x1 = xf1.position;
+	b2Vec2 x2 = xf2.position;
+	b2Vec2 p1 = joint->GetAnchor1();
+	b2Vec2 p2 = joint->GetAnchor2();
+
+	b2Color color(0.5f, 0.8f, 0.8f);
+
+	switch (joint->GetType())
+	{
+	case e_distanceJoint:
+		m_debugDraw->DrawSegment(p1, p2, color);
+		break;
+
+	case e_pulleyJoint:
+		{
+			b2PulleyJoint* pulley = (b2PulleyJoint*)joint;
+			b2Vec2 s1 = pulley->GetGroundAnchor1();
+			b2Vec2 s2 = pulley->GetGroundAnchor2();
+			m_debugDraw->DrawSegment(s1, p1, color);
+			m_debugDraw->DrawSegment(s2, p2, color);
+			m_debugDraw->DrawSegment(s1, s2, color);
+		}
+		break;
+
+	case e_mouseJoint:
+		// don't draw this
+		break;
+
+	default:
+		m_debugDraw->DrawSegment(x1, p1, color);
+		m_debugDraw->DrawSegment(p1, p2, color);
+		m_debugDraw->DrawSegment(x2, p2, color);
+	}
+}
+
+void b2World::DebugDraw()
+{
+	if (m_debugDraw == NULL)
+	{
+		return;
+	}
+
+	uint32 flags = m_debugDraw->GetFlags();
+
+	if (flags & b2DebugDraw::e_shapeBit)
+	{
+		bool core = (flags & b2DebugDraw::e_coreShapeBit) == b2DebugDraw::e_coreShapeBit;
+
+		for (b2Body* b = m_bodyList; b; b = b->GetNext())
+		{
+			const b2XForm& xf = b->GetXForm();
+			for (b2Shape* s = b->GetShapeList(); s; s = s->GetBodyNext())
+			{
+				if (b->IsStatic())
+				{
+					DrawShape(s, xf, b2Color(0.5f, 0.9f, 0.5f), core);
+				}
+				else if (b->IsSleeping())
+				{
+					DrawShape(s, xf, b2Color(0.5f, 0.5f, 0.9f), core);
+				}
+				else
+				{
+					DrawShape(s, xf, b2Color(0.9f, 0.9f, 0.9f), core);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_jointBit)
+	{
+		for (b2Joint* j = m_jointList; j; j = j->GetNext())
+		{
+			if (j->GetType() != e_mouseJoint)
+			{
+				DrawJoint(j);
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_contactPointBit)
+	{
+		b2Color color(0.9f, 0.5f, 0.5f);
+		for (b2Contact* c = m_contactList; c; c = c->GetNext())
+		{
+			b2Manifold* ms = c->GetManifolds();
+			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
+			{
+				b2Manifold* m = ms + i;
+				for (int j = 0; j < m->pointCount; ++j)
+				{
+					m_debugDraw->DrawPoint(m->points[j].position, color);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_contactNormalBit)
+	{
+		b2Color color(0.4f, 0.9f, 0.4f);
+		for (b2Contact* c = m_contactList; c; c = c->GetNext())
+		{
+			b2Manifold* ms = c->GetManifolds();
+			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
+			{
+				b2Manifold* m = ms + i;
+				for (int j = 0; j < m->pointCount; ++j)
+				{
+					m_debugDraw->DrawAxis(m->points[j].position, m->normal, color);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_contactImpulseBit)
+	{
+		b2Color color(0.9f, 0.9f, 0.3f);
+		for (b2Contact* c = m_contactList; c; c = c->GetNext())
+		{
+			b2Manifold* ms = c->GetManifolds();
+			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
+			{
+				b2Manifold* m = ms + i;
+				for (int j = 0; j < m->pointCount; ++j)
+				{
+					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].normalImpulse * m->normal, color);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_frictionImpulseBit)
+	{
+		b2Color color(0.9f, 0.9f, 0.3f);
+		for (b2Contact* c = m_contactList; c; c = c->GetNext())
+		{
+			b2Manifold* ms = c->GetManifolds();
+			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
+			{
+				b2Manifold* m = ms + i;
+				b2Vec2 tangent = b2Cross(m->normal, 1.0f);
+
+				for (int j = 0; j < m->pointCount; ++j)
+				{
+					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].tangentImpulse * tangent, color);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_pairBit)
+	{
+		b2BroadPhase* bp = m_broadPhase;
+		b2Vec2 invQ;
+		invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
+		b2Color color(0.9f, 0.9f, 0.3f);
+
+		for (int32 i = 0; i < b2_tableCapacity; ++i)
+		{
+			uint16 index = bp->m_pairManager.m_hashTable[i];
+			while (index != b2_nullPair)
+			{
+				b2Pair* pair = bp->m_pairManager.m_pairs + index;
+				b2Proxy* p1 = bp->m_proxyPool + pair->proxyId1;
+				b2Proxy* p2 = bp->m_proxyPool + pair->proxyId2;
+
+				b2AABB b1, b2;
+				b1.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->lowerBounds[0]].value;
+				b1.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->lowerBounds[1]].value;
+				b1.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->upperBounds[0]].value;
+				b1.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->upperBounds[1]].value;
+				b2.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->lowerBounds[0]].value;
+				b2.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->lowerBounds[1]].value;
+				b2.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->upperBounds[0]].value;
+				b2.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->upperBounds[1]].value;
+
+				b2Vec2 x1 = 0.5f * (b1.minVertex + b1.maxVertex);
+				b2Vec2 x2 = 0.5f * (b2.minVertex + b2.maxVertex);
+
+				m_debugDraw->DrawSegment(x1, x2, color);
+
+				index = pair->next;
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_aabbBit)
+	{
+		b2BroadPhase* bp = m_broadPhase;
+		b2Vec2 invQ;
+		invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
+		b2Color color(0.9f, 0.3f, 0.9f);
+		for (int32 i = 0; i < b2_maxProxies; ++i)
+		{
+			b2Proxy* p = bp->m_proxyPool + i;
+			if (p->IsValid() == false)
+			{
+				continue;
+			}
+
+			b2AABB b;
+			b.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
+			b.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
+			b.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
+			b.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
+
+			b2Vec2 vs[4];
+			vs[0].Set(b.minVertex.x, b.minVertex.y);
+			vs[1].Set(b.maxVertex.x, b.minVertex.y);
+			vs[2].Set(b.maxVertex.x, b.maxVertex.y);
+			vs[3].Set(b.minVertex.x, b.maxVertex.y);
+
+			m_debugDraw->DrawPolygon(vs, 4, color);
+		}
+	}
+
+	if (flags & b2DebugDraw::e_obbBit)
+	{
+		b2Color color(0.5f, 0.3f, 0.5f);
+
+		for (b2Body* b = m_bodyList; b; b = b->GetNext())
+		{
+			const b2XForm& xf = b->GetXForm();
+			for (b2Shape* s = b->GetShapeList(); s; s = s->GetBodyNext())
+			{
+				if (s->GetType() != e_polygonShape)
+				{
+					continue;
+				}
+
+				b2PolygonShape* poly = (b2PolygonShape*)s;
+				const b2OBB& obb = poly->GetOBB();
+				b2Vec2 h = obb.extents;
+				b2Vec2 vs[4];
+				vs[0].Set(-h.x, -h.y);
+				vs[1].Set( h.x, -h.y);
+				vs[2].Set( h.x,  h.y);
+				vs[3].Set(-h.x,  h.y);
+
+				for (int32 i = 0; i < 4; ++i)
+				{
+					vs[i] = obb.center + b2Mul(obb.R, vs[i]);
+					vs[i] = b2Mul(xf, vs[i]);
+				}
+
+				m_debugDraw->DrawPolygon(vs, 4, color);
+			}
+		}
+	}
 }

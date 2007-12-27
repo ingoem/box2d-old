@@ -226,19 +226,19 @@ void BroadPhaseTest::Step(Settings* settings)
 		if (actor->proxyId == b2_nullProxy)
 			continue;
 
-		Color c;
+		b2Color c;
 		switch (actor->overlapCount)
 		{
 		case 0:
-			c.cx = 0.9f; c.cy = 0.9f; c.cz = 0.9f;
+			c.r = 0.9f; c.g = 0.9f; c.b = 0.9f;
 			break;
 
 		case 1:
-			c.cx = 0.6f; c.cy = 0.9f; c.cz = 0.6f;
+			c.r = 0.6f; c.g = 0.9f; c.b = 0.6f;
 			break;
 
 		default:
-			c.cx = 0.9f; c.cy = 0.6f; c.cz = 0.6f;
+			c.r = 0.9f; c.g = 0.6f; c.b = 0.6f;
 			break;
 		}
 

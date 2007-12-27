@@ -20,11 +20,25 @@
 #define TEST_H
 
 #include "Box2D.h"
+#include "Render.h"
 
 class Test;
 struct Settings;
 
 typedef Test* TestCreateFcn();
+
+#if 0
+e_shapeBit				= 0x0001, ///< draw shapes
+e_jointBit				= 0x0002, ///< draw joint connections
+e_coreShapeBit			= 0x0004, ///< draw core (TOI) shapes
+e_aabbBit				= 0x0008, ///< draw axis aligned bounding boxes
+e_obbBit				= 0x0010, ///< draw oriented bounding boxes
+e_pairBit				= 0x0020, ///< draw broad-phase pairs
+e_contactPointBit		= 0x0040, ///< draw contact points
+e_contactNormalsBit		= 0x0080, ///< draw contact normals
+e_contactImpulseBit		= 0x0100, ///< draw contact impulses
+e_frictionImpulseBit	= 0x0200, ///< draw friction impulses
+#endif
 
 struct Settings
 {
@@ -32,29 +46,39 @@ struct Settings
 		hz(60.0f),
 		iterationCount(10),
 		drawStats(0),
-		drawContacts(0),
-		drawImpulses(0),
+		drawShapes(1),
+		drawJoints(1),
+		drawCoreShapes(0),
 		drawAABBs(0),
+		drawOBBs(0),
 		drawPairs(0),
-		drawCores(0),
+		drawContactPoints(0),
+		drawContactNormals(0),
+		drawContactImpulses(0),
+		drawFrictionImpulses(0),
 		enableWarmStarting(1),
 		enablePositionCorrection(1),
 		pause(0),
 		singleStep(0)
 		{}
 
-	float hz;
-	int iterationCount;
-	int drawStats;
-	int drawContacts;
-	int drawImpulses;
-	int drawAABBs;
-	int drawPairs;
-	int drawCores;
-	int enableWarmStarting;
-	int enablePositionCorrection;
-	int pause;
-	int singleStep;
+	float32 hz;
+	int32 iterationCount;
+	int32 drawShapes;
+	int32 drawJoints;
+	int32 drawCoreShapes;
+	int32 drawAABBs;
+	int32 drawOBBs;
+	int32 drawPairs;
+	int32 drawContactPoints;
+	int32 drawContactNormals;
+	int32 drawContactImpulses;
+	int32 drawFrictionImpulses;
+	int32 drawStats;
+	int32 enableWarmStarting;
+	int32 enablePositionCorrection;
+	int32 pause;
+	int32 singleStep;
 };
 
 struct TestEntry
@@ -114,6 +138,7 @@ protected:
 
 	DestructionListener m_destructionListener;
 	BoundaryListener m_boundaryListener;
+	DebugDraw m_debugDraw;
 	int32 m_textLine;
 	b2World* m_world;
 	b2Body* m_bomb;
