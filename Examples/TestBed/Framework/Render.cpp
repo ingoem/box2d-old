@@ -133,6 +133,25 @@ void DebugDraw::DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color&
 	DrawSegment(p1, p2, color);
 }
 
+void DebugDraw::DrawXForm(const b2XForm& xf)
+{
+	b2Vec2 p1 = xf.position, p2;
+	const float32 k_axisScale = 0.4f;
+	glBegin(GL_LINES);
+	
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex2f(p1.x, p1.y);
+	p2 = p1 + k_axisScale * xf.R.col1;
+	glVertex2f(p2.x, p2.y);
+
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex2f(p1.x, p1.y);
+	p2 = p1 + k_axisScale * xf.R.col2;
+	glVertex2f(p2.x, p2.y);
+
+	glEnd();
+}
+
 void DebugDraw::DrawImpulse(const b2Vec2& point, const b2Vec2& impulse, const b2Color& color)
 {
 	const float32 k_impulseScale = 1.0f;

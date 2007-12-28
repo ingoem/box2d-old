@@ -24,30 +24,29 @@ class DistanceTest : public Test
 public:
 	DistanceTest()
 	{
-#if 1
+#if 0
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
 			sd.friction = 0.3f;
+			m_shape1 = m_world->Create(&sd);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			bd.AddShape(m_shape1);
 			m_body1 = m_world->Create(&bd);
-			m_shape1 = m_body1->m_shapeList;
 		}
 #else
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(0.5f, 0.5f);
-			sd.extents *= 10.0f;
+			sd.SetAsBox(1.0f, 1.0f);
 			sd.density = 0.0f;
+			m_shape1 = m_world->Create(&sd);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			bd.AddShape(&sd);
+			bd.AddShape(m_shape1);
 			m_body1 = m_world->Create(&bd);
-			m_shape1 = m_body1->m_shapeList;
 		}
 #endif
 
@@ -56,9 +55,8 @@ public:
 			b2PolygonDef sd;
 			float32 a = 0.25f;
 			sd.SetAsBox(a, a);
-			sd.extents *= 10.0f;
 			sd.density = 1.0f;
-#elif 1
+#elif 0
 			b2CircleDef sd;
 			sd.radius = 0.5f;
 			sd.density = 1.0f;
@@ -70,17 +68,17 @@ public:
 			sd.vertices[2].Set(0.0f, 15.0f);
 			sd.density = 1.0f;
 #endif
+			m_shape2 = m_world->Create(&sd);
 
 			b2BodyDef bd;
-#if 1
+#if 0
 			bd.position.Set(-48.377853f, 0.49244255f);
 			bd.rotation = 90.475891f;
 #else
 			bd.position.Set(0.0f, 10.0f);
 #endif
-			bd.AddShape(&sd);
+			bd.AddShape(m_shape2);
 			m_body2 = m_world->Create(&bd);
-			m_shape2 = m_body2->m_shapeList;
 		}
 
 		m_world->m_gravity.Set(0.0f, 0.0f);
@@ -101,13 +99,24 @@ public:
 	{
 		B2_NOT_USED(settings);
 
-		m_world->Step(0.0f, 1);
+		uint32 flags = 0;
+		flags += settings->drawShapes			* b2DebugDraw::e_shapeBit;
+		flags += settings->drawJoints			* b2DebugDraw::e_jointBit;
+		flags += settings->drawCoreShapes		* b2DebugDraw::e_coreShapeBit;
+		flags += settings->drawAABBs			* b2DebugDraw::e_aabbBit;
+		flags += settings->drawOBBs				* b2DebugDraw::e_obbBit;
+		flags += settings->drawPairs			* b2DebugDraw::e_pairBit;
+		flags += settings->drawContactPoints	* b2DebugDraw::e_contactPointBit;
+		flags += settings->drawContactNormals	* b2DebugDraw::e_contactNormalBit;
+		flags += settings->drawContactImpulses	* b2DebugDraw::e_contactImpulseBit;
+		flags += settings->drawFrictionImpulses	* b2DebugDraw::e_frictionImpulseBit;
+		flags += settings->drawCOMs				* b2DebugDraw::e_centerOfMassBit;
+		m_debugDraw.SetFlags(flags);
 
-		DrawShape(m_shape1, Color(0.5f, 0.9f, 0.5f), settings->drawCores == 1);
-		DrawShape(m_shape2, Color(0.9f, 0.9f, 0.9f), settings->drawCores == 1);
+		m_world->Step(0.0f, 0);
 
 		b2Vec2 x1, x2;
-		float32 distance = b2Distance(&x1, &x2, m_shape1, m_shape2);
+		float32 distance = b2Distance(&x1, &x2, m_shape1, m_body1->GetXForm(), m_shape2, m_body2->GetXForm());
 
 		DrawString(5, m_textLine, "distance = %g", distance);
 		m_textLine += 15;

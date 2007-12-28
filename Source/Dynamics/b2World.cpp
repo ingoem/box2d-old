@@ -1014,4 +1014,12 @@ void b2World::DebugDraw()
 			}
 		}
 	}
+
+	if (flags & b2DebugDraw::e_centerOfMassBit)
+	{
+		for (b2Body* b = m_bodyList; b; b = b->GetNext())
+		{
+			m_debugDraw->DrawXForm(b->GetXForm());
+		}
+	}
 }

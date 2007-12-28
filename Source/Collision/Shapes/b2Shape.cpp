@@ -96,6 +96,7 @@ b2Shape::~b2Shape()
 
 void b2Shape::Attach(b2Body* body, const b2Vec2& offset)
 {
+	// Are you trying to reuse a shape or a body definition?
 	b2Assert(m_body == NULL);
 	m_body = body;
 	ApplyOffset(offset);

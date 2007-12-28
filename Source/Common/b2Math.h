@@ -27,10 +27,10 @@
 
 inline bool b2IsValid(float x)
 {
-#ifdef _MSC_VER
-	return _finite(x) != 0;
-#else
+#ifdef __APPLE__
 	return finite(x) != 0;
+#else
+	return _finite(x) != 0;
 #endif
 }
 

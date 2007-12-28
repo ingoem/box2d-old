@@ -84,13 +84,15 @@ Version 2.0.0
 - JointDefs in local coordinates so that save/load works with limits. DONE
 - Wake up on apply force. DONE
 - Improve polygon collision performance. DONE
-- OBBs for polygons. DONE
+- Optimal OBBs for polygons. DONE
 - Debug display interface. DONE
 - Access version number. DONE
+- Improved TestBed camera. DONE
 - CCD.
 - Apply impulse at TOI.
 - Contact callbacks with impulses.
 - Safe contact callback example.
+- Body add/remove shape.
 - Doxygen.
 - Sensors.
 - Car example.

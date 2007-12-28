@@ -313,6 +313,9 @@ public:
 
 inline void b2BodyDef::AddShape(b2Shape* shape)
 {
+	// You can't reuse shapes.
+	b2Assert(shape->m_body == NULL);
+	b2Assert(shape->m_bodyNext == NULL);
 	shape->m_bodyNext = shapes;
 	shapes = shape;
 }

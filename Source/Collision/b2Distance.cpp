@@ -298,18 +298,16 @@ static float32 DistancePC(
 	Point point;
 	point.p = b2Mul(xf2, circle->m_localPosition);
 
-	b2XForm xfp;
-	xfp.position.SetZero();
-	xfp.R.SetIdentity();
+	float32 distance = DistanceGeneric(x1, x2, polygon, xf1, &point, b2XForm_identity);
 
-	float32 distance = DistanceGeneric(x1, x2, polygon, xf1, &point, xfp);
+	float32 r = circle->GetRadius() - b2_toiSlop;
 
-	if (distance > circle->m_radius)
+	if (distance > r)
 	{
-		distance -= circle->m_radius;
+		distance -= r;
 		b2Vec2 d = *x2 - *x1;
 		d.Normalize();
-		*x2 -= circle->m_radius * d;
+		*x2 -= r * d;
 	}
 	else
 	{

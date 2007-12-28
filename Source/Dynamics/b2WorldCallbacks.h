@@ -23,6 +23,7 @@
 
 struct b2Manifold;
 struct b2Vec2;
+struct b2XForm;
 class b2Shape;
 class b2Body;
 class b2Joint;
@@ -159,6 +160,7 @@ public:
 		e_contactNormalBit		= 0x0080, ///< draw contact normals
 		e_contactImpulseBit		= 0x0100, ///< draw contact impulses
 		e_frictionImpulseBit	= 0x0200, ///< draw friction impulses
+		e_centerOfMassBit		= 0x0400, ///< draw center of mass frame
 	};
 
 	/// Set the drawing flags.
@@ -195,6 +197,10 @@ public:
 	/// @param point the axis origin in world coordinates.
 	/// @param axis a unit vector in world coordinates.
 	virtual void DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color& color) = 0;
+
+	/// Draw a transform. Choose your own length scale.
+	/// @param xf a transform.
+	virtual void DrawXForm(const b2XForm& xf) = 0;
 
 	/// Draw an impulse. Choose your own length scale.
 	/// @param point the impulse point of application in world coordinates.

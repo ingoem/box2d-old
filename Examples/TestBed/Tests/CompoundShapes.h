@@ -45,13 +45,12 @@ public:
 			sd2.localPosition.Set(0.5f, 0.5f);
 			sd2.density = 0.0f; // massless
 
-			b2BodyDef bd;
-			bd.AddShape(m_world->Create(&sd1));
-			bd.AddShape(m_world->Create(&sd2));
-
 			for (int i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
+				b2BodyDef bd;
+				bd.AddShape(m_world->Create(&sd1));
+				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
 				bd.rotation = b2Random(-b2_pi, b2_pi);
 				m_world->Create(&bd);
@@ -67,13 +66,12 @@ public:
 			sd2.SetAsBox(0.25f, 0.5f, b2Vec2(0.0f, -0.5f), 0.5f * b2_pi);
 			sd2.density = 2.0f;
 
-			b2BodyDef bd;
-			bd.AddShape(m_world->Create(&sd1));
-			bd.AddShape(m_world->Create(&sd2));
-
 			for (int i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
+				b2BodyDef bd;
+				bd.AddShape(m_world->Create(&sd1));
+				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
 				bd.rotation = b2Random(-b2_pi, b2_pi);
 				m_world->Create(&bd);
@@ -103,13 +101,12 @@ public:
 			sd2.vertices[2] = b2Mul(xf2, b2Vec2(0.0f, 0.5f));
 			sd2.density = 2.0f;
 
-			b2BodyDef bd;
-			bd.AddShape(m_world->Create(&sd1));
-			bd.AddShape(m_world->Create(&sd2));
-
 			for (int32 i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
+				b2BodyDef bd;
+				bd.AddShape(m_world->Create(&sd1));
+				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x, 2.05f + 2.5f * i);
 				bd.rotation = 0.0f;
 				m_world->Create(&bd);

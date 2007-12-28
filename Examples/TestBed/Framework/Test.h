@@ -27,19 +27,6 @@ struct Settings;
 
 typedef Test* TestCreateFcn();
 
-#if 0
-e_shapeBit				= 0x0001, ///< draw shapes
-e_jointBit				= 0x0002, ///< draw joint connections
-e_coreShapeBit			= 0x0004, ///< draw core (TOI) shapes
-e_aabbBit				= 0x0008, ///< draw axis aligned bounding boxes
-e_obbBit				= 0x0010, ///< draw oriented bounding boxes
-e_pairBit				= 0x0020, ///< draw broad-phase pairs
-e_contactPointBit		= 0x0040, ///< draw contact points
-e_contactNormalsBit		= 0x0080, ///< draw contact normals
-e_contactImpulseBit		= 0x0100, ///< draw contact impulses
-e_frictionImpulseBit	= 0x0200, ///< draw friction impulses
-#endif
-
 struct Settings
 {
 	Settings() :
@@ -56,6 +43,7 @@ struct Settings
 		drawContactNormals(0),
 		drawContactImpulses(0),
 		drawFrictionImpulses(0),
+		drawCOMs(0),
 		enableWarmStarting(1),
 		enablePositionCorrection(1),
 		pause(0),
@@ -74,6 +62,7 @@ struct Settings
 	int32 drawContactNormals;
 	int32 drawContactImpulses;
 	int32 drawFrictionImpulses;
+	int32 drawCOMs;
 	int32 drawStats;
 	int32 enableWarmStarting;
 	int32 enablePositionCorrection;

@@ -28,13 +28,13 @@
 //#include "ApplyForce.h"
 //#include "Bridge.h"
 //#include "BroadPhaseTest.h"
-//#include "CCDTest.h"
+#include "CCDTest.h"
 //#include "Chain.h"
 //#include "CollisionFiltering.h"
 //#include "CollisionProcessing.h"
 #include "CompoundShapes.h"
 //#include "Cradle.h"
-//#include "DistanceTest.h"
+#include "DistanceTest.h"
 //#include "Gears.h"
 //#include "MotorsAndLimits.h"
 //#include "PolyCollision.h"
@@ -49,11 +49,11 @@
 
 TestEntry g_testEntries[] =
 {
+	{"CCD Test", CCDTest::Create},
+	{"Distance Test", DistanceTest::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
-	//{"CCD Test", CCDTest::Create},
-	//{"Distance Test", DistanceTest::Create},
 	//{"Apply Force", ApplyForce::Create},
 	//{"PolyCollision", PolyCollision::Create},
 	//{"Vertical Stack", VerticalStack::Create},

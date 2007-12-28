@@ -193,6 +193,7 @@ void Test::Step(Settings* settings)
 	flags += settings->drawContactNormals	* b2DebugDraw::e_contactNormalBit;
 	flags += settings->drawContactImpulses	* b2DebugDraw::e_contactImpulseBit;
 	flags += settings->drawFrictionImpulses	* b2DebugDraw::e_frictionImpulseBit;
+	flags += settings->drawCOMs				* b2DebugDraw::e_centerOfMassBit;
 	m_debugDraw.SetFlags(flags);
 
 	b2World::s_enableWarmStarting = settings->enableWarmStarting;

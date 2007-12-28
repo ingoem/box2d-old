@@ -23,6 +23,8 @@
 
 struct b2AABB;
 
+// This class implements debug drawing callbacks that are invoked
+// inside b2World::Step.
 class DebugDraw : public b2DebugDraw
 {
 public:
@@ -39,6 +41,8 @@ public:
 	void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color);
 
 	void DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color& color);
+
+	void DrawXForm(const b2XForm& xf);
 
 	void DrawImpulse(const b2Vec2& point, const b2Vec2& impulse, const b2Color& color);
 };

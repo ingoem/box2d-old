@@ -35,9 +35,8 @@ namespace
 	int32 framePeriod = 16;
 	int32 mainWindow;
 	GLUI *glui;
-	float32 viewZoom = 20.0f;
-	float32 viewX = 0.0f;
-	float32 viewY = 0.0f;
+	float32 viewZoom = 1.0f;
+	b2Vec2 viewCenter(0.0f, 20.0f);
 	int tx, ty, tw, th;
 }
 
@@ -46,27 +45,45 @@ void Resize(int32 w, int32 h)
 	width = w;
 	height = h;
 
-	GLUI_Master.get_viewport_area( &tx, &ty, &tw, &th );
-	glViewport( tx, ty, tw, th );
+	GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
+	glViewport(tx, ty, tw, th);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	double ratio = (double)tw / (double)th;
+	float32 ratio = float32(tw) / float32(th);
 
-	gluOrtho2D(viewZoom * (viewX - ratio), viewZoom * (ratio + viewX),
-		viewZoom * (viewY - 0.1), viewZoom * (viewY + 1.9));
+	b2Vec2 extents(ratio * 25.0f, 25.0f);
+	extents *= viewZoom;
+
+	b2Vec2 lower = viewCenter - extents;
+	b2Vec2 upper = viewCenter + extents;
+
+	// L/R/B/T
+	gluOrtho2D(lower.x, upper.x, lower.y, upper.y);
 }
 
 b2Vec2 ConvertScreenToWorld(int32 x, int32 y)
 {
-	b2Vec2 p;
-
-	float32 ratio = float32(tw) / float32(th);
 	float32 u = x / float32(tw);
 	float32 v = (th - y) / float32(th);
+
+	float32 ratio = float32(tw) / float32(th);
+	b2Vec2 extents(ratio * 25.0f, 25.0f);
+	extents *= viewZoom;
+
+	b2Vec2 lower = viewCenter - extents;
+	b2Vec2 upper = viewCenter + extents;
+
+	b2Vec2 p;
+	p.x = (1.0f - u) * lower.x + u * upper.x;
+	p.y = (1.0f - v) * lower.y + v * upper.y;
+	return p;
+
+#if 0
 	p.x = viewZoom * (viewX - ratio) * (1.0f - u) + viewZoom * (ratio + viewX) * u;
 	p.y = viewZoom * (viewY - 0.1f) * (1.0f - v) + viewZoom * (viewY + 1.9f) * v;
 	return p;
+#endif
 }
 
 // This is used to control the frame rate (60Hz).
@@ -97,9 +114,8 @@ void SimulationLoop()
 		delete test;
 		entry = g_testEntries + testIndex;
 		test = entry->createFcn();
-		viewZoom = 20.0f;
-		viewX = 0.0f;
-		viewY = 0.0f;
+		viewZoom = 1.0f;
+		viewCenter.Set(0.0f, 20.0f);
 		Resize(width, height);
 	}
 }
@@ -117,13 +133,13 @@ void Keyboard(unsigned char key, int x, int y)
 
 		// Press 'z' to zoom out.
 	case 'z':
-		viewZoom = b2Max(viewZoom + 1.0f, 1.0f);
+		viewZoom = b2Min(1.1f * viewZoom, 20.0f);
 		Resize(width, height);
 		break;
 
 		// Press 'x' to zoom in.
 	case 'x':
-		viewZoom = b2Min(viewZoom - 1.0f, 100.0f);
+		viewZoom = b2Max(0.9f * viewZoom, 0.05f);
 		Resize(width, height);
 		break;
 
@@ -159,33 +175,32 @@ void KeyboardSpecial(int key, int x, int y)
 	{
 		// Press left to pan left.
 	case GLUT_KEY_LEFT:
-		viewX -= 0.1f;
+		viewCenter.x -= 0.5f;
 		Resize(width, height);
 		break;
 
 		// Press right to pan right.
 	case GLUT_KEY_RIGHT:
-		viewX += 0.1f;
+		viewCenter.x += 0.5f;
 		Resize(width, height);
 		break;
 
 		// Press down to pan down.
 	case GLUT_KEY_DOWN:
-		viewY -= 0.1f;
+		viewCenter.y -= 0.5f;
 		Resize(width, height);
 		break;
 
 		// Press up to pan up.
 	case GLUT_KEY_UP:
-		viewY += 0.1f;
+		viewCenter.y += 0.5f;
 		Resize(width, height);
 		break;
 
 		// Press home to reset the view.
 	case GLUT_KEY_HOME:
-		viewZoom = 20.0f;
-		viewX = 0.0f;
-		viewY = 0.0f;
+		viewZoom = 1.0f;
+		viewCenter.Set(0.0f, 20.0f);
 		Resize(width, height);
 		break;
 	}
@@ -279,6 +294,7 @@ int main(int argc, char** argv)
 	glui->add_checkbox_to_panel(drawPanel, "Contact Normals", &settings.drawContactNormals);
 	glui->add_checkbox_to_panel(drawPanel, "Contact Impulses", &settings.drawContactImpulses);
 	glui->add_checkbox_to_panel(drawPanel, "Friction Impulses", &settings.drawFrictionImpulses);
+	glui->add_checkbox_to_panel(drawPanel, "Center of Masses", &settings.drawCOMs);
 	glui->add_checkbox_to_panel(drawPanel, "Statistics", &settings.drawStats);
 
 	int32 testCount = 0;
