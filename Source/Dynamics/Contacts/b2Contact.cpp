@@ -144,23 +144,49 @@ void b2Contact::Update(b2ContactListener* listener)
 
 	Evaluate();
 
+	m_flags &= ~(e_beginFlag | e_persistFlag | e_endFlag);
+	if (oldCount == 0 && m_manifoldCount > 0)
+	{
+		m_flags |= e_beginFlag;
+	}
+	else if (oldCount > 0 && m_manifoldCount == 0)
+	{
+		m_flags |= e_endFlag;
+	}
+	else if (m_manifoldCount > 0)
+	{
+		m_flags |= e_persistFlag;
+	}
+
+	b2Body* body1 = m_shape1->GetBody();
+	b2Body* body2 = m_shape2->GetBody();
+	if (body1->IsStatic() || body1->IsBullet() || body2->IsStatic() || body2->IsBullet())
+	{
+		m_flags &= ~e_slowFlag;
+	}
+	else
+	{
+		m_flags |= e_slowFlag;
+	}
+
 	if (listener)
 	{
 		b2SolverTweaks tweaks;
 		tweaks.friction = m_friction;
 		tweaks.restitution = m_restitution;
 		tweaks.nonSolid = bool(m_flags & e_nonSolidFlag);
-		if (oldCount == 0 && m_manifoldCount > 0)
+
+		if (m_flags & e_beginFlag)
 		{
-			listener->Begin(&tweaks, GetManifolds(), m_shape1, m_shape2);
+			listener->Tweak(&tweaks, GetManifolds(), m_manifoldCount, m_shape1, m_shape2, b2ContactListener::e_begin);
 		}
-		else if (oldCount > 0 && m_manifoldCount == 0)
+		else if (m_flags & e_endFlag)
 		{
 			listener->End(m_shape1, m_shape2);
 		}
-		else if (m_manifoldCount > 0)
+		else if (m_flags & e_persistFlag)
 		{
-			listener->Persist(&tweaks, GetManifolds(), m_shape1, m_shape2);
+			listener->Tweak(&tweaks, GetManifolds(), m_manifoldCount, m_shape1, m_shape2, b2ContactListener::e_persist);
 		}
 
 		m_friction = tweaks.friction;

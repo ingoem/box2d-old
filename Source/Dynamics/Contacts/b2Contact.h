@@ -75,12 +75,17 @@ public:
 	b2Shape* GetShape2();
 
 	//--------------- Internals Below -------------------
+public:
 
 	// m_flags
 	enum
 	{
-		e_nonSolidFlag		= 0x0001,
-		e_islandFlag		= 0x0002,
+		e_nonSolidFlag	= 0x0001,
+		e_slowFlag		= 0x0002,
+		e_islandFlag	= 0x0004,
+		e_beginFlag		= 0x0008,
+		e_persistFlag	= 0x0010,
+		e_endFlag		= 0x0020,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
@@ -101,6 +106,7 @@ public:
 	static bool s_initialized;
 
 	uint32 m_flags;
+	int32 m_manifoldCount;
 
 	// World pool and list pointers.
 	b2Contact* m_prev;
@@ -113,14 +119,10 @@ public:
 	b2Shape* m_shape1;
 	b2Shape* m_shape2;
 
-	int32 m_manifoldCount;
-
 	// Combined friction
 	float32 m_friction;
 	float32 m_restitution;
 
-	b2Vec2 m_toiPoint1;
-	b2Vec2 m_toiPoint2;
 	float32 m_toi;
 };
 

@@ -140,7 +140,7 @@ void b2Island::Clear()
 	m_jointCount = 0;
 }
 
-void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity)
+void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity, bool allowSleep)
 {
 	// Integrate velocities and apply damping.
 	for (int32 i = 0; i < m_bodyCount; ++i)
@@ -206,6 +206,51 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity)
 
 		// Note: shapes are synchronized later.
 	}
+
+	if (allowSleep)
+	{
+		float32 minSleepTime = FLT_MAX;
+
+		const float32 linTolSqr = b2_linearSleepTolerance * b2_linearSleepTolerance;
+		const float32 angTolSqr = b2_angularSleepTolerance * b2_angularSleepTolerance;
+
+		for (int32 i = 0; i < m_bodyCount; ++i)
+		{
+			b2Body* b = m_bodies[i];
+			if (b->m_invMass == 0.0f)
+			{
+				continue;
+			}
+
+			if ((b->m_flags & b2Body::e_allowSleepFlag) == 0)
+			{
+				b->m_sleepTime = 0.0f;
+				minSleepTime = 0.0f;
+			}
+
+			if ((b->m_flags & b2Body::e_allowSleepFlag) == 0 ||
+				b->m_angularVelocity * b->m_angularVelocity > angTolSqr ||
+				b2Dot(b->m_linearVelocity, b->m_linearVelocity) > linTolSqr)
+			{
+				b->m_sleepTime = 0.0f;
+				minSleepTime = 0.0f;
+			}
+			else
+			{
+				b->m_sleepTime += step.dt;
+				minSleepTime = b2Min(minSleepTime, b->m_sleepTime);
+			}
+		}
+
+		if (minSleepTime >= b2_timeToSleep)
+		{
+			for (int32 i = 0; i < m_bodyCount; ++i)
+			{
+				b2Body* b = m_bodies[i];
+				b->m_flags |= b2Body::e_sleepFlag;
+			}
+		}
+	}
 }
 
 void b2Island::SolvePositionConstraints(const b2TimeStep& step)
@@ -237,48 +282,12 @@ void b2Island::SolvePositionConstraints(const b2TimeStep& step)
 	}
 }
 
-
-void b2Island::UpdateSleep(const b2TimeStep& step)
+void b2Island::HandleTOI(const b2TimeStep& step)
 {
-	float32 minSleepTime = FLT_MAX;
+	step;
+}
 
-	const float32 linTolSqr = b2_linearSleepTolerance * b2_linearSleepTolerance;
-	const float32 angTolSqr = b2_angularSleepTolerance * b2_angularSleepTolerance;
-
-	for (int32 i = 0; i < m_bodyCount; ++i)
-	{
-		b2Body* b = m_bodies[i];
-		if (b->m_invMass == 0.0f)
-		{
-			continue;
-		}
-
-		if ((b->m_flags & b2Body::e_allowSleepFlag) == 0)
-		{
-			b->m_sleepTime = 0.0f;
-			minSleepTime = 0.0f;
-		}
-
-		if ((b->m_flags & b2Body::e_allowSleepFlag) == 0 ||
-			b->m_angularVelocity * b->m_angularVelocity > angTolSqr ||
-			b2Dot(b->m_linearVelocity, b->m_linearVelocity) > linTolSqr)
-		{
-			b->m_sleepTime = 0.0f;
-			minSleepTime = 0.0f;
-		}
-		else
-		{
-			b->m_sleepTime += step.dt;
-			minSleepTime = b2Min(minSleepTime, b->m_sleepTime);
-		}
-	}
-
-	if (minSleepTime >= b2_timeToSleep)
-	{
-		for (int32 i = 0; i < m_bodyCount; ++i)
-		{
-			b2Body* b = m_bodies[i];
-			b->m_flags |= b2Body::e_sleepFlag;
-		}
-	}
+void b2Island::Report(b2ContactListener* listener)
+{
+	listener;
 }

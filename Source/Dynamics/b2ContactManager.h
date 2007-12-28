@@ -39,8 +39,6 @@ public:
 
 	void Collide(const b2TimeStep& step);
 
-	void DestroyContact(b2Contact* contact);
-
 	b2World* m_world;
 
 	// This lets us provide broadphase proxy pair user data for

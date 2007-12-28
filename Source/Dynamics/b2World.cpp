@@ -386,8 +386,10 @@ void b2World::Destroy(b2Joint* j)
 	}
 }
 
-void b2World::Integrate(const b2TimeStep& step)
+void b2World::Solve(const b2TimeStep& step)
 {
+	m_positionIterationCount = 0;
+
 	// Size the island for the worst case.
 	b2Island island(m_bodyCount, m_contactCount, m_jointCount, this);
 
@@ -455,6 +457,17 @@ void b2World::Integrate(const b2TimeStep& step)
 					continue;
 				}
 
+				// Non-solid contacts don't grow the island.
+				if (cn->contact->m_flags & b2Contact::e_nonSolidFlag)
+				{
+					continue;
+				}
+
+				if (cn->contact->GetManifoldCount() == 0)
+				{
+					continue;
+				}
+
 				b2Assert(stackCount < stackSize);
 				stack[stackCount++] = other;
 				other->m_flags |= b2Body::e_islandFlag;
@@ -483,7 +496,13 @@ void b2World::Integrate(const b2TimeStep& step)
 			}
 		}
 
-		island.Integrate(step, m_gravity);
+		island.Integrate(step, m_gravity, m_allowSleep);
+
+		if (s_enablePositionCorrection)
+		{
+			island.SolvePositionConstraints(step);
+			m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
+		}
 
 		// Post solve cleanup.
 		for (int32 i = 0; i < island.m_bodyCount; ++i)
@@ -535,14 +554,8 @@ void b2World::Integrate(const b2TimeStep& step)
 	m_broadPhase->Commit();
 }
 
-void b2World::SolvePositionConstraints(const b2TimeStep& step)
+void b2World::HandleTOI(const b2TimeStep& step)
 {
-	m_positionIterationCount = 0;
-	if (step.dt == 0.0f)
-	{
-		return;
-	}
-
 	// Size the island for the worst case.
 	b2Island island(m_bodyCount, m_contactCount, m_jointCount, this);
 
@@ -554,10 +567,6 @@ void b2World::SolvePositionConstraints(const b2TimeStep& step)
 	for (b2Contact* c = m_contactList; c; c = c->m_next)
 	{
 		c->m_flags &= ~b2Contact::e_islandFlag;
-	}
-	for (b2Joint* j = m_jointList; j; j = j->m_next)
-	{
-		j->m_islandFlag = false;
 	}
 
 	// Build and simulate all awake islands.
@@ -596,13 +605,10 @@ void b2World::SolvePositionConstraints(const b2TimeStep& step)
 			// Search all contacts connected to this body.
 			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
 			{
-				if (cn->contact->m_flags & b2Contact::e_islandFlag)
+				if (cn->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_slowFlag))
 				{
 					continue;
 				}
-
-				island.Add(cn->contact);
-				cn->contact->m_flags |= b2Contact::e_islandFlag;
 
 				b2Body* other = cn->other;
 				if (other->m_flags & b2Body::e_islandFlag)
@@ -614,38 +620,11 @@ void b2World::SolvePositionConstraints(const b2TimeStep& step)
 				stack[stackCount++] = other;
 				other->m_flags |= b2Body::e_islandFlag;
 			}
-
-			// Search all joints connect to this body.
-			for (b2JointNode* jn = b->m_jointList; jn; jn = jn->next)
-			{
-				if (jn->joint->m_islandFlag == true)
-				{
-					continue;
-				}
-
-				island.Add(jn->joint);
-				jn->joint->m_islandFlag = true;
-
-				b2Body* other = jn->other;
-				if (other->m_flags & b2Body::e_islandFlag)
-				{
-					continue;
-				}
-
-				b2Assert(stackCount < stackSize);
-				stack[stackCount++] = other;
-				other->m_flags |= b2Body::e_islandFlag;
-			}
 		}
 
-		island.SolvePositionConstraints(step);
+		island.HandleTOI(step);
 
 		m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
-
-		if (m_allowSleep)
-		{
-			island.UpdateSleep(step);
-		}
 
 		// Post solve cleanup.
 		for (int32 i = 0; i < island.m_bodyCount; ++i)
@@ -662,8 +641,15 @@ void b2World::SolvePositionConstraints(const b2TimeStep& step)
 	m_stackAllocator.Free(stack);
 }
 
+void b2World::Report(const b2TimeStep& step)
+{
+	step;	
+}
+
 void b2World::Step(float32 dt, int32 iterations)
 {
+	m_lock = true;
+
 	b2TimeStep step;
 	step.dt = dt;
 	step.iterations	= iterations;
@@ -676,19 +662,28 @@ void b2World::Step(float32 dt, int32 iterations)
 		step.inv_dt = 0.0f;
 	}
 	
-	// Integrate velocities, solve velocity constraints, and integrate positions.
-	Integrate(step);
-
 	// Update contacts.
 	m_contactManager.Collide(step);
 
-	// Project positions onto the constraint manifold.
-	if (s_enablePositionCorrection)
+	// Integrate velocities, solve velocity constraints, and integrate positions.
+	if (step.dt > 0.0f)
 	{
-		SolvePositionConstraints(step);
+		Solve(step);
 	}
 
-	DebugDraw();
+	// Handle TOI events.
+	if (s_enablePositionCorrection && step.dt > 0.0f)
+	{
+		HandleTOI(step);
+	}
+
+	// Report contact information.
+	Report(step);
+	
+	// Draw debug information.
+	DrawDebugData();
+
+	m_lock = false;
 }
 
 int32 b2World::Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount)
@@ -800,7 +795,7 @@ void b2World::DrawJoint(b2Joint* joint)
 	}
 }
 
-void b2World::DebugDraw()
+void b2World::DrawDebugData()
 {
 	if (m_debugDraw == NULL)
 	{

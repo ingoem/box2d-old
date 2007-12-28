@@ -149,14 +149,17 @@ public:
 	/// @return the head of the world shape list.
 	b2Contact* GetContactList();
 
+public:
 	//--------------- Internals Below -------------------
+	// Internal yet public to make life easier.
 
-	void Integrate(const b2TimeStep& step);
-	void SolvePositionConstraints(const b2TimeStep& step);
+	void Solve(const b2TimeStep& step);
+	void Report(const b2TimeStep& step);
+	void HandleTOI(const b2TimeStep& step);
 
 	void DrawJoint(b2Joint* joint);
 	void DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color, bool core);
-	void DebugDraw();
+	void DrawDebugData();
 
 	b2BlockAllocator m_blockAllocator;
 	b2StackAllocator m_stackAllocator;

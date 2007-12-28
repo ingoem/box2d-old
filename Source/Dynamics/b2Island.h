@@ -35,9 +35,10 @@ public:
 
 	void Clear();
 
-	void Integrate(const b2TimeStep& step, const b2Vec2& gravity);
+	void Integrate(const b2TimeStep& step, const b2Vec2& gravity, bool allowSleep);
 	void SolvePositionConstraints(const b2TimeStep& step);
-	void UpdateSleep(const b2TimeStep& step);
+	void HandleTOI(const b2TimeStep& step);
+	void Report(b2ContactListener* listener);
 
 	void Add(b2Body* body)
 	{

@@ -93,36 +93,46 @@ struct b2SolverTweaks
 	float32 restitution;
 };
 
-/// Implement this class to provide collision filtering. In other words, you can implement
-/// this class if you want finer control over contact creation.
-/// You can also use this class to tweak contact settings. These tweaks persist until
-/// you tweak the settings again or the contact is destroyed.
+/// Implement this class to get collision results. You can use these results for
+/// things like sounds and game logic. You can also use this class to tweak contact 
+/// settings. These tweaks persist until you tweak the settings again or the contact
+/// is destroyed.
+/// @warning You cannot create/destroy Box2D entities inside these callbacks.
 class b2ContactListener
 {
 public:
 	virtual ~b2ContactListener() {}
 
-	/// Called when a time of impact (TOI) event occurs.
-	/// @param point1 closest point on shape1.
-	/// @param point2 closest point on shape2.
-	/// @param shape1 the first shape in the contact.
-	/// @param shape2 the second shape in the contact.
-	/// @return false if this TOI event should be ignored.
-	virtual bool TOI(const b2Vec2& point1, const b2Vec2& point2, const b2Shape* shape1, const b2Shape* shape2) = 0;
+	/// The contact condition tells you the status of the contact manifold.
+	enum Condition
+	{
+		e_toi,		///< time of impact contact, only position correction is done.
+		e_begin,	///< new contact, there may have already been a TOI contact.
+		e_persist,	///< old but active contact
+	};
 
-	/// Called when a new non-empty contact manifold is created. The manifold normal points from shape1 to shape2.
+	/// Called just before contacts are solved. This allows you to adjust the solver
+	/// behavior. This also allows you to adjust the behavior of TOI events.
+	/// The manifold normal points from shape1 to shape2. The impulses stored in
+	/// the manifold are stale.
 	/// @param tweaks allows you to adjust the contact solver behavior.
-	/// @param manifold the contact geometry. You may adjust this, but be careful.
+	/// @param manifolds array of contact manifolds. You may adjust this, but be careful.
+	/// @param manifoldCount the number of contact manifolds.
 	/// @param shape1 the first shape in the contact.
 	/// @param shape2 the second shape in the contact.
-	virtual void Begin(b2SolverTweaks* tweaks, b2Manifold* manifold, const b2Shape* shape1, const b2Shape* shape2) = 0;
+	/// @param age the 
+	virtual void Tweak(	b2SolverTweaks* tweaks, b2Manifold* manifolds, int32 manifoldCount,
+						const b2Shape* shape1, const b2Shape* shape2, Condition condition) = 0;
 
-	/// Called when contact persists. The manifold normal points from shape1 to shape2.
-	/// @param tweaks allows you to adjust the contact solver behavior.
-	/// @param manifold the contact geometry. You may adjust this, but be careful.
+	/// Called at the end of the step with the contact results. The impulses stored in the
+	/// manifold are current (except for TOI contacts).
+	/// @param manifolds array of contact manifolds.
+	/// @param manifoldCount the number of contact manifolds.
 	/// @param shape1 the first shape in the contact.
 	/// @param shape2 the second shape in the contact.
-	virtual void Persist(b2SolverTweaks* tweaks, b2Manifold* manifold, const b2Shape* shape1, const b2Shape* shape2) = 0;
+	/// @param condition the condition of the contact.
+	virtual void Report(const b2Manifold* manifolds, int32 manifoldCount,
+						const b2Shape* shape1, const b2Shape* shape2, Condition condition) = 0;
 
 	/// Called when contact ends. This does not mean the contact object is destroyed, it just
 	/// means that there are no contact points.
