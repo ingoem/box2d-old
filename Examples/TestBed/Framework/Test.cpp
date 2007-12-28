@@ -145,8 +145,7 @@ void Test::LaunchBomb()
 	}
 
 	b2PolygonDef sd;
-	b2Vec2 extents(0.25, 0.25f);
-	sd.SetAsBox(extents, b2XForm::s_identity);
+	sd.SetAsBox(0.25f, 0.25f);
 	sd.density = 10.0f;
 	b2Shape* shape = m_world->Create(&sd);
 

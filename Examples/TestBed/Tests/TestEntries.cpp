@@ -25,54 +25,50 @@
 #include "freeglut/gl/glut.h"
 #endif
 
-#if 0
-#include "ApplyForce.h"
-#include "Bridge.h"
-#include "BroadPhaseTest.h"
-#include "CCDTest.h"
-#include "Chain.h"
-#include "CollisionFiltering.h"
-#include "CollisionProcessing.h"
+//#include "ApplyForce.h"
+//#include "Bridge.h"
+//#include "BroadPhaseTest.h"
+//#include "CCDTest.h"
+//#include "Chain.h"
+//#include "CollisionFiltering.h"
+//#include "CollisionProcessing.h"
 #include "CompoundShapes.h"
-#include "Cradle.h"
-#include "DistanceTest.h"
-#include "Gears.h"
-#include "MotorsAndLimits.h"
-#include "PolyCollision.h"
+//#include "Cradle.h"
+//#include "DistanceTest.h"
+//#include "Gears.h"
+//#include "MotorsAndLimits.h"
+//#include "PolyCollision.h"
 #include "PolyShapes.h"
-#include "Pulleys.h"
-#include "Pyramid.h"
-#include "SliderCrank.h"
-#include "VaryingFriction.h"
-#endif
+//#include "Pulleys.h"
+//#include "Pyramid.h"
+//#include "SliderCrank.h"
+//#include "VaryingFriction.h"
 #include "VaryingRestitution.h"
 //#include "VerticalStack.h"
 //#include "Web.h"
 
 TestEntry g_testEntries[] =
 {
-	{"Varying Restitution", VaryingRestitution::Create},
-#if 0
-	{"CCD Test", CCDTest::Create},
-	{"Distance Test", DistanceTest::Create},
-	{"Polygon Shapes", PolyShapes::Create},
-	{"Apply Force", ApplyForce::Create},
 	{"Compound Shapes", CompoundShapes::Create},
-	{"PolyCollision", PolyCollision::Create},
-	{"Vertical Stack", VerticalStack::Create},
-	{"Newton's Cradle", Cradle::Create},
-	{"Broad Phase", BroadPhaseTest::Create},
-	{"Chain", Chain::Create},
-	{"Bridge", Bridge::Create},
-	{"Collision Processing", CollisionProcessing::Create},
-	{"Pyramid", Pyramid::Create},
-	{"Web", Web::Create},
-	{"Gears", Gears::Create},
-	{"Pulleys", Pulleys::Create},
-	{"Slider Crank", SliderCrank::Create},
-	{"Collision Filtering", CollisionFiltering::Create},
-	{"Motors and Limits", MotorsAndLimits::Create},
-	{"Varying Friction", VaryingFriction::Create},
-#endif
+	{"Polygon Shapes", PolyShapes::Create},
+	{"Varying Restitution", VaryingRestitution::Create},
+	//{"CCD Test", CCDTest::Create},
+	//{"Distance Test", DistanceTest::Create},
+	//{"Apply Force", ApplyForce::Create},
+	//{"PolyCollision", PolyCollision::Create},
+	//{"Vertical Stack", VerticalStack::Create},
+	//{"Newton's Cradle", Cradle::Create},
+	//{"Broad Phase", BroadPhaseTest::Create},
+	//{"Chain", Chain::Create},
+	//{"Bridge", Bridge::Create},
+	//{"Collision Processing", CollisionProcessing::Create},
+	//{"Pyramid", Pyramid::Create},
+	//{"Web", Web::Create},
+	//{"Gears", Gears::Create},
+	//{"Pulleys", Pulleys::Create},
+	//{"Slider Crank", SliderCrank::Create},
+	//{"Collision Filtering", CollisionFiltering::Create},
+	//{"Motors and Limits", MotorsAndLimits::Create},
+	//{"Varying Friction", VaryingFriction::Create},
 	{NULL, NULL}
 };

@@ -38,12 +38,12 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
 			bd.AddShape(&sd);
-			m_body1 = m_world->CreateBody(&bd);
+			m_body1 = m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(0.5f, 0.5f);
+			b2PolygonDef sd;
+			sd.SetAsBox(0.5f, 0.5f);
 			sd.density = 1.0f;
 			sd.localPosition.Set(-0.5f, 0.25f);
 			sd.localRotation = 0.4f;
@@ -51,7 +51,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
 			bd.AddShape(&sd);
-			m_body2 = m_world->CreateBody(&bd);
+			m_body2 = m_world->Create(&bd);
 		}
 
 		m_world->m_gravity.Set(0.0f, 0.0f);

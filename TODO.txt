@@ -92,7 +92,6 @@ Version 2.0.0
 - Contact callbacks with impulses.
 - Safe contact callback example.
 - Doxygen.
-- No static pairs.
 - Sensors.
 - Car example.
 - Ragdoll contribution.
@@ -125,6 +124,7 @@ Version 2.5.0
 
 Version 2.6.0
 - Ropes and particles.
+- Growable vertex arrays.
 
 Version 3+
 - Performance.

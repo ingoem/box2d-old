@@ -25,21 +25,21 @@ public:
 	Pyramid()
 	{
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			float32 a = 0.5f;
 			sd.type = e_boxShape;
-			sd.extents.Set(a, a);
+			sd.SetAsBox(a, a);
 			sd.density = 5.0f;
 
 			b2BodyDef bd;
@@ -57,7 +57,7 @@ public:
 				for (int32 j = i; j < 25; ++j)
 				{
 					bd.position = y;
-					m_world->CreateBody(&bd);
+					m_world->Create(&bd);
 
 					y += deltaY;
 				}

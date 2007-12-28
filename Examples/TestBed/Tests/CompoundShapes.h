@@ -25,14 +25,13 @@ public:
 	CompoundShapes()
 	{
 		{
-			b2BoxDef sd;
-			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			b2PolygonDef sd;
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			bd.AddShape(m_world->Create(&sd));
+			m_world->Create(&bd);
 		}
 
 		{
@@ -47,100 +46,96 @@ public:
 			sd2.density = 0.0f; // massless
 
 			b2BodyDef bd;
-			bd.AddShape(&sd1);
-			bd.AddShape(&sd2);
+			bd.AddShape(m_world->Create(&sd1));
+			bd.AddShape(m_world->Create(&sd2));
 
 			for (int i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
 				bd.rotation = b2Random(-b2_pi, b2_pi);
-				m_world->CreateBody(&bd);
+				m_world->Create(&bd);
 			}
 		}
 
 		{
-			b2BoxDef sd1;
-			sd1.extents.Set(0.25f, 0.5f);
+			b2PolygonDef sd1;
+			sd1.SetAsBox(0.25f, 0.5f);
 			sd1.density = 2.0f;
 
-			b2BoxDef sd2;
-			sd2.extents.Set(0.25f, 0.5f);
-			sd2.localPosition.Set(0.0f, -0.5f);
-			sd2.localRotation = 0.5f * b2_pi;
+			b2PolygonDef sd2;
+			sd2.SetAsBox(0.25f, 0.5f, b2Vec2(0.0f, -0.5f), 0.5f * b2_pi);
 			sd2.density = 2.0f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd1);
-			bd.AddShape(&sd2);
+			bd.AddShape(m_world->Create(&sd1));
+			bd.AddShape(m_world->Create(&sd2));
 
 			for (int i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
 				bd.rotation = b2Random(-b2_pi, b2_pi);
-				m_world->CreateBody(&bd);
+				m_world->Create(&bd);
 			}
 		}
 
 		{
+			b2XForm xf1;
+			xf1.R.Set(0.3524f * b2_pi);
+			xf1.position = b2Mul(xf1.R, b2Vec2(1.0f, 0.0f));
+
 			b2PolygonDef sd1;
 			sd1.vertexCount = 3;
-			sd1.vertices[0].Set(-1.0f, 0.0f);
-			sd1.vertices[1].Set(1.0f, 0.0f);
-			sd1.vertices[2].Set(0.0f, 0.5f);
-			sd1.localRotation = 0.3524f * b2_pi;
-			b2Mat22 R1(sd1.localRotation);
-			sd1.localPosition = b2Mul(R1, b2Vec2(1.0f, 0.0f));
+			sd1.vertices[0] = b2Mul(xf1, b2Vec2(-1.0f, 0.0f));
+			sd1.vertices[1] = b2Mul(xf1, b2Vec2(1.0f, 0.0f));
+			sd1.vertices[2] = b2Mul(xf1, b2Vec2(0.0f, 0.5f));
 			sd1.density = 2.0f;
+
+			b2XForm xf2;
+			xf2.R.Set(-0.3524f * b2_pi);
+			xf2.position = b2Mul(xf2.R, b2Vec2(-1.0f, 0.0f));
 
 			b2PolygonDef sd2;
 			sd2.vertexCount = 3;
-			sd2.vertices[0].Set(-1.0f, 0.0f);
-			sd2.vertices[1].Set(1.0f, 0.0f);
-			sd2.vertices[2].Set(0.0f, 0.5f);
-			sd2.localRotation = -0.3524f * b2_pi;
-			b2Mat22 R2(sd2.localRotation);
-			sd2.localPosition = b2Mul(R2, b2Vec2(-1.0f, 0.0f));
+			sd2.vertices[0] = b2Mul(xf2, b2Vec2(-1.0f, 0.0f));
+			sd2.vertices[1] = b2Mul(xf2, b2Vec2(1.0f, 0.0f));
+			sd2.vertices[2] = b2Mul(xf2, b2Vec2(0.0f, 0.5f));
 			sd2.density = 2.0f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd1);
-			bd.AddShape(&sd2);
+			bd.AddShape(m_world->Create(&sd1));
+			bd.AddShape(m_world->Create(&sd2));
 
 			for (int32 i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				bd.position.Set(x, 2.05f + 2.5f * i);
 				bd.rotation = 0.0f;
-				m_world->CreateBody(&bd);
+				m_world->Create(&bd);
 			}
 		}
 
 		{
-			b2BoxDef sd_bottom;
-			sd_bottom.extents.Set( 1.5f, 0.15f );
+			b2PolygonDef sd_bottom;
+			sd_bottom.SetAsBox( 1.5f, 0.15f );
 			sd_bottom.density = 4.0f;
 
-			b2BoxDef sd_left;
-			sd_left.extents.Set( 0.15f, 2.7f );
-			sd_left.localPosition.Set( -1.45f, 2.35f );
-			sd_left.localRotation = 0.2f;
+			b2PolygonDef sd_left;
+			sd_left.SetAsBox(0.15f, 2.7f, b2Vec2(-1.45f, 2.35f), 0.2f);
 			sd_left.density = 4.0f;
 
-			b2BoxDef sd_right;
-			sd_right.extents.Set( 0.15f, 2.7f );
-			sd_right.localPosition.Set( 1.45f, 2.35f );
-			sd_right.localRotation = -0.2f;
+			b2PolygonDef sd_right;
+			sd_right.SetAsBox(0.15f, 2.7f, b2Vec2(1.45f, 2.35f), -0.2f);
 			sd_right.density = 4.0f;
 
 			b2BodyDef bd;
 			bd.position.Set( 0.0f, 2.0f );
-			bd.AddShape( &sd_bottom );
-			bd.AddShape( &sd_left );
-			bd.AddShape( &sd_right );
+			bd.AddShape(m_world->Create(&sd_bottom));
+			bd.AddShape(m_world->Create(&sd_left));
+			bd.AddShape(m_world->Create(&sd_right));
 
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 	}
 

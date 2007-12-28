@@ -26,20 +26,20 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(2.0f, 0.5f);
+			sd.SetAsBox(2.0f, 0.5f);
 			sd.density = 5.0f;
 			sd.friction = 0.05f;
 
@@ -53,7 +53,7 @@ public:
 			const float32 y = 8.0f;
 
 			bd.position.Set(3.0f, y);
-			body = m_world->CreateBody(&bd);
+			body = m_world->Create(&bd);
 
 			rjd.anchorPoint.Set(0.0f, y);
 			rjd.body1 = prevBody;
@@ -67,7 +67,7 @@ public:
 			prevBody = body;
 
 			bd.position.Set(9.0f, y);
-			body = m_world->CreateBody(&bd);
+			body = m_world->Create(&bd);
 
 			rjd.anchorPoint.Set(6.0f, y);
 			rjd.body1 = prevBody;
@@ -86,7 +86,7 @@ public:
 
 			bd.position.Set(-10.0f, 10.0f);
 			bd.rotation = 0.5f * b2_pi;
-			body = m_world->CreateBody(&bd);
+			body = m_world->Create(&bd);
 
 			b2PrismaticJointDef pjd;
 			pjd.anchorPoint.Set(-10.0f, 10.0f);

@@ -108,8 +108,6 @@ struct b2Vec2
 	}
 
 	float32 x, y;
-
-	static b2Vec2 s_zero;
 };
 
 struct b2Mat22
@@ -190,8 +188,6 @@ struct b2Mat22
 	}
 
 	b2Vec2 col1, col2;
-
-	static b2Mat22 s_identity;
 };
 
 struct b2XForm
@@ -207,9 +203,11 @@ struct b2XForm
 
 	b2Vec2 position;
 	b2Mat22 R;
-
-	static b2XForm s_identity;
 };
+
+extern const b2Vec2 b2Vec2_zero;
+extern const b2Mat22 b2Mat22_identity;
+extern const b2XForm b2XForm_identity;
 
 inline float32 b2Dot(const b2Vec2& a, const b2Vec2& b)
 {

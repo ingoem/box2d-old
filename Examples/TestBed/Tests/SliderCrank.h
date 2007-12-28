@@ -28,21 +28,21 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->Create(&bd);
 		}
 
 		{
 			// Define crank.
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(0.5f, 2.0f);
+			sd.SetAsBox(0.5f, 2.0f);
 			sd.density = 1.0f;
 
 			b2BodyDef bd;
@@ -53,7 +53,7 @@ public:
 			b2Body* prevBody = ground;
 
 			bd.position.Set(0.0f, 7.0f);
-			b2Body* body = m_world->CreateBody(&bd);
+			b2Body* body = m_world->Create(&bd);
 
 			rjd.anchorPoint.Set(0.0f, 5.0f);
 			rjd.body1 = prevBody;
@@ -66,9 +66,9 @@ public:
 			prevBody = body;
 
 			// Define follower.
-			sd.extents.Set(0.5f, 4.0f);
+			sd.SetAsBox(0.5f, 4.0f);
 			bd.position.Set(0.0f, 13.0f);
-			body = m_world->CreateBody(&bd);
+			body = m_world->Create(&bd);
 
 			rjd.anchorPoint.Set(0.0f, 9.0f);
 			rjd.body1 = prevBody;
@@ -79,9 +79,9 @@ public:
 			prevBody = body;
 
 			// Define piston
-			sd.extents.Set(1.5f, 1.5f);
+			sd.SetAsBox(1.5f, 1.5f);
 			bd.position.Set(0.0f, 17.0f);
-			body = m_world->CreateBody(&bd);
+			body = m_world->Create(&bd);
 
 			rjd.anchorPoint.Set(0.0f, 17.0f);
 			rjd.body1 = prevBody;
@@ -102,7 +102,7 @@ public:
 			// Create a payload
 			sd.density = 2.0f;
 			bd.position.Set(0.0f, 23.0f);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 	}
 

@@ -30,15 +30,15 @@ public:
 	{
 		// Ground body
 		{
-			b2BoxDef sd;
-			sd.extents.Set(50.0f, 10.0f);
+			b2PolygonDef sd;
+			sd.SetAsBox(50.0f, 10.0f);
 			sd.friction = 0.3f;
 			sd.categoryBits = 0x0001;
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			bd.AddShape(m_world->Create(&sd));
+			m_world->Create(&bd);
 		}
 
 		sds[0].vertexCount = 3;
@@ -90,11 +90,11 @@ public:
 		memset(bodies, 0, sizeof(bodies));
 	}
 
-	void CreateBody(int32 index)
+	void Create(int32 index)
 	{
 		if (bodies[bodyIndex] != NULL)
 		{
-			m_world->DestroyBody(bodies[bodyIndex]);
+			m_world->Destroy(bodies[bodyIndex]);
 			bodies[bodyIndex] = NULL;
 		}
 
@@ -102,11 +102,11 @@ public:
 
 		if (index < 4)
 		{
-			bd.AddShape(sds + index);
+			bd.AddShape(m_world->Create(sds + index));
 		}
 		else
 		{
-			bd.AddShape(&circleDef);
+			bd.AddShape(m_world->Create(&circleDef));
 			bd.angularDamping = 0.02f;
 		}
 
@@ -114,7 +114,7 @@ public:
 		bd.position.Set(x, 10.0f);
 		bd.rotation = b2Random(-b2_pi, b2_pi);
 
-		bodies[bodyIndex] = m_world->CreateBody(&bd);
+		bodies[bodyIndex] = m_world->Create(&bd);
 		bodyIndex = (bodyIndex + 1) % k_maxBodies;
 	}
 
@@ -124,7 +124,7 @@ public:
 		{
 			if (bodies[i] != NULL)
 			{
-				m_world->DestroyBody(bodies[i]);
+				m_world->Destroy(bodies[i]);
 				bodies[i] = NULL;
 				return;
 			}
@@ -140,7 +140,7 @@ public:
 		case '3':
 		case '4':
 		case '5':
-			CreateBody(key - '1');
+			Create(key - '1');
 			break;
 
 		case 'd':

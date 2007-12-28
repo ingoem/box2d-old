@@ -53,7 +53,7 @@ public:
 				//float32 w = 100.0f;
 				//bd.angularVelocity = w;
 				//bd.linearVelocity.Set(w * L, 0.0f);
-				b2Body* body = m_world->CreateBody(&bd);
+				b2Body* body = m_world->Create(&bd);
 
 				jd.anchorPoint.Set(x, y + L);
 				jd.body1 = ground;

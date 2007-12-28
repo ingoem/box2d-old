@@ -47,8 +47,7 @@ int main(int argc, char** argv)
 	b2PolygonDef groundShapeDef;
 
 	// The extents are the half-widths of the box.
-	b2Vec2 extents(50.0f, 10.0f);
-	groundShapeDef.SetAsBox(extents, b2XForm::s_identity);
+	groundShapeDef.SetAsBox(50.0f, 10.0f);
 
 	// Set the density of the ground box to zero. This will
 	// make the ground body static (fixed).
@@ -71,8 +70,7 @@ int main(int argc, char** argv)
 
 	// Define another box shape for our dynamic body.
 	b2PolygonDef shapeDef;
-	extents.Set(1.0f, 1.0f);
-	shapeDef.SetAsBox(extents, b2XForm::s_identity);
+	shapeDef.SetAsBox(1.0f, 1.0f);
 
 	// Set the box density to be non-zero, so it will be dynamic.
 	shapeDef.density = 1.0f;

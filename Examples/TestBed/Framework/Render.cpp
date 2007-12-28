@@ -40,7 +40,7 @@ void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2C
 
 void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
-	glColor3f(0.5f * color.r, 0.5f * color.g, 0.5f * color.b);
+	glColor4f(0.5f * color.r, 0.5f * color.g, 0.5f * color.b, 0.5f);
 	glBegin(GL_TRIANGLE_FAN);
 	for (int32 i = 0; i < vertexCount; ++i)
 	{
@@ -48,7 +48,7 @@ void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, cons
 	}
 	glEnd();
 
-	glColor3f(color.r, color.g, color.b);
+	glColor4f(color.r, color.g, color.b, 1.0f);
 	glBegin(GL_LINE_LOOP);
 	for (int32 i = 0; i < vertexCount; ++i)
 	{

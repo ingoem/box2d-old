@@ -27,20 +27,20 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(0.5f, 0.5f);
+			sd.SetAsBox(0.5f, 0.5f);
 			sd.density = 5.0f;
 			sd.friction = 0.2f;
 
@@ -48,16 +48,16 @@ public:
 			bd.AddShape(&sd);
 
 			bd.position.Set(-5.0f, 5.0f);
-			m_bodies[0] = m_world->CreateBody(&bd);
+			m_bodies[0] = m_world->Create(&bd);
 
 			bd.position.Set(5.0f, 5.0f);
-			m_bodies[1] = m_world->CreateBody(&bd);
+			m_bodies[1] = m_world->Create(&bd);
 
 			bd.position.Set(5.0f, 15.0f);
-			m_bodies[2] = m_world->CreateBody(&bd);
+			m_bodies[2] = m_world->Create(&bd);
 
 			bd.position.Set(-5.0f, 15.0f);
-			m_bodies[3] = m_world->CreateBody(&bd);
+			m_bodies[3] = m_world->Create(&bd);
 
 			b2DistanceJointDef jd;
 

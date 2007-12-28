@@ -25,21 +25,21 @@ public:
 	VerticalStack()
 	{
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			float32 a = 0.5f;
 			sd.type = e_boxShape;
-			sd.extents.Set(a, a);
+			sd.SetAsBox(a, a);
 			sd.density = 1.0f;
 			sd.friction = 0.3f;
 
@@ -52,7 +52,7 @@ public:
 				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;
 				//bd.position.Set(x, 0.752f + 1.54f * i);
 				bd.position.Set(0.0f, 0.51f + 1.02f * i);
-				m_world->CreateBody(&bd);
+				m_world->Create(&bd);
 			}
 		}
 	}

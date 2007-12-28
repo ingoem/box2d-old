@@ -44,15 +44,15 @@ public:
 	{
 		// Ground body
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 			sd.friction = 0.3f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		// Small triangle
@@ -71,7 +71,7 @@ public:
 		triangleBodyDef.AddShape(&triangleShapeDef);
 		triangleBodyDef.position.Set(-5.0f, 2.0f);
 
-		m_world->CreateBody(&triangleBodyDef);
+		m_world->Create(&triangleBodyDef);
 
 		// Large triangle (recycle definitions)
 		triangleShapeDef.vertices[0] *= 2.0f;
@@ -80,11 +80,11 @@ public:
 		triangleShapeDef.groupIndex = k_largeGroup;
 		triangleBodyDef.position.Set(-5.0f, 6.0f);
 		triangleBodyDef.preventRotation = true; // look at me!
-		m_world->CreateBody(&triangleBodyDef);
+		m_world->Create(&triangleBodyDef);
 
 		// Small box
-		b2BoxDef boxShapeDef;
-		boxShapeDef.extents.Set(1.0f, 0.5f);
+		b2PolygonDef boxShapeDef;
+		boxShapeDef.SetAsBox(1.0f, 0.5f);
 		boxShapeDef.density = 1.0f;
 
 		boxShapeDef.groupIndex = k_smallGroup;
@@ -95,13 +95,13 @@ public:
 		boxBodyDef.position.Set(0.0f, 2.0f);
 		boxBodyDef.AddShape(&boxShapeDef);
 
-		m_world->CreateBody(&boxBodyDef);
+		m_world->Create(&boxBodyDef);
 
 		// Large box (recycle definitions)
 		boxShapeDef.extents *= 2.0f;
 		boxShapeDef.groupIndex = k_largeGroup;
 		boxBodyDef.position.Set(0.0f, 6.0f);
-		m_world->CreateBody(&boxBodyDef);
+		m_world->Create(&boxBodyDef);
 
 		// Small circle
 		b2CircleDef circleShapeDef;
@@ -116,13 +116,13 @@ public:
 		circleBodyDef.AddShape(&circleShapeDef);
 		circleBodyDef.position.Set(5.0f, 2.0f);
 		
-		m_world->CreateBody(&circleBodyDef);
+		m_world->Create(&circleBodyDef);
 
 		// Large circle
 		circleShapeDef.radius *= 2.0f;
 		circleShapeDef.groupIndex = k_largeGroup;
 		circleBodyDef.position.Set(5.0f, 6.0f);
-		m_world->CreateBody(&circleBodyDef);
+		m_world->Create(&circleBodyDef);
 	}
 	static Test* Create()
 	{

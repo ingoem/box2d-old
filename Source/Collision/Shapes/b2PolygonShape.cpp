@@ -19,13 +19,26 @@
 
 #include "b2PolygonShape.h"
 
-void b2PolygonDef::SetAsBox(const b2Vec2& extents, const b2XForm& transform)
+void b2PolygonDef::SetAsBox(float32 hx, float32 hy)
 {
 	vertexCount = 4;
-	vertices[0] = transform.position + b2Mul(transform.R, b2Vec2(extents.x, extents.y));
-	vertices[1] = transform.position + b2Mul(transform.R, b2Vec2(-extents.x, extents.y));
-	vertices[2] = transform.position + b2Mul(transform.R, b2Vec2(-extents.x, -extents.y));
-	vertices[3] = transform.position + b2Mul(transform.R, b2Vec2(extents.x, -extents.y));
+	vertices[0].Set(-hx, -hy);
+	vertices[1].Set( hx, -hy);
+	vertices[2].Set( hx,  hy);
+	vertices[3].Set(-hx,  hy);
+}
+
+void b2PolygonDef::SetAsBox(float32 hx, float32 hy, const b2Vec2& center, float32 angle)
+{
+	SetAsBox(hx, hy);
+	b2XForm xf;
+	xf.position = center;
+	xf.R.Set(angle);
+
+	for (int32 i = 0; i < vertexCount; ++i)
+	{
+		vertices[i] = b2Mul(xf, vertices[i]);
+	}
 }
 
 static b2Vec2 ComputeCentroid(const b2Vec2* vs, int32 count)
@@ -90,16 +103,17 @@ static void ComputeOBB(b2OBB* obb, const b2Vec2* vs, int32 count)
 	
 	for (int32 i = 1; i <= count; ++i)
 	{
-		b2Vec2 ux = p[i] - p[i-1];
+		b2Vec2 root = p[i-1];
+		b2Vec2 ux = p[i] - root;
 		float32 length = ux.Normalize();
 		b2Assert(length > FLT_EPSILON);
 		b2Vec2 uy(-ux.y, ux.x);
 		b2Vec2 lower(FLT_MAX, FLT_MAX);
 		b2Vec2 upper(-FLT_MAX, -FLT_MAX);
 
-		for (int32 j = 1; j < count; ++j)
+		for (int32 j = 0; j < count; ++j)
 		{
-			b2Vec2 d = p[j] - p[0];
+			b2Vec2 d = p[j] - root;
 			b2Vec2 r;
 			r.x = b2Dot(ux, d);
 			r.y = b2Dot(uy, d);
@@ -108,13 +122,13 @@ static void ComputeOBB(b2OBB* obb, const b2Vec2* vs, int32 count)
 		}
 
 		float32 area = (upper.x - lower.x) * (upper.y - lower.y);
-		if ( area < minArea )
+		if (area < 0.95f * minArea)
 		{
 			minArea = area;
 			obb->R.col1 = ux;
 			obb->R.col2 = uy;
 			b2Vec2 center = 0.5f * (lower + upper);
-			obb->center = p[0] + b2Mul(obb->R, center);
+			obb->center = root + b2Mul(obb->R, center);
 			obb->extents = 0.5f * (upper - lower);
 		}
 	}
@@ -404,9 +418,8 @@ void b2PolygonShape::ComputeMass(b2MassData* massData) const
 	center *= 1.0f / area;
 	massData->center = center;
 
-	// Inertia tensor relative to the center.
-	I = m_density * (I - area * b2Dot(center, center));
-	massData->I = I;
+	// Inertia tensor relative to the local origin.
+	massData->I = m_density * I;
 }
 
 b2Vec2 b2PolygonShape::Centroid(const b2XForm& xf) const

@@ -26,21 +26,21 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			//sd.extents.Set(0.375f, 0.125f);
-			sd.extents.Set(0.6f, 0.125f);
+			//sd.SetAsBox(0.375f, 0.125f);
+			sd.SetAsBox(0.6f, 0.125f);
 			sd.density = 20.0f;
 			sd.friction = 0.2f;
 
@@ -55,7 +55,7 @@ public:
 			for (int32 i = 0; i < 30; ++i)
 			{
 				bd.position.Set(0.5f + i, y);
-				b2Body* body = m_world->CreateBody(&bd);
+				b2Body* body = m_world->Create(&bd);
 
 				jd.anchorPoint.Set((float32)i, y);
 				jd.body1 = prevBody;

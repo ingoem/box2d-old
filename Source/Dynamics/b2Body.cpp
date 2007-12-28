@@ -36,11 +36,32 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_angle0 = m_angle;
 	m_world = world;
 
+	m_jointList = NULL;
+	m_contactList = NULL;
+	m_prev = NULL;
+	m_next = NULL;
+
 	m_linearDamping = b2Clamp(1.0f - bd->linearDamping, 0.0f, 1.0f);
 	m_angularDamping = b2Clamp(1.0f - bd->angularDamping, 0.0f, 1.0f);
 
 	m_force.Set(0.0f, 0.0f);
 	m_torque = 0.0f;
+
+	// Compute the center of mass velocity.
+	m_linearVelocity.SetZero();
+	m_angularVelocity = 0.0f;
+
+	m_sleepTime = 0.0f;
+	if (bd->allowSleep)
+	{
+		m_flags |= e_allowSleepFlag;
+	}
+	if (bd->isSleeping)
+	{
+		m_flags |= e_sleepFlag;
+	}
+
+	m_userData = bd->userData;
 
 	// Compute the total mass and COM.
 	m_shapeList = bd->shapes;
@@ -59,18 +80,13 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	}
 
 	// Compute center of mass, and shift the origin to the COM.
+	b2Vec2 offset;
 	if (m_mass > 0.0f)
 	{
 		m_center *= 1.0f / m_mass;
 		m_xf.position += b2Mul(m_xf.R, m_center);
 
-		b2Vec2 offset = -m_center;
-		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
-		{
-			s->Attach(this, offset);
-			s->CreateProxy(m_world->m_broadPhase, m_xf);
-		}
-
+		offset = -m_center;
 		m_I -= m_mass * b2Dot(m_center, m_center);
 		b2Assert(m_I > 0.0f);
 
@@ -79,12 +95,7 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	}
 	else
 	{
-		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
-		{
-			s->Attach(this, b2Vec2::s_zero);
-			s->CreateProxy(m_world->m_broadPhase, m_xf);
-		}
-
+		offset = b2Vec2_zero;
 		m_flags |= e_staticFlag;
 		m_invMass = 0.0f;
 		m_invI = 0.0f;
@@ -96,26 +107,14 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		m_invI = 0.0f;
 	}
 
-	// Compute the center of mass velocity.
-	m_linearVelocity.SetZero();
-	m_angularVelocity = 0.0f;
-
-	m_jointList = NULL;
-	m_contactList = NULL;
-	m_prev = NULL;
-	m_next = NULL;
-
-	m_sleepTime = 0.0f;
-	if (bd->allowSleep)
+	// Attach shapes and add them to the broad-phase.
+	// Careful: this invokes user callbacks. So this
+	// should go last in the body constructor.
+	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		m_flags |= e_allowSleepFlag;
+		s->Attach(this, offset);
+		s->CreateProxy(m_world->m_broadPhase, m_xf);
 	}
-	if (bd->isSleeping)
-	{
-		m_flags |= e_sleepFlag;
-	}
-
-	m_userData = bd->userData;
 }
 
 b2Body::~b2Body()

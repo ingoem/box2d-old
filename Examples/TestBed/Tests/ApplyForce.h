@@ -27,26 +27,26 @@ public:
 		m_world->m_gravity.Set(0.0f, 0.0f);
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(50.0f, 10.0f);
+			b2PolygonDef sd;
+			sd.SetAsBox(50.0f, 10.0f);
 			sd.restitution = 0.9f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 
 			bd.position.Set(30.0f, 50.0f);
 			bd.rotation = 0.5f * b2_pi;
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 
 			bd.position.Set(-30.0f, 50.0f);
 			bd.rotation = -0.5f * b2_pi;
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 
 			bd.position.Set(0.0f, 40.0f);
 			bd.rotation = 0.0f;
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
@@ -81,7 +81,7 @@ public:
 
 			bd.position.Set(0.0f, 1.05f);
 			bd.rotation = b2_pi;
-			m_body = m_world->CreateBody(&bd);
+			m_body = m_world->Create(&bd);
 		}
 	}
 

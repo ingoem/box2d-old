@@ -28,8 +28,7 @@ public:
 #if 1
 		{
 			b2PolygonDef sd;
-			b2Vec2 extents(50.0f, 10.0f);
-			sd.SetAsBox(extents, b2XForm::s_identity);
+			sd.SetAsBox(50.0f, 10.0f);
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
@@ -56,25 +55,25 @@ public:
 #elif 1
 		// Test bug in poly collision
 		{
-			b2BoxDef sd;
-			sd.extents.Set(50.0f, 10.0f);
+			b2PolygonDef sd;
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd_bottom;
-			sd_bottom.extents.Set( 1.5f, 0.15f );
+			b2PolygonDef sd_bottom;
+			sd_bottom.SetAsBox( 1.5f, 0.15f );
 
-			b2BoxDef sd_left;
-			sd_left.extents.Set( 0.15f, 2.5f );
+			b2PolygonDef sd_left;
+			sd_left.SetAsBox( 0.15f, 2.5f );
 			sd_left.localPosition.Set( -1.45f, 2.35f );
 
-			b2BoxDef sd_right;
-			sd_right.extents.Set( 0.15f, 2.5f );
+			b2PolygonDef sd_right;
+			sd_right.SetAsBox( 0.15f, 2.5f );
 			sd_right.localPosition.Set( 1.45f, 2.35f );
 
 			b2BodyDef bd;
@@ -83,13 +82,13 @@ public:
 			bd.AddShape( &sd_left );
 			bd.AddShape( &sd_right );
 
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		// debug thing
 		{
-			b2BoxDef sd;
-			sd.extents.Set(3.0f, 0.5f);
+			b2PolygonDef sd;
+			sd.SetAsBox(3.0f, 0.5f);
 			sd.localRotation = 3.141596f * 0.25f;
 			sd.friction = 0.01f;
 
@@ -97,16 +96,16 @@ public:
 			bd.position.Set( 3.5f, 10.0f );
 			bd.AddShape( &sd );
 
-			m_world->CreateBody( &bd );
+			m_world->Create( &bd );
 
 
-			sd.extents.Set( 0.5f, 0.5f );
+			sd.SetAsBox( 0.5f, 0.5f );
 			sd.density = 5.0f;
 
 			b2BodyDef penetrating_box;
 			penetrating_box.position.Set( 4.5f, 20.0f );
 			penetrating_box.AddShape( &sd );
-			m_world->CreateBody( &penetrating_box );
+			m_world->Create( &penetrating_box );
 		}
 #elif 1
 		// Test bug in poly collision
@@ -134,7 +133,7 @@ public:
 			body.rotation = 5.7595868f;
 			body.AddShape(&box);
 
-			m_world->CreateBody(&body);
+			m_world->Create(&body);
 		}
 
 		{
@@ -152,33 +151,33 @@ public:
 			body.position.Set(32.0f, 30.0f);
 			body.AddShape(&box);
 
-			m_world->CreateBody(&body);
+			m_world->Create(&body);
 		}
 #else
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd_bottom;
+			b2PolygonDef sd_bottom;
 			sd_bottom.type = e_boxShape;
-			sd_bottom.extents.Set( 1.5f, 0.15f );
+			sd_bottom.SetAsBox( 1.5f, 0.15f );
 
-			b2BoxDef sd_left;
+			b2PolygonDef sd_left;
 			sd_left.type = e_boxShape;
-			sd_left.extents.Set( 0.15f, 2.7f );
+			sd_left.SetAsBox( 0.15f, 2.7f );
 			sd_left.localPosition.Set( -1.45f, 2.35f );
 
-			b2BoxDef sd_right;
+			b2PolygonDef sd_right;
 			sd_right.type = e_boxShape;
-			sd_right.extents.Set( 0.15f, 2.7f );
+			sd_right.SetAsBox( 0.15f, 2.7f );
 			sd_right.localPosition.Set( 1.45f, 2.35f );
 
 			b2BodyDef bd;
@@ -187,19 +186,19 @@ public:
 			bd.AddShape( &sd_left );
 			bd.AddShape( &sd_right );
 
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		// debug thing
 		{
-			b2BoxDef sd;
-			sd.extents.Set( 0.5f, 0.5f );
+			b2PolygonDef sd;
+			sd.SetAsBox( 0.5f, 0.5f );
 			sd.density = 5.0f;
 
 			b2BodyDef penetrating_box;
 			penetrating_box.position.Set( -0.80f, 20.0f );
 			penetrating_box.AddShape( &sd );
-			m_world->CreateBody( &penetrating_box );
+			m_world->Create( &penetrating_box );
 
 		}
 #endif

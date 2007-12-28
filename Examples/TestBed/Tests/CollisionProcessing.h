@@ -28,15 +28,15 @@ public:
 	{
 		// Ground body
 		{
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			sd.type = e_boxShape;
-			sd.extents.Set(50.0f, 10.0f);
+			sd.SetAsBox(50.0f, 10.0f);
 			sd.friction = 0.3f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		float32 xLo = -5.0f, xHi = 5.0f;
@@ -54,30 +54,30 @@ public:
 		triangleBodyDef.AddShape(&triangleShapeDef);
 		triangleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
-		m_world->CreateBody(&triangleBodyDef);
+		m_world->Create(&triangleBodyDef);
 
 		// Large triangle (recycle definitions)
 		triangleShapeDef.vertices[0] *= 2.0f;
 		triangleShapeDef.vertices[1] *= 2.0f;
 		triangleShapeDef.vertices[2] *= 2.0f;
 		triangleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
-		m_world->CreateBody(&triangleBodyDef);
+		m_world->Create(&triangleBodyDef);
 
 		// Small box
-		b2BoxDef boxShapeDef;
-		boxShapeDef.extents.Set(1.0f, 0.5f);
+		b2PolygonDef boxShapeDef;
+		boxShapeDef.SetAsBox(1.0f, 0.5f);
 		boxShapeDef.density = 1.0f;
 
 		b2BodyDef boxBodyDef;
 		boxBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 		boxBodyDef.AddShape(&boxShapeDef);
 
-		m_world->CreateBody(&boxBodyDef);
+		m_world->Create(&boxBodyDef);
 
 		// Large box (recycle definitions)
 		boxShapeDef.extents *= 2.0f;
 		boxBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
-		m_world->CreateBody(&boxBodyDef);
+		m_world->Create(&boxBodyDef);
 
 		// Small circle
 		b2CircleDef circleShapeDef;
@@ -88,12 +88,12 @@ public:
 		circleBodyDef.AddShape(&circleShapeDef);
 		circleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
-		m_world->CreateBody(&circleBodyDef);
+		m_world->Create(&circleBodyDef);
 
 		// Large circle
 		circleShapeDef.radius *= 2.0f;
 		circleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
-		m_world->CreateBody(&circleBodyDef);
+		m_world->Create(&circleBodyDef);
 	}
 
 	void Step(Settings* settings)

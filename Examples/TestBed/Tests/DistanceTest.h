@@ -26,36 +26,36 @@ public:
 	{
 #if 1
 		{
-			b2BoxDef sd;
-			sd.extents.Set(50.0f, 10.0f);
+			b2PolygonDef sd;
+			sd.SetAsBox(50.0f, 10.0f);
 			sd.friction = 0.3f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_body1 = m_world->CreateBody(&bd);
+			m_body1 = m_world->Create(&bd);
 			m_shape1 = m_body1->m_shapeList;
 		}
 #else
 		{
-			b2BoxDef sd;
-			sd.extents.Set(0.5f, 0.5f);
+			b2PolygonDef sd;
+			sd.SetAsBox(0.5f, 0.5f);
 			sd.extents *= 10.0f;
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
 			bd.AddShape(&sd);
-			m_body1 = m_world->CreateBody(&bd);
+			m_body1 = m_world->Create(&bd);
 			m_shape1 = m_body1->m_shapeList;
 		}
 #endif
 
 		{
 #if 0
-			b2BoxDef sd;
+			b2PolygonDef sd;
 			float32 a = 0.25f;
-			sd.extents.Set(a, a);
+			sd.SetAsBox(a, a);
 			sd.extents *= 10.0f;
 			sd.density = 1.0f;
 #elif 1
@@ -79,7 +79,7 @@ public:
 			bd.position.Set(0.0f, 10.0f);
 #endif
 			bd.AddShape(&sd);
-			m_body2 = m_world->CreateBody(&bd);
+			m_body2 = m_world->Create(&bd);
 			m_shape2 = m_body2->m_shapeList;
 		}
 

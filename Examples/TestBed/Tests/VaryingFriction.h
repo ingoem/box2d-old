@@ -28,18 +28,18 @@ public:
 		float32 scale = 2.0f;
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(50.0f, 10.0f);
+			b2PolygonDef sd;
+			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(6.5f, 0.125f);
+			b2PolygonDef sd;
+			sd.SetAsBox(6.5f, 0.125f);
 			sd.extents *= scale;
 
 			b2BodyDef bd;
@@ -48,12 +48,12 @@ public:
 
 			bd.rotation = -0.25f;
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(0.125f, 0.5f);
+			b2PolygonDef sd;
+			sd.SetAsBox(0.125f, 0.5f);
 			sd.extents *= scale;
 
 			b2BodyDef bd;
@@ -61,12 +61,12 @@ public:
 			bd.position *= scale;
 
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(6.5f, 0.125f);
+			b2PolygonDef sd;
+			sd.SetAsBox(6.5f, 0.125f);
 			sd.extents *= scale;
 
 			b2BodyDef bd;
@@ -75,12 +75,12 @@ public:
 
 			bd.rotation = 0.25f;
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(0.125f, 0.5f);
+			b2PolygonDef sd;
+			sd.SetAsBox(0.125f, 0.5f);
 			sd.extents *= scale;
 
 			b2BodyDef bd;
@@ -88,12 +88,12 @@ public:
 			bd.position *= scale;
 
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(6.5f, 0.125f);
+			b2PolygonDef sd;
+			sd.SetAsBox(6.5f, 0.125f);
 			sd.extents *= scale;
 
 			b2BodyDef bd;
@@ -102,12 +102,12 @@ public:
 
 			bd.rotation = -0.25f;
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(0.25f, 0.25f);
+			b2PolygonDef sd;
+			sd.SetAsBox(0.25f, 0.25f);
 			sd.extents *= scale;
 
 			sd.density = 25.0f;
@@ -122,7 +122,7 @@ public:
 				sd.friction = friction[i];
 				bd.position.Set(-7.5f + 2.0f * i, 14.0f);
 				bd.position *= scale;
-				m_world->CreateBody(&bd);
+				m_world->Create(&bd);
 			}
 		}
 	}

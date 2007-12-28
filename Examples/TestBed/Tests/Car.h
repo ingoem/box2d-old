@@ -38,10 +38,10 @@ public:
 		m_world = new b2World(aabb, gravity, true);
 		/*
 		{	// car body
-		b2BoxDef	box;
+		b2PolygonDef	box;
 		b2BodyDef	body;
 
-		box.extents.Set(2.2225f,0.73787f);
+		box.SetAsBox(2.2225f,0.73787f);
 		box.type		= e_boxShape;
 		box.density		= 227.6f;
 		box.friction	= 0.68f;
@@ -50,7 +50,7 @@ public:
 		body.position.Set(10,2.8f);
 		body.AddShape(&box);
 
-		m_vehicle = m_world->CreateBody(&body);
+		m_vehicle = m_world->Create(&body);
 		}
 		*/
 		{	// car body
@@ -88,21 +88,21 @@ public:
 			body.AddShape(&poly2);
 			body.position.Set(10,2.8f);
 
-			m_vehicle = m_world->CreateBody(&body);
+			m_vehicle = m_world->Create(&body);
 		}
 
 		{	// ground
-			b2BoxDef	box;
+			b2PolygonDef	box;
 			b2BodyDef	body;
 
-			box.extents.Set(9.5,0.5);
+			box.SetAsBox(9.5,0.5);
 			box.density		= 0;
 			box.friction	= 0.62f;
 
 			body.position.Set(10,1);
 			body.AddShape(&box);
 
-			m_world->CreateBody(&body);
+			m_world->Create(&body);
 		}
 
 
@@ -121,9 +121,9 @@ public:
 			body.position.Set(11.2f,2);
 			body.AddShape(&circ);
 
-			m_rightWheel = m_world->CreateBody(&body);
+			m_rightWheel = m_world->Create(&body);
 			body.position.Set(8.8f,2);
-			m_leftWheel = m_world->CreateBody(&body);
+			m_leftWheel = m_world->Create(&body);
 		}
 
 		{	// axles
@@ -138,9 +138,9 @@ public:
 			body.position = m_leftWheel->GetCenterPosition();
 			body.AddShape(&circ);
 
-			leftAxle = m_world->CreateBody(&body);
+			leftAxle = m_world->Create(&body);
 			body.position = m_rightWheel->GetCenterPosition();
-			rightAxle = m_world->CreateBody(&body);
+			rightAxle = m_world->Create(&body);
 
 			{	// join wheels to axles
 				b2RevoluteJointDef	joint;
@@ -174,10 +174,10 @@ public:
 			}
 		}
 		{	// falling person
-			b2BoxDef	box;
+			b2PolygonDef	box;
 			b2BodyDef	body;
 
-			box.extents.Set(0.5f,1.7f);
+			box.SetAsBox(0.5f,1.7f);
 			box.type		= e_boxShape;
 			box.density		= 1000;
 			box.friction	= 0.1f;
@@ -185,72 +185,72 @@ public:
 			body.position.Set(10,40);
 			body.AddShape(&box);
 
-			//m_world->CreateBody(&body);
+			//m_world->Create(&body);
 		}
 		{	// more ground
-			b2BoxDef	box;
+			b2PolygonDef	box;
 			b2BodyDef	body;
 
-			box.extents.Set(9.5,0.5);
+			box.SetAsBox(9.5,0.5);
 			box.density		= 0;
 			box.friction	= 0.62f;
 			box.localRotation	= 0.1f * b2_pi;
 			body.position.Set(27,3.1f);
 			body.AddShape(&box);
 
-			m_world->CreateBody(&body);
+			m_world->Create(&body);
 		}
 		{	// more ground
-			b2BoxDef	box;
+			b2PolygonDef	box;
 			b2BodyDef	body;
 
-			box.extents.Set(9.5,0.5);
+			box.SetAsBox(9.5,0.5);
 			box.density		= 0;
 			box.friction	= 0.62f;
 			box.localRotation	= -0.1f * b2_pi;
 			body.position.Set(55,3.1f);
 			body.AddShape(&box);
 
-			m_world->CreateBody(&body);
+			m_world->Create(&body);
 		}
 		{	// more ground
-			b2BoxDef	box;
+			b2PolygonDef	box;
 			b2BodyDef	body;
 
-			box.extents.Set(9.5,0.5);
+			box.SetAsBox(9.5,0.5);
 			box.density		= 0;
 			box.friction	= 0.62f;
 			box.localRotation	= 0.03f * b2_pi;
 			body.position.Set(71,2);
 			body.AddShape(&box);
 
-			m_world->CreateBody(&body);
+			m_world->Create(&body);
 		}
 		{	// more ground
-			b2BoxDef	box;
+			b2PolygonDef	box;
 			b2BodyDef	body;
 
-			box.extents.Set(5,0.5);
+			box.SetAsBox(5,0.5);
 			box.density		= 0;
 			box.friction	= 0.62f;
 			box.localRotation	= 0.15f * b2_pi;
 			body.position.Set(80,4);
 			body.AddShape(&box);
 
-			m_world->CreateBody(&body);
+			m_world->Create(&body);
 		}
 		{	// more ground
-			b2BoxDef	box;
+			b2PolygonDef	box;
 			b2BodyDef	body;
 
-			box.extents.Set(30,0.5);
+			box.SetAsBox(30,0.5);
 			box.density		= 0;
 			box.friction	= 0.62f;
 			box.localRotation	= 0;
 			body.position.Set(140,2);
 			body.AddShape(&box);
 
-			m_world->CreateBody(&body);
+			m_world->Create(&body);
 		}
 	}
 

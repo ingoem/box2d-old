@@ -18,6 +18,6 @@
 
 #include "b2Math.h"
 
-b2Vec2 b2Vec2::s_zero(0.0f, 0.0f);
-b2Mat22 b2Mat22::s_identity(1.0f, 0.0f, 0.0f, 1.0f);
-b2XForm b2XForm::s_identity(b2Vec2::s_zero, b2Mat22::s_identity);
+const b2Vec2 b2Vec2_zero(0.0f, 0.0f);
+const b2Mat22 b2Mat22_identity(1.0f, 0.0f, 0.0f, 1.0f);
+const b2XForm b2XForm_identity(b2Vec2_zero, b2Mat22_identity);

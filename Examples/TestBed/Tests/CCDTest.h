@@ -29,19 +29,19 @@ public:
 		m_world->m_gravity.SetZero();
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(0.1f, 10.0f);
+			b2PolygonDef sd;
+			sd.SetAsBox(0.1f, 10.0f);
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 20.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(0.1f, 2.0f);
+			b2PolygonDef sd;
+			sd.SetAsBox(0.1f, 2.0f);
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
 
@@ -53,23 +53,23 @@ public:
 			bd.linearVelocity.Set(-200.0f, 0.0f);
 			bd.angularVelocity = m_angularVelocity;
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 #else
 		{
-			b2BoxDef sd;
-			sd.extents.Set(10.0f, 0.1f);
+			b2PolygonDef sd;
+			sd.SetAsBox(10.0f, 0.1f);
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -0.2f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 
 		{
-			b2BoxDef sd;
-			sd.extents.Set(2.0f, 0.1f);
+			b2PolygonDef sd;
+			sd.SetAsBox(2.0f, 0.1f);
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
 
@@ -78,17 +78,17 @@ public:
 			bd.position.Set(0.0f, 20.0f);
 			bd.linearVelocity.Set(0.0f, -200.0f);
 			bd.AddShape(&sd);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 
-			sd.extents.Set(1.0f, 0.1f);
+			sd.SetAsBox(1.0f, 0.1f);
 			bd.position.Set(0.0f, 20.2f);
 			bd.linearVelocity.Set(0.0f, -201.0f);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 
-			sd.extents.Set(0.5f, 0.1f);
+			sd.SetAsBox(0.5f, 0.1f);
 			bd.position.Set(0.0f, 20.4f);
 			bd.linearVelocity.Set(0.0f, -202.0f);
-			m_world->CreateBody(&bd);
+			m_world->Create(&bd);
 		}
 #endif
 	}

@@ -30,12 +30,22 @@ struct b2PolygonDef : public b2ShapeDef
 		vertexCount = 0;
 	}
 
-	/// Build vertices to represent a box.
-	/// @param extents the half-width vector
-	/// @param transform the local transform of the box
-	void SetAsBox(const b2Vec2& extents, const b2XForm& transform);
+	/// Build vertices to represent an axis-aligned box.
+	/// @param hx the half-width.
+	/// @param hy the half-height.
+	void SetAsBox(float32 hx, float32 hy);
 
+	/// Build vertices to represent an oriented box.
+	/// @param hx the half-width.
+	/// @param hy the half-height.
+	/// @param center the center of the box in local coordinates.
+	/// @param angle the rotation of the box in local coordinates.
+	void SetAsBox(float32 hx, float32 hy, const b2Vec2& center, float32 angle);
+
+	/// The polygon vertices in local coordinates.
 	b2Vec2 vertices[b2_maxPolygonVertices];
+
+	/// The number of polygon vertices.
 	int32 vertexCount;
 };
 

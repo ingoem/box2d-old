@@ -735,7 +735,7 @@ void b2World::DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color,
 			int32 vertexCount = poly->GetVertexCount();
 			const b2Vec2* localVertices = poly->GetVertices();
 
-			b2Assert(vertexCount < b2_maxPolygonVertices);
+			b2Assert(vertexCount <= b2_maxPolygonVertices);
 			b2Vec2 vertices[b2_maxPolygonVertices];
 
 			for (int32 i = 0; i < vertexCount; ++i)
