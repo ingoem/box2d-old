@@ -113,6 +113,7 @@ public:
 			}
 		}
 
+#if 1
 		{
 			b2PolygonDef sd_bottom;
 			sd_bottom.SetAsBox( 1.5f, 0.15f );
@@ -134,6 +135,7 @@ public:
 
 			m_world->Create(&bd);
 		}
+#endif
 	}
 
 	static Test* Create()

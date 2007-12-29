@@ -127,7 +127,7 @@ void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& c
 
 void DebugDraw::DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color& color)
 {
-	const float32 k_axisScale = 1.0f;
+	const float32 k_axisScale = 0.3f;
 	b2Vec2 p1 = point;
 	b2Vec2 p2 = point + k_axisScale	* axis;
 	DrawSegment(p1, p2, color);

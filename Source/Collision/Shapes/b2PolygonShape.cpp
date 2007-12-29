@@ -333,7 +333,7 @@ void b2PolygonShape::ComputeSweptAABB(b2AABB* aabb,
 	ComputeAABB(&aabb1, transform1);
 	ComputeAABB(&aabb2, transform2);
 	aabb->minVertex = b2Min(aabb1.minVertex, aabb2.minVertex);
-	aabb->maxVertex = b2Min(aabb1.maxVertex, aabb2.maxVertex);
+	aabb->maxVertex = b2Max(aabb1.maxVertex, aabb2.maxVertex);
 }
 
 void b2PolygonShape::ComputeMass(b2MassData* massData) const

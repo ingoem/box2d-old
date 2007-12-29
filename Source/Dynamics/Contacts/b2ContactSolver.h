@@ -62,7 +62,7 @@ public:
 	void SolveVelocityConstraints();
 	void FinalizeVelocityConstraints();
 
-	bool SolvePositionConstraints(float32 beta);
+	bool SolvePositionConstraints(float32 baumgarte, float32 factor1 = 1.0f, float32 factor2 = 1.0f);
 
 	b2StackAllocator* m_allocator;
 	b2ContactConstraint* m_constraints;

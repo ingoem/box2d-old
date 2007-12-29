@@ -185,7 +185,7 @@ void b2ContactSolver::SolveVelocityConstraints()
 		b2Vec2 normal = c->normal;
 		b2Vec2 tangent = b2Cross(normal, 1.0f);
 
-		// Solver normal constraints
+		// Solve normal constraints
 		for (int32 j = 0; j < c->pointCount; ++j)
 		{
 			b2ContactConstraintPoint* ccp = c->points + j;
@@ -216,7 +216,7 @@ void b2ContactSolver::SolveVelocityConstraints()
 			ccp->normalImpulse = newImpulse;
 		}
 
-		// Solver tangent constraints
+		// Solve tangent constraints
 		for (int32 j = 0; j < c->pointCount; ++j)
 		{
 			b2ContactConstraintPoint* ccp = c->points + j;
@@ -265,7 +265,7 @@ void b2ContactSolver::FinalizeVelocityConstraints()
 	}
 }
 
-bool b2ContactSolver::SolvePositionConstraints(float32 beta)
+bool b2ContactSolver::SolvePositionConstraints(float32 baumgarte, float32 factor1, float32 factor2)
 {
 	float32 minSeparation = 0.0f;
 
@@ -274,10 +274,11 @@ bool b2ContactSolver::SolvePositionConstraints(float32 beta)
 		b2ContactConstraint* c = m_constraints + i;
 		b2Body* b1 = c->body1;
 		b2Body* b2 = c->body2;
-		float32 invMass1 = b1->m_invMass;
-		float32 invI1 = b1->m_invI;
-		float32 invMass2 = b2->m_invMass;
-		float32 invI2 = b2->m_invI;
+		float32 invMass1 = factor1 * b1->m_invMass;
+		float32 invI1 = factor1 * b1->m_invI;
+		float32 invMass2 = factor2 * b2->m_invMass;
+		float32 invI2 = factor2 * b2->m_invI;
+		
 		b2Vec2 normal = c->normal;
 		b2Vec2 tangent = b2Cross(normal, 1.0f);
 
@@ -300,7 +301,7 @@ bool b2ContactSolver::SolvePositionConstraints(float32 beta)
 			minSeparation = b2Min(minSeparation, separation);
 
 			// Prevent large corrections and allow slop.
-			float32 C = beta * b2Clamp(separation + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
+			float32 C = baumgarte * b2Clamp(separation + 0.5f * b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
 
 			// Compute normal impulse
 			float32 dImpulse = -ccp->normalMass * C;

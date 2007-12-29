@@ -39,7 +39,7 @@ struct b2TimeStep
 {
 	float32 dt;			// time step
 	float32 inv_dt;		// inverse time step (0 if dt == 0).
-	int32 iterations;
+	int32 maxIterations;
 };
 
 /// The world class manages all physics entities, dynamic simulation,
@@ -154,11 +154,11 @@ public:
 	// Internal yet public to make life easier.
 
 	void Solve(const b2TimeStep& step);
-	void Report(const b2TimeStep& step);
-	void HandleTOI(const b2TimeStep& step);
+	void SolveTOI();
 
 	void DrawJoint(b2Joint* joint);
 	void DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color, bool core);
+	void DrawContacts();
 	void DrawDebugData();
 
 	b2BlockAllocator m_blockAllocator;

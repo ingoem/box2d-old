@@ -30,6 +30,11 @@ b2Contact* b2PolyAndCircleContact::Create(b2Shape* shape1, b2Shape* shape2, b2Bl
 
 void b2PolyAndCircleContact::Destroy(b2Contact* contact, b2BlockAllocator* allocator)
 {
+	b2Assert(contact->m_shape1->m_body->m_contactList != &contact->m_node1);
+	b2Assert(contact->m_shape1->m_body->m_contactList != &contact->m_node2);
+	b2Assert(contact->m_shape2->m_body->m_contactList != &contact->m_node1);
+	b2Assert(contact->m_shape2->m_body->m_contactList != &contact->m_node2);
+
 	((b2PolyAndCircleContact*)contact)->~b2PolyAndCircleContact();
 	allocator->Free(contact, sizeof(b2PolyAndCircleContact));
 }

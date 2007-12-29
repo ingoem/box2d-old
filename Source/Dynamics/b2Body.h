@@ -31,8 +31,9 @@ class b2World;
 struct b2JointNode;
 struct b2ContactNode;
 
-/// A body definition holds all the data needed to
-/// construct a rigid body.
+/// A body definition holds all the data needed to construct a rigid body.
+/// @warning You cannot reuse body definitions because they hold shapes, which cannot
+/// be reused.
 struct b2BodyDef
 {
 	/// This constructor sets the body definition default values.
@@ -250,7 +251,7 @@ public:
 		e_sleepFlag			= 0x0008,
 		e_allowSleepFlag	= 0x0010,
 		e_bulletFlag		= 0x0020,
-		e_toiResolved		= 0x0040,
+		e_toiResolvedFlag	= 0x0040,
 	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);
@@ -499,7 +500,7 @@ inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
 
 inline void b2Body::GetSweep(b2Sweep* sweep) const
 {
-	if (m_flags & e_toiResolved)
+	if (m_flags & e_toiResolvedFlag)
 	{
 		sweep->position = (1.0f - m_toi) * m_position0 + m_toi * m_xf.position;
 		sweep->theta = (1.0f - m_toi) * m_angle0 + m_toi * m_angle;
@@ -527,13 +528,13 @@ inline float32 b2Body::GetTOI() const
 
 inline void b2Body::ResetTOI()
 {
-	m_flags &= ~e_toiResolved;
+	m_flags &= ~e_toiResolvedFlag;
 	m_toi = 1.0f;
 }
 
 inline void b2Body::ResolveTOI()
 {
-	m_flags |= e_toiResolved;
+	m_flags |= e_toiResolvedFlag;
 
 	// Commit body1 to toi position.
 	m_xf.position = (1.0f - m_toi) * m_position0 + m_toi * m_xf.position;

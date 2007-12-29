@@ -183,7 +183,7 @@ b2Body* b2World::Create(const b2BodyDef* def)
 	void* mem = m_blockAllocator.Allocate(sizeof(b2Body));
 	b2Body* b = new (mem) b2Body(def, this);
 
-	// Add to doubly linked list.
+	// Add to world doubly linked list.
 	b->m_prev = NULL;
 	b->m_next = m_bodyList;
 	if (m_bodyList)
@@ -235,7 +235,7 @@ void b2World::Destroy(b2Body* b)
 		Destroy(s0);
 	}
 
-	// Remove from normal body list.
+	// Remove world body list.
 	if (b->m_prev)
 	{
 		b->m_prev->m_next = b->m_next;
@@ -386,12 +386,13 @@ void b2World::Destroy(b2Joint* j)
 	}
 }
 
+// Find islands, integrate and solve constraints, solve position constraints
 void b2World::Solve(const b2TimeStep& step)
 {
 	m_positionIterationCount = 0;
 
 	// Size the island for the worst case.
-	b2Island island(m_bodyCount, m_contactCount, m_jointCount, this);
+	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator, m_contactListener);
 
 	// Clear all the island flags.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
@@ -443,7 +444,14 @@ void b2World::Solve(const b2TimeStep& step)
 			// Search all contacts connected to this body.
 			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
 			{
+				// Has this contact already been added to an island?
 				if (cn->contact->m_flags & b2Contact::e_islandFlag)
+				{
+					continue;
+				}
+
+				// Is this contact touching?
+				if (cn->contact->GetManifoldCount() == 0)
 				{
 					continue;
 				}
@@ -452,6 +460,8 @@ void b2World::Solve(const b2TimeStep& step)
 				cn->contact->m_flags |= b2Contact::e_islandFlag;
 
 				b2Body* other = cn->other;
+
+				// Was the other body already added to this island?
 				if (other->m_flags & b2Body::e_islandFlag)
 				{
 					continue;
@@ -459,11 +469,6 @@ void b2World::Solve(const b2TimeStep& step)
 
 				// Non-solid contacts don't grow the island.
 				if (cn->contact->m_flags & b2Contact::e_nonSolidFlag)
-				{
-					continue;
-				}
-
-				if (cn->contact->GetManifoldCount() == 0)
 				{
 					continue;
 				}
@@ -496,13 +501,8 @@ void b2World::Solve(const b2TimeStep& step)
 			}
 		}
 
-		island.Integrate(step, m_gravity, m_allowSleep);
-
-		if (s_enablePositionCorrection)
-		{
-			island.SolvePositionConstraints(step);
-			m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
-		}
+		island.Solve(step, m_gravity, s_enablePositionCorrection > 0, m_allowSleep);
+		m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
 
 		// Post solve cleanup.
 		for (int32 i = 0; i < island.m_bodyCount; ++i)
@@ -518,7 +518,11 @@ void b2World::Solve(const b2TimeStep& step)
 
 	m_stackAllocator.Free(stack);
 
-	// Synchronize shapes.
+	// Draw contact data before any contacts get destroyed by the broad-phase commit.
+	DrawContacts();
+
+	// Synchronize shapes. This can destroy contacts, so we should do this after
+	// all reporting. This also can destroy bodies, so we can't do this with islands.
 	b2Body* b = m_bodyList;
 	while (b)
 	{
@@ -551,13 +555,15 @@ void b2World::Solve(const b2TimeStep& step)
 	}
 
 	// Commit shape proxy movements to the broad-phase so that new contacts are created.
+	// Also, some contacts can be destroyed.
 	m_broadPhase->Commit();
 }
 
-void b2World::HandleTOI(const b2TimeStep& step)
+// Find TOI islands and solve them.
+void b2World::SolveTOI()
 {
 	// Size the island for the worst case.
-	b2Island island(m_bodyCount, m_contactCount, m_jointCount, this);
+	b2Island island(m_bodyCount, m_contactCount, 0, &m_stackAllocator, m_contactListener);
 
 	// Clear all the island flags.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
@@ -569,7 +575,7 @@ void b2World::HandleTOI(const b2TimeStep& step)
 		c->m_flags &= ~b2Contact::e_islandFlag;
 	}
 
-	// Build and simulate all awake islands.
+	// Build and solve all TOI islands.
 	int32 stackSize = m_bodyCount;
 	b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
 	for (b2Body* seed = m_bodyList; seed; seed = seed->m_next)
@@ -592,12 +598,9 @@ void b2World::HandleTOI(const b2TimeStep& step)
 			b2Body* b = stack[--stackCount];
 			island.Add(b);
 
-			// Make sure the body is awake.
-			b->m_flags &= ~b2Body::e_sleepFlag;
-
-			// To keep islands as small as possible, we don't
-			// propagate islands across static bodies.
-			if (b->m_flags & b2Body::e_staticFlag)
+			// To keep the island as small as possible, we don't
+			// propagate across sleeping or static bodies.
+			if (b->m_flags & (b2Body::e_staticFlag | b2Body::e_sleepFlag))
 			{
 				continue;
 			}
@@ -605,10 +608,13 @@ void b2World::HandleTOI(const b2TimeStep& step)
 			// Search all contacts connected to this body.
 			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
 			{
-				if (cn->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_slowFlag))
+				if (cn->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_slowFlag | b2Contact::e_nonSolidFlag))
 				{
 					continue;
 				}
+
+				island.Add(cn->contact);
+				cn->contact->m_flags |= b2Contact::e_islandFlag;
 
 				b2Body* other = cn->other;
 				if (other->m_flags & b2Body::e_islandFlag)
@@ -622,28 +628,31 @@ void b2World::HandleTOI(const b2TimeStep& step)
 			}
 		}
 
-		island.HandleTOI(step);
-
-		m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
-
-		// Post solve cleanup.
-		for (int32 i = 0; i < island.m_bodyCount; ++i)
+		// An island without contacts doesn't need TOI solution.
+		if (island.m_contactCount > 0)
 		{
-			// Allow static bodies to participate in other islands.
-			b2Body* b = island.m_bodies[i];
-			if (b->m_flags & b2Body::e_staticFlag)
+			if (island.m_contactCount > m_contactCount)
 			{
-				b->m_flags &= ~b2Body::e_islandFlag;
+				m_contactCount += 0;
+			}
+			b2Assert(island.m_contactCount <= m_contactCount);
+
+			island.SolveTOI();
+
+			// Post solve cleanup.
+			for (int32 i = 0; i < island.m_bodyCount; ++i)
+			{
+				// Allow static bodies to participate in other islands.
+				b2Body* b = island.m_bodies[i];
+				if (b->m_flags & b2Body::e_staticFlag)
+				{
+					b->m_flags &= ~b2Body::e_islandFlag;
+				}
 			}
 		}
 	}
 
 	m_stackAllocator.Free(stack);
-}
-
-void b2World::Report(const b2TimeStep& step)
-{
-	step;	
 }
 
 void b2World::Step(float32 dt, int32 iterations)
@@ -652,7 +661,7 @@ void b2World::Step(float32 dt, int32 iterations)
 
 	b2TimeStep step;
 	step.dt = dt;
-	step.iterations	= iterations;
+	step.maxIterations	= iterations;
 	if (dt > 0.0f)
 	{
 		step.inv_dt = 1.0f / dt;
@@ -663,7 +672,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	}
 	
 	// Update contacts.
-	m_contactManager.Collide(step);
+	m_contactManager.Collide();
 
 	// Integrate velocities, solve velocity constraints, and integrate positions.
 	if (step.dt > 0.0f)
@@ -674,14 +683,16 @@ void b2World::Step(float32 dt, int32 iterations)
 	// Handle TOI events.
 	if (s_enablePositionCorrection && step.dt > 0.0f)
 	{
-		HandleTOI(step);
+		SolveTOI();
 	}
 
-	// Report contact information.
-	Report(step);
-	
 	// Draw debug information.
 	DrawDebugData();
+
+	if (step.dt == 0.0f)
+	{
+		DrawContacts();
+	}
 
 	m_lock = false;
 }
@@ -795,7 +806,7 @@ void b2World::DrawJoint(b2Joint* joint)
 	}
 }
 
-void b2World::DrawDebugData()
+void b2World::DrawContacts()
 {
 	if (m_debugDraw == NULL)
 	{
@@ -803,42 +814,6 @@ void b2World::DrawDebugData()
 	}
 
 	uint32 flags = m_debugDraw->GetFlags();
-
-	if (flags & b2DebugDraw::e_shapeBit)
-	{
-		bool core = (flags & b2DebugDraw::e_coreShapeBit) == b2DebugDraw::e_coreShapeBit;
-
-		for (b2Body* b = m_bodyList; b; b = b->GetNext())
-		{
-			const b2XForm& xf = b->GetXForm();
-			for (b2Shape* s = b->GetShapeList(); s; s = s->GetBodyNext())
-			{
-				if (b->IsStatic())
-				{
-					DrawShape(s, xf, b2Color(0.5f, 0.9f, 0.5f), core);
-				}
-				else if (b->IsSleeping())
-				{
-					DrawShape(s, xf, b2Color(0.5f, 0.5f, 0.9f), core);
-				}
-				else
-				{
-					DrawShape(s, xf, b2Color(0.9f, 0.9f, 0.9f), core);
-				}
-			}
-		}
-	}
-
-	if (flags & b2DebugDraw::e_jointBit)
-	{
-		for (b2Joint* j = m_jointList; j; j = j->GetNext())
-		{
-			if (j->GetType() != e_mouseJoint)
-			{
-				DrawJoint(j);
-			}
-		}
-	}
 
 	if (flags & b2DebugDraw::e_contactPointBit)
 	{
@@ -906,6 +881,52 @@ void b2World::DrawDebugData()
 				{
 					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].tangentImpulse * tangent, color);
 				}
+			}
+		}
+	}
+}
+
+void b2World::DrawDebugData()
+{
+	if (m_debugDraw == NULL)
+	{
+		return;
+	}
+
+	uint32 flags = m_debugDraw->GetFlags();
+
+	if (flags & b2DebugDraw::e_shapeBit)
+	{
+		bool core = (flags & b2DebugDraw::e_coreShapeBit) == b2DebugDraw::e_coreShapeBit;
+
+		for (b2Body* b = m_bodyList; b; b = b->GetNext())
+		{
+			const b2XForm& xf = b->GetXForm();
+			for (b2Shape* s = b->GetShapeList(); s; s = s->GetBodyNext())
+			{
+				if (b->IsStatic())
+				{
+					DrawShape(s, xf, b2Color(0.5f, 0.9f, 0.5f), core);
+				}
+				else if (b->IsSleeping())
+				{
+					DrawShape(s, xf, b2Color(0.5f, 0.5f, 0.9f), core);
+				}
+				else
+				{
+					DrawShape(s, xf, b2Color(0.9f, 0.9f, 0.9f), core);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_jointBit)
+	{
+		for (b2Joint* j = m_jointList; j; j = j->GetNext())
+		{
+			if (j->GetType() != e_mouseJoint)
+			{
+				DrawJoint(j);
 			}
 		}
 	}

@@ -79,7 +79,10 @@ Test::~Test()
 
 void Test::MouseDown(const b2Vec2& p)
 {
-	b2Assert(m_mouseJoint == NULL);
+	if (m_mouseJoint != NULL)
+	{
+		return;
+	}
 
 	// Make a small box.
 	b2AABB aabb;

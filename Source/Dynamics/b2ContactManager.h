@@ -37,7 +37,7 @@ public:
 	// Implements PairCallback
 	void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData);
 
-	void Collide(const b2TimeStep& step);
+	void Collide();
 
 	b2World* m_world;
 

@@ -99,12 +99,12 @@ void b2Contact::Destroy(b2Contact* contact, b2BlockAllocator* allocator)
 
 	if (contact->GetManifoldCount() > 0)
 	{
-		contact->m_shape1->m_body->WakeUp();
-		contact->m_shape2->m_body->WakeUp();
+		contact->GetShape1()->GetBody()->WakeUp();
+		contact->GetShape2()->GetBody()->WakeUp();
 	}
 
-	b2ShapeType type1 = contact->m_shape1->m_type;
-	b2ShapeType type2 = contact->m_shape2->m_type;
+	b2ShapeType type1 = contact->GetShape1()->GetType();
+	b2ShapeType type2 = contact->GetShape2()->GetType();
 
 	b2Assert(e_unknownShape < type1 && type1 < e_shapeTypeCount);
 	b2Assert(e_unknownShape < type2 && type2 < e_shapeTypeCount);
@@ -142,10 +142,14 @@ void b2Contact::Update(b2ContactListener* listener)
 {
 	int32 oldCount = m_manifoldCount;
 
+	// The oldCount might be positive due to a TOI event. We should
+	// still notify the user that contact has begun.
+	bool toiBegin = (m_flags & e_toiBeginFlag) != 0;
+
 	Evaluate();
 
-	m_flags &= ~(e_beginFlag | e_persistFlag | e_endFlag);
-	if (oldCount == 0 && m_manifoldCount > 0)
+	m_flags &= ~(e_beginFlag | e_persistFlag | e_endFlag | e_toiBeginFlag);
+	if ((oldCount == 0 || toiBegin) && m_manifoldCount > 0)
 	{
 		m_flags |= e_beginFlag;
 	}
@@ -178,7 +182,7 @@ void b2Contact::Update(b2ContactListener* listener)
 
 		if (m_flags & e_beginFlag)
 		{
-			listener->Tweak(&tweaks, GetManifolds(), m_manifoldCount, m_shape1, m_shape2, b2ContactListener::e_begin);
+			listener->Tweak(&tweaks, GetManifolds(), m_manifoldCount, m_shape1, m_shape2, true);
 		}
 		else if (m_flags & e_endFlag)
 		{
@@ -186,7 +190,7 @@ void b2Contact::Update(b2ContactListener* listener)
 		}
 		else if (m_flags & e_persistFlag)
 		{
-			listener->Tweak(&tweaks, GetManifolds(), m_manifoldCount, m_shape1, m_shape2, b2ContactListener::e_persist);
+			listener->Tweak(&tweaks, GetManifolds(), m_manifoldCount, m_shape1, m_shape2, false);
 		}
 
 		m_friction = tweaks.friction;
@@ -212,15 +216,19 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 	float32 toi1 = b1->GetTOI();
 	float32 toi2 = b2->GetTOI();
 	b2Vec2 point1, point2;
+
+	// Use maxTOI as an early out of the TOI calculation.
 	float32 maxTOI = b2Max(toi1, toi2);
 
 	float32 toi = b2TimeOfImpact(&point1, &point2, m_shape1, sweep1, m_shape2, sweep2, maxTOI);
-	if (toi > 0.0f && toi < toi1 && toi < toi2)
+	if (toi > 0.0f && toi < maxTOI)
 	{
 		bool apply = true;
 		if (listener)
 		{
-			apply = listener->TOI(point1, point2, m_shape1, m_shape2);
+			b2XForm xf1 = sweep1.GetXForm(toi);
+			b2XForm xf2 = sweep2.GetXForm(toi);
+			apply = listener->TOI(m_shape1, xf1, point1, m_shape2, xf2, point2);
 		}
 
 		if (apply)
@@ -228,27 +236,84 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 			b1->SetTOI(toi);
 			b2->SetTOI(toi);
 		}
+		else
+		{
+			toi = 1.0f;
+		}
+
+		return toi;
 	}
 
-	return toi;
+	// The time of impact had an early out, so the result is meaningless.
+	return 1.0f;
 }
 
-void b2Contact::ResolveTOI(b2ContactListener* listener, b2StackAllocator* allocator, float32 toi)
+void b2Contact::ResolveTOI(b2StackAllocator* allocator)
 {
 	b2Body* b1 = m_shape1->GetBody();
 	b2Body* b2 = m_shape2->GetBody();
 
-	b2Assert(b1->m_toi == toi);
-	b2Assert(b2->m_toi == toi);
+	// Has either body already been resolved?
+	bool resolved1 = (b1->m_flags & b2Body::e_toiResolvedFlag) != 0;
+	bool resolved2 = (b2->m_flags & b2Body::e_toiResolvedFlag) != 0;
+	b2Assert(resolved1 == false || resolved2 == false);
 
-	b1->ResolveTOI();
-	b2->ResolveTOI();
+	// Use mass factors to avoid repositioning already resolved bodies.
+	float32 factor1 = 1.0f, factor2 = 1.0f;
+	if (resolved1)
+	{
+		factor1 = 0.0f;
+	}
 
-	Update(listener);
+	if (resolved2)
+	{
+		factor2 = 0.0f;
+	}
+
+	b2Assert(b1->GetTOI() == b2->GetTOI());
+
+	float32 toi = b1->GetTOI();
+
+	b1->m_xf.position = (1.0f - toi) * b1->m_position0 + toi * b1->m_xf.position;
+	b1->m_angle = (1.0f - toi) * b1->m_angle0 + toi * b1->m_angle;
+	b1->m_xf.R.Set(b1->m_angle);
+
+	b2->m_xf.position = (1.0f - toi) * b2->m_position0 + toi * b2->m_xf.position;
+	b2->m_angle = (1.0f - toi) * b2->m_angle0 + toi * b2->m_angle;
+	b2->m_xf.R.Set(b2->m_angle);
+
+	int32 oldCount = m_manifoldCount;
+
+	Evaluate();
+
+	b2Assert(m_manifoldCount > 0);
+
+	if (oldCount == 0)
+	{
+		m_flags |= e_toiBeginFlag;
+	}
 
 	b2Contact* contact = this;
 	b2ContactSolver solver(&contact, 1, allocator);
-	solver.InitVelocityConstraints();
-	solver.SolveVelocityConstraints();
-	solver.SolvePositionConstraints(0.8f);
+
+	const int32 k_maxIterations = 100;
+	const float32 k_toiBaumgarte = 0.5f;
+
+	for (int32 i = 0; i < k_maxIterations; ++i)
+	{
+		bool success = solver.SolvePositionConstraints(k_toiBaumgarte, factor1, factor2);
+		if (success)
+		{
+			break;
+		}
+	}
+
+	// Mark the bodies as resolved.
+	b1->m_flags |= b2Body::e_toiResolvedFlag;
+	b1->m_position0 = b1->m_xf.position;
+	b1->m_angle0 = b1->m_angle;
+
+	b2->m_flags |= b2Body::e_toiResolvedFlag;
+	b2->m_position0 = b2->m_xf.position;
+	b2->m_angle0 = b2->m_angle;
 }

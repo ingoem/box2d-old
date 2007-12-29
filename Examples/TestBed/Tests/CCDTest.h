@@ -25,7 +25,7 @@ public:
 
 	CCDTest()
 	{
-#if 1
+#if 0
 		m_world->m_gravity.SetZero();
 
 		{
@@ -47,8 +47,8 @@ public:
 			sd.restitution = 0.0f;
 			b2Shape* shape = m_world->Create(&sd);
 
-			//m_angularVelocity = b2Random(-50.0f, 50.0f);
-			m_angularVelocity = -35.268715f;
+			m_angularVelocity = b2Random(-50.0f, 50.0f);
+			//m_angularVelocity = 39.596241f;
 
 			b2BodyDef bd;
 			bd.position.Set(50.0f, 20.0f);
@@ -57,7 +57,7 @@ public:
 			body->SetLinearVelocity(b2Vec2(-200.0f, 0.0f));
 			body->SetAngularVelocity(m_angularVelocity);
 		}
-#else
+#elif 0
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(10.0f, 0.1f);
@@ -65,7 +65,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -0.2f);
-			bd.AddShape(&sd);
+			bd.AddShape(m_world->Create(&sd));
 			m_world->Create(&bd);
 		}
 
@@ -75,23 +75,73 @@ public:
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
 
-			b2BodyDef bd;
-			bd.isBullet = true;
-			bd.position.Set(0.0f, 20.0f);
-			bd.linearVelocity.Set(0.0f, -200.0f);
-			bd.AddShape(&sd);
-			m_world->Create(&bd);
+			b2BodyDef bd1;
+			bd1.isBullet = true;
+			bd1.position.Set(0.0f, 20.0f);
+			bd1.AddShape(m_world->Create(&sd));
+			b2Body* b1 = m_world->Create(&bd1);
+			b1->SetLinearVelocity(b2Vec2(0.0f, -200.0f));
 
 			sd.SetAsBox(1.0f, 0.1f);
-			bd.position.Set(0.0f, 20.2f);
-			bd.linearVelocity.Set(0.0f, -201.0f);
-			m_world->Create(&bd);
+			b2BodyDef bd2;
+			bd2.isBullet = true;
+			bd2.position.Set(0.0f, 20.2f);
+			bd2.AddShape(m_world->Create(&sd));
+			b2Body* b2 = m_world->Create(&bd2);
+			b2->SetLinearVelocity(b2Vec2(0.0f, -201.0f));
 
 			sd.SetAsBox(0.5f, 0.1f);
-			bd.position.Set(0.0f, 20.4f);
-			bd.linearVelocity.Set(0.0f, -202.0f);
+			b2BodyDef bd3;
+			bd3.isBullet = true;
+			bd3.position.Set(0.0f, 20.4f);
+			b2Body* b3 = m_world->Create(&bd3);
+			b3->SetLinearVelocity(b2Vec2(0.0f, -202.0f));
+		}
+#else
+		{
+			b2PolygonDef sd;
+			sd.density = 0.0f;
+			sd.restitution = 1.1f;
+
+			sd.SetAsBox(0.1f, 10.0f, b2Vec2(-10.0f, 0.0f), 0.0f);
+			b2Shape* shape1 = m_world->Create(&sd);
+
+			sd.SetAsBox(0.1f, 10.0f, b2Vec2(10.0f, 0.0f), 0.0f);
+			b2Shape* shape2 = m_world->Create(&sd);
+
+			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, -10.0f), 0.5f * b2_pi);
+			b2Shape* shape3 = m_world->Create(&sd);
+
+			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, 10.0f), -0.5f * b2_pi);
+			b2Shape* shape4 = m_world->Create(&sd);
+
+			b2BodyDef bd;
+			bd.position.Set(0.0f, 20.0f);
+			bd.AddShape(shape1);
+			bd.AddShape(shape2);
+			bd.AddShape(shape3);
+			bd.AddShape(shape4);
 			m_world->Create(&bd);
 		}
+
+		{
+			b2PolygonDef sd;
+			sd.SetAsBox(0.1f, 2.0f);
+			sd.density = 1.0f;
+			sd.restitution = 1.1f;
+			b2Shape* shape = m_world->Create(&sd);
+
+			m_angularVelocity = b2Random(-50.0f, 50.0f);
+			//m_angularVelocity = 39.596241f;
+
+			b2BodyDef bd;
+			bd.position.Set(0.0f, 10.0f);
+			bd.AddShape(shape);
+			b2Body* body = m_world->Create(&bd);
+			//body->SetLinearVelocity(b2Vec2(-200.0f, 0.0f));
+			body->SetAngularVelocity(m_angularVelocity);
+		}
+
 #endif
 	}
 

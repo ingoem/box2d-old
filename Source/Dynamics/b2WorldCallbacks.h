@@ -103,13 +103,18 @@ class b2ContactListener
 public:
 	virtual ~b2ContactListener() {}
 
-	/// The contact condition tells you the status of the contact manifold.
-	enum Condition
-	{
-		e_toi,		///< time of impact contact, only position correction is done.
-		e_begin,	///< new contact, there may have already been a TOI contact.
-		e_persist,	///< old but active contact
-	};
+	/// Reports a time of impact (TOI) event. Allows you to dismiss this event. You will get
+	/// the results for any new contacts the next time step. TOI events are tentative, so
+	/// you aren't guaranteed these shapes will collide.
+	/// @param shape1 the first shape.
+	/// @param xf1 the TOI transform of shape1.
+	/// @param point1 the closest point on shape1 in world coordinates.
+	/// @param shape2 the second shape.
+	/// @param xf2 the TOI transform of shape2.
+	/// @param point2 the closest point on shape2 in world coordinates.
+	/// @return false if this TOI event should be ignored.
+	virtual bool TOI(	const b2Shape* shape1, const b2XForm& xf1, const b2Vec2& point1,
+						const b2Shape* shape2, const b2XForm& xf2, const b2Vec2& point2);
 
 	/// Called just before contacts are solved. This allows you to adjust the solver
 	/// behavior. This also allows you to adjust the behavior of TOI events.
@@ -120,9 +125,9 @@ public:
 	/// @param manifoldCount the number of contact manifolds.
 	/// @param shape1 the first shape in the contact.
 	/// @param shape2 the second shape in the contact.
-	/// @param age the 
+	/// @param newContact true if the shapes just started touching. 
 	virtual void Tweak(	b2SolverTweaks* tweaks, b2Manifold* manifolds, int32 manifoldCount,
-						const b2Shape* shape1, const b2Shape* shape2, Condition condition) = 0;
+						const b2Shape* shape1, const b2Shape* shape2, bool newContact) = 0;
 
 	/// Called at the end of the step with the contact results. The impulses stored in the
 	/// manifold are current (except for TOI contacts).
@@ -130,12 +135,13 @@ public:
 	/// @param manifoldCount the number of contact manifolds.
 	/// @param shape1 the first shape in the contact.
 	/// @param shape2 the second shape in the contact.
-	/// @param condition the condition of the contact.
+	/// @param newContact true if the shapes just started touching. 
 	virtual void Report(const b2Manifold* manifolds, int32 manifoldCount,
-						const b2Shape* shape1, const b2Shape* shape2, Condition condition) = 0;
+						const b2Shape* shape1, const b2Shape* shape2, bool newContact) = 0;
 
 	/// Called when contact ends. This does not mean the contact object is destroyed, it just
-	/// means that there are no contact points.
+	/// means that there are no contact points. You may see a contact begin/persist and then
+	/// end in one time step.
 	/// @param shape1 the first shape in the contact.
 	/// @param shape2 the second shape in the contact.
 	virtual void End(const b2Shape* shape1, const b2Shape* shape2) = 0;

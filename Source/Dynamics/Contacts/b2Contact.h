@@ -86,6 +86,7 @@ public:
 		e_beginFlag		= 0x0008,
 		e_persistFlag	= 0x0010,
 		e_endFlag		= 0x0020,
+		e_toiBeginFlag  = 0x0040,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
@@ -99,7 +100,7 @@ public:
 	virtual ~b2Contact() {}
 
 	float32 TimeOfImpact(b2ContactListener* listener);
-	void ResolveTOI(b2ContactListener* listener, b2StackAllocator* allocator, float32 toi);
+	void ResolveTOI(b2StackAllocator* allocator);
 	void Update(b2ContactListener* listener);
 	virtual void Evaluate() = 0;
 	static b2ContactRegister s_registers[e_shapeTypeCount][e_shapeTypeCount];
@@ -122,8 +123,6 @@ public:
 	// Combined friction
 	float32 m_friction;
 	float32 m_restitution;
-
-	float32 m_toi;
 };
 
 inline b2Contact* b2Contact::GetNext()

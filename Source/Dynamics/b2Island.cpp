@@ -107,7 +107,8 @@ b2Island::b2Island(
 	int32 bodyCapacity,
 	int32 contactCapacity,
 	int32 jointCapacity,
-	b2World* world)
+	b2StackAllocator* allocator,
+	b2ContactListener* listener)
 {
 	m_bodyCapacity = bodyCapacity;
 	m_contactCapacity = contactCapacity;
@@ -116,11 +117,12 @@ b2Island::b2Island(
 	m_contactCount = 0;
 	m_jointCount = 0;
 
-	m_world = world;
+	m_allocator = allocator;
+	m_listener = listener;
 
-	m_bodies = (b2Body**)m_world->m_stackAllocator.Allocate(bodyCapacity * sizeof(b2Body*));
-	m_contacts = (b2Contact**)m_world->m_stackAllocator.Allocate(contactCapacity	 * sizeof(b2Contact*));
-	m_joints = (b2Joint**)m_world->m_stackAllocator.Allocate(jointCapacity * sizeof(b2Joint*));
+	m_bodies = (b2Body**)m_allocator->Allocate(bodyCapacity * sizeof(b2Body*));
+	m_contacts = (b2Contact**)m_allocator->Allocate(contactCapacity	 * sizeof(b2Contact*));
+	m_joints = (b2Joint**)m_allocator->Allocate(jointCapacity * sizeof(b2Joint*));
 
 	m_positionIterationCount = 0;
 }
@@ -128,19 +130,12 @@ b2Island::b2Island(
 b2Island::~b2Island()
 {
 	// Warning: the order should reverse the constructor order.
-	m_world->m_stackAllocator.Free(m_joints);
-	m_world->m_stackAllocator.Free(m_contacts);
-	m_world->m_stackAllocator.Free(m_bodies);
+	m_allocator->Free(m_joints);
+	m_allocator->Free(m_contacts);
+	m_allocator->Free(m_bodies);
 }
 
-void b2Island::Clear()
-{
-	m_bodyCount = 0;
-	m_contactCount = 0;
-	m_jointCount = 0;
-}
-
-void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity, bool allowSleep)
+void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correctPositions, bool allowSleep)
 {
 	// Integrate velocities and apply damping.
 	for (int32 i = 0; i < m_bodyCount; ++i)
@@ -163,7 +158,7 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity, bool all
 		b->m_angularVelocity *= b->m_angularDamping;
 	}
 
-	b2ContactSolver contactSolver(m_contacts, m_contactCount, &m_world->m_stackAllocator);
+	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);
 
 	// Initialize velocity constraints.
 	contactSolver.InitVelocityConstraints();
@@ -174,7 +169,7 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity, bool all
 	}
 
 	// Solve velocity constraints.
-	for (int32 i = 0; i < step.iterations; ++i)
+	for (int32 i = 0; i < step.maxIterations; ++i)
 	{
 		contactSolver.SolveVelocityConstraints();
 
@@ -187,7 +182,7 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity, bool all
 	// Post-solve (store impulses for warm starting).
 	contactSolver.FinalizeVelocityConstraints();
 
-	// Integrate positions, synchronize shapes, and reset forces.
+	// Integrate positions.
 	for (int32 i = 0; i < m_bodyCount; ++i)
 	{
 		b2Body* b = m_bodies[i];
@@ -205,6 +200,34 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity, bool all
 		b->m_xf.R.Set(b->m_angle);
 
 		// Note: shapes are synchronized later.
+	}
+
+	if (correctPositions)
+	{
+		// Initialize position constraints.
+		// Contacts don't need initialization.
+		for (int32 i = 0; i < m_jointCount; ++i)
+		{
+			m_joints[i]->InitPositionConstraints();
+		}
+
+		// Iterate over constraints.
+		for (m_positionIterationCount = 0; m_positionIterationCount < step.maxIterations; ++m_positionIterationCount)
+		{
+			bool contactsOkay = contactSolver.SolvePositionConstraints(b2_contactBaumgarte);
+
+			bool jointsOkay = true;
+			for (int i = 0; i < m_jointCount; ++i)
+			{
+				bool jointOkay = m_joints[i]->SolvePositionConstraints();
+				jointsOkay = jointsOkay && jointOkay;
+			}
+
+			if (contactsOkay && jointsOkay)
+			{
+				break;
+			}
+		}
 	}
 
 	if (allowSleep)
@@ -251,43 +274,61 @@ void b2Island::Integrate(const b2TimeStep& step, const b2Vec2& gravity, bool all
 			}
 		}
 	}
-}
 
-void b2Island::SolvePositionConstraints(const b2TimeStep& step)
-{
-	b2ContactSolver contactSolver(m_contacts, m_contactCount, &m_world->m_stackAllocator);
-
-	// Initialize position constraints
-	for (int32 i = 0; i < m_jointCount; ++i)
+	// Report contact results to the user.
+	if (m_listener)
 	{
-		m_joints[i]->InitPositionConstraints();
-	}
-
-	// Solve position constraints.
-	for (m_positionIterationCount = 0; m_positionIterationCount < step.iterations; ++m_positionIterationCount)
-	{
-		bool contactsOkay = contactSolver.SolvePositionConstraints(b2_contactBaumgarte);
-
-		bool jointsOkay = true;
-		for (int i = 0; i < m_jointCount; ++i)
+		for (int32 i = 0; i < m_contactCount; ++i)
 		{
-			bool jointOkay = m_joints[i]->SolvePositionConstraints();
-			jointsOkay = jointsOkay && jointOkay;
-		}
-
-		if (contactsOkay && jointsOkay)
-		{
-			break;
+			b2Contact* c = m_contacts[i];
+			bool newContact = (c->m_flags & b2Contact::e_beginFlag) != 0;
+			m_listener->Report(c->GetManifolds(), c->GetManifoldCount(), c->GetShape1(), c->GetShape2(), newContact);
 		}
 	}
 }
 
-void b2Island::HandleTOI(const b2TimeStep& step)
+// Continuous physics. We find the smallest TOI and resolve that contact. The resolved
+// bodies are then frozen. The process is repeated until there are no more TOI events.
+void b2Island::SolveTOI()
 {
-	step;
-}
+	// Prepare the bodies for TOI events.
+	for (int32 i = 0; i < m_bodyCount; ++i)
+	{
+		b2Body* b = m_bodies[i];
+		b->m_toi = 1.0f;
+		b->m_flags &= ~b2Body::e_toiResolvedFlag;
+	}
 
-void b2Island::Report(b2ContactListener* listener)
-{
-	listener;
+	// Search for TOI events until there are none.
+	bool found = true;
+	while (found)
+	{
+		found = false;
+		float32 minTOI = 1.0f;
+		b2Contact* toiContact = NULL;
+		for (int32 i = 0; i < m_contactCount; ++i)
+		{
+			b2Contact* c = m_contacts[i];
+
+			float32 toi = c->TimeOfImpact(m_listener);
+			if (toi < minTOI)
+			{
+				minTOI = toi;
+				toiContact = c;
+				found = true;
+			}
+		}
+
+		if (toiContact)
+		{
+			// Resolve the TOI event.
+			toiContact->ResolveTOI(m_allocator);
+
+			// Reset TOIs so we can handle chain reactions.
+			for (int32 i = 0; i < m_bodyCount; ++i)
+			{
+				m_bodies[i]->m_toi = 1.0f;
+			}
+		}
+	}
 }

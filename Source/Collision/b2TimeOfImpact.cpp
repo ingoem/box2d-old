@@ -60,15 +60,13 @@ float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
 		float32 distance = b2Distance(x1, x2, shape1, xf1, shape2, xf2);
 		if (distance < b2_linearSlop)
 		{
-			// Need a non-zero distance to form a contact normal.
-			b2Assert(t1 == 0.0f || distance > FLT_EPSILON);
 			break;
 		}
 
 		// Compute upper bound on remaining movement.
 		b2Vec2 n = *x2 - *x1;
 		n.Normalize();
-		float32 relativeVelocity = (1.0f - t1) * (b2Dot(n, v1 - v2) + b2Abs(omega1) * r1 + b2Abs(omega2) * r2);
+		float32 relativeVelocity = b2Dot(n, v1 - v2) + b2Abs(omega1) * r1 + b2Abs(omega2) * r2;
 		if (b2Abs(relativeVelocity) < FLT_EPSILON)
 		{
 			t1 = 1.0f;
@@ -76,7 +74,7 @@ float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
 		}
 
 		// Get the conservative time increment. Don't advance all the way.
-		float32 dt = (distance - 0.25f * b2_linearSlop) / relativeVelocity;
+		float32 dt = distance / relativeVelocity;
 		float32 t2 = t1 + dt;
 
 		// The shapes may be moving apart.

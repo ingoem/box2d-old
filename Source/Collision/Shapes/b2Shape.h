@@ -49,7 +49,7 @@ enum b2ShapeType
 };
 
 /// A shape definition is used to construct a shape. This class defines an
-/// abstract shape definition.
+/// abstract shape definition. You can reuse shape definitions safely.
 struct b2ShapeDef
 {
 	/// The constructor sets the default shape definition values.
@@ -102,6 +102,7 @@ struct b2ShapeDef
 
 /// A shape is used for collision detection. Shapes are created in b2World.
 /// You can use shape for collision detection before they are attached to the world.
+/// @warning you cannot reuse shapes.
 class b2Shape
 {
 public:

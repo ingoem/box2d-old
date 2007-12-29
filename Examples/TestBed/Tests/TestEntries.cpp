@@ -40,7 +40,7 @@
 //#include "PolyCollision.h"
 #include "PolyShapes.h"
 //#include "Pulleys.h"
-//#include "Pyramid.h"
+#include "Pyramid.h"
 //#include "SliderCrank.h"
 //#include "VaryingFriction.h"
 #include "VaryingRestitution.h"
@@ -50,9 +50,10 @@
 TestEntry g_testEntries[] =
 {
 	{"CCD Test", CCDTest::Create},
-	{"Distance Test", DistanceTest::Create},
+	{"Pyramid", Pyramid::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Polygon Shapes", PolyShapes::Create},
+	{"Distance Test", DistanceTest::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	//{"Apply Force", ApplyForce::Create},
 	//{"PolyCollision", PolyCollision::Create},
@@ -62,7 +63,6 @@ TestEntry g_testEntries[] =
 	//{"Chain", Chain::Create},
 	//{"Bridge", Bridge::Create},
 	//{"Collision Processing", CollisionProcessing::Create},
-	//{"Pyramid", Pyramid::Create},
 	//{"Web", Web::Create},
 	//{"Gears", Gears::Create},
 	//{"Pulleys", Pulleys::Create},

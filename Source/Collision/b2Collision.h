@@ -82,6 +82,10 @@ struct b2OBB
 /// This describes the motion of a body/shape for TOI computation.
 struct b2Sweep
 {
+	/// Get the transform at a specific time.
+	/// @param toi the normalized time in [0,1].
+	b2XForm GetXForm(float32 toi) const;
+
 	b2Vec2 position, velocity;
 	float32 theta, omega;
 };
@@ -136,6 +140,14 @@ inline bool b2TestOverlap(const b2AABB& a, const b2AABB& b)
 		return false;
 
 	return true;
+}
+
+inline b2XForm b2Sweep::GetXForm(float32 toi) const
+{
+	b2XForm xf;
+	xf.position = position + toi * velocity;
+	xf.R.Set(theta + toi * omega);
+	return xf;
 }
 
 #endif
