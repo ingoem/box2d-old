@@ -78,7 +78,7 @@ void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
 	const float32 k_segments = 16.0f;
 	const float32 k_increment = 2.0f * b2_pi / k_segments;
 	float32 theta = 0.0f;
-	glColor3f(0.5f * color.r, 0.5f * color.g, 0.5f * color.b);
+	glColor4f(0.5f * color.r, 0.5f * color.g, 0.5f * color.b, 0.5f);
 	glBegin(GL_TRIANGLE_FAN);
 	for (int32 i = 0; i < k_segments; ++i)
 	{
@@ -89,7 +89,7 @@ void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
 	glEnd();
 
 	theta = 0.0f;
-	glColor3f(color.r, color.g, color.b);
+	glColor4f(color.r, color.g, color.b, 1.0f);
 	glBegin(GL_LINE_LOOP);
 	for (int32 i = 0; i < k_segments; ++i)
 	{

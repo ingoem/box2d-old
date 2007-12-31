@@ -146,7 +146,7 @@ void Test::LaunchBomb()
 
 	b2PolygonDef sd;
 	sd.SetAsBox(0.25f, 0.25f);
-	sd.density = 10.0f;
+	sd.density = 20.0f;
 	b2Shape* shape = m_world->Create(&sd);
 
 	b2BodyDef bd;

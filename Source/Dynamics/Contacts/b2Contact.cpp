@@ -117,6 +117,11 @@ b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 {
 	m_flags = 0;
 
+	if (s1->IsSensor() || s2->IsSensor())
+	{
+		m_flags |= e_nonSolidFlag;
+	}
+
 	m_shape1 = s1;
 	m_shape2 = s2;
 
@@ -164,6 +169,8 @@ void b2Contact::Update(b2ContactListener* listener)
 
 	b2Body* body1 = m_shape1->GetBody();
 	b2Body* body2 = m_shape2->GetBody();
+
+	// Slow contacts don't generate TOI events.
 	if (body1->IsStatic() || body1->IsBullet() || body2->IsStatic() || body2->IsBullet())
 	{
 		m_flags &= ~e_slowFlag;

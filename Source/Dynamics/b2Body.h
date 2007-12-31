@@ -252,8 +252,7 @@ public:
 		e_allowSleepFlag	= 0x0010,
 		e_bulletFlag		= 0x0020,
 		e_toiResolvedFlag	= 0x0040,
-		e_retiredFlag		= 0x0080,
-		e_sayGoodByeFlag	= 0x0100,
+		e_sayGoodByeFlag	= 0x0080,
 	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);

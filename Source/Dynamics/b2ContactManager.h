@@ -41,6 +41,8 @@ public:
 
 	void Collide();
 
+	void Report();
+
 	b2World* m_world;
 
 	// This lets us provide broadphase proxy pair user data for

@@ -110,6 +110,10 @@ public:
 	/// @return the shape type.
 	b2ShapeType GetType() const;
 
+	/// Is this shape a sensor (non-solid)?
+	/// @return the true if the shape is a sensor.
+	bool IsSensor() const;
+
 	/// Get the parent body of this shape. This is NULL if the shape is not attached.
 	/// @return the parent body.
 	b2Body* GetBody();
@@ -214,7 +218,7 @@ public:
 
 	// These must be computed by concrete shape.
 	// Used for CCD.
-	float32 m_minRadius;
+	float32 m_minRadius; // not used yet, purpose: to cull TOI events.
 	float32 m_maxRadius;
 
 	uint16 m_proxyId;
@@ -228,6 +232,11 @@ public:
 inline b2ShapeType b2Shape::GetType() const
 {
 	return m_type;
+}
+
+inline bool b2Shape::IsSensor() const
+{
+	return m_isSensor;
 }
 
 inline void* b2Shape::GetUserData()

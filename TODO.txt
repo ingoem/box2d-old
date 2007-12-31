@@ -88,13 +88,18 @@ Version 2.0.0
 - Debug display interface. DONE
 - Access version number. DONE
 - Improved TestBed camera. DONE
-- Contact callbacks with impulses. DONE
-- CCD.
-- Apply impulse at TOI.
-- Safe contact callback example.
-- Body add/remove shape.
-- Doxygen.
+- CCD. DONE
+- Apply impulse at TOI. DONE
+- Max velocities. DONE
+- All contact results available via contact retirement. DONE
 - Sensors.
+- Time of Impact (TOI) callbacks.
+- Contact solver tweak callbacks.
+- Contact callbacks with impulses.
+- Body add/remove shape.
+- Safe contact callback example.
+- Doxygen.
+- Update manual.
 - Car example.
 - Ragdoll contribution.
 - CMake contribution.

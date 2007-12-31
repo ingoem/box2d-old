@@ -29,6 +29,7 @@ b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2Sta
 	m_constraintCount = 0;
 	for (int32 i = 0; i < contactCount; ++i)
 	{
+		b2Assert(contacts[i]->IsSolid());
 		m_constraintCount += contacts[i]->GetManifoldCount();
 	}
 
@@ -38,6 +39,7 @@ b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2Sta
 	for (int32 i = 0; i < contactCount; ++i)
 	{
 		b2Contact* contact = contacts[i];
+
 		b2Body* b1 = contact->m_shape1->m_body;
 		b2Body* b2 = contact->m_shape2->m_body;
 		int32 manifoldCount = contact->GetManifoldCount();

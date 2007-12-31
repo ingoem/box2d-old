@@ -156,6 +156,25 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 		// Apply damping.
 		b->m_linearVelocity *= b->m_linearDamping;
 		b->m_angularVelocity *= b->m_angularDamping;
+
+		// Check for large velocities.
+		if (b2Dot(b->m_linearVelocity, b->m_linearVelocity) > b2_maxLinearVelocitySquared)
+		{
+			b->m_linearVelocity.Normalize();
+			b->m_linearVelocity *= b2_maxLinearVelocity;
+		}
+
+		if (b->m_angularVelocity * b->m_angularVelocity > b2_maxAngularVelocitySquared)
+		{
+			if (b->m_angularVelocity < 0.0f)
+			{
+				b->m_angularVelocity = -b2_maxAngularVelocity;
+			}
+			else
+			{
+				b->m_angularVelocity = b2_maxAngularVelocity;
+			}
+		}
 	}
 
 	b2ContactSolver contactSolver(m_contacts, m_contactCount, m_allocator);
@@ -272,17 +291,6 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 				b2Body* b = m_bodies[i];
 				b->m_flags |= b2Body::e_sleepFlag;
 			}
-		}
-	}
-
-	// Report contact results to the user.
-	if (m_listener)
-	{
-		for (int32 i = 0; i < m_contactCount; ++i)
-		{
-			b2Contact* c = m_contacts[i];
-			bool newContact = (c->m_flags & b2Contact::e_beginFlag) != 0;
-			m_listener->Report(c->GetManifolds(), c->GetManifoldCount(), c->GetShape1(), c->GetShape2(), newContact);
 		}
 	}
 }

@@ -452,7 +452,7 @@ void b2World::Solve(const b2TimeStep& step)
 			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
 			{
 				// Has this contact already been added to an island?
-				if (cn->contact->m_flags & b2Contact::e_islandFlag)
+				if (cn->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_nonSolidFlag))
 				{
 					continue;
 				}
@@ -470,12 +470,6 @@ void b2World::Solve(const b2TimeStep& step)
 
 				// Was the other body already added to this island?
 				if (other->m_flags & b2Body::e_islandFlag)
-				{
-					continue;
-				}
-
-				// Non-solid contacts don't grow the island.
-				if (cn->contact->m_flags & b2Contact::e_nonSolidFlag)
 				{
 					continue;
 				}
@@ -673,6 +667,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	{
 		SolveTOI();
 	}
+
 
 	// Draw debug information.
 	DrawDebugData();

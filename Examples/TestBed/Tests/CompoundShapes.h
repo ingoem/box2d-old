@@ -129,6 +129,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set( 0.0f, 2.0f );
+			bd.isBullet = true;
 			bd.AddShape(m_world->Create(&sd_bottom));
 			bd.AddShape(m_world->Create(&sd_left));
 			bd.AddShape(m_world->Create(&sd_right));

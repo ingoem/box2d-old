@@ -65,6 +65,10 @@ public:
 		return m_manifoldCount;
 	}
 
+	/// Is this contact solid?
+	/// @return true if this contact should generate a response.
+	bool IsSolid() const;
+
 	/// Get the next contact in the world's contact list.
 	b2Contact* GetNext();
 
@@ -125,6 +129,11 @@ public:
 	float32 m_friction;
 	float32 m_restitution;
 };
+
+inline bool b2Contact::IsSolid() const
+{
+	return (m_flags & e_nonSolidFlag) == 0;
+}
 
 inline b2Contact* b2Contact::GetNext()
 {

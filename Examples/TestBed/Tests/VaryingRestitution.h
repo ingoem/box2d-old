@@ -43,7 +43,7 @@ public:
 
 			float32 restitution[7] = {0.0f, 0.1f, 0.3f, 0.5f, 0.75f, 0.9f, 1.0f};
 
-			for (int32 i = 0; i < 1; ++i)
+			for (int32 i = 0; i < 7; ++i)
 			{
 				sd.restitution = restitution[i];
 				b2BodyDef bd;

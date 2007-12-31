@@ -82,6 +82,16 @@ const float32 b2_maxLinearCorrection = 0.2f * b2_lengthUnitsPerMeter;	// 20 cm
 /// prevent overshoot.
 const float32 b2_maxAngularCorrection = 8.0f / 180.0f * b2_pi;			// 8 degrees
 
+/// The maximum linear velocity of a body. This limit is very large and is used
+/// to prevent numerical problems. You shouldn't need to adjust this.
+const float32 b2_maxLinearVelocity = 100.0f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;
+const float32 b2_maxLinearVelocitySquared = b2_maxLinearVelocity * b2_maxLinearVelocity;
+
+/// The maximum angular velocity of a body. This limit is very large and is used
+/// to prevent numerical problems. You shouldn't need to adjust this.
+const float32 b2_maxAngularVelocity = 250.0f / b2_timeUnitsPerSecond;
+const float32 b2_maxAngularVelocitySquared = b2_maxAngularVelocity * b2_maxAngularVelocity;
+
 /// This scale factor controls how fast overlap is resolved. Ideally this would be 1 so
 /// that overlap is removed in one time step. However using values close to 1 often lead
 /// to overshoot.

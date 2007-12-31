@@ -126,7 +126,6 @@ public:
 			m_world->Create(&bd);
 		}
 
-#if 1
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(0.1f, 2.0f);
@@ -138,13 +137,12 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 15.0f);
+			bd.isBullet = true;
 			bd.AddShape(shape);
 			b2Body* body = m_world->Create(&bd);
 			body->SetAngularVelocity(m_angularVelocity);
 		}
-#endif
 
-#if 1
 		{
 			b2CircleDef sd;
 			sd.radius = 0.25f;
@@ -156,11 +154,11 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(5.0f, 25.0f);
+			bd.isBullet = true;
 			bd.AddShape(shape);
 			b2Body* body = m_world->Create(&bd);
 			body->SetAngularVelocity(m_angularVelocity);
 		}
-#endif
 #endif
 	}
 
