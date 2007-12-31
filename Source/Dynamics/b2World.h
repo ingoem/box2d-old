@@ -158,7 +158,6 @@ public:
 
 	void DrawJoint(b2Joint* joint);
 	void DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color, bool core);
-	void DrawContacts();
 	void DrawDebugData();
 
 	b2BlockAllocator m_blockAllocator;

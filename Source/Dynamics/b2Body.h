@@ -42,7 +42,7 @@ struct b2BodyDef
 		userData = NULL;
 		shapes = NULL;
 		position.Set(0.0f, 0.0f);
-		rotation = 0.0f;
+		angle = 0.0f;
 		linearDamping = 0.0f;
 		angularDamping = 0.0f;
 		allowSleep = true;
@@ -65,8 +65,8 @@ struct b2BodyDef
 	/// since this can lead to many overlapping shapes.
 	b2Vec2 position;
 
-	/// The world rotation of the body in radians.
-	float32 rotation;
+	/// The world angle of the body in radians.
+	float32 angle;
 
 	/// Linear damping is use to reduce the linear velocity and should be in
 	/// the range [0,1], where 0 means no damping and 1 means full damping.
@@ -252,6 +252,8 @@ public:
 		e_allowSleepFlag	= 0x0010,
 		e_bulletFlag		= 0x0020,
 		e_toiResolvedFlag	= 0x0040,
+		e_retiredFlag		= 0x0080,
+		e_sayGoodByeFlag	= 0x0100,
 	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);
@@ -503,14 +505,14 @@ inline void b2Body::GetSweep(b2Sweep* sweep) const
 	if (m_flags & e_toiResolvedFlag)
 	{
 		sweep->position = (1.0f - m_toi) * m_position0 + m_toi * m_xf.position;
-		sweep->theta = (1.0f - m_toi) * m_angle0 + m_toi * m_angle;
+		sweep->angle = (1.0f - m_toi) * m_angle0 + m_toi * m_angle;
 		sweep->velocity.SetZero();
 		sweep->omega = 0.0f;
 	}
 	else
 	{
 		sweep->position = m_position0;
-		sweep->theta = m_angle0;
+		sweep->angle = m_angle0;
 		sweep->velocity = m_xf.position - m_position0;
 		sweep->omega = m_angle - m_angle0;
 	}

@@ -104,7 +104,7 @@ void* b2ContactManager::PairAdded(void* proxyUserData1, void* proxyUserData2)
 }
 
 // This is a callback from the broadphase when two AABB proxies cease
-// to overlap. We destroy the b2Contact.
+// to overlap. We retire the b2Contact.
 void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData)
 {
 	B2_NOT_USED(proxyUserData1);
@@ -121,15 +121,39 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 		return;
 	}
 
-	b2Assert(m_world->m_contactCount > 0);
+	b2Shape* shape1 = c->GetShape1();
+	b2Shape* shape2 = c->GetShape2();
 
+	b2Body* body1 = shape1->GetBody();
+	b2Body* body2 = shape2->GetBody();
+
+	bool sayGoodBye1 = (body1->m_flags & b2Body::e_sayGoodByeFlag) != 0;
+	bool sayGoodBye2 = (body2->m_flags & b2Body::e_sayGoodByeFlag) != 0;
+
+	if (sayGoodBye1 || sayGoodBye2)
+	{
+		// An attached body is being destroyed, we must destroy this contact
+		// immediately to avoid orphaned shape pointers.
+		Destroy(c);
+	}
+	else
+	{
+		// Don't destroy the contact yet, so the user can get results.
+		// Just mark it as retired and it will be destroyed at the beginning
+		// of the next time step.
+		c->m_flags |= b2Contact::e_retiredFlag;
+	}
+}
+
+void b2ContactManager::Destroy(b2Contact* c)
+{
 	b2Shape* shape1 = c->GetShape1();
 	b2Shape* shape2 = c->GetShape2();
 
 	// Inform the user that this contact is ending.
 	if (c->GetManifoldCount() > 0 && m_world->m_contactListener)
 	{
-		m_world->m_contactListener->End(shape1, shape2);
+		m_world->m_contactListener->End(c->GetShape1(), c->GetShape2());
 	}
 
 	// Remove from the world.
@@ -193,6 +217,20 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 // contact list.
 void b2ContactManager::Collide()
 {
+	// Destroy retired contacts.
+	b2Contact* c = m_world->m_contactList;
+	while (c != NULL)
+	{
+		b2Contact* c0 = c;
+		c = c->GetNext();
+
+		if (c0->m_flags & b2Contact::e_retiredFlag)
+		{
+			Destroy(c0);
+		}
+	}
+
+	// Update awake contacts.
 	for (b2Contact* c = m_world->m_contactList; c; c = c->GetNext())
 	{
 		b2Body* body1 = c->GetShape1()->GetBody();

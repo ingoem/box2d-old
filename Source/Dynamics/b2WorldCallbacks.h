@@ -46,22 +46,15 @@ public:
 };
 
 
-/// This is called when a body's shape passes outside of the world boundary. If you
-/// override this and pass back e_destroyBody, you must nullify your copies of the
-/// body pointer.
+/// This is called when a body's shape passes outside of the world boundary.
 class b2BoundaryListener
 {
 public:
-	enum Response
-	{
-		e_freezeBody,
-		e_destroyBody,
-	};
-
 	virtual ~b2BoundaryListener() {}
 
 	/// This is called for each body that leaves the world boundary.
-	virtual Response Violation(b2Body* body) = 0;
+	/// @warning you can't modify the world inside this callback.
+	virtual void Violation(b2Body* body) = 0;
 };
 
 

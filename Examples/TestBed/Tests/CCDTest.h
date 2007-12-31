@@ -98,10 +98,12 @@ public:
 			b3->SetLinearVelocity(b2Vec2(0.0f, -202.0f));
 		}
 #else
+		const float32 k_restitution = 1.1f;
+
 		{
 			b2PolygonDef sd;
 			sd.density = 0.0f;
-			sd.restitution = 1.1f;
+			sd.restitution = k_restitution;
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(-10.0f, 0.0f), 0.0f);
 			b2Shape* shape1 = m_world->Create(&sd);
@@ -124,24 +126,41 @@ public:
 			m_world->Create(&bd);
 		}
 
+#if 1
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(0.1f, 2.0f);
 			sd.density = 1.0f;
-			sd.restitution = 1.1f;
+			sd.restitution = 0.0f;
 			b2Shape* shape = m_world->Create(&sd);
 
 			m_angularVelocity = b2Random(-50.0f, 50.0f);
-			//m_angularVelocity = 39.596241f;
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, 10.0f);
+			bd.position.Set(0.0f, 15.0f);
 			bd.AddShape(shape);
 			b2Body* body = m_world->Create(&bd);
-			//body->SetLinearVelocity(b2Vec2(-200.0f, 0.0f));
 			body->SetAngularVelocity(m_angularVelocity);
 		}
+#endif
 
+#if 1
+		{
+			b2CircleDef sd;
+			sd.radius = 0.25f;
+			sd.density = 1.0f;
+			sd.restitution = 0.0f;
+			b2Shape* shape = m_world->Create(&sd);
+
+			m_angularVelocity = b2Random(-50.0f, 50.0f);
+
+			b2BodyDef bd;
+			bd.position.Set(5.0f, 25.0f);
+			bd.AddShape(shape);
+			b2Body* body = m_world->Create(&bd);
+			body->SetAngularVelocity(m_angularVelocity);
+		}
+#endif
 #endif
 	}
 

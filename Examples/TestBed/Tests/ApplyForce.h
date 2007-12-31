@@ -37,15 +37,15 @@ public:
 			m_world->Create(&bd);
 
 			bd.position.Set(30.0f, 50.0f);
-			bd.rotation = 0.5f * b2_pi;
+			bd.angle = 0.5f * b2_pi;
 			m_world->Create(&bd);
 
 			bd.position.Set(-30.0f, 50.0f);
-			bd.rotation = -0.5f * b2_pi;
+			bd.angle = -0.5f * b2_pi;
 			m_world->Create(&bd);
 
 			bd.position.Set(0.0f, 40.0f);
-			bd.rotation = 0.0f;
+			bd.angle = 0.0f;
 			m_world->Create(&bd);
 		}
 
@@ -80,7 +80,7 @@ public:
 			bd.linearDamping = 0.02f;
 
 			bd.position.Set(0.0f, 1.05f);
-			bd.rotation = b2_pi;
+			bd.angle = b2_pi;
 			m_body = m_world->Create(&bd);
 		}
 	}

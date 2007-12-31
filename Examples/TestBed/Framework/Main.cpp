@@ -78,12 +78,6 @@ b2Vec2 ConvertScreenToWorld(int32 x, int32 y)
 	p.x = (1.0f - u) * lower.x + u * upper.x;
 	p.y = (1.0f - v) * lower.y + v * upper.y;
 	return p;
-
-#if 0
-	p.x = viewZoom * (viewX - ratio) * (1.0f - u) + viewZoom * (ratio + viewX) * u;
-	p.y = viewZoom * (viewY - 0.1f) * (1.0f - v) + viewZoom * (viewY + 1.9f) * v;
-	return p;
-#endif
 }
 
 // This is used to control the frame rate (60Hz).
@@ -139,7 +133,7 @@ void Keyboard(unsigned char key, int x, int y)
 
 		// Press 'x' to zoom in.
 	case 'x':
-		viewZoom = b2Max(0.9f * viewZoom, 0.05f);
+		viewZoom = b2Max(0.9f * viewZoom, 0.02f);
 		Resize(width, height);
 		break;
 

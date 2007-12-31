@@ -37,6 +37,8 @@ public:
 	// Implements PairCallback
 	void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData);
 
+	void Destroy(b2Contact* c);
+
 	void Collide();
 
 	b2World* m_world;

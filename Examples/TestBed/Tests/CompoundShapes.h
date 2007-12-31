@@ -52,7 +52,7 @@ public:
 				bd.AddShape(m_world->Create(&sd1));
 				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
-				bd.rotation = b2Random(-b2_pi, b2_pi);
+				bd.angle = b2Random(-b2_pi, b2_pi);
 				m_world->Create(&bd);
 			}
 		}
@@ -73,7 +73,7 @@ public:
 				bd.AddShape(m_world->Create(&sd1));
 				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
-				bd.rotation = b2Random(-b2_pi, b2_pi);
+				bd.angle = b2Random(-b2_pi, b2_pi);
 				m_world->Create(&bd);
 			}
 		}
@@ -108,7 +108,7 @@ public:
 				bd.AddShape(m_world->Create(&sd1));
 				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x, 2.05f + 2.5f * i);
-				bd.rotation = 0.0f;
+				bd.angle = 0.0f;
 				m_world->Create(&bd);
 			}
 		}

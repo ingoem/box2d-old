@@ -93,7 +93,7 @@ public:
 class BoundaryListener : public b2BoundaryListener	
 {
 public:
-	Response Violation(b2Body* body);
+	void Violation(b2Body* body);
 
 	Test* test;
 };
@@ -115,11 +115,7 @@ public:
 
 	// Let derived tests know that a joint was destroyed.
 	virtual void JointDestroyed(b2Joint* joint) { B2_NOT_USED(joint); }
-	virtual b2BoundaryListener::Response BoundaryViolated(b2Body* body)
-	{
-		B2_NOT_USED(body);
-		return b2BoundaryListener::e_freezeBody;
-	}
+	virtual void BoundaryViolated(b2Body* body) { B2_NOT_USED(body); }
 
 protected:
 	friend class DestructionListener;

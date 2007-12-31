@@ -311,7 +311,7 @@ void b2Island::SolveTOI()
 			b2Contact* c = m_contacts[i];
 
 			float32 toi = c->TimeOfImpact(m_listener);
-			if (toi < minTOI)
+ 			if (toi < minTOI)
 			{
 				minTOI = toi;
 				toiContact = c;

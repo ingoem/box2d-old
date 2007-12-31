@@ -30,7 +30,7 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		m_flags |= e_bulletFlag;
 	}
 	m_xf.position = bd->position;
-	m_angle = bd->rotation;
+	m_angle = bd->angle;
 	m_xf.R.Set(m_angle);
 	m_position0 = m_xf.position;
 	m_angle0 = m_angle;

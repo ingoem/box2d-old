@@ -28,12 +28,12 @@ float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
 					   float32 maxTOI)
 {
 	b2Vec2 p1Start = sweep1.position;
-	float32 a1Start = sweep1.theta;
+	float32 a1Start = sweep1.angle;
 	b2Vec2 v1 = sweep1.velocity;
 	float32 omega1 = sweep1.omega;
 
 	b2Vec2 p2Start = sweep2.position;
-	float32 a2Start = sweep2.theta;
+	float32 a2Start = sweep2.angle;
 	b2Vec2 v2 = sweep2.velocity;
 	float32 omega2 = sweep2.omega;
 
@@ -53,7 +53,8 @@ float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
 	xf2.R.Set(a2);
 
 	float32 t1 = 0.0f;
-	const int32 maxIterations = 50;
+	const int32 maxIterations = 10;
+	float32 invRelativeVelocity0 = 0.0f;
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
 		// Get the accurate distance between shapes.
@@ -73,8 +74,15 @@ float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
 			break;
 		}
 
+		float32 invRelativeVelocity = 1.0f / relativeVelocity;
+		if (iter == 0)
+		{
+			invRelativeVelocity0 = invRelativeVelocity;
+		}
+
 		// Get the conservative time increment. Don't advance all the way.
-		float32 dt = distance / relativeVelocity;
+		//float32 dt = distance / relativeVelocity;
+		float32 dt = distance * invRelativeVelocity;
 		float32 t2 = t1 + dt;
 
 		// The shapes may be moving apart.
@@ -108,6 +116,11 @@ float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
 
 		xf2.position = p2;
 		xf2.R.Set(a2);
+
+		if (iter == maxIterations - 1)
+		{
+			iter += 0;
+		}
 	}
 
 	return t1;

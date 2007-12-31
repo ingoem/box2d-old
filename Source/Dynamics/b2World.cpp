@@ -205,6 +205,12 @@ void b2World::Destroy(b2Body* b)
 		return;
 	}
 
+	// When a body's shapes are destroyed, the contacts are
+	// implicitly destroyed via the pair manager. Set a flag
+	// to let the contact manager know that this body is being
+	// destroyed so that the contact is destroyed immediately.
+	b->m_flags |= b2Body::e_sayGoodByeFlag;
+
 	// Delete the attached joints.
 	b2JointNode* jn = b->m_jointList;
 	while (jn)
@@ -220,7 +226,8 @@ void b2World::Destroy(b2Body* b)
 		Destroy(jn0->joint);
 	}
 
-	// Delete the attached shapes.
+	// Delete the attached shapes. This destroys broad-phase
+	// proxies and pairs, leading to the destruction of contacts.
 	b2Shape* s = b->m_shapeList;
 	while (s)
 	{
@@ -518,18 +525,12 @@ void b2World::Solve(const b2TimeStep& step)
 
 	m_stackAllocator.Free(stack);
 
-	// Draw contact data before any contacts get destroyed by the broad-phase commit.
-	DrawContacts();
-
-	// Synchronize shapes. This can destroy contacts, so we should do this after
-	// all reporting. This also can destroy bodies, so we can't do this with islands.
-	b2Body* b = m_bodyList;
-	while (b)
+	// Synchronize shapes, check for out of range bodies.
+	for (b2Body* b = m_bodyList; b; b = b->GetNext())
 	{
 		uint32 skipFlags = b2Body::e_sleepFlag | b2Body::e_staticFlag | b2Body::e_frozenFlag;
 		if (b->m_flags & skipFlags)
 		{
-			b = b->GetNext();
 			continue;
 		}
 		
@@ -541,17 +542,8 @@ void b2World::Solve(const b2TimeStep& step)
 		// Did the body's shapes leave the world?
 		if (inRange == false && m_boundaryListener != NULL)
 		{
-			b2BoundaryListener::Response response = m_boundaryListener->Violation(b);
-			if (response == b2BoundaryListener::e_destroyBody)
-			{
-				b2Body* bNuke = b;
-				b = b->GetNext();
-				Destroy(bNuke);
-				continue;
-			}
+			m_boundaryListener->Violation(b);
 		}
-
-		b = b->GetNext();
 	}
 
 	// Commit shape proxy movements to the broad-phase so that new contacts are created.
@@ -631,10 +623,6 @@ void b2World::SolveTOI()
 		// An island without contacts doesn't need TOI solution.
 		if (island.m_contactCount > 0)
 		{
-			if (island.m_contactCount > m_contactCount)
-			{
-				m_contactCount += 0;
-			}
 			b2Assert(island.m_contactCount <= m_contactCount);
 
 			island.SolveTOI();
@@ -688,11 +676,6 @@ void b2World::Step(float32 dt, int32 iterations)
 
 	// Draw debug information.
 	DrawDebugData();
-
-	if (step.dt == 0.0f)
-	{
-		DrawContacts();
-	}
 
 	m_lock = false;
 }
@@ -803,86 +786,6 @@ void b2World::DrawJoint(b2Joint* joint)
 		m_debugDraw->DrawSegment(x1, p1, color);
 		m_debugDraw->DrawSegment(p1, p2, color);
 		m_debugDraw->DrawSegment(x2, p2, color);
-	}
-}
-
-void b2World::DrawContacts()
-{
-	if (m_debugDraw == NULL)
-	{
-		return;
-	}
-
-	uint32 flags = m_debugDraw->GetFlags();
-
-	if (flags & b2DebugDraw::e_contactPointBit)
-	{
-		b2Color color(0.9f, 0.5f, 0.5f);
-		for (b2Contact* c = m_contactList; c; c = c->GetNext())
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					m_debugDraw->DrawPoint(m->points[j].position, color);
-				}
-			}
-		}
-	}
-
-	if (flags & b2DebugDraw::e_contactNormalBit)
-	{
-		b2Color color(0.4f, 0.9f, 0.4f);
-		for (b2Contact* c = m_contactList; c; c = c->GetNext())
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					m_debugDraw->DrawAxis(m->points[j].position, m->normal, color);
-				}
-			}
-		}
-	}
-
-	if (flags & b2DebugDraw::e_contactImpulseBit)
-	{
-		b2Color color(0.9f, 0.9f, 0.3f);
-		for (b2Contact* c = m_contactList; c; c = c->GetNext())
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].normalImpulse * m->normal, color);
-				}
-			}
-		}
-	}
-
-	if (flags & b2DebugDraw::e_frictionImpulseBit)
-	{
-		b2Color color(0.9f, 0.9f, 0.3f);
-		for (b2Contact* c = m_contactList; c; c = c->GetNext())
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				b2Vec2 tangent = b2Cross(m->normal, 1.0f);
-
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].tangentImpulse * tangent, color);
-				}
-			}
-		}
 	}
 }
 
@@ -1036,6 +939,76 @@ void b2World::DrawDebugData()
 		for (b2Body* b = m_bodyList; b; b = b->GetNext())
 		{
 			m_debugDraw->DrawXForm(b->GetXForm());
+		}
+	}
+
+	if (flags & b2DebugDraw::e_contactPointBit)
+	{
+		b2Color color(0.9f, 0.5f, 0.5f);
+		for (b2Contact* c = m_contactList; c; c = c->GetNext())
+		{
+			b2Manifold* ms = c->GetManifolds();
+			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
+			{
+				b2Manifold* m = ms + i;
+				for (int j = 0; j < m->pointCount; ++j)
+				{
+					m_debugDraw->DrawPoint(m->points[j].position, color);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_contactNormalBit)
+	{
+		b2Color color(0.4f, 0.9f, 0.4f);
+		for (b2Contact* c = m_contactList; c; c = c->GetNext())
+		{
+			b2Manifold* ms = c->GetManifolds();
+			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
+			{
+				b2Manifold* m = ms + i;
+				for (int j = 0; j < m->pointCount; ++j)
+				{
+					m_debugDraw->DrawAxis(m->points[j].position, m->normal, color);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_contactImpulseBit)
+	{
+		b2Color color(0.9f, 0.9f, 0.3f);
+		for (b2Contact* c = m_contactList; c; c = c->GetNext())
+		{
+			b2Manifold* ms = c->GetManifolds();
+			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
+			{
+				b2Manifold* m = ms + i;
+				for (int j = 0; j < m->pointCount; ++j)
+				{
+					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].normalImpulse * m->normal, color);
+				}
+			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_frictionImpulseBit)
+	{
+		b2Color color(0.9f, 0.9f, 0.3f);
+		for (b2Contact* c = m_contactList; c; c = c->GetNext())
+		{
+			b2Manifold* ms = c->GetManifolds();
+			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
+			{
+				b2Manifold* m = ms + i;
+				b2Vec2 tangent = b2Cross(m->normal, 1.0f);
+
+				for (int j = 0; j < m->pointCount; ++j)
+				{
+					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].tangentImpulse * tangent, color);
+				}
+			}
 		}
 	}
 }

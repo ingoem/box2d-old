@@ -87,7 +87,7 @@ struct b2Sweep
 	b2XForm GetXForm(float32 toi) const;
 
 	b2Vec2 position, velocity;
-	float32 theta, omega;
+	float32 angle, omega;
 };
 
 /// Compute the collision manifold between two circles.
@@ -146,7 +146,7 @@ inline b2XForm b2Sweep::GetXForm(float32 toi) const
 {
 	b2XForm xf;
 	xf.position = position + toi * velocity;
-	xf.R.Set(theta + toi * omega);
+	xf.R.Set(angle + toi * omega);
 	return xf;
 }
 

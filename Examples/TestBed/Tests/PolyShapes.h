@@ -112,7 +112,7 @@ public:
 
 		float32 x = b2Random(-2.0f, 2.0f);
 		bd.position.Set(x, 10.0f);
-		bd.rotation = b2Random(-b2_pi, b2_pi);
+		bd.angle = b2Random(-b2_pi, b2_pi);
 
 		bodies[bodyIndex] = m_world->Create(&bd);
 		bodyIndex = (bodyIndex + 1) % k_maxBodies;

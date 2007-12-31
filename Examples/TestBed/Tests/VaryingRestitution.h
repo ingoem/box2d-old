@@ -129,8 +129,8 @@ public:
 			body.position.Set(45.0f, 27.65f);
 			body.position.Set(45.0f, 27.729946f);
 			body.allowSleep = false;
-			body.rotation = 330.0f / 180.0f * b2_pi;
-			body.rotation = 5.7595868f;
+			body.angle = 330.0f / 180.0f * b2_pi;
+			body.angle = 5.7595868f;
 			body.AddShape(&box);
 
 			m_world->Create(&body);

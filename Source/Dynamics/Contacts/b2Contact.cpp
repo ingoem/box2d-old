@@ -210,6 +210,14 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 {
 	b2Body* b1 = m_shape1->GetBody();
 	b2Body* b2 = m_shape2->GetBody();
+
+	bool resolved1 = (b1->m_flags & b2Body::e_toiResolvedFlag) != 0;
+	bool resolved2 = (b2->m_flags & b2Body::e_toiResolvedFlag) != 0;
+	if (resolved1 && resolved2)
+	{
+		return 1.0f;
+	}
+
 	b2Sweep sweep1, sweep2;
 	b1->GetSweep(&sweep1);
 	b2->GetSweep(&sweep2);
@@ -218,7 +226,7 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 	b2Vec2 point1, point2;
 
 	// Use maxTOI as an early out of the TOI calculation.
-	float32 maxTOI = b2Max(toi1, toi2);
+	float32 maxTOI = b2Min(toi1, toi2);
 
 	float32 toi = b2TimeOfImpact(&point1, &point2, m_shape1, sweep1, m_shape2, sweep2, maxTOI);
 	if (toi > 0.0f && toi < maxTOI)
@@ -270,42 +278,54 @@ void b2Contact::ResolveTOI(b2StackAllocator* allocator)
 		factor2 = 0.0f;
 	}
 
+	if (b1->GetTOI() != b2->GetTOI())
+	{
+		return;
+	}
+
 	b2Assert(b1->GetTOI() == b2->GetTOI());
 
 	float32 toi = b1->GetTOI();
 
-	b1->m_xf.position = (1.0f - toi) * b1->m_position0 + toi * b1->m_xf.position;
-	b1->m_angle = (1.0f - toi) * b1->m_angle0 + toi * b1->m_angle;
+	b1->m_xf.position = b1->m_position0 + toi * (b1->m_xf.position - b1->m_position0);
+	b1->m_angle = b1->m_angle0 + toi * (b1->m_angle - b1->m_angle0);
 	b1->m_xf.R.Set(b1->m_angle);
 
-	b2->m_xf.position = (1.0f - toi) * b2->m_position0 + toi * b2->m_xf.position;
-	b2->m_angle = (1.0f - toi) * b2->m_angle0 + toi * b2->m_angle;
+	b2->m_xf.position = b2->m_position0 + toi * (b2->m_xf.position - b2->m_position0);
+	b2->m_angle = b2->m_angle0 + toi * (b2->m_angle - b2->m_angle0);
 	b2->m_xf.R.Set(b2->m_angle);
 
 	int32 oldCount = m_manifoldCount;
 
 	Evaluate();
 
-	b2Assert(m_manifoldCount > 0);
-
-	if (oldCount == 0)
+	// It is sad, but sometimes the TOI is not accurate enough to give us
+	// a manifold. This is due to very large velocities.
+	if (m_manifoldCount > 0)
 	{
-		m_flags |= e_toiBeginFlag;
-	}
-
-	b2Contact* contact = this;
-	b2ContactSolver solver(&contact, 1, allocator);
-
-	const int32 k_maxIterations = 100;
-	const float32 k_toiBaumgarte = 0.5f;
-
-	for (int32 i = 0; i < k_maxIterations; ++i)
-	{
-		bool success = solver.SolvePositionConstraints(k_toiBaumgarte, factor1, factor2);
-		if (success)
+		if (oldCount == 0)
 		{
-			break;
+			m_flags |= e_toiBeginFlag;
 		}
+
+		b2Contact* contact = this;
+		b2ContactSolver solver(&contact, 1, allocator);
+
+		const int32 k_maxIterations = 100;
+		const float32 k_toiBaumgarte = 0.5f;
+
+		for (int32 i = 0; i < k_maxIterations; ++i)
+		{
+			bool success = solver.SolvePositionConstraints(k_toiBaumgarte, factor1, factor2);
+			if (success)
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		m_manifoldCount += 0;
 	}
 
 	// Mark the bodies as resolved.

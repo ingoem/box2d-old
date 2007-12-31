@@ -85,7 +85,7 @@ public:
 			m_joint2 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
 
 			bd.position.Set(-10.0f, 10.0f);
-			bd.rotation = 0.5f * b2_pi;
+			bd.angle = 0.5f * b2_pi;
 			body = m_world->Create(&bd);
 
 			b2PrismaticJointDef pjd;

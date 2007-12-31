@@ -46,7 +46,7 @@ public:
 			bd.position.Set(-2.0f, 11.0f);
 			bd.position *= scale;
 
-			bd.rotation = -0.25f;
+			bd.angle = -0.25f;
 			bd.AddShape(&sd);
 			m_world->Create(&bd);
 		}
@@ -73,7 +73,7 @@ public:
 			bd.position.Set(2.0f, 7.0f);
 			bd.position *= scale;
 
-			bd.rotation = 0.25f;
+			bd.angle = 0.25f;
 			bd.AddShape(&sd);
 			m_world->Create(&bd);
 		}
@@ -100,7 +100,7 @@ public:
 			bd.position.Set(-2.0f, 3.0f);
 			bd.position *= scale;
 
-			bd.rotation = -0.25f;
+			bd.angle = -0.25f;
 			bd.AddShape(&sd);
 			m_world->Create(&bd);
 		}

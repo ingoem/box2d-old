@@ -40,15 +40,12 @@ void DestructionListener::SayGoodbye(b2Joint* joint)
 	}
 }
 
-b2BoundaryListener::Response BoundaryListener::Violation(b2Body* body)
+void BoundaryListener::Violation(b2Body* body)
 {
-	if (test->m_bomb == body)
+	if (test->m_bomb != body)
 	{
-		test->m_bomb = NULL;
-		return e_destroyBody;
+		test->BoundaryViolated(body);
 	}
-
-	return test->BoundaryViolated(body);
 }
 
 Test::Test()
@@ -156,7 +153,7 @@ void Test::LaunchBomb()
 	bd.AddShape(shape);
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
-	bd.rotation = b2Random(-1.5f, 1.5f);
+	bd.angle = b2Random(-1.5f, 1.5f);
 	bd.isBullet = true;
 
 	m_bomb = m_world->Create(&bd);
@@ -205,6 +202,12 @@ void Test::Step(Settings* settings)
 	m_world->Step(timeStep, settings->iterationCount);
 
 	m_world->m_broadPhase->Validate();
+
+	if (m_bomb != NULL && m_bomb->IsFrozen())
+	{
+		m_world->Destroy(m_bomb);
+		m_bomb = NULL;
+	}
 
 	if (settings->drawStats)
 	{

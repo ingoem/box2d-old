@@ -87,6 +87,7 @@ public:
 		e_persistFlag	= 0x0010,
 		e_endFlag		= 0x0020,
 		e_toiBeginFlag  = 0x0040,
+		e_retiredFlag	= 0x0080,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,

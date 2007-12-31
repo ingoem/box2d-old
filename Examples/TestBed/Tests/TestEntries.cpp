@@ -42,6 +42,7 @@
 //#include "Pulleys.h"
 #include "Pyramid.h"
 //#include "SliderCrank.h"
+#include "TimeOfImpact.h"
 //#include "VaryingFriction.h"
 #include "VaryingRestitution.h"
 //#include "VerticalStack.h"
@@ -50,6 +51,7 @@
 TestEntry g_testEntries[] =
 {
 	{"CCD Test", CCDTest::Create},
+	{"Time of Impact", TimeOfImpact::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Polygon Shapes", PolyShapes::Create},

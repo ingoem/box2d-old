@@ -278,6 +278,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\TimeOfImpact.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\VaryingFriction.h"
 				>
 			</File>

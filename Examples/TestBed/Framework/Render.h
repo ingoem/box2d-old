@@ -28,7 +28,7 @@ struct b2AABB;
 class DebugDraw : public b2DebugDraw
 {
 public:
-	void DrawPolygon(const b2Vec2* points, int32 pointCount, const b2Color& color);
+	void DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
 
 	void DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
 
