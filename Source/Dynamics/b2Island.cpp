@@ -290,6 +290,10 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 			{
 				b2Body* b = m_bodies[i];
 				b->m_flags |= b2Body::e_sleepFlag;
+				b->m_linearVelocity = b2Vec2_zero;
+				b->m_angularVelocity = 0.0f;
+				b->m_position0 = b->m_xf.position;
+				b->m_angle0 = b->m_angle;
 			}
 		}
 	}
@@ -307,7 +311,14 @@ void b2Island::SolveTOI()
 		b->m_flags &= ~b2Body::e_toiResolvedFlag;
 	}
 
+	for (int32 i = 0; i < m_contactCount; ++i)
+	{
+		b2Contact* c = m_contacts[i];
+		c->m_flags &= ~b2Contact::e_toiFlag;
+	}
+
 	// Search for TOI events until there are none.
+	bool anyEvents = false;
 	bool found = true;
 	while (found)
 	{
@@ -317,6 +328,10 @@ void b2Island::SolveTOI()
 		for (int32 i = 0; i < m_contactCount; ++i)
 		{
 			b2Contact* c = m_contacts[i];
+			if (c->m_flags & b2Contact::e_toiFlag)
+			{
+				continue;
+			}
 
 			float32 toi = c->TimeOfImpact(m_listener);
  			if (toi < minTOI)
@@ -329,14 +344,60 @@ void b2Island::SolveTOI()
 
 		if (toiContact)
 		{
-			// Resolve the TOI event.
-			toiContact->ResolveTOI(m_allocator);
+
+			// Resolve TOI bodies.
+			b2Body* b1 = toiContact->GetShape1()->GetBody();
+			b2Body* b2 = toiContact->GetShape2()->GetBody();
+
+			b1->m_position0 += minTOI * (b1->m_xf.position - b1->m_position0);
+			b1->m_angle0 += minTOI * (b1->m_angle - b1->m_angle0);
+			b1->m_xf.position = b1->m_position0;
+			b1->m_angle = b1->m_angle0;
+			b1->m_xf.R.Set(b1->m_angle);
+
+			b2->m_position0 += minTOI * (b2->m_xf.position - b2->m_position0);
+			b2->m_angle0 += minTOI * (b2->m_angle - b2->m_angle0);
+			b2->m_xf.position = b2->m_position0;
+			b2->m_angle = b2->m_angle0;
+			b2->m_xf.R.Set(b2->m_angle);
+
+			toiContact->m_flags |= b2Contact::e_toiFlag;
+			toiContact->Evaluate();
 
 			// Reset TOIs so we can handle chain reactions.
 			for (int32 i = 0; i < m_bodyCount; ++i)
 			{
 				m_bodies[i]->m_toi = 1.0f;
 			}
+
+			anyEvents = true;
+		}
+	}
+
+	// If there were any events then relax the contacts so that we have
+	// wiggle room for the next time step (domino problem).
+	if (anyEvents)
+	{
+		b2ContactSolver solver(m_contacts, m_contactCount, m_allocator);
+
+		int32 k_maxIterations = 20;
+		int32 iter = 0;
+		while (iter < k_maxIterations)
+		{
+			bool success = solver.SolvePositionConstraints(0.5f);
+			if (success == true)
+			{
+				break;
+			}
+			++iter;
+		}
+
+		// Resolve all bodies. Some may be sleeping.
+		for (int32 i = 0; i < m_bodyCount; ++i)
+		{
+			b2Body* b = m_bodies[i];
+			b->m_position0 = b->m_xf.position;
+			b->m_angle0 = b->m_angle;
 		}
 	}
 }

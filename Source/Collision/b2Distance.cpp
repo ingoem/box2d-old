@@ -250,19 +250,21 @@ static float32 DistanceCC(
 
 	b2Vec2 d = p2 - p1;
 	float32 dSqr = b2Dot(d, d);
-	float32 r = circle1->m_radius + circle2->m_radius;
+	float32 r1 = circle1->m_radius - b2_toiSlop;
+	float32 r2 = circle2->m_radius - b2_toiSlop;
+	float32 r = r1 + r2;
 	if (dSqr > r * r)
 	{
 		float32 dLen = d.Normalize();
 		float32 distance = dLen - r;
-		*x1 = p1 + circle1->m_radius * d;
-		*x2 = p2 - circle2->m_radius * d;
+		*x1 = p1 + r1 * d;
+		*x2 = p2 - r2 * d;
 		return distance;
 	}
 	else if (dSqr > FLT_EPSILON * FLT_EPSILON)
 	{
 		d.Normalize();
-		*x1 = p1 + circle1->m_radius * d;
+		*x1 = p1 + r1 * d;
 		*x2 = *x1;
 		return 0.0f;
 	}

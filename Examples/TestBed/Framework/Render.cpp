@@ -40,6 +40,8 @@ void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2C
 
 void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
+	glEnable(GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4f(0.5f * color.r, 0.5f * color.g, 0.5f * color.b, 0.5f);
 	glBegin(GL_TRIANGLE_FAN);
 	for (int32 i = 0; i < vertexCount; ++i)
@@ -47,6 +49,7 @@ void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, cons
 		glVertex2f(vertices[i].x, vertices[i].y);
 	}
 	glEnd();
+	glDisable(GL_BLEND);
 
 	glColor4f(color.r, color.g, color.b, 1.0f);
 	glBegin(GL_LINE_LOOP);
@@ -78,6 +81,8 @@ void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
 	const float32 k_segments = 16.0f;
 	const float32 k_increment = 2.0f * b2_pi / k_segments;
 	float32 theta = 0.0f;
+	glEnable(GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4f(0.5f * color.r, 0.5f * color.g, 0.5f * color.b, 0.5f);
 	glBegin(GL_TRIANGLE_FAN);
 	for (int32 i = 0; i < k_segments; ++i)
@@ -87,6 +92,7 @@ void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
 		theta += k_increment;
 	}
 	glEnd();
+	glDisable(GL_BLEND);
 
 	theta = 0.0f;
 	glColor4f(color.r, color.g, color.b, 1.0f);

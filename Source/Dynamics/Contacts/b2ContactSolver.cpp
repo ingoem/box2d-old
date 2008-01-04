@@ -88,13 +88,18 @@ b2ContactSolver::b2ContactSolver(b2Contact** contacts, int32 contactCount, b2Sta
 
 				float32 r1Sqr = b2Dot(r1, r1);
 				float32 r2Sqr = b2Dot(r2, r2);
-
 				float32 rn1 = b2Dot(r1, normal);
 				float32 rn2 = b2Dot(r2, normal);
+
 				float32 kNormal = b1->m_invMass + b2->m_invMass;
 				kNormal += b1->m_invI * (r1Sqr - rn1 * rn1) + b2->m_invI * (r2Sqr - rn2 * rn2);
 				b2Assert(kNormal > FLT_EPSILON);
 				ccp->normalMass = 1.0f / kNormal;
+
+				float32 kEqualized = b1->m_mass * b1->m_invMass + b2->m_mass * b2->m_invMass;
+				kEqualized += b1->m_mass * b1->m_invI * (r1Sqr - rn1 * rn1) + b2->m_mass * b2->m_invI * (r2Sqr - rn2 * rn2);
+				b2Assert(kEqualized > FLT_EPSILON);
+				ccp->equalizedMass = 1.0f / kEqualized;
 
 				b2Vec2 tangent = b2Cross(normal, 1.0f);
 
@@ -267,7 +272,7 @@ void b2ContactSolver::FinalizeVelocityConstraints()
 	}
 }
 
-bool b2ContactSolver::SolvePositionConstraints(float32 baumgarte, float32 factor1, float32 factor2)
+bool b2ContactSolver::SolvePositionConstraints(float32 baumgarte)
 {
 	float32 minSeparation = 0.0f;
 
@@ -276,13 +281,12 @@ bool b2ContactSolver::SolvePositionConstraints(float32 baumgarte, float32 factor
 		b2ContactConstraint* c = m_constraints + i;
 		b2Body* b1 = c->body1;
 		b2Body* b2 = c->body2;
-		float32 invMass1 = factor1 * b1->m_invMass;
-		float32 invI1 = factor1 * b1->m_invI;
-		float32 invMass2 = factor2 * b2->m_invMass;
-		float32 invI2 = factor2 * b2->m_invI;
+		float32 invMass1 = b1->m_mass * b1->m_invMass;
+		float32 invI1 = b1->m_mass * b1->m_invI;
+		float32 invMass2 = b2->m_mass * b2->m_invMass;
+		float32 invI2 = b2->m_mass * b2->m_invI;
 		
 		b2Vec2 normal = c->normal;
-		b2Vec2 tangent = b2Cross(normal, 1.0f);
 
 		// Solver normal constraints
 		for (int32 j = 0; j < c->pointCount; ++j)
@@ -303,10 +307,10 @@ bool b2ContactSolver::SolvePositionConstraints(float32 baumgarte, float32 factor
 			minSeparation = b2Min(minSeparation, separation);
 
 			// Prevent large corrections and allow slop.
-			float32 C = baumgarte * b2Clamp(separation + 0.5f * b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
+			float32 C = baumgarte * b2Clamp(separation + b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
 
 			// Compute normal impulse
-			float32 dImpulse = -ccp->normalMass * C;
+			float32 dImpulse = -ccp->equalizedMass * C;
 
 			// b2Clamp the accumulated impulse
 			float32 impulse0 = ccp->positionImpulse;
@@ -325,5 +329,5 @@ bool b2ContactSolver::SolvePositionConstraints(float32 baumgarte, float32 factor
 		}
 	}
 
-	return minSeparation >= -b2_linearSlop;
+	return minSeparation >= -1.5f * b2_linearSlop;
 }

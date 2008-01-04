@@ -54,7 +54,7 @@ float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
 
 	float32 t1 = 0.0f;
 	const int32 maxIterations = 10;
-	float32 invRelativeVelocity0 = 0.0f;
+	b2Vec2 normal = b2Vec2_zero;
 	for (int32 iter = 0; iter < maxIterations; ++iter)
 	{
 		// Get the accurate distance between shapes.
@@ -65,24 +65,17 @@ float32 b2TimeOfImpact(b2Vec2* x1, b2Vec2* x2,
 		}
 
 		// Compute upper bound on remaining movement.
-		b2Vec2 n = *x2 - *x1;
-		n.Normalize();
-		float32 relativeVelocity = b2Dot(n, v1 - v2) + b2Abs(omega1) * r1 + b2Abs(omega2) * r2;
+		normal = *x2 - *x1;
+		normal.Normalize();
+		float32 relativeVelocity = b2Dot(normal, v1 - v2) + b2Abs(omega1) * r1 + b2Abs(omega2) * r2;
 		if (b2Abs(relativeVelocity) < FLT_EPSILON)
 		{
 			t1 = 1.0f;
 			break;
 		}
 
-		float32 invRelativeVelocity = 1.0f / relativeVelocity;
-		if (iter == 0)
-		{
-			invRelativeVelocity0 = invRelativeVelocity;
-		}
-
 		// Get the conservative time increment. Don't advance all the way.
-		//float32 dt = distance / relativeVelocity;
-		float32 dt = distance * invRelativeVelocity;
+		float32 dt = (distance - 0.5f * b2_linearSlop) / relativeVelocity;
 		float32 t2 = t1 + dt;
 
 		// The shapes may be moving apart.

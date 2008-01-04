@@ -271,9 +271,6 @@ public:
 	void SetTOI(float32 toi);
 	float32 GetTOI() const;
 
-	void ResetTOI();
-	void ResolveTOI();
-
 	uint32 m_flags;
 
 	b2XForm m_xf;	// center of mass transform
@@ -501,20 +498,10 @@ inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
 
 inline void b2Body::GetSweep(b2Sweep* sweep) const
 {
-	if (m_flags & e_toiResolvedFlag)
-	{
-		sweep->position = (1.0f - m_toi) * m_position0 + m_toi * m_xf.position;
-		sweep->angle = (1.0f - m_toi) * m_angle0 + m_toi * m_angle;
-		sweep->velocity.SetZero();
-		sweep->omega = 0.0f;
-	}
-	else
-	{
-		sweep->position = m_position0;
-		sweep->angle = m_angle0;
-		sweep->velocity = m_xf.position - m_position0;
-		sweep->omega = m_angle - m_angle0;
-	}
+	sweep->position = m_position0;
+	sweep->angle = m_angle0;
+	sweep->velocity = m_xf.position - m_position0;
+	sweep->omega = m_angle - m_angle0;
 }
 
 inline void b2Body::SetTOI(float32 toi)
@@ -525,25 +512,6 @@ inline void b2Body::SetTOI(float32 toi)
 inline float32 b2Body::GetTOI() const
 {
 	return m_toi;
-}
-
-inline void b2Body::ResetTOI()
-{
-	m_flags &= ~e_toiResolvedFlag;
-	m_toi = 1.0f;
-}
-
-inline void b2Body::ResolveTOI()
-{
-	m_flags |= e_toiResolvedFlag;
-
-	// Commit body1 to toi position.
-	m_xf.position = (1.0f - m_toi) * m_position0 + m_toi * m_xf.position;
-	m_angle = (1.0f - m_toi) * m_angle0 + m_toi * m_angle;
-	m_xf.R.Set(m_angle);
-
-	m_position0 = m_xf.position;
-	m_angle0 = m_angle;
 }
 
 #endif

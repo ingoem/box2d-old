@@ -144,24 +144,21 @@ void Test::LaunchBomb()
 		m_bomb = NULL;
 	}
 
-	b2PolygonDef sd;
-	sd.SetAsBox(0.25f, 0.25f);
-	sd.density = 20.0f;
+	b2CircleDef sd;
+	sd.radius = 0.5f;
+	sd.density = 5.0f;
+	sd.restitution = 0.1f;
 	b2Shape* shape = m_world->Create(&sd);
 
 	b2BodyDef bd;
 	bd.AddShape(shape);
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
-	bd.angle = b2Random(-1.5f, 1.5f);
 	bd.isBullet = true;
 
 	m_bomb = m_world->Create(&bd);
 	m_bomb->SetLinearVelocity(-5.0f * bd.position);
-	m_bomb->SetAngularVelocity(b2Random(-20.0f, 20.0f));
 }
-
-typedef const char *(APIENTRY * WGLGETEXTENSIONSSTRINGEXT_T)( void );
 
 void Test::Step(Settings* settings)
 {

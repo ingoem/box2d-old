@@ -36,6 +36,7 @@ struct b2ContactConstraintPoint
 	float32 positionImpulse;
 	float32 normalMass;
 	float32 tangentMass;
+	float32 equalizedMass;
 	float32 separation;
 	float32 velocityBias;
 };
@@ -62,7 +63,7 @@ public:
 	void SolveVelocityConstraints();
 	void FinalizeVelocityConstraints();
 
-	bool SolvePositionConstraints(float32 baumgarte, float32 factor1 = 1.0f, float32 factor2 = 1.0f);
+	bool SolvePositionConstraints(float32 baumgarte);
 
 	b2StackAllocator* m_allocator;
 	b2ContactConstraint* m_constraints;

@@ -149,11 +149,11 @@ void b2Contact::Update(b2ContactListener* listener)
 
 	// The oldCount might be positive due to a TOI event. We should
 	// still notify the user that contact has begun.
-	bool toiBegin = (m_flags & e_toiBeginFlag) != 0;
+	bool toiBegin = (m_flags & e_toiFlag) != 0;
 
 	Evaluate();
 
-	m_flags &= ~(e_beginFlag | e_persistFlag | e_endFlag | e_toiBeginFlag);
+	m_flags &= ~(e_beginFlag | e_persistFlag | e_endFlag | e_toiFlag);
 	if ((oldCount == 0 || toiBegin) && m_manifoldCount > 0)
 	{
 		m_flags |= e_beginFlag;
@@ -218,12 +218,14 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 	b2Body* b1 = m_shape1->GetBody();
 	b2Body* b2 = m_shape2->GetBody();
 
-	bool resolved1 = (b1->m_flags & b2Body::e_toiResolvedFlag) != 0;
-	bool resolved2 = (b2->m_flags & b2Body::e_toiResolvedFlag) != 0;
+#if 0
+	bool resolved1 = (b1->m_flags & (b2Body::e_toiResolvedFlag | b2Body::e_sleepFlag | b2Body::e_staticFlag)) != 0;
+	bool resolved2 = (b2->m_flags & (b2Body::e_toiResolvedFlag | b2Body::e_sleepFlag | b2Body::e_staticFlag)) != 0;
 	if (resolved1 && resolved2)
 	{
 		return 1.0f;
 	}
+#endif
 
 	b2Sweep sweep1, sweep2;
 	b1->GetSweep(&sweep1);
@@ -236,7 +238,7 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 	float32 maxTOI = b2Min(toi1, toi2);
 
 	float32 toi = b2TimeOfImpact(&point1, &point2, m_shape1, sweep1, m_shape2, sweep2, maxTOI);
-	if (toi > 0.0f && toi < maxTOI)
+	if (toi < maxTOI)
 	{
 		bool apply = true;
 		if (listener)
@@ -263,15 +265,34 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 	return 1.0f;
 }
 
+struct TOIPoint
+{
+	b2Vec2 localAnchor1;
+	b2Vec2 localAnchor2;
+	float32 positionImpulse;
+	float32 normalMass;
+};
+
+struct TOIConstraint
+{
+	TOIPoint points[b2_maxManifoldPoints];
+};
+
+#if 0
 void b2Contact::ResolveTOI(b2StackAllocator* allocator)
 {
 	b2Body* b1 = m_shape1->GetBody();
 	b2Body* b2 = m_shape2->GetBody();
 
+	b2Assert(b1->GetTOI() == b2->GetTOI());
+
+	float32 toi = b1->GetTOI();
+
 	// Has either body already been resolved?
-	bool resolved1 = (b1->m_flags & b2Body::e_toiResolvedFlag) != 0;
-	bool resolved2 = (b2->m_flags & b2Body::e_toiResolvedFlag) != 0;
-	b2Assert(resolved1 == false || resolved2 == false);
+	//bool resolved1 = (b1->m_flags & (b2Body::e_toiResolvedFlag | b2Body::e_sleepFlag | b2Body::e_staticFlag)) != 0;
+	//bool resolved2 = (b2->m_flags & (b2Body::e_toiResolvedFlag | b2Body::e_sleepFlag | b2Body::e_staticFlag)) != 0;
+	bool resolved1 = (b1->m_flags & (b2Body::e_sleepFlag | b2Body::e_staticFlag)) != 0;
+	bool resolved2 = (b2->m_flags & (b2Body::e_sleepFlag | b2Body::e_staticFlag)) != 0;
 
 	// Use mass factors to avoid repositioning already resolved bodies.
 	float32 factor1 = 1.0f, factor2 = 1.0f;
@@ -279,68 +300,143 @@ void b2Contact::ResolveTOI(b2StackAllocator* allocator)
 	{
 		factor1 = 0.0f;
 	}
+	else
+	{
+		b1->m_xf.position = b1->m_position0 + toi * (b1->m_xf.position - b1->m_position0);
+		b1->m_angle = b1->m_angle0 + toi * (b1->m_angle - b1->m_angle0);
+		b1->m_xf.R.Set(b1->m_angle);
+
+		b1->m_position0 = b1->m_xf.position;
+		b1->m_angle0 = b1->m_angle;
+	}
 
 	if (resolved2)
 	{
 		factor2 = 0.0f;
 	}
-
-	if (b1->GetTOI() != b2->GetTOI())
+	else
 	{
-		return;
+		b2->m_xf.position = b2->m_position0 + toi * (b2->m_xf.position - b2->m_position0);
+		b2->m_angle = b2->m_angle0 + toi * (b2->m_angle - b2->m_angle0);
+		b2->m_xf.R.Set(b2->m_angle);
+
+		b2->m_position0 = b2->m_xf.position;
+		b2->m_angle0 = b2->m_angle;
 	}
 
-	b2Assert(b1->GetTOI() == b2->GetTOI());
-
-	float32 toi = b1->GetTOI();
-
-	b1->m_xf.position = b1->m_position0 + toi * (b1->m_xf.position - b1->m_position0);
-	b1->m_angle = b1->m_angle0 + toi * (b1->m_angle - b1->m_angle0);
-	b1->m_xf.R.Set(b1->m_angle);
-
-	b2->m_xf.position = b2->m_position0 + toi * (b2->m_xf.position - b2->m_position0);
-	b2->m_angle = b2->m_angle0 + toi * (b2->m_angle - b2->m_angle0);
-	b2->m_xf.R.Set(b2->m_angle);
-
-	int32 oldCount = m_manifoldCount;
+	b2Assert(factor1 > 0.0f || factor2 > 0.0f);
+	m_flags |= e_toiFlag;
 
 	Evaluate();
 
-	// It is sad, but sometimes the TOI is not accurate enough to give us
-	// a manifold. This is due to very large velocities.
 	if (m_manifoldCount > 0)
 	{
-		if (oldCount == 0)
+		float32 invMass1 = factor1;
+		float32 invI1 = factor1 * b1->m_mass * b1->m_invI;
+		float32 invMass2 = factor2;
+		float32 invI2 = factor2 * b2->m_mass * b2->m_invI;
+
+		const b2Manifold* manifolds = GetManifolds();
+		TOIConstraint* constraints = (TOIConstraint*)allocator->Allocate(m_manifoldCount * sizeof(TOIConstraint));
+		for (int32 i = 0; i < m_manifoldCount; ++i)
 		{
-			m_flags |= e_toiBeginFlag;
+			TOIConstraint* constraint = constraints + i;
+			const b2Manifold* manifold = manifolds + i;
+			for (int32 j = 0; j < manifold->pointCount; ++j)
+			{
+				const b2ContactPoint* cp = manifold->points + j;
+				TOIPoint* tp = constraint->points + j;
+
+				b2Vec2 r1 = cp->position - b1->m_xf.position;
+				b2Vec2 r2 = cp->position - b2->m_xf.position;
+
+				tp->localAnchor1 = b2MulT(b1->m_xf.R, r1);
+				tp->localAnchor2 = b2MulT(b2->m_xf.R, r2);
+
+				// Form "equalized" effective mass.
+				float32 r1Sqr = b2Dot(r1, r1);
+				float32 r2Sqr = b2Dot(r2, r2);
+				float32 rn1 = b2Dot(r1, manifold->normal);
+				float32 rn2 = b2Dot(r2, manifold->normal);
+				float32 kNormal = invMass1 + invMass2 + invI1 * (r1Sqr - rn1 * rn1) + invI2 * (r2Sqr - rn2 * rn2);
+				b2Assert(kNormal > FLT_EPSILON);
+				tp->normalMass = 1.0f / kNormal;
+
+				tp->positionImpulse = 0.0f;
+			}
 		}
 
-		b2Contact* contact = this;
-		b2ContactSolver solver(&contact, 1, allocator);
-
-		const int32 k_maxIterations = 100;
-		const float32 k_toiBaumgarte = 0.5f;
-
+		const int32 k_maxIterations = 10;
 		for (int32 i = 0; i < k_maxIterations; ++i)
 		{
-			bool success = solver.SolvePositionConstraints(k_toiBaumgarte, factor1, factor2);
-			if (success)
+			//float32 minSeparation = 0.0f;
+			float32 minSeparation = FLT_MAX;
+			for (int32 j = 0; j < m_manifoldCount; ++j)
+			{
+				TOIConstraint* constraint = constraints + j;
+				const b2Manifold* manifold = manifolds + j;
+				int32 pointCount = manifold->pointCount;
+
+				for (int32 k = 0; k < pointCount; ++k)
+				{
+					const b2ContactPoint* cp = manifold->points + k;
+					TOIPoint* tp = constraint->points + k;
+
+					b2Vec2 r1 = b2Mul(b1->m_xf.R, tp->localAnchor1);
+					b2Vec2 r2 = b2Mul(b2->m_xf.R, tp->localAnchor2);
+
+					b2Vec2 p1 = b1->m_xf.position + r1;
+					b2Vec2 p2 = b2->m_xf.position + r2;
+					b2Vec2 dp = p2 - p1;
+
+					// Approximate the current separation.
+					float32 separation = b2Dot(dp, manifold->normal) + cp->separation;
+
+					// Track max constraint error.
+					//minSeparation = b2Min(minSeparation, separation);
+					minSeparation = b2Min(minSeparation, b2Abs(separation + b2_linearSlop));
+
+					// Prevent large corrections and allow slop.
+					//float32 C = 0.2f * b2Clamp(separation + 0.5f * b2_linearSlop, -b2_maxLinearCorrection, 0.0f);
+					float32 C = separation + b2_linearSlop;
+
+					// Compute normal impulse
+					float32 dImpulse = -tp->normalMass * C;
+
+					// b2Clamp the accumulated impulse
+					//float32 impulse0 = tp->positionImpulse;
+					//tp->positionImpulse = b2Max(impulse0 + dImpulse, 0.0f);
+					//dImpulse = tp->positionImpulse - impulse0;
+
+					b2Vec2 impulse = dImpulse * manifold->normal;
+
+					b1->m_xf.position -= invMass1 * impulse;
+					b1->m_angle -= invI1 * b2Cross(r1, impulse);
+					b1->m_xf.R.Set(b1->m_angle);
+
+					b2->m_xf.position += invMass2 * impulse;
+					b2->m_angle += invI2 * b2Cross(r2, impulse);
+					b2->m_xf.R.Set(b2->m_angle);
+				}
+			}
+
+			// Early out on convergence.
+			if (minSeparation < b2_linearSlop) //minSeparation >= -b2_linearSlop)
 			{
 				break;
 			}
 		}
-	}
-	else
-	{
-		m_manifoldCount += 0;
+
+		allocator->Free(constraints);
 	}
 
 	// Mark the bodies as resolved.
 	b1->m_flags |= b2Body::e_toiResolvedFlag;
-	b1->m_position0 = b1->m_xf.position;
-	b1->m_angle0 = b1->m_angle;
+	//b1->m_position0 = b1->m_xf.position;
+	//b1->m_angle0 = b1->m_angle;
 
 	b2->m_flags |= b2Body::e_toiResolvedFlag;
-	b2->m_position0 = b2->m_xf.position;
-	b2->m_angle0 = b2->m_angle;
+	//b2->m_position0 = b2->m_xf.position;
+	//b2->m_angle0 = b2->m_angle;
 }
+#endif

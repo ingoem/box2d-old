@@ -65,7 +65,7 @@ Version 1.4.1
 - Improve mouse joint. DONE
 
 Version 1.4.2
-- Improve joint stability.
+- Improve joint stability. DONE.
 
 Version 1.4.3
 - Fix thin polygon collision. DONE
@@ -89,14 +89,14 @@ Version 2.0.0
 - Access version number. DONE
 - Improved TestBed camera. DONE
 - CCD. DONE
-- Apply impulse at TOI. DONE
+- Apply position correction per TOI event. DONE
 - Max velocities. DONE
 - All contact results available via contact retirement. DONE
-- Sensors.
+- Sensors. DONE.
+- Body add/remove shape.
 - Time of Impact (TOI) callbacks.
 - Contact solver tweak callbacks.
 - Contact callbacks with impulses.
-- Body add/remove shape.
 - Safe contact callback example.
 - Doxygen.
 - Update manual.

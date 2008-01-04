@@ -554,7 +554,8 @@ void b2World::SolveTOI()
 	// Clear all the island flags.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
 	{
-		b->m_flags &= ~b2Body::e_islandFlag;
+		b->m_flags &= ~(b2Body::e_islandFlag | b2Body::e_toiResolvedFlag);
+		b->m_toi = 1.0f;
 	}
 	for (b2Contact* c = m_contactList; c; c = c->m_next)
 	{
@@ -634,6 +635,18 @@ void b2World::SolveTOI()
 		}
 	}
 
+	// Advance safe points for awake, dynamic bodies that did not have a TOI event.
+	for (b2Body* b = m_bodyList; b; b = b->m_next)
+	{
+		if (b->m_flags & (b2Body::e_staticFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag | b2Body::e_toiResolvedFlag))
+		{
+			continue;
+		}
+
+		b->m_position0 = b->m_xf.position;
+		b->m_angle0 = b->m_angle;
+	}
+
 	m_stackAllocator.Free(stack);
 }
 
@@ -667,7 +680,6 @@ void b2World::Step(float32 dt, int32 iterations)
 	{
 		SolveTOI();
 	}
-
 
 	// Draw debug information.
 	DrawDebugData();
