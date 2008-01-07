@@ -203,9 +203,9 @@ void DrawAABB(b2AABB* aabb, const b2Color& c)
 {
 	glColor3f(c.r, c.g, c.b);
 	glBegin(GL_LINE_LOOP);
-	glVertex2f(aabb->minVertex.x, aabb->minVertex.y);
-	glVertex2f(aabb->maxVertex.x, aabb->minVertex.y);
-	glVertex2f(aabb->maxVertex.x, aabb->maxVertex.y);
-	glVertex2f(aabb->minVertex.x, aabb->maxVertex.y);
+	glVertex2f(aabb->lowerBound.x, aabb->lowerBound.y);
+	glVertex2f(aabb->upperBound.x, aabb->lowerBound.y);
+	glVertex2f(aabb->upperBound.x, aabb->upperBound.y);
+	glVertex2f(aabb->lowerBound.x, aabb->upperBound.y);
 	glEnd();
 }

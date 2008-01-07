@@ -24,11 +24,27 @@
 
 b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
-	m_flags = 0;
+	b2Assert(world->m_lock == false);
+
+	m_flags = e_staticFlag;
+	
 	if (bd->isBullet)
 	{
 		m_flags |= e_bulletFlag;
 	}
+	if (bd->preventRotation)
+	{
+		m_flags |= e_fixedRotationFlag;
+	}
+	if (bd->allowSleep)
+	{
+		m_flags |= e_allowSleepFlag;
+	}
+	if (bd->isSleeping)
+	{
+		m_flags |= e_sleepFlag;
+	}
+
 	m_xf.position = bd->position;
 	m_angle = bd->angle;
 	m_xf.R.Set(m_angle);
@@ -47,25 +63,175 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_force.Set(0.0f, 0.0f);
 	m_torque = 0.0f;
 
-	// Compute the center of mass velocity.
 	m_linearVelocity.SetZero();
 	m_angularVelocity = 0.0f;
 
 	m_sleepTime = 0.0f;
-	if (bd->allowSleep)
-	{
-		m_flags |= e_allowSleepFlag;
-	}
-	if (bd->isSleeping)
-	{
-		m_flags |= e_sleepFlag;
-	}
+	m_center.SetZero();
+	m_mass = 0.0f;
+	m_invMass = 0.0f;
+	m_I = 0.0f;
+	m_invI = 0.0f;
 
 	m_userData = bd->userData;
 
-	// Compute the total mass and COM.
-	m_shapeList = bd->shapes;
+	m_shapeList = NULL;
 	m_shapeCount = 0;
+}
+
+b2Body::~b2Body()
+{
+	b2Assert(m_world->m_lock == false);
+	// shapes and joints are destroyed in b2World::Destroy
+}
+
+void b2Body::AddShape(b2Shape* shape)
+{
+	b2Assert(m_world->m_lock == false);
+	if (m_world->m_lock == true)
+	{
+		return;
+	}
+
+	// Did you already add this shape to a body?
+	b2Assert(shape->m_body == NULL);
+	b2Assert(shape->m_bodyNext == NULL);
+
+	shape->m_bodyNext = m_shapeList;
+	m_shapeList = shape;
+	++m_shapeCount;
+
+	shape->m_body = this;
+	shape->CreateProxy(m_world->m_broadPhase, m_xf);
+}
+
+b2Shape* b2Body::AddShape(b2ShapeDef* shapeDef)
+{
+	b2Assert(m_world->m_lock == false);
+	if (m_world->m_lock == true)
+	{
+		return NULL;
+	}
+
+	b2Shape* shape = m_world->Create(shapeDef);
+
+	shape->m_bodyNext = m_shapeList;
+	m_shapeList = shape;
+	++m_shapeCount;
+
+	shape->m_body = this;
+	shape->CreateProxy(m_world->m_broadPhase, m_xf);
+
+	return shape;
+}
+
+void b2Body::RemoveShape(b2Shape* shape)
+{
+	b2Assert(shape->m_body != NULL);
+	b2Assert(m_shapeCount > 0);
+	b2Shape** node = &m_shapeList;
+	bool found = false;
+	while (*node != NULL)
+	{
+		if (*node == shape)
+		{
+			*node = shape->m_bodyNext;
+			found = true;
+			break;
+		}
+
+		node = &(*node)->m_bodyNext;
+	}
+
+	// You tried to remove a shape that is not attached to this body.
+	b2Assert(found);
+
+	shape->m_body = NULL;
+	shape->m_bodyNext = NULL;
+
+	--m_shapeCount;
+}
+
+// TODO_ERIN adjust linear velocity and torque to account for movement of center.
+void b2Body::SetMass(const b2MassData* massData)
+{
+	// Move center of mass position back to origin.
+	b2Vec2 shift;
+	shift = b2Mul(m_xf.R, m_center);
+	m_xf.position -= shift;
+	m_position0 -= shift;
+
+	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	{
+		s->ApplyOffset(m_center);
+	}
+
+	m_mass = massData->mass;
+	m_I = massData->I;
+	m_center = massData->center;
+
+	bool wasStatic = bool(m_flags & e_staticFlag);
+
+	if (m_mass > 0.0f)
+	{
+		m_flags &= ~e_staticFlag;
+
+		// Reposition the body origin onto the center of mass.
+		m_I -= m_mass * b2Dot(m_center, m_center);
+		b2Assert(m_I > 0.0f);
+
+		m_invMass = 1.0f / m_mass;
+		m_invI = 1.0f / m_I;
+	}
+	else
+	{
+		m_flags |= e_staticFlag;
+		m_invMass = 0.0f;
+		m_invI = 0.0f;
+	}
+
+	if (m_flags & e_fixedRotationFlag)
+	{
+		m_I = 0.0f;
+		m_invI = 0.0f;
+	}
+
+	// Move to new center of mass position.
+	shift = b2Mul(m_xf.R, m_center);
+	m_xf.position += shift;
+	m_position0 += shift;
+
+	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	{
+		s->ApplyOffset(-m_center);
+	}
+
+	bool isStatic = bool(m_flags & e_staticFlag);
+	if (wasStatic != isStatic)
+	{
+		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+		{
+			s->ResetProxy(m_world->m_broadPhase, m_xf);
+		}
+	}
+}
+
+// TODO_ERIN adjust linear velocity and torque to account for movement of center.
+void b2Body::SetMassFromShapes()
+{
+	// Move center of mass position back to origin.
+	b2Vec2 shift;
+	shift = b2Mul(m_xf.R, m_center);
+	m_xf.position -= shift;
+	m_position0 -= shift;
+
+	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	{
+		s->ApplyOffset(m_center);
+	}
+
+	bool wasStatic = bool(m_flags & e_staticFlag);
+
 	m_mass = 0.0f;
 	m_I = 0.0f;
 	m_center.SetZero();
@@ -76,17 +242,15 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		m_mass += massData.mass;
 		m_center += massData.mass * massData.center;
 		m_I += massData.I;
-		++m_shapeCount;
 	}
 
 	// Compute center of mass, and shift the origin to the COM.
-	b2Vec2 offset;
 	if (m_mass > 0.0f)
 	{
-		m_center *= 1.0f / m_mass;
-		m_xf.position += b2Mul(m_xf.R, m_center);
+		m_flags &= ~e_staticFlag;
 
-		offset = -m_center;
+		m_center *= 1.0f / m_mass;
+
 		m_I -= m_mass * b2Dot(m_center, m_center);
 		b2Assert(m_I > 0.0f);
 
@@ -95,64 +259,35 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	}
 	else
 	{
-		offset = b2Vec2_zero;
 		m_flags |= e_staticFlag;
 		m_invMass = 0.0f;
 		m_invI = 0.0f;
 	}
 
-	if (bd->preventRotation == true)
+	if (m_flags & e_fixedRotationFlag)
 	{
 		m_I = 0.0f;
 		m_invI = 0.0f;
 	}
 
-	// Attach shapes and add them to the broad-phase.
-	// Careful: this invokes user callbacks. So this
-	// should go last in the body constructor.
+	// Move to new center of mass position.
+	shift = b2Mul(m_xf.R, m_center);
+	m_xf.position += shift;
+	m_position0 += shift;
+
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		s->Attach(this, offset);
-		s->CreateProxy(m_world->m_broadPhase, m_xf);
+		s->ApplyOffset(-m_center);
 	}
-}
 
-b2Body::~b2Body()
-{
-	// shapes and joints are destroyed in b2World::Destroy
-}
-
-void b2Body::AddShape(b2Shape* shape, bool recomputeMass)
-{
-	b2Assert(m_world->m_lock == false);
-	if (m_world->m_lock == true)
+	bool isStatic = bool(m_flags & e_staticFlag);
+	if (wasStatic != isStatic)
 	{
-		return;
+		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+		{
+			s->ResetProxy(m_world->m_broadPhase, m_xf);
+		}
 	}
-
-	b2Assert(shape->m_body == NULL);
-	b2Assert(shape->m_bodyNext == NULL);
-	B2_NOT_USED(shape);
-	B2_NOT_USED(recomputeMass);
-	// TODO_ERIN
-}
-
-void b2Body::RemoveShape(b2Shape* shape, bool recomputeMass)
-{
-	b2Assert(m_world->m_lock == false);
-	if (m_world->m_lock == true)
-	{
-		return;
-	}
-
-	B2_NOT_USED(shape);
-	B2_NOT_USED(recomputeMass);
-	// TODO_ERIN
-}
-
-void b2Body::RecomputeMass()
-{
-	// TODO_ERIN
 }
 
 bool b2Body::SetOriginPosition(const b2Vec2& position, float angle)

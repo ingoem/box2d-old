@@ -33,7 +33,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -47,7 +47,7 @@ public:
 			bd.position *= scale;
 
 			bd.angle = -0.25f;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -60,7 +60,7 @@ public:
 			bd.position.Set(5.25f, 9.5f);
 			bd.position *= scale;
 
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -74,7 +74,7 @@ public:
 			bd.position *= scale;
 
 			bd.angle = 0.25f;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -87,7 +87,7 @@ public:
 			bd.position.Set(-5.25f, 5.5f);
 			bd.position *= scale;
 
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -101,7 +101,7 @@ public:
 			bd.position *= scale;
 
 			bd.angle = -0.25f;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -113,7 +113,7 @@ public:
 			sd.density = 25.0f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 
 			float friction[5] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};
 

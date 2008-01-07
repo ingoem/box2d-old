@@ -46,6 +46,7 @@ struct Settings
 		drawCOMs(0),
 		enableWarmStarting(1),
 		enablePositionCorrection(1),
+		enableTOI(1),
 		pause(0),
 		singleStep(0)
 		{}
@@ -66,6 +67,7 @@ struct Settings
 	int32 drawStats;
 	int32 enableWarmStarting;
 	int32 enablePositionCorrection;
+	int32 enableTOI;
 	int32 pause;
 	int32 singleStep;
 };

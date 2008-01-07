@@ -33,7 +33,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			ground = m_world->Create(&bd);
 		}
 
@@ -45,7 +45,7 @@ public:
 			sd.friction = 0.2f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 
 			bd.position.Set(-5.0f, 5.0f);
 			m_bodies[0] = m_world->Create(&bd);
@@ -65,49 +65,49 @@ public:
 			jd.body2 = m_bodies[0];
 			jd.anchorPoint1.Set(-10.0f, 0.0f);
 			jd.anchorPoint2 = m_bodies[0]->m_xf.position + b2Vec2::Make(-0.5f, -0.5f);
-			m_joints[0] = m_world->CreateJoint(&jd);
+			m_joints[0] = m_world->Create(&jd);
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[1];
 			jd.anchorPoint1.Set(10.0f, 0.0f);
 			jd.anchorPoint2 = m_bodies[1]->m_xf.position + b2Vec2::Make(0.5f, -0.5f);
-			m_joints[1] = m_world->CreateJoint(&jd);
+			m_joints[1] = m_world->Create(&jd);
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[2];
 			jd.anchorPoint1.Set(10.0f, 20.0f);
 			jd.anchorPoint2 = m_bodies[2]->m_xf.position + b2Vec2::Make(0.5f, 0.5f);
-			m_joints[2] = m_world->CreateJoint(&jd);
+			m_joints[2] = m_world->Create(&jd);
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[3];
 			jd.anchorPoint1.Set(-10.0f, 20.0f);
 			jd.anchorPoint2 = m_bodies[3]->m_xf.position + b2Vec2::Make(-0.5f, 0.5f);
-			m_joints[3] = m_world->CreateJoint(&jd);
+			m_joints[3] = m_world->Create(&jd);
 
 			jd.body1 = m_bodies[0];
 			jd.body2 = m_bodies[1];
 			jd.anchorPoint1 = m_bodies[0]->m_xf.position + b2Vec2::Make(0.5f, 0.0f);
 			jd.anchorPoint2 = m_bodies[1]->m_xf.position + b2Vec2::Make(-0.5f, 0.0f);;
-			m_joints[4] = m_world->CreateJoint(&jd);
+			m_joints[4] = m_world->Create(&jd);
 
 			jd.body1 = m_bodies[1];
 			jd.body2 = m_bodies[2];
 			jd.anchorPoint1 = m_bodies[1]->m_xf.position + b2Vec2::Make(0.0f, 0.5f);
 			jd.anchorPoint2 = m_bodies[2]->m_xf.position + b2Vec2::Make(0.0f, -0.5f);
-			m_joints[5] = m_world->CreateJoint(&jd);
+			m_joints[5] = m_world->Create(&jd);
 
 			jd.body1 = m_bodies[2];
 			jd.body2 = m_bodies[3];
 			jd.anchorPoint1 = m_bodies[2]->m_xf.position + b2Vec2::Make(-0.5f, 0.0f);
 			jd.anchorPoint2 = m_bodies[3]->m_xf.position + b2Vec2::Make(0.5f, 0.0f);
-			m_joints[6] = m_world->CreateJoint(&jd);
+			m_joints[6] = m_world->Create(&jd);
 
 			jd.body1 = m_bodies[3];
 			jd.body2 = m_bodies[0];
 			jd.anchorPoint1 = m_bodies[3]->m_xf.position + b2Vec2::Make(0.0f, -0.5f);
 			jd.anchorPoint2 = m_bodies[0]->m_xf.position + b2Vec2::Make(0.0f, 0.5f);
-			m_joints[7] = m_world->CreateJoint(&jd);
+			m_joints[7] = m_world->Create(&jd);
 		}
 	}
 

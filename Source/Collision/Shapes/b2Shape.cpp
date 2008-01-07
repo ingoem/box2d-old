@@ -94,14 +94,6 @@ b2Shape::~b2Shape()
 	b2Assert(m_proxyId == b2_nullProxy);
 }
 
-void b2Shape::Attach(b2Body* body, const b2Vec2& offset)
-{
-	// Are you trying to reuse a shape or a body definition?
-	b2Assert(m_body == NULL);
-	m_body = body;
-	ApplyOffset(offset);
-}
-
 void b2Shape::CreateProxy(b2BroadPhase* broadPhase, const b2XForm& transform)
 {
 	b2Assert(m_proxyId == b2_nullProxy);
@@ -155,26 +147,27 @@ bool b2Shape::Synchronize(b2BroadPhase* broadPhase, const b2XForm& transform1, c
 	}
 }
 
-bool b2Shape::ResetProxy(b2BroadPhase* broadPhase, const b2XForm& transform)
+void b2Shape::ResetProxy(b2BroadPhase* broadPhase, const b2XForm& transform)
 {
-	if (m_proxyId == b2_nullProxy)
+	if (m_proxyId != b2_nullProxy)
 	{	
-		return false;
+		broadPhase->DestroyProxy(m_proxyId);
 	}
-
-	broadPhase->DestroyProxy(m_proxyId);
 
 	b2AABB aabb;
 	ComputeAABB(&aabb, transform);
 
-	if (broadPhase->InRange(aabb))
+	bool inRange = broadPhase->InRange(aabb);
+
+	// You are affecting a shape outside the world box.
+	b2Assert(inRange);
+
+	if (inRange)
 	{
 		m_proxyId = broadPhase->CreateProxy(aabb, this);
-		return true;
 	}
 	else
 	{
 		m_proxyId = b2_nullProxy;
-		return false;
 	}
 }

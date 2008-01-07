@@ -51,7 +51,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 

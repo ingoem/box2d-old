@@ -48,11 +48,23 @@ struct b2ContactRegister
 	bool primary;
 };
 
-/// The class manages contact between two shapes. If the shapes touch then
-/// the contact is connected to the two associated bodies.
+/// The class manages contact between two shapes. A contact exists for each overlapping
+/// AABB in the broadphase (except if filtered). Therefore a contact object may exist
+/// that has no contact points.
 class b2Contact
 {
 public:
+
+	/// The contact must be in one of these states (TODO_ERIN).
+	enum State
+	{
+		e_created,			///< the contact has just been created, but not evaluated.
+		e_notTouching,		///< there are no contact points
+		e_toiTouching,		///< the contact began due to a TOI event
+		e_beginTouching,	///< the shapes just began touching
+		e_touching,			///< the shapes are still touching
+		e_endTouching,		///< the shapes just stopped touching
+	};
 
 	/// Get the manifold array.
 	virtual b2Manifold* GetManifolds() = 0;
@@ -90,7 +102,7 @@ public:
 		e_beginFlag		= 0x0008,
 		e_persistFlag	= 0x0010,
 		e_endFlag		= 0x0020,
-		e_toiFlag  = 0x0040,
+		e_toiFlag		= 0x0040,
 		e_retiredFlag	= 0x0080,
 	};
 

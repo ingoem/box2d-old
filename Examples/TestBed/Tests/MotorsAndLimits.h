@@ -32,7 +32,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			ground = m_world->Create(&bd);
 		}
 
@@ -44,7 +44,7 @@ public:
 			sd.friction = 0.05f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 
 			b2RevoluteJointDef rjd;
 			
@@ -62,7 +62,7 @@ public:
 			rjd.motorTorque = 10000.0f;
 			rjd.enableMotor = true;
 			
-			m_joint1 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
+			m_joint1 = (b2RevoluteJoint*)m_world->Create(&rjd);
 
 			prevBody = body;
 
@@ -82,7 +82,7 @@ public:
 			//rjd.maxAngle = 0.0f;
 			rjd.enableLimit = true;
 
-			m_joint2 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
+			m_joint2 = (b2RevoluteJoint*)m_world->Create(&rjd);
 
 			bd.position.Set(-10.0f, 10.0f);
 			bd.angle = 0.5f * b2_pi;
@@ -100,7 +100,7 @@ public:
 			pjd.upperTranslation = 20.0f;
 			pjd.enableLimit = true;
 
-			m_joint3 = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
+			m_joint3 = (b2PrismaticJoint*)m_world->Create(&pjd);
 		}
 	}
 

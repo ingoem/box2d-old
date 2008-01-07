@@ -31,8 +31,8 @@ int main(int argc, char** argv)
 	// Define the size of the world. Simulation will still work
 	// if bodies reach the end of the world, but it will be slower.
 	b2AABB worldAABB;
-	worldAABB.minVertex.Set(-100.0f, -100.0f);
-	worldAABB.maxVertex.Set(100.0f, 100.0f);
+	worldAABB.lowerBound.Set(-100.0f, -100.0f);
+	worldAABB.upperBound.Set(100.0f, 100.0f);
 
 	// Define the gravity vector.
 	b2Vec2 gravity(0.0f, -10.0f);
@@ -42,6 +42,15 @@ int main(int argc, char** argv)
 
 	// Construct a world object, which will hold and simulate the rigid bodies.
 	b2World world(worldAABB, gravity, doSleep);
+
+	// Define the ground body.
+	b2BodyDef groundBodyDef;
+	groundBodyDef.position.Set(0.0f, -10.0f);
+
+	// Call the body factory which allocates memory for the ground body
+	// from a pool and creates the ground box shape (also from a pool).
+	// The body is also added to the world.
+	b2Body* groundBody = world.Create(&groundBodyDef);
 
 	// Define the ground box shape.
 	b2PolygonDef groundShapeDef;
@@ -56,17 +65,13 @@ int main(int argc, char** argv)
 	// Create the ground shape;
 	b2Shape* groundShape = world.Create(&groundShapeDef);
 
-	// Define the ground body.
-	b2BodyDef groundBodyDef;
-	groundBodyDef.position.Set(0.0f, -10.0f);
+	// Add the ground shape to the ground body.
+	groundBody->AddShape(groundShape);
 
-	// Part of a body's def is its list of shapes.
-	groundBodyDef.AddShape(groundShape);
-
-	// Call the body factory which allocates memory for the ground body
-	// from a pool and creates the ground box shape (also from a pool).
-	// The body is also added to the world.
-	world.Create(&groundBodyDef);
+	// Define the dynamic body. We set its position and call the body factory.
+	b2BodyDef bodyDef;
+	bodyDef.position.Set(0.0f, 4.0f);
+	b2Body* body = world.Create(&bodyDef);
 
 	// Define another box shape for our dynamic body.
 	b2PolygonDef shapeDef;
@@ -81,12 +86,12 @@ int main(int argc, char** argv)
 	// Create the box shape.
 	b2Shape* boxShape = world.Create(&shapeDef);
 
-	// Define the dynamic body. We set its position,
-	// add the box shape, and call the body factory.
-	b2BodyDef bodyDef;
-	bodyDef.position.Set(0.0f, 4.0f);
-	bodyDef.AddShape(boxShape);
-	b2Body* body = world.Create(&bodyDef);
+	// Add the shape to the body.
+	body->AddShape(boxShape);
+
+	// Now tell the dynamic body to compute it's mass properties base
+	// on its shape.
+	body->SetMassFromShapes();
 
 	// Prepare for simulation. Typically we use a time step of 1/60 of a
 	// second (60Hz) and 10 iterations. This provides a high quality simulation

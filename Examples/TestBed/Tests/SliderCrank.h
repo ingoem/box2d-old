@@ -34,7 +34,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			ground = m_world->Create(&bd);
 		}
 
@@ -46,7 +46,7 @@ public:
 			sd.density = 1.0f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 
 			b2RevoluteJointDef rjd;
 
@@ -61,7 +61,7 @@ public:
 			rjd.motorSpeed = 1.0f * b2_pi;
 			rjd.motorTorque = 10000.0f;
 			rjd.enableMotor = true;
-			m_joint1 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
+			m_joint1 = (b2RevoluteJoint*)m_world->Create(&rjd);
 
 			prevBody = body;
 
@@ -74,7 +74,7 @@ public:
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
 			rjd.enableMotor = false;
-			m_world->CreateJoint(&rjd);
+			m_world->Create(&rjd);
 
 			prevBody = body;
 
@@ -86,7 +86,7 @@ public:
 			rjd.anchorPoint.Set(0.0f, 17.0f);
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
-			m_world->CreateJoint(&rjd);
+			m_world->Create(&rjd);
 
 			b2PrismaticJointDef pjd;
 			pjd.anchorPoint.Set(0.0f, 17.0f);
@@ -97,7 +97,7 @@ public:
 			pjd.motorForce = 1000.0f;
 			pjd.enableMotor = true;
 
-			m_joint2 = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
+			m_joint2 = (b2PrismaticJoint*)m_world->Create(&pjd);
 
 			// Create a payload
 			sd.density = 2.0f;

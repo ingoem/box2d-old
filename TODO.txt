@@ -93,10 +93,10 @@ Version 2.0.0
 - Max velocities. DONE
 - All contact results available via contact retirement. DONE
 - Sensors. DONE.
-- Body add/remove shape.
-- Time of Impact (TOI) callbacks.
-- Contact solver tweak callbacks.
-- Contact callbacks with impulses.
+- Time of Impact (TOI) callbacks. DONE
+- Contact solver tweak callbacks. DONE
+- Contact callbacks with impulses. DONE
+- Body add/remove shape. DONE
 - Safe contact callback example.
 - Doxygen.
 - Update manual.

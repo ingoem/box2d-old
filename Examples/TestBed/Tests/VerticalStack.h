@@ -31,7 +31,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -44,7 +44,7 @@ public:
 			sd.friction = 0.3f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 
 			for (int i = 0; i < 16; ++i)
 			{

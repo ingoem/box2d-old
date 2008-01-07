@@ -321,8 +321,8 @@ void b2PolygonShape::ComputeAABB(b2AABB* aabb, const b2XForm& transform) const
 	b2Mat22 absR = b2Abs(R);
 	b2Vec2 h = b2Mul(absR, m_obb.extents);
 	b2Vec2 position = transform.position + b2Mul(transform.R, m_obb.center);
-	aabb->minVertex = position - h;
-	aabb->maxVertex = position + h;
+	aabb->lowerBound = position - h;
+	aabb->upperBound = position + h;
 }
 
 void b2PolygonShape::ComputeSweptAABB(b2AABB* aabb,
@@ -332,8 +332,8 @@ void b2PolygonShape::ComputeSweptAABB(b2AABB* aabb,
 	b2AABB aabb1, aabb2;
 	ComputeAABB(&aabb1, transform1);
 	ComputeAABB(&aabb2, transform2);
-	aabb->minVertex = b2Min(aabb1.minVertex, aabb2.minVertex);
-	aabb->maxVertex = b2Max(aabb1.maxVertex, aabb2.maxVertex);
+	aabb->lowerBound = b2Min(aabb1.lowerBound, aabb2.lowerBound);
+	aabb->upperBound = b2Max(aabb1.upperBound, aabb2.upperBound);
 }
 
 void b2PolygonShape::ComputeMass(b2MassData* massData) const

@@ -51,8 +51,8 @@ void BoundaryListener::Violation(b2Body* body)
 Test::Test()
 {
 	b2AABB worldAABB;
-	worldAABB.minVertex.Set(-100.0f, -100.0f);
-	worldAABB.maxVertex.Set(100.0f, 200.0f);
+	worldAABB.lowerBound.Set(-100.0f, -100.0f);
+	worldAABB.upperBound.Set(100.0f, 200.0f);
 	b2Vec2 gravity;
 	gravity.Set(0.0f, -10.0f);
 	bool doSleep = true;
@@ -85,8 +85,8 @@ void Test::MouseDown(const b2Vec2& p)
 	b2AABB aabb;
 	b2Vec2 d;
 	d.Set(0.001f, 0.001f);
-	aabb.minVertex = p - d;
-	aabb.maxVertex = p + d;
+	aabb.lowerBound = p - d;
+	aabb.upperBound = p + d;
 
 	// Query the world for overlapping shapes.
 	const int32 k_maxCount = 10;
@@ -144,20 +144,21 @@ void Test::LaunchBomb()
 		m_bomb = NULL;
 	}
 
-	b2CircleDef sd;
-	sd.radius = 0.5f;
-	sd.density = 5.0f;
-	sd.restitution = 0.1f;
-	b2Shape* shape = m_world->Create(&sd);
-
 	b2BodyDef bd;
-	bd.AddShape(shape);
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
 	bd.isBullet = true;
-
 	m_bomb = m_world->Create(&bd);
 	m_bomb->SetLinearVelocity(-5.0f * bd.position);
+
+	b2CircleDef sd;
+	sd.radius = 0.3f;
+	sd.density = 20.0f;
+	sd.restitution = 0.1f;
+	b2Shape* shape = m_world->Create(&sd);
+	m_bomb->AddShape(shape);
+	
+	m_bomb->SetMassFromShapes();
 }
 
 void Test::Step(Settings* settings)
@@ -195,6 +196,7 @@ void Test::Step(Settings* settings)
 
 	b2World::s_enableWarmStarting = settings->enableWarmStarting;
 	b2World::s_enablePositionCorrection = settings->enablePositionCorrection;
+	b2World::s_enableTOI = settings->enableTOI;
 
 	m_world->Step(timeStep, settings->iterationCount);
 

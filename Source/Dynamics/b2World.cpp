@@ -28,6 +28,7 @@
 
 int32 b2World::s_enablePositionCorrection = 1;
 int32 b2World::s_enableWarmStarting = 1;
+int32 b2World::s_enableTOI = 1;
 
 b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 {
@@ -554,7 +555,7 @@ void b2World::SolveTOI()
 	// Clear all the island flags.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
 	{
-		b->m_flags &= ~(b2Body::e_islandFlag | b2Body::e_toiResolvedFlag);
+		b->m_flags &= ~b2Body::e_islandFlag;
 		b->m_toi = 1.0f;
 	}
 	for (b2Contact* c = m_contactList; c; c = c->m_next)
@@ -638,7 +639,7 @@ void b2World::SolveTOI()
 	// Advance safe points for awake, dynamic bodies that did not have a TOI event.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
 	{
-		if (b->m_flags & (b2Body::e_staticFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag | b2Body::e_toiResolvedFlag))
+		if (b->m_flags & (b2Body::e_staticFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag))
 		{
 			continue;
 		}
@@ -676,7 +677,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	}
 
 	// Handle TOI events.
-	if (s_enablePositionCorrection && step.dt > 0.0f)
+	if (s_enableTOI && step.dt > 0.0f)
 	{
 		SolveTOI();
 	}
@@ -858,17 +859,17 @@ void b2World::DrawDebugData()
 				b2Proxy* p2 = bp->m_proxyPool + pair->proxyId2;
 
 				b2AABB b1, b2;
-				b1.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->lowerBounds[0]].value;
-				b1.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->lowerBounds[1]].value;
-				b1.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p1->upperBounds[0]].value;
-				b1.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p1->upperBounds[1]].value;
-				b2.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->lowerBounds[0]].value;
-				b2.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->lowerBounds[1]].value;
-				b2.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p2->upperBounds[0]].value;
-				b2.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p2->upperBounds[1]].value;
+				b1.lowerBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p1->lowerBounds[0]].value;
+				b1.lowerBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p1->lowerBounds[1]].value;
+				b1.upperBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p1->upperBounds[0]].value;
+				b1.upperBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p1->upperBounds[1]].value;
+				b2.lowerBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p2->lowerBounds[0]].value;
+				b2.lowerBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p2->lowerBounds[1]].value;
+				b2.upperBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p2->upperBounds[0]].value;
+				b2.upperBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p2->upperBounds[1]].value;
 
-				b2Vec2 x1 = 0.5f * (b1.minVertex + b1.maxVertex);
-				b2Vec2 x2 = 0.5f * (b2.minVertex + b2.maxVertex);
+				b2Vec2 x1 = 0.5f * (b1.lowerBound + b1.upperBound);
+				b2Vec2 x2 = 0.5f * (b2.lowerBound + b2.upperBound);
 
 				m_debugDraw->DrawSegment(x1, x2, color);
 
@@ -892,16 +893,16 @@ void b2World::DrawDebugData()
 			}
 
 			b2AABB b;
-			b.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
-			b.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
-			b.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
-			b.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
+			b.lowerBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
+			b.lowerBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
+			b.upperBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
+			b.upperBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
 
 			b2Vec2 vs[4];
-			vs[0].Set(b.minVertex.x, b.minVertex.y);
-			vs[1].Set(b.maxVertex.x, b.minVertex.y);
-			vs[2].Set(b.maxVertex.x, b.maxVertex.y);
-			vs[3].Set(b.minVertex.x, b.maxVertex.y);
+			vs[0].Set(b.lowerBound.x, b.lowerBound.y);
+			vs[1].Set(b.upperBound.x, b.lowerBound.y);
+			vs[2].Set(b.upperBound.x, b.upperBound.y);
+			vs[3].Set(b.lowerBound.x, b.upperBound.y);
 
 			m_debugDraw->DrawPolygon(vs, 4, color);
 		}

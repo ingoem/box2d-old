@@ -32,15 +32,13 @@ struct b2JointNode;
 struct b2ContactNode;
 
 /// A body definition holds all the data needed to construct a rigid body.
-/// @warning You cannot reuse body definitions because they hold shapes, which cannot
-/// be reused.
+/// You can safely re-use body definitions.
 struct b2BodyDef
 {
 	/// This constructor sets the body definition default values.
 	b2BodyDef()
 	{
 		userData = NULL;
-		shapes = NULL;
 		position.Set(0.0f, 0.0f);
 		angle = 0.0f;
 		linearDamping = 0.0f;
@@ -51,17 +49,10 @@ struct b2BodyDef
 		isBullet = false;
 	}
 
-	/// Add a shape to the shape list.
-	/// @param shape a shape created using b2World::Create.
-	void AddShape(b2Shape* shape);
-
 	/// Use this to store application specific body data.
 	void* userData;
 
-	/// The shape list. Do no manipulate this directly, instead use AddShape.
-	b2Shape* shapes;
-
-	/// The world position of the body. Avoid using creating bodies at the origin
+	/// The world position of the body. Avoid creating bodies at the origin
 	/// since this can lead to many overlapping shapes.
 	b2Vec2 position;
 
@@ -86,8 +77,10 @@ struct b2BodyDef
 	/// Should this body be prevented from rotating? Useful for characters.
 	bool preventRotation;
 
-	/// Is this a fast moving body that should be prevented from passing through
-	/// other moving bodies?
+	/// Is this a fast moving body that should be prevented from tunneling through
+	/// other moving bodies? Note that all bodies are prevent from tunneling through
+	/// static bodies. You should use this flag sparingly since it increases
+	/// processing time.
 	bool isBullet;
 };
 
@@ -100,17 +93,29 @@ public:
 	/// body. This function may be expensive so you should try to add
 	/// shapes using the body definition.
 	/// @param shape the shape to be added.
-	/// @param recomputeMass set to true if you want the body's mass to be recomputed
-	/// based on the inclusion of this new shape.
-	void AddShape(b2Shape* shape, bool recomputeMass);
+	void AddShape(b2Shape* shape);
+
+	/// Convenience function, automatically creates a shape and adds it.
+	/// @param shapeDef the shape definition.
+	b2Shape* AddShape(b2ShapeDef* shapeDef);
 
 	/// Remove a shape. It is up to you to destroy the shape with
 	/// b2World::Destroy. This removes the shape from the broad-phase and
-	/// therefore destroys any contacts associated with this shape.
+	/// therefore destroys any contacts associated with this shape. If you
+	/// don't want to keep the shape, you can just call b2World::Destroy
+	/// instead.
 	/// @param shape the shape to be removed.
-	/// @param recomputeMass set to true if you want the body's mass to be recomputed
-	/// based on the remaining shapes.
-	void RemoveShape(b2Shape* shape, bool recomputeMass);
+	void RemoveShape(b2Shape* shape);
+
+	/// Set the mass properties. Note that this changes the center of mass position.
+	/// If you are not sure how to compute mass properties, use SetMassFromShapes.
+	/// @param massData the mass properties.
+	void SetMass(const b2MassData* massData);
+
+	/// Compute the mass properties from the attached shapes. You typically call this
+	/// after adding all the shapes. If you add or remove shapes later, you may want
+	/// to call this again. Note that this changes the center of mass position.
+	void SetMassFromShapes();
 
 	/// Set the position of the body's origin and rotation (radians).
 	/// This breaks any contacts and wakes the other bodies.
@@ -185,7 +190,7 @@ public:
 	float32 GetInertia() const;
 
 	/// Get the world coordinates of a point given the local coordinates.
-	/// @param localPoint a point on the body measured relative the the body's center of mass.
+	/// @param localPoint a point on the body measured relative the the body's origin.
 	/// @return the same point expressed in world coordinates.
 	b2Vec2 GetWorldPoint(const b2Vec2& localPoint);
 
@@ -194,9 +199,9 @@ public:
 	/// @return the same vector expressed in world coordinates.
 	b2Vec2 GetWorldVector(const b2Vec2& localVector);
 
-	/// Gets a local point relative to the center of mass given a world point.
+	/// Gets a local point relative to the body's origin given a world point.
 	/// @param a point in world coordinates.
-	/// @return the corresponding local point relative to the center of mass.
+	/// @return the corresponding local point relative to the body's origin.
 	b2Vec2 GetLocalPoint(const b2Vec2& worldPoint);
 
 	/// Gets a local vector given a world vector.
@@ -251,14 +256,14 @@ public:
 		e_sleepFlag			= 0x0008,
 		e_allowSleepFlag	= 0x0010,
 		e_bulletFlag		= 0x0020,
-		e_toiResolvedFlag	= 0x0040,
-		e_sayGoodByeFlag	= 0x0080,
+		e_sayGoodByeFlag	= 0x0040,
+		e_fixedRotationFlag	= 0x0080,
 	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);
 	~b2Body();
 
-	void RecomputeMass();
+	void ComputeMass();
 
 	bool SynchronizeShapes();
 
@@ -309,15 +314,6 @@ public:
 
 	void* m_userData;
 };
-
-inline void b2BodyDef::AddShape(b2Shape* shape)
-{
-	// You can't reuse shapes.
-	b2Assert(shape->m_body == NULL);
-	b2Assert(shape->m_bodyNext == NULL);
-	shape->m_bodyNext = shapes;
-	shapes = shape;
-}
 
 inline b2Vec2 b2Body::GetOriginPosition() const
 {

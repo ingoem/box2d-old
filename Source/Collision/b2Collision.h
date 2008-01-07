@@ -41,6 +41,8 @@ union b2ContactID
 	uint32 key;
 };
 
+/// A contact point holds details related to the geometry
+/// and dynamics of contact points.
 struct b2ContactPoint
 {
 	b2Vec2 position;
@@ -50,7 +52,7 @@ struct b2ContactPoint
 	b2ContactID id;
 };
 
-// A manifold for two touching convex shapes.
+/// A manifold for two touching convex shapes.
 struct b2Manifold
 {
 	b2ContactPoint points[b2_maxManifoldPoints];
@@ -58,20 +60,26 @@ struct b2Manifold
 	int32 pointCount;
 };
 
+/// A line setgment.
 struct b2Segment
 {
+	/// Ray cast against this segment with another segment.
 	bool TestSegment(float32* lambda, b2Vec2* normal, const b2Segment& segment, float32 maxLambda) const;
 
 	b2Vec2 p1, p2;
 };
 
+/// An axis aligned bounding box.
 struct b2AABB
 {
+	/// Verify that the bounds are sorted.
 	bool IsValid() const;
 
-	b2Vec2 minVertex, maxVertex;
+	b2Vec2 lowerBound;
+	b2Vec2 upperBound;
 };
 
+/// An oriented bounding box.
 struct b2OBB
 {
 	b2Mat22 R;
@@ -83,11 +91,13 @@ struct b2OBB
 struct b2Sweep
 {
 	/// Get the transform at a specific time.
-	/// @param toi the normalized time in [0,1].
-	b2XForm GetXForm(float32 toi) const;
+	/// @param t the normalized time in [0,1].
+	b2XForm GetXForm(float32 t) const;
 
-	b2Vec2 position, velocity;
-	float32 angle, omega;
+	b2Vec2 position;
+	b2Vec2 velocity;
+	float32 angle;
+	float32 omega;
 };
 
 /// Compute the collision manifold between two circles.
@@ -119,19 +129,22 @@ float32 b2TimeOfImpact(b2Vec2* point1, b2Vec2* point2,
 					   const b2Shape* shape2, const b2Sweep& sweep2,
 					   float32 maxTOI);
 
+
+// ---------------- Inline Functions ------------------------------------------
+
 inline bool b2AABB::IsValid() const
 {
-	b2Vec2 d = maxVertex - minVertex;
+	b2Vec2 d = upperBound - lowerBound;
 	bool valid = d.x >= 0.0f && d.y >= 0;
-	valid = valid && minVertex.IsValid() && maxVertex.IsValid();
+	valid = valid && lowerBound.IsValid() && upperBound.IsValid();
 	return valid;
 }
 
 inline bool b2TestOverlap(const b2AABB& a, const b2AABB& b)
 {
 	b2Vec2 d1, d2;
-	d1 = b.minVertex - a.maxVertex;
-	d2 = a.minVertex - b.maxVertex;
+	d1 = b.lowerBound - a.upperBound;
+	d2 = a.lowerBound - b.upperBound;
 
 	if (d1.x > 0.0f || d1.y > 0.0f)
 		return false;

@@ -24,9 +24,9 @@ const float32 k_width = 1.0f;
 inline void GetRandomAABB(b2AABB* aabb)
 {
 	b2Vec2 w; w.Set(k_width, k_width);
-	aabb->minVertex.x = b2Random(-k_extent, k_extent);
-	aabb->minVertex.y = b2Random(0.0f, 2.0f * k_extent);
-	aabb->maxVertex = aabb->minVertex + w;
+	aabb->lowerBound.x = b2Random(-k_extent, k_extent);
+	aabb->lowerBound.y = b2Random(0.0f, 2.0f * k_extent);
+	aabb->upperBound = aabb->lowerBound + w;
 }
 
 inline void MoveAABB(b2AABB* aabb)
@@ -36,16 +36,16 @@ inline void MoveAABB(b2AABB* aabb)
 	d.y = b2Random(-0.5f, 0.5f);
 	//d.x = 2.0f;
 	//d.y = 0.0f;
-	aabb->minVertex += d;
-	aabb->maxVertex += d;
+	aabb->lowerBound += d;
+	aabb->upperBound += d;
 
-	b2Vec2 c0 = 0.5f * (aabb->minVertex + aabb->maxVertex);
+	b2Vec2 c0 = 0.5f * (aabb->lowerBound + aabb->upperBound);
 	b2Vec2 min; min.Set(-k_extent, 0.0f);
 	b2Vec2 max; max.Set(k_extent, 2.0f * k_extent);
 	b2Vec2 c = b2Clamp(c0, min, max);
 
-	aabb->minVertex += c - c0;
-	aabb->maxVertex += c - c0;
+	aabb->lowerBound += c - c0;
+	aabb->upperBound += c - c0;
 }
 
 void* Callback::PairAdded(void* proxyUserData1, void* proxyUserData2)
@@ -102,8 +102,8 @@ BroadPhaseTest::BroadPhaseTest()
 	srand(888);
 
 	b2AABB worldAABB;
-	worldAABB.minVertex.Set(-5.0f * k_extent, -5.0f * k_extent);
-	worldAABB.maxVertex.Set(5.0f * k_extent, 5.0f * k_extent);
+	worldAABB.lowerBound.Set(-5.0f * k_extent, -5.0f * k_extent);
+	worldAABB.upperBound.Set(5.0f * k_extent, 5.0f * k_extent);
 
 	m_overlapCount = 0;
 	m_overlapCountExact = 0;

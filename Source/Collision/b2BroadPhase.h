@@ -122,7 +122,7 @@ public:
 
 inline bool b2BroadPhase::InRange(const b2AABB& aabb) const
 {
-	b2Vec2 d = b2Max(aabb.minVertex - m_worldAABB.maxVertex, m_worldAABB.minVertex - aabb.maxVertex);
+	b2Vec2 d = b2Max(aabb.lowerBound - m_worldAABB.upperBound, m_worldAABB.lowerBound - aabb.upperBound);
 	return b2Max(d.x, d.y) < 0.0f;
 }
 

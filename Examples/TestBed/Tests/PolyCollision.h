@@ -37,7 +37,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_body1 = m_world->Create(&bd);
 		}
 
@@ -50,7 +50,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_body2 = m_world->Create(&bd);
 		}
 
@@ -160,16 +160,16 @@ public:
 				}
 
 				b2AABB b;
-				b.minVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
-				b.minVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
-				b.maxVertex.x = bp->m_worldAABB.minVertex.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
-				b.maxVertex.y = bp->m_worldAABB.minVertex.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
+				b.lowerBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
+				b.lowerBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
+				b.upperBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
+				b.upperBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
 
 				glBegin(GL_LINE_LOOP);
-				glVertex2f(b.minVertex.x, b.minVertex.y);
-				glVertex2f(b.maxVertex.x, b.minVertex.y);
-				glVertex2f(b.maxVertex.x, b.maxVertex.y);
-				glVertex2f(b.minVertex.x, b.maxVertex.y);
+				glVertex2f(b.lowerBound.x, b.lowerBound.y);
+				glVertex2f(b.upperBound.x, b.lowerBound.y);
+				glVertex2f(b.upperBound.x, b.upperBound.y);
+				glVertex2f(b.lowerBound.x, b.upperBound.y);
 				glEnd();
 			}
 		}

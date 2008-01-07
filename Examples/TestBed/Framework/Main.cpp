@@ -274,6 +274,7 @@ int main(int argc, char** argv)
 
 	glui->add_checkbox("Position Correction", &settings.enablePositionCorrection);
 	glui->add_checkbox("Warm Starting", &settings.enableWarmStarting);
+	glui->add_checkbox("Time of Impact", &settings.enableTOI);
 
 	glui->add_separator();
 

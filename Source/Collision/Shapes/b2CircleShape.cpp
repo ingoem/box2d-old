@@ -95,8 +95,8 @@ bool b2CircleShape::TestSegment(const b2XForm& transform,
 void b2CircleShape::ComputeAABB(b2AABB* aabb, const b2XForm& transform) const
 {
 	b2Vec2 p = transform.position + b2Mul(transform.R, m_localPosition);
-	aabb->minVertex.Set(p.x - m_radius, p.y - m_radius);
-	aabb->maxVertex.Set(p.x + m_radius, p.y + m_radius);
+	aabb->lowerBound.Set(p.x - m_radius, p.y - m_radius);
+	aabb->upperBound.Set(p.x + m_radius, p.y + m_radius);
 }
 
 void b2CircleShape::ComputeSweptAABB(b2AABB* aabb, const b2XForm& transform1, const b2XForm& transform2) const
@@ -106,8 +106,8 @@ void b2CircleShape::ComputeSweptAABB(b2AABB* aabb, const b2XForm& transform1, co
 	b2Vec2 lower = b2Min(p1, p2);
 	b2Vec2 upper = b2Max(p1, p2);
 
-	aabb->minVertex.Set(lower.x - m_radius, lower.y - m_radius);
-	aabb->maxVertex.Set(upper.x + m_radius, upper.y + m_radius);
+	aabb->lowerBound.Set(lower.x - m_radius, lower.y - m_radius);
+	aabb->upperBound.Set(upper.x + m_radius, upper.y + m_radius);
 }
 
 void b2CircleShape::ComputeMass(b2MassData* massData) const

@@ -32,7 +32,7 @@ public:
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(m_world->Create(&sd));
+			body->AddShape(m_world->Create(&sd));
 			m_world->Create(&bd);
 		}
 
@@ -47,7 +47,7 @@ public:
 			{
 				sd.restitution = restitution[i];
 				b2BodyDef bd;
-				bd.AddShape(m_world->Create(&sd));
+				body->AddShape(m_world->Create(&sd));
 				bd.position.Set(-10.0f + 3.0f * i, 20.0f);
 				m_world->Create(&bd);
 			}
@@ -60,7 +60,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -78,9 +78,9 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set( 0.0f, 3.0f );
-			bd.AddShape( &sd_bottom );
-			bd.AddShape( &sd_left );
-			bd.AddShape( &sd_right );
+			body->AddShape( &sd_bottom );
+			body->AddShape( &sd_left );
+			body->AddShape( &sd_right );
 
 			m_world->Create(&bd);
 		}
@@ -94,7 +94,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set( 3.5f, 10.0f );
-			bd.AddShape( &sd );
+			body->AddShape( &sd );
 
 			m_world->Create( &bd );
 
@@ -161,7 +161,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			m_world->Create(&bd);
 		}
 
@@ -182,9 +182,9 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set( 0.0f, 3.0f );
-			bd.AddShape( &sd_bottom );
-			bd.AddShape( &sd_left );
-			bd.AddShape( &sd_right );
+			body->AddShape( &sd_bottom );
+			body->AddShape( &sd_left );
+			body->AddShape( &sd_right );
 
 			m_world->Create(&bd);
 		}

@@ -20,18 +20,6 @@
 #include "../b2Body.h"
 #include "../b2World.h"
 
-void b2PrismaticJointDef::SetInWorld(const b2Vec2& anchor, const b2Vec2& axis)
-{
-	const b2XForm& xf1 = body1->GetXForm();
-	const b2XForm& xf2 = body2->GetXForm();
-
-	localAnchor1 = b2MulT(xf1, anchor);
-	localAnchor2 = b2MulT(xf2, anchor);
-
-	localAxis1 = b2MulT(xf1.R, axis);
-	refAngle = body2->GetAngle() - body1->GetAngle();
-}
-
 // Linear constraint (point-to-line)
 // d = p2 - p1 = x2 + r2 - x1 - r1
 // C = dot(ay1, d)
@@ -85,8 +73,8 @@ void b2PrismaticJoint::InitVelocityConstraints()
 	b2Body* b2 = m_body2;
 
 	// Compute the effective masses.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
 
 	float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
 	float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
@@ -264,8 +252,8 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 	float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
 	float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
 	b2Vec2 p1 = b1->m_xf.position + r1;
 	b2Vec2 p2 = b2->m_xf.position + r2;
 	b2Vec2 d = p2 - p1;
@@ -302,8 +290,8 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 	// Solve linear limit constraint.
 	if (m_enableLimit && m_limitState != e_inactiveLimit)
 	{
-		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1);
-		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2);
+		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
+		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
 		b2Vec2 p1 = b1->m_xf.position + r1;
 		b2Vec2 p2 = b2->m_xf.position + r2;
 		b2Vec2 d = p2 - p1;
@@ -358,13 +346,13 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 b2Vec2 b2PrismaticJoint::GetAnchor1() const
 {
 	b2Body* b1 = m_body1;
-	return b1->m_xf.position + b2Mul(b1->m_xf.R, m_localAnchor1);
+	return b1->GetWorldPoint(m_localAnchor1);
 }
 
 b2Vec2 b2PrismaticJoint::GetAnchor2() const
 {
 	b2Body* b2 = m_body2;
-	return b2->m_xf.position + b2Mul(b2->m_xf.R, m_localAnchor2);
+	return b2->GetWorldPoint(m_localAnchor2);
 }
 
 b2Vec2 b2PrismaticJoint::GetReactionForce(float32 invTimeStep) const

@@ -29,44 +29,42 @@
 //#include "Bridge.h"
 //#include "BroadPhaseTest.h"
 #include "CCDTest.h"
-//#include "Chain.h"
+#include "Chain.h"
 //#include "CollisionFiltering.h"
 //#include "CollisionProcessing.h"
 #include "CompoundShapes.h"
-//#include "Cradle.h"
-#include "DistanceTest.h"
-//#include "Gears.h"
+//#include "DistanceTest.h"
+#include "Gears.h"
 //#include "MotorsAndLimits.h"
 //#include "PolyCollision.h"
-#include "PolyShapes.h"
+//#include "PolyShapes.h"
 //#include "Pulleys.h"
-#include "Pyramid.h"
+//#include "Pyramid.h"
 //#include "SliderCrank.h"
-#include "TimeOfImpact.h"
+//#include "TimeOfImpact.h"
 //#include "VaryingFriction.h"
-#include "VaryingRestitution.h"
+//#include "VaryingRestitution.h"
 //#include "VerticalStack.h"
 //#include "Web.h"
 
 TestEntry g_testEntries[] =
 {
-	{"CCD Test", CCDTest::Create},
-	{"Time of Impact", TimeOfImpact::Create},
-	{"Pyramid", Pyramid::Create},
+	{"Chain", Chain::Create},
 	{"Compound Shapes", CompoundShapes::Create},
-	{"Polygon Shapes", PolyShapes::Create},
-	{"Distance Test", DistanceTest::Create},
-	{"Varying Restitution", VaryingRestitution::Create},
+	{"CCD Test", CCDTest::Create},
+	{"Gears", Gears::Create},
+	//{"Time of Impact", TimeOfImpact::Create},
+	//{"Pyramid", Pyramid::Create},
+	//{"Polygon Shapes", PolyShapes::Create},
+	//{"Distance Test", DistanceTest::Create},
+	//{"Varying Restitution", VaryingRestitution::Create},
 	//{"Apply Force", ApplyForce::Create},
 	//{"PolyCollision", PolyCollision::Create},
 	//{"Vertical Stack", VerticalStack::Create},
-	//{"Newton's Cradle", Cradle::Create},
 	//{"Broad Phase", BroadPhaseTest::Create},
-	//{"Chain", Chain::Create},
 	//{"Bridge", Bridge::Create},
 	//{"Collision Processing", CollisionProcessing::Create},
 	//{"Web", Web::Create},
-	//{"Gears", Gears::Create},
 	//{"Pulleys", Pulleys::Create},
 	//{"Slider Crank", SliderCrank::Create},
 	//{"Collision Filtering", CollisionFiltering::Create},

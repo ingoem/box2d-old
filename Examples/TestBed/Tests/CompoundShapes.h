@@ -25,13 +25,13 @@ public:
 	CompoundShapes()
 	{
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(m_world->Create(&sd));
-			m_world->Create(&bd);
+			b2Body* body = m_world->Create(&bd);
+
+			b2PolygonDef sd;
+			sd.SetAsBox(50.0f, 10.0f);
+			body->AddShape(m_world->Create(&sd));
 		}
 
 		{
@@ -49,11 +49,12 @@ public:
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				b2BodyDef bd;
-				bd.AddShape(m_world->Create(&sd1));
-				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
 				bd.angle = b2Random(-b2_pi, b2_pi);
-				m_world->Create(&bd);
+				b2Body* body = m_world->Create(&bd);
+				body->AddShape(m_world->Create(&sd1));
+				body->AddShape(m_world->Create(&sd2));
+				body->SetMassFromShapes();
 			}
 		}
 
@@ -70,11 +71,12 @@ public:
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				b2BodyDef bd;
-				bd.AddShape(m_world->Create(&sd1));
-				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
 				bd.angle = b2Random(-b2_pi, b2_pi);
-				m_world->Create(&bd);
+				b2Body* body = m_world->Create(&bd);
+				body->AddShape(m_world->Create(&sd1));
+				body->AddShape(m_world->Create(&sd2));
+				body->SetMassFromShapes();
 			}
 		}
 
@@ -105,11 +107,12 @@ public:
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				b2BodyDef bd;
-				bd.AddShape(m_world->Create(&sd1));
-				bd.AddShape(m_world->Create(&sd2));
 				bd.position.Set(x, 2.05f + 2.5f * i);
 				bd.angle = 0.0f;
-				m_world->Create(&bd);
+				b2Body* body = m_world->Create(&bd);
+				body->AddShape(m_world->Create(&sd1));
+				body->AddShape(m_world->Create(&sd2));
+				body->SetMassFromShapes();
 			}
 		}
 
@@ -130,11 +133,11 @@ public:
 			b2BodyDef bd;
 			bd.position.Set( 0.0f, 2.0f );
 			bd.isBullet = true;
-			bd.AddShape(m_world->Create(&sd_bottom));
-			bd.AddShape(m_world->Create(&sd_left));
-			bd.AddShape(m_world->Create(&sd_right));
-
-			m_world->Create(&bd);
+			b2Body* body = m_world->Create(&bd);
+			body->AddShape(m_world->Create(&sd_bottom));
+			body->AddShape(m_world->Create(&sd_left));
+			body->AddShape(m_world->Create(&sd_right));
+			body->SetMassFromShapes();
 		}
 #endif
 	}

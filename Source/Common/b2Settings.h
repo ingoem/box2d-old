@@ -84,7 +84,7 @@ const float32 b2_maxAngularCorrection = 8.0f / 180.0f * b2_pi;			// 8 degrees
 
 /// The maximum linear velocity of a body. This limit is very large and is used
 /// to prevent numerical problems. You shouldn't need to adjust this.
-const float32 b2_maxLinearVelocity = 100.0f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;
+const float32 b2_maxLinearVelocity = 200.0f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;
 const float32 b2_maxLinearVelocitySquared = b2_maxLinearVelocity * b2_maxLinearVelocity;
 
 /// The maximum angular velocity of a body. This limit is very large and is used

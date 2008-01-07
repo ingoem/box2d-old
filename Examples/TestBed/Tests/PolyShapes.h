@@ -37,7 +37,7 @@ public:
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(m_world->Create(&sd));
+			body->AddShape(m_world->Create(&sd));
 			m_world->Create(&bd);
 		}
 
@@ -102,11 +102,11 @@ public:
 
 		if (index < 4)
 		{
-			bd.AddShape(m_world->Create(sds + index));
+			body->AddShape(m_world->Create(sds + index));
 		}
 		else
 		{
-			bd.AddShape(m_world->Create(&circleDef));
+			body->AddShape(m_world->Create(&circleDef));
 			bd.angularDamping = 0.02f;
 		}
 

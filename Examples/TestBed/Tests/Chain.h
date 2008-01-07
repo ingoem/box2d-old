@@ -26,26 +26,21 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2PolygonDef sd;
-			sd.type = e_boxShape;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
 			ground = m_world->Create(&bd);
+
+			b2PolygonDef sd;
+			sd.SetAsBox(50.0f, 10.0f);
+			b2Shape* shape = m_world->Create(&sd);
+			ground->AddShape(shape);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
-			//sd.SetAsBox(0.375f, 0.125f);
 			sd.SetAsBox(0.6f, 0.125f);
 			sd.density = 20.0f;
 			sd.friction = 0.2f;
-
-			b2BodyDef bd;
-			bd.AddShape(&sd);
 
 			b2RevoluteJointDef jd;
 			jd.collideConnected = false;
@@ -54,13 +49,20 @@ public:
 			b2Body* prevBody = ground;
 			for (int32 i = 0; i < 30; ++i)
 			{
+				b2BodyDef bd;
 				bd.position.Set(0.5f + i, y);
 				b2Body* body = m_world->Create(&bd);
+				b2Shape* shape = m_world->Create(&sd);
+				body->AddShape(shape);
+				body->SetMassFromShapes();
 
-				jd.anchorPoint.Set((float32)i, y);
+				b2Vec2 anchor(float32(i), y);
+				jd.localAnchor1 = prevBody->GetLocalPoint(anchor);
+				jd.localAnchor2 = body->GetLocalPoint(anchor);
+				jd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 				jd.body1 = prevBody;
 				jd.body2 = body;
-				m_world->CreateJoint(&jd);
+				m_world->Create(&jd);
 
 				prevBody = body;
 			}

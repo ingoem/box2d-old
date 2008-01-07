@@ -30,7 +30,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(m_world->Create(&sd));
+			body->AddShape(m_world->Create(&sd));
 			m_world->Create(&bd);
 		}
 
@@ -52,7 +52,7 @@ public:
 				for (int32 j = i; j < 25; ++j)
 				{
 					b2BodyDef bd;
-					bd.AddShape(m_world->Create(&sd));
+					body->AddShape(m_world->Create(&sd));
 					bd.position = y;
 					m_world->Create(&bd);
 

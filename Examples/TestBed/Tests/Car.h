@@ -31,8 +31,8 @@ public:
 		b2Vec2 gravity;
 		b2AABB aabb;
 
-		aabb.minVertex.Set(-50,-50);
-		aabb.maxVertex.Set(200,100);
+		aabb.lowerBound.Set(-50,-50);
+		aabb.upperBound.Set(200,100);
 		gravity.Set(0, -9.80665f);
 
 		m_world = new b2World(aabb, gravity, true);
@@ -148,11 +148,11 @@ public:
 				joint.body2 = m_leftWheel;
 				joint.collideConnected = false;
 				joint.anchorPoint = leftAxle->GetCenterPosition();
-				m_world->CreateJoint(&joint);
+				m_world->Create(&joint);
 				joint.body1 = rightAxle;
 				joint.body2 = m_rightWheel;
 				joint.anchorPoint = rightAxle->GetCenterPosition();
-				m_world->CreateJoint(&joint);
+				m_world->Create(&joint);
 			}
 			{	// join axles to car
 				b2PrismaticJointDef	joint;
@@ -167,10 +167,10 @@ public:
 				joint.motorSpeed = 0;
 				joint.axis.Set(0,1);
 				joint.anchorPoint = leftAxle->GetCenterPosition();
-				m_world->CreateJoint(&joint);
+				m_world->Create(&joint);
 				joint.body1 = rightAxle;
 				joint.anchorPoint = rightAxle->GetCenterPosition();
-				m_world->CreateJoint(&joint);
+				m_world->Create(&joint);
 			}
 		}
 		{	// falling person

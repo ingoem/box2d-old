@@ -189,13 +189,12 @@ public:
 	b2Shape(const b2ShapeDef* def);
 	virtual ~b2Shape();
 
-	void Attach(b2Body* body, const b2Vec2& offset);
 	void CreateProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
 	void DestroyProxy(b2BroadPhase* broadPhase);
 	bool Synchronize(b2BroadPhase* broadPhase,
 					const b2XForm& xf1,
 					const b2XForm& xf2);
-	bool ResetProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
+	void ResetProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
 	virtual void ApplyOffset(const b2Vec2& offset) = 0;
 
 	float32 GetMinRadius() const;

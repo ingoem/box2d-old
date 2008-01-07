@@ -32,7 +32,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			ground = m_world->Create(&bd);
 		}
 
@@ -47,7 +47,7 @@ public:
 			sd.density = 5.0f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 
 			bd.position.Set(-10.0f, y);
 			b2Body* body1 = m_world->Create(&bd);
@@ -67,14 +67,14 @@ public:
 			pulleyDef.maxLength1 = 28.0f;
 			pulleyDef.maxLength2 = 12.0f;
 
-			m_joint1 = (b2PulleyJoint*)m_world->CreateJoint(&pulleyDef);
+			m_joint1 = (b2PulleyJoint*)m_world->Create(&pulleyDef);
 
 			b2PrismaticJointDef prismDef;
 			prismDef.body1 = ground;
 			prismDef.body2 = body2;
 			prismDef.axis.Set(0.0f, 1.0f);
 			prismDef.anchorPoint = body2->GetCenterPosition();
-			m_joint2 = (b2PrismaticJoint*)m_world->CreateJoint(&prismDef);
+			m_joint2 = (b2PrismaticJoint*)m_world->Create(&prismDef);
 		}
 	}
 

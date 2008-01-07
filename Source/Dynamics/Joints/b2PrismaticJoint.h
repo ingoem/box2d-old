@@ -35,7 +35,7 @@ struct b2PrismaticJointDef : public b2JointDef
 		localAnchor1.SetZero();
 		localAnchor2.SetZero();
 		localAxis1.Set(1.0f, 0.0f);
-		refAngle = 0.0f;
+		referenceAngle = 0.0f;
 		enableLimit = false;
 		lowerTranslation = 0.0f;
 		upperTranslation = 0.0f;
@@ -44,25 +44,17 @@ struct b2PrismaticJointDef : public b2JointDef
 		motorSpeed = 0.0f;
 	}
 
-	/// Utility function to set local anchor points from a world anchor point.
-	/// This also sets the local axis and reference angle from the current
-	/// body transforms.
-	/// @param anchor world position of the common point.
-	/// @param axis the translation axis.
-	/// @warning body1 and body2 must be set.
-	void SetInWorld(const b2Vec2& anchor, const b2Vec2& axis);
-
-	/// The local anchor point in body1.
+	/// The local anchor point relative to body1's origin.
 	b2Vec2 localAnchor1;
 
-	/// The local anchor point in body2.
+	/// The local anchor point relative to body2's origin.
 	b2Vec2 localAnchor2;
 
 	/// The local translation axis in body1.
 	b2Vec2 localAxis1;
 
 	/// The constrained angle between the bodies: body2_angle - body1_angle.
-	float32 refAngle;
+	float32 referenceAngle;
 
 	/// Enable/disable the joint limit.
 	bool enableLimit;

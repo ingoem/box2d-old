@@ -75,15 +75,16 @@ public:
 	/// consume draw commands when you call Step().
 	void SetDebugDraw(b2DebugDraw* debugDraw);
 
-	/// Create a rigid body given a definition. No reference to the definition
+	/// Create a shape given a definition. No reference to the definition
 	/// is retained.
 	/// @warning This function is locked during callbacks.
 	b2Shape* Create(const b2ShapeDef* def);
 
-	/// Destroy a rigid body given a definition. No reference to the definition
-	/// is retained. This function is locked during callbacks. This automatically
-	/// deletes all associated shapes and joints.
+	/// Destroy a shape. This automatically removes the shape from the attached body
+	/// (if any). This also automatically destroys any associated contacts.
+	/// This function is locked during callbacks.
 	/// @warning This function is locked during callbacks.
+	/// @param shape the shape to be destroyed.
 	void Destroy(b2Shape* shape);
 
 	/// Create a rigid body given a definition. No reference to the definition
@@ -196,6 +197,9 @@ public:
 
 	// This is for debugging the solver.
 	static int32 s_enableWarmStarting;
+
+	// This is for debugging the solver.
+	static int32 s_enableTOI;
 };
 
 inline b2Body* b2World::GetGroundBody()

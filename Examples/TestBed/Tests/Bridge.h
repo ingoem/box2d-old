@@ -32,7 +32,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 			ground = m_world->Create(&bd);
 		}
 
@@ -44,7 +44,7 @@ public:
 			sd.friction = 0.2f;
 
 			b2BodyDef bd;
-			bd.AddShape(&sd);
+			body->AddShape(&sd);
 
 			b2RevoluteJointDef jd;
 			const int32 numPlanks = 30;
@@ -58,7 +58,7 @@ public:
 				jd.anchorPoint.Set(-15.0f + 1.0f * i, 5.0f);
 				jd.body1 = prevBody;
 				jd.body2 = body;
-				m_world->CreateJoint(&jd);
+				m_world->Create(&jd);
 
 				prevBody = body;
 			}
@@ -66,7 +66,7 @@ public:
 			jd.anchorPoint.Set(-15.0f + 1.0f * numPlanks, 5.0f);
 			jd.body1 = prevBody;
 			jd.body2 = ground;
-			m_world->CreateJoint(&jd);
+			m_world->Create(&jd);
 		}
 	}
 

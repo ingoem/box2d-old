@@ -308,7 +308,6 @@ void b2Island::SolveTOI()
 	{
 		b2Body* b = m_bodies[i];
 		b->m_toi = 1.0f;
-		b->m_flags &= ~b2Body::e_toiResolvedFlag;
 	}
 
 	for (int32 i = 0; i < m_contactCount; ++i)
