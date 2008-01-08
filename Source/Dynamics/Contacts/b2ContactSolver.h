@@ -69,4 +69,8 @@ public:
 	b2ContactConstraint* m_constraints;
 	int m_constraintCount;
 };
+
+void b2SolveContactPoint(b2TOIPoint* point, b2Body* body1, b2Body* body2,
+						 float32 resitution, float32 friction, float32 baumgarte);
+
 #endif

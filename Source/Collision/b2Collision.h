@@ -52,6 +52,15 @@ struct b2ContactPoint
 	b2ContactID id;
 };
 
+struct b2TOIPoint
+{
+	b2Vec2 position;
+	b2Vec2 normal;
+	float32 separation;
+	float32 normalImpulse;
+	float32 tangentImpulse;
+};
+
 /// A manifold for two touching convex shapes.
 struct b2Manifold
 {
@@ -124,7 +133,7 @@ float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
 /// Compute the distance between two shapes and the closest points.
 /// @return the fraction between [0,1] in which the shapes first touch.
 /// t=0 means the shapes begin touching/overlapped, and t=1 means the shapes don't touch.
-float32 b2TimeOfImpact(b2Vec2* point1, b2Vec2* point2,
+float32 b2TimeOfImpact(b2TOIPoint* point,
 					   const b2Shape* shape1, const b2Sweep& sweep1,
 					   const b2Shape* shape2, const b2Sweep& sweep2,
 					   float32 maxTOI);

@@ -546,6 +546,51 @@ void b2World::Solve(const b2TimeStep& step)
 	m_broadPhase->Commit();
 }
 
+#if 0
+// Find TOI contacts and solve them.
+void b2World::SolveTOI()
+{
+	b2TOIPoint* points = (b2TOIPoint*)m_stackAllocator->Allocate(m_contactCount * sizeof(b2TOIPoint));
+
+	float32 t = 0.0f;
+	while (t < 1.0f)
+	{
+		b2TOIPoint* point = NULL;
+		b2Contact* toiContact = NULL;
+		float32 minTOI = 1.0f;
+
+		int32 index = 0;
+		for (b2Contact* c = m_contactList; c; c = c->m_next, ++index)
+		{
+			if (c->m_flags & (b2Contact::e_slowFlag | b2Contact::e_nonSolidFlag))
+			{
+				continue;
+			}
+
+			float32 toi = b2TimeOfImpact(points + index, c->m_shape1, sweep1, c->m_shape2, sweep2, 1.0f);
+			c->m_toi = toi;
+			if (toi < minTOI)
+			{
+				point = points + index;
+				toiContact = c;
+				minTOI = toi;
+			}
+		}
+
+		if (toiContact)
+		{
+			b2Body* b1 = toiContact->GetShape1()->GetBody();
+			b2Body* b2 = toiContact->GetShape2()->GetBody();
+			b2SolveContactPoint(point, b1, b2, c->m_restitution, c->m_friction, 0.5f * 60.0f);
+		}
+	}
+
+
+	m_stackAllocator.Free(points);
+}
+
+#else
+
 // Find TOI islands and solve them.
 void b2World::SolveTOI()
 {
@@ -650,6 +695,7 @@ void b2World::SolveTOI()
 
 	m_stackAllocator.Free(stack);
 }
+#endif
 
 void b2World::Step(float32 dt, int32 iterations)
 {

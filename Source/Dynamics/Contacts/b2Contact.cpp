@@ -223,12 +223,12 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 	b2->GetSweep(&sweep2);
 	float32 toi1 = b1->GetTOI();
 	float32 toi2 = b2->GetTOI();
-	b2Vec2 point1, point2;
+	b2TOIPoint point;
 
 	// Use maxTOI as an early out of the TOI calculation.
 	float32 maxTOI = b2Min(toi1, toi2);
 
-	float32 toi = b2TimeOfImpact(&point1, &point2, m_shape1, sweep1, m_shape2, sweep2, maxTOI);
+	float32 toi = b2TimeOfImpact(&point, m_shape1, sweep1, m_shape2, sweep2, maxTOI);
 	if (toi < maxTOI)
 	{
 		bool apply = true;
@@ -236,7 +236,7 @@ float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
 		{
 			b2XForm xf1 = sweep1.GetXForm(toi);
 			b2XForm xf2 = sweep2.GetXForm(toi);
-			apply = listener->TOI(m_shape1, xf1, point1, m_shape2, xf2, point2);
+			apply = listener->TOI(m_shape1, xf1, point.position, m_shape2, xf2, point.position);
 		}
 
 		if (apply)

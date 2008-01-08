@@ -32,12 +32,11 @@ public:
 			b2PolygonDef sd;
 			sd.SetAsBox(0.1f, 10.0f);
 			sd.density = 0.0f;
-			b2Shape* shape = m_world->Create(&sd);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 20.0f);
-			body->AddShape(shape);
-			m_world->Create(&bd);
+			b2Body* body = m_world->Create(&bd);
+			body->AddShape(&sd);
 		}
 
 		{
@@ -45,15 +44,15 @@ public:
 			sd.SetAsBox(0.1f, 2.0f);
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
-			b2Shape* shape = m_world->Create(&sd);
 
-			m_angularVelocity = b2Random(-50.0f, 50.0f);
-			//m_angularVelocity = 39.596241f;
+			//m_angularVelocity = b2Random(-50.0f, 50.0f);
+			m_angularVelocity = 39.596241f;
 
 			b2BodyDef bd;
 			bd.position.Set(50.0f, 20.0f);
-			body->AddShape(shape);
 			b2Body* body = m_world->Create(&bd);
+			body->AddShape(&sd);
+			body->SetMassFromShapes();
 			body->SetLinearVelocity(b2Vec2(-200.0f, 0.0f));
 			body->SetAngularVelocity(m_angularVelocity);
 		}

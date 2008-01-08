@@ -49,9 +49,9 @@
 
 TestEntry g_testEntries[] =
 {
+	{"CCD Test", CCDTest::Create},
 	{"Chain", Chain::Create},
 	{"Compound Shapes", CompoundShapes::Create},
-	{"CCD Test", CCDTest::Create},
 	{"Gears", Gears::Create},
 	//{"Time of Impact", TimeOfImpact::Create},
 	//{"Pyramid", Pyramid::Create},
