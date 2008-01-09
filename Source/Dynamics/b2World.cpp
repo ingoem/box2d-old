@@ -548,14 +548,17 @@ void b2World::Solve(const b2TimeStep& step)
 
 #if 0
 // Find TOI contacts and solve them.
-void b2World::SolveTOI()
+void b2World::SolveTOI(const b2TimeStep& step)
 {
-	b2TOIPoint* points = (b2TOIPoint*)m_stackAllocator->Allocate(m_contactCount * sizeof(b2TOIPoint));
+	for (b2Body* b = m_bodyList; b; b = b->m_next)
+	{
+		b->m_toi = 0.0f;
+	}
 
 	float32 t = 0.0f;
 	while (t < 1.0f)
 	{
-		b2TOIPoint* point = NULL;
+		b2TOIPoint toiPoint = NULL;
 		b2Contact* toiContact = NULL;
 		float32 minTOI = 1.0f;
 
@@ -567,11 +570,21 @@ void b2World::SolveTOI()
 				continue;
 			}
 
-			float32 toi = b2TimeOfImpact(points + index, c->m_shape1, sweep1, c->m_shape2, sweep2, 1.0f);
+			b2Shape* s1 = c->GetShape1();
+			b2Shape* s2 = c->GetShape2();
+			b2Body* b1 = s1->GetBody();
+			b2Body* b2 = s2->GetBody();
+
+			b2Sweep sweep1, sweep2;
+			b1->GetSweep(&sweep1);
+			b2->GetSweep(&sweep2);
+
+			b2TOIPoint point;
+			float32 toi = b2TimeOfImpact(point, c->m_shape1, sweep1, c->m_shape2, sweep2, t);
 			c->m_toi = toi;
 			if (toi < minTOI)
 			{
-				point = points + index;
+				toiPoint = point;
 				toiContact = c;
 				minTOI = toi;
 			}
@@ -581,12 +594,77 @@ void b2World::SolveTOI()
 		{
 			b2Body* b1 = toiContact->GetShape1()->GetBody();
 			b2Body* b2 = toiContact->GetShape2()->GetBody();
-			b2SolveContactPoint(point, b1, b2, c->m_restitution, c->m_friction, 0.5f * 60.0f);
+			if (b1->IsStatic() == false)
+			{
+				// March forward
+				b1->m_position0 += (minTOI - b1->m_toi) * (b1->m_xf.position - b1->m_position0);
+				b1->m_angle0 += (minTOI - b1->m_toi) * (b1->m_angle - b1->m_angle0);
+				b1->m_xf.position = b1->m_position0;
+				b1->m_angle = b1->m_angle0;
+				b1->m_xf.R.Set(b1->m_angle);
+				b1->WakeUp();
+			}
+
+			if (b2->IsStatic() == false)
+			{
+				// March forward
+				b2->m_position0 += (minTOI - b2->m_toi) * (b2->m_xf.position - b2->m_position0);
+				b2->m_angle0 += (minTOI - b2->m_toi) * (b2->m_angle - b2->m_angle0);
+				b2->m_xf.position = b2->m_position0;
+				b2->m_angle = b2->m_angle0;
+				b2->m_xf.R.Set(b2->m_angle);
+				b2->WakeUp();
+			}
+
+			b2SolveContactPoint(&toiPoint, b1, b2, c->m_restitution, c->m_friction, 0.5f * 60.0f);
+
+			float32 dt = step.dt * (1.0f - minTOI);
+
+			if (b1->IsStatic() == false)
+			{
+				// March forward
+				b1->m_position0 += (minTOI - b1->m_toi) * (b1->m_xf.position - b1->m_position0);
+				b1->m_angle0 += (minTOI - b1->m_toi) * (b1->m_angle - b1->m_angle0);
+
+				// Integrate
+				b1->m_xf.position = b1->m_position0 dt * b1->m_linearVelocity;
+				b1->m_angle += dt * b1->m_angularVelocity;
+				b1->m_xf.R.Set(b1->m_angle);
+				
+				b1->SynchronizeShapes();
+			}
+
+
+			if (b2->IsStatic() == false)
+			{
+				// Store positions for continuous collision.
+				b2->m_position0 += b2->m_xf.position;
+				b2->m_angle0 += b2->m_angle;
+
+				// Integrate
+				b2->m_xf.position += dt * b2->m_linearVelocity;
+				b2->m_angle += dt * b2->m_angularVelocity;
+				b2->m_xf.R.Set(b2->m_angle);
+				
+				b2->SynchronizeShapes();
+			}
+
+			m_broadPhase->Commit();
+
+			b1->m_toi = minTOI;
+			b2->m_toi = minTOI;
+			t = minTOI;
+		}
+		else
+		{
+			for (b2Body* b = m_bodyList; b; b = b->m_next)
+			{
+				b->m_toi = 0.0f;
+			}
+
+			t = 1.0f;
 		}
 	}
-
-
-	m_stackAllocator.Free(points);
 }
 
 #else

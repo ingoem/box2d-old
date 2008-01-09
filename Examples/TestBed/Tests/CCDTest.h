@@ -25,7 +25,7 @@ public:
 
 	CCDTest()
 	{
-#if 0
+#if 1
 		m_world->m_gravity.SetZero();
 
 		{
