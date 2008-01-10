@@ -65,7 +65,7 @@ float32 b2TimeOfImpact(b2TOIPoint* tp,
 	{
 		// Get the accurate distance between shapes.
 		distance = b2Distance(&p1, &p2, shape1, xf1, shape2, xf2);
-		if (distance < b2_linearSlop)
+		if (distance - targetDistance < b2_linearSlop)
 		{
 			break;
 		}

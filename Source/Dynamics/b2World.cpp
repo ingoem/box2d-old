@@ -21,6 +21,7 @@
 #include "b2Island.h"
 #include "Joints/b2PulleyJoint.h"
 #include "Contacts/b2Contact.h"
+#include "Contacts/b2ContactSolver.h"
 #include "../Collision/b2Collision.h"
 #include "../Collision/Shapes/b2CircleShape.h"
 #include "../Collision/Shapes/b2PolygonShape.h"
@@ -558,7 +559,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 	float32 t = 0.0f;
 	while (t < 1.0f)
 	{
-		b2TOIPoint toiPoint = NULL;
+		b2TOIPoint toiPoint;
 		b2Contact* toiContact = NULL;
 		float32 minTOI = 1.0f;
 
@@ -580,7 +581,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			b2->GetSweep(&sweep2);
 
 			b2TOIPoint point;
-			float32 toi = b2TimeOfImpact(point, c->m_shape1, sweep1, c->m_shape2, sweep2, t);
+			float32 toi = b2TimeOfImpact(&point, c->m_shape1, sweep1, c->m_shape2, sweep2, 1.0f);
 			c->m_toi = toi;
 			if (toi < minTOI)
 			{
@@ -616,18 +617,14 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				b2->WakeUp();
 			}
 
-			b2SolveContactPoint(&toiPoint, b1, b2, c->m_restitution, c->m_friction, 0.5f * 60.0f);
+			b2SolveContactPoint(&toiPoint, b1, b2, toiContact->m_restitution, toiContact->m_friction, 0.5f * 60.0f);
 
 			float32 dt = step.dt * (1.0f - minTOI);
 
 			if (b1->IsStatic() == false)
 			{
-				// March forward
-				b1->m_position0 += (minTOI - b1->m_toi) * (b1->m_xf.position - b1->m_position0);
-				b1->m_angle0 += (minTOI - b1->m_toi) * (b1->m_angle - b1->m_angle0);
-
 				// Integrate
-				b1->m_xf.position = b1->m_position0 dt * b1->m_linearVelocity;
+				b1->m_xf.position += dt * b1->m_linearVelocity;
 				b1->m_angle += dt * b1->m_angularVelocity;
 				b1->m_xf.R.Set(b1->m_angle);
 				
@@ -637,10 +634,6 @@ void b2World::SolveTOI(const b2TimeStep& step)
 
 			if (b2->IsStatic() == false)
 			{
-				// Store positions for continuous collision.
-				b2->m_position0 += b2->m_xf.position;
-				b2->m_angle0 += b2->m_angle;
-
 				// Integrate
 				b2->m_xf.position += dt * b2->m_linearVelocity;
 				b2->m_angle += dt * b2->m_angularVelocity;
@@ -657,11 +650,6 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		}
 		else
 		{
-			for (b2Body* b = m_bodyList; b; b = b->m_next)
-			{
-				b->m_toi = 0.0f;
-			}
-
 			t = 1.0f;
 		}
 	}
@@ -670,8 +658,10 @@ void b2World::SolveTOI(const b2TimeStep& step)
 #else
 
 // Find TOI islands and solve them.
-void b2World::SolveTOI()
+void b2World::SolveTOI(const b2TimeStep& step)
 {
+	step;
+
 	// Size the island for the worst case.
 	b2Island island(m_bodyCount, m_contactCount, 0, &m_stackAllocator, m_contactListener);
 
@@ -803,7 +793,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	// Handle TOI events.
 	if (s_enableTOI && step.dt > 0.0f)
 	{
-		SolveTOI();
+		SolveTOI(step);
 	}
 
 	// Draw debug information.

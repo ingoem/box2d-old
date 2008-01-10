@@ -155,7 +155,7 @@ public:
 	// Internal yet public to make life easier.
 
 	void Solve(const b2TimeStep& step);
-	void SolveTOI();
+	void SolveTOI(const b2TimeStep& step);
 
 	void DrawJoint(b2Joint* joint);
 	void DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color, bool core);
