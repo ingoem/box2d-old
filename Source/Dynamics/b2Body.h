@@ -35,9 +35,20 @@ struct b2ContactNode;
 /// You can safely re-use body definitions.
 struct b2BodyDef
 {
+	/// The type of body.
+	enum Type
+	{
+		e_staticBody,	///< A static body should not move and has infinite mass.
+		e_dynamicBody,	///< A regular moving body.
+	};
+
 	/// This constructor sets the body definition default values.
 	b2BodyDef()
 	{
+		type = e_staticBody;
+		massData.center.SetZero();
+		massData.mass = 0.0f;
+		massData.I = 0.0f;
 		userData = NULL;
 		position.Set(0.0f, 0.0f);
 		angle = 0.0f;
@@ -48,6 +59,15 @@ struct b2BodyDef
 		preventRotation = false;
 		isBullet = false;
 	}
+
+	/// We need the shape type to setup collision filtering correctly, so
+	/// that static bodies don't collide with each other.
+	Type type;
+
+	/// You can use this to initialized the mass properties of the body.
+	/// If you prefer, you can set the mass properties after the shapes
+	/// have been added using b2Body::SetMassFromShapes.
+	b2MassData massData;
 
 	/// Use this to store application specific body data.
 	void* userData;
@@ -256,8 +276,7 @@ public:
 		e_sleepFlag			= 0x0008,
 		e_allowSleepFlag	= 0x0010,
 		e_bulletFlag		= 0x0020,
-		e_sayGoodByeFlag	= 0x0040,
-		e_fixedRotationFlag	= 0x0080,
+		e_fixedRotationFlag	= 0x0040,
 	};
 
 	b2Body(const b2BodyDef* bd, b2World* world);
@@ -272,9 +291,12 @@ public:
 	bool IsConnected(const b2Body* other) const;
 
 	void GetSweep(b2Sweep* sweep) const;
+	void GetSweep(b2Sweep* sweep, float32 t) const;
 
 	void SetTOI(float32 toi);
 	float32 GetTOI() const;
+
+	void SetStepFraction(float32 t);
 
 	uint32 m_flags;
 
@@ -284,7 +306,7 @@ public:
 	// Conservative advancement data.
 	b2Vec2 m_position0;
 	float32 m_angle0;
-	float32 m_toi;
+	float32 m_t;
 
 	b2Vec2 m_linearVelocity;
 	float32 m_angularVelocity;
@@ -500,14 +522,40 @@ inline void b2Body::GetSweep(b2Sweep* sweep) const
 	sweep->omega = m_angle - m_angle0;
 }
 
+inline void b2Body::GetSweep(b2Sweep* sweep, float32 t) const
+{
+	float32 dt = t - m_t;
+	b2Assert(dt >= 0.0f);
+
+	b2Vec2 p0 = m_position0 + dt * (m_xf.position - m_position0);
+	float32 a0 = m_angle0 + dt * (m_angle - m_angle0);
+
+	sweep->position = p0;
+	sweep->angle = a0;
+	sweep->velocity = m_xf.position - p0;
+	sweep->omega = m_angle - a0;
+}
+
 inline void b2Body::SetTOI(float32 toi)
 {
-	m_toi = toi;
+	m_t = toi;
 }
 
 inline float32 b2Body::GetTOI() const
 {
-	return m_toi;
+	return m_t;
+}
+
+inline void b2Body::SetStepFraction(float32 t)
+{
+	b2Assert(m_t < 1.0f);
+	float32 s = (t - m_t) / (1.0f - m_t);
+	m_position0 += s * (m_xf.position - m_position0);
+	m_angle0 += s * (m_angle - m_angle0);
+	m_xf.position = m_position0;
+	m_angle = m_angle0;
+	m_xf.R.Set(m_angle);
+	m_t = t;
 }
 
 #endif

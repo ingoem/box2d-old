@@ -70,6 +70,9 @@ const float32 b2_angularSlop = 2.0f / 180.0f * b2_pi;			// 2 degrees
 /// b2_linearSlop.
 const float32 b2_toiSlop = 8.0f * b2_linearSlop;
 
+/// Maximum number of contacts to be handled to solve a TOI island.
+const int32 b2_maxTOIContactsPerIsland = 32;
+
 /// A velocity threshold for elastic collisions. Any collision with a relative linear
 /// velocity below this threshold will be treated as inelastic.
 const float32 b2_velocityThreshold = 1.0f * b2_lengthUnitsPerMeter / b2_timeUnitsPerSecond;		// 1 m/s

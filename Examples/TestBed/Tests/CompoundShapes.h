@@ -102,6 +102,7 @@ public:
 			sd2.vertices[1] = b2Mul(xf2, b2Vec2(1.0f, 0.0f));
 			sd2.vertices[2] = b2Mul(xf2, b2Vec2(0.0f, 0.5f));
 			sd2.density = 2.0f;
+			sd2.isSensor = true;
 
 			for (int32 i = 0; i < 10; ++i)
 			{

@@ -30,8 +30,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->AddShape(m_world->Create(&sd));
-			m_world->Create(&bd);
+			b2Body* ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
@@ -52,9 +52,10 @@ public:
 				for (int32 j = i; j < 25; ++j)
 				{
 					b2BodyDef bd;
-					body->AddShape(m_world->Create(&sd));
 					bd.position = y;
-					m_world->Create(&bd);
+					b2Body* body = m_world->Create(&bd);
+					body->AddShape(&sd);
+					body->SetMassFromShapes();
 
 					y += deltaY;
 				}

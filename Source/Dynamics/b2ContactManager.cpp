@@ -121,28 +121,9 @@ void b2ContactManager::PairRemoved(void* proxyUserData1, void* proxyUserData2, v
 		return;
 	}
 
-	b2Shape* shape1 = c->GetShape1();
-	b2Shape* shape2 = c->GetShape2();
-
-	b2Body* body1 = shape1->GetBody();
-	b2Body* body2 = shape2->GetBody();
-
-	bool sayGoodBye1 = (body1->m_flags & b2Body::e_sayGoodByeFlag) != 0;
-	bool sayGoodBye2 = (body2->m_flags & b2Body::e_sayGoodByeFlag) != 0;
-
-	if (sayGoodBye1 || sayGoodBye2)
-	{
-		// An attached body is being destroyed, we must destroy this contact
-		// immediately to avoid orphaned shape pointers.
-		Destroy(c);
-	}
-	else
-	{
-		// Don't destroy the contact yet, so the user can get results.
-		// Just mark it as retired and it will be destroyed at the beginning
-		// of the next time step.
-		c->m_flags |= b2Contact::e_retiredFlag;
-	}
+	// An attached body is being destroyed, we must destroy this contact
+	// immediately to avoid orphaned shape pointers.
+	Destroy(c);
 }
 
 void b2ContactManager::Destroy(b2Contact* c)
@@ -217,19 +198,6 @@ void b2ContactManager::Destroy(b2Contact* c)
 // contact list.
 void b2ContactManager::Collide()
 {
-	// Destroy retired contacts.
-	b2Contact* c = m_world->m_contactList;
-	while (c != NULL)
-	{
-		b2Contact* c0 = c;
-		c = c->GetNext();
-
-		if (c0->m_flags & b2Contact::e_retiredFlag)
-		{
-			Destroy(c0);
-		}
-	}
-
 	// Update awake contacts.
 	for (b2Contact* c = m_world->m_contactList; c; c = c->GetNext())
 	{

@@ -22,6 +22,7 @@
 //#include "Contacts/b2Contact.h"
 #include "../Collision/Shapes/b2Shape.h"
 
+// TODO_ERIN use Type and MassData.
 b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
 	b2Assert(world->m_lock == false);

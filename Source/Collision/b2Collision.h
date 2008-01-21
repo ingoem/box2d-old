@@ -47,8 +47,8 @@ struct b2ContactPoint
 {
 	b2Vec2 position;
 	float32 separation;
-	float32 normalImpulse;
-	float32 tangentImpulse;
+	float32 normalForce;
+	float32 tangentForce;
 	b2ContactID id;
 };
 
@@ -56,9 +56,6 @@ struct b2TOIPoint
 {
 	b2Vec2 position;
 	b2Vec2 normal;
-	float32 separation;
-	float32 normalImpulse;
-	float32 tangentImpulse;
 };
 
 /// A manifold for two touching convex shapes.
@@ -69,7 +66,7 @@ struct b2Manifold
 	int32 pointCount;
 };
 
-/// A line setgment.
+/// A line segment.
 struct b2Segment
 {
 	/// Ray cast against this segment with another segment.

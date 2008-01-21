@@ -44,7 +44,7 @@ public:
 
 	void Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correctPositions, bool allowSleep);
 
-	void SolveTOI();
+	void SolveTOI(const b2TimeStep& subStep);
 
 	void Add(b2Body* body)
 	{

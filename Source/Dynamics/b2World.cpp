@@ -207,12 +207,6 @@ void b2World::Destroy(b2Body* b)
 		return;
 	}
 
-	// When a body's shapes are destroyed, the contacts are
-	// implicitly destroyed via the pair manager. Set a flag
-	// to let the contact manager know that this body is being
-	// destroyed so that the contact is destroyed immediately.
-	b->m_flags |= b2Body::e_sayGoodByeFlag;
-
 	// Delete the attached joints.
 	b2JointNode* jn = b->m_jointList;
 	while (jn)
@@ -547,143 +541,119 @@ void b2World::Solve(const b2TimeStep& step)
 	m_broadPhase->Commit();
 }
 
-#if 0
 // Find TOI contacts and solve them.
 void b2World::SolveTOI(const b2TimeStep& step)
 {
+	// Reserve an island and a stack for TOI island solution.
+	b2Island island(m_bodyCount, b2_maxTOIContactsPerIsland, 0, &m_stackAllocator, m_contactListener);
+	int32 stackSize = m_bodyCount;
+	b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
+
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
 	{
-		b->m_toi = 0.0f;
+		b->m_flags &= ~b2Body::e_islandFlag;
+		b->m_t = 0.0f;
 	}
 
-	float32 t = 0.0f;
-	while (t < 1.0f)
+	for (b2Contact* c = m_contactList; c; c = c->m_next)
 	{
-		b2TOIPoint toiPoint;
-		b2Contact* toiContact = NULL;
+		// Invalidate TOI
+		c->m_flags &= ~(b2Contact::e_toiFlag | b2Contact::e_islandFlag);
+	}
+
+	// Find TOI events and solve them.
+	for (;;)
+	{
+		// Find the first TOI.
+		b2Contact* minContact = NULL;
 		float32 minTOI = 1.0f;
 
-		int32 index = 0;
-		for (b2Contact* c = m_contactList; c; c = c->m_next, ++index)
+		for (b2Contact* c = m_contactList; c; c = c->m_next)
 		{
 			if (c->m_flags & (b2Contact::e_slowFlag | b2Contact::e_nonSolidFlag))
 			{
 				continue;
 			}
 
-			b2Shape* s1 = c->GetShape1();
-			b2Shape* s2 = c->GetShape2();
-			b2Body* b1 = s1->GetBody();
-			b2Body* b2 = s2->GetBody();
+			// TODO_ERIN keep a counter on the contact, only respond to M TOIs per contact.
 
-			b2Sweep sweep1, sweep2;
-			b1->GetSweep(&sweep1);
-			b2->GetSweep(&sweep2);
-
-			b2TOIPoint point;
-			float32 toi = b2TimeOfImpact(&point, c->m_shape1, sweep1, c->m_shape2, sweep2, 1.0f);
-			c->m_toi = toi;
-			if (toi < minTOI)
+			float32 toi = 1.0f;
+			if (c->m_flags & b2Contact::e_toiFlag)
 			{
-				toiPoint = point;
-				toiContact = c;
+				// This contact has a valid cached TOI.
+				toi = c->m_toi;
+			}
+			else
+			{
+				// Compute the TOI for this contact.
+				b2Shape* s1 = c->GetShape1();
+				b2Shape* s2 = c->GetShape2();
+				b2Body* b1 = s1->GetBody();
+				b2Body* b2 = s2->GetBody();
+
+				if ((b1->IsStatic() || b1->IsSleeping()) && (b2->IsStatic() || b2->IsSleeping()))
+				{
+					continue;
+				}
+
+				float32 t1 = b1->m_t;
+				float32 t2 = b2->m_t;
+				float32 t = b2Max(t1, t2);
+				b2Assert(t < 1.0f);
+
+				b2Sweep sweep1, sweep2;
+				b1->GetSweep(&sweep1, t);
+				b2->GetSweep(&sweep2, t);
+
+				b2TOIPoint point;
+				toi = b2TimeOfImpact(&point, c->m_shape1, sweep1, c->m_shape2, sweep2, 1.0f);
+				b2Assert(0.0f <= toi && toi <= 1.0f);
+				if (toi > 0.0f && toi < 1.0f)
+				{
+					toi = b2Min(t + toi * (1.0f - t), 1.0f);
+				}
+
+				c->m_toi = toi;
+				c->m_flags |= b2Contact::e_toiFlag;
+			}
+
+			if (FLT_EPSILON < toi && toi < minTOI)
+			{
+				// This is the minimum TOI found so far.
+				minContact = c;
 				minTOI = toi;
 			}
 		}
 
-		if (toiContact)
+		if (minContact == NULL)
 		{
-			b2Body* b1 = toiContact->GetShape1()->GetBody();
-			b2Body* b2 = toiContact->GetShape2()->GetBody();
-			if (b1->IsStatic() == false)
-			{
-				// March forward
-				b1->m_position0 += (minTOI - b1->m_toi) * (b1->m_xf.position - b1->m_position0);
-				b1->m_angle0 += (minTOI - b1->m_toi) * (b1->m_angle - b1->m_angle0);
-				b1->m_xf.position = b1->m_position0;
-				b1->m_angle = b1->m_angle0;
-				b1->m_xf.R.Set(b1->m_angle);
-				b1->WakeUp();
-			}
-
-			if (b2->IsStatic() == false)
-			{
-				// March forward
-				b2->m_position0 += (minTOI - b2->m_toi) * (b2->m_xf.position - b2->m_position0);
-				b2->m_angle0 += (minTOI - b2->m_toi) * (b2->m_angle - b2->m_angle0);
-				b2->m_xf.position = b2->m_position0;
-				b2->m_angle = b2->m_angle0;
-				b2->m_xf.R.Set(b2->m_angle);
-				b2->WakeUp();
-			}
-
-			b2SolveContactPoint(&toiPoint, b1, b2, toiContact->m_restitution, toiContact->m_friction, 0.5f * 60.0f);
-
-			float32 dt = step.dt * (1.0f - minTOI);
-
-			if (b1->IsStatic() == false)
-			{
-				// Integrate
-				b1->m_xf.position += dt * b1->m_linearVelocity;
-				b1->m_angle += dt * b1->m_angularVelocity;
-				b1->m_xf.R.Set(b1->m_angle);
-				
-				b1->SynchronizeShapes();
-			}
-
-
-			if (b2->IsStatic() == false)
-			{
-				// Integrate
-				b2->m_xf.position += dt * b2->m_linearVelocity;
-				b2->m_angle += dt * b2->m_angularVelocity;
-				b2->m_xf.R.Set(b2->m_angle);
-				
-				b2->SynchronizeShapes();
-			}
-
-			m_broadPhase->Commit();
-
-			b1->m_toi = minTOI;
-			b2->m_toi = minTOI;
-			t = minTOI;
+			// No more TOI events. Done!
+			break;
 		}
-		else
+
+		// Teleport the bodies to the TOI.
+		b2Shape* s1 = minContact->GetShape1();
+		b2Shape* s2 = minContact->GetShape2();
+		b2Body* b1 = s1->GetBody();
+		b2Body* b2 = s2->GetBody();
+		b1->SetStepFraction(minTOI);
+		b2->SetStepFraction(minTOI);
+
+		// The TOI contact likely has some new contact points.
+		minContact->Update(m_contactListener);
+
+		if (minContact->GetManifoldCount() == 0)
 		{
-			t = 1.0f;
-		}
-	}
-}
-
-#else
-
-// Find TOI islands and solve them.
-void b2World::SolveTOI(const b2TimeStep& step)
-{
-	step;
-
-	// Size the island for the worst case.
-	b2Island island(m_bodyCount, m_contactCount, 0, &m_stackAllocator, m_contactListener);
-
-	// Clear all the island flags.
-	for (b2Body* b = m_bodyList; b; b = b->m_next)
-	{
-		b->m_flags &= ~b2Body::e_islandFlag;
-		b->m_toi = 1.0f;
-	}
-	for (b2Contact* c = m_contactList; c; c = c->m_next)
-	{
-		c->m_flags &= ~b2Contact::e_islandFlag;
-	}
-
-	// Build and solve all TOI islands.
-	int32 stackSize = m_bodyCount;
-	b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
-	for (b2Body* seed = m_bodyList; seed; seed = seed->m_next)
-	{
-		if (seed->m_flags & (b2Body::e_staticFlag | b2Body::e_islandFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag))
-		{
+			// This shouldn't happen. Numerical error?
+			//b2Assert(false);
 			continue;
+		}
+
+		// Build the TOI island. We need a dynamic seed.
+		b2Body* seed = b1;
+		if (seed->IsStatic())
+		{
+			seed = b2;
 		}
 
 		// Reset island and stack.
@@ -692,16 +662,19 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		stack[stackCount++] = seed;
 		seed->m_flags |= b2Body::e_islandFlag;
 
-		// Perform a depth first search (DFS) on the constraint graph.
+		// Perform a depth first search (DFS) on the contact graph.
 		while (stackCount > 0)
 		{
 			// Grab the next body off the stack and add it to the island.
 			b2Body* b = stack[--stackCount];
 			island.Add(b);
 
-			// To keep the island as small as possible, we don't
-			// propagate across sleeping or static bodies.
-			if (b->m_flags & (b2Body::e_staticFlag | b2Body::e_sleepFlag))
+			// Make sure the body is awake.
+			b->m_flags &= ~b2Body::e_sleepFlag;
+
+			// To keep islands as small as possible, we don't
+			// propagate islands across static bodies.
+			if (b->m_flags & b2Body::e_staticFlag)
 			{
 				continue;
 			}
@@ -709,7 +682,20 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			// Search all contacts connected to this body.
 			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
 			{
+				// Does the TOI island still have space for contacts?
+				if (island.m_contactCount == island.m_contactCapacity)
+				{
+					continue;
+				}
+
+				// Has this contact already been added to an island? Skip slow or non-solid contacts.
 				if (cn->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_slowFlag | b2Contact::e_nonSolidFlag))
+				{
+					continue;
+				}
+
+				// Is this contact touching? For performance we are not updating this contact.
+				if (cn->contact->GetManifoldCount() == 0)
 				{
 					continue;
 				}
@@ -717,10 +703,20 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				island.Add(cn->contact);
 				cn->contact->m_flags |= b2Contact::e_islandFlag;
 
+				// Update other body.
 				b2Body* other = cn->other;
+
+				// Was the other body already added to this island?
 				if (other->m_flags & b2Body::e_islandFlag)
 				{
 					continue;
+				}
+
+				// March forward, this can do no harm since this is the min TOI.
+				if (other->IsStatic() == false)
+				{
+					other->SetStepFraction(minTOI);
+					other->WakeUp();
 				}
 
 				b2Assert(stackCount < stackSize);
@@ -729,41 +725,60 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			}
 		}
 
-		// An island without contacts doesn't need TOI solution.
-		if (island.m_contactCount > 0)
+		b2TimeStep subStep;
+		subStep.dt = (1.0f - minTOI) * step.dt;
+		b2Assert(subStep.dt > 0.0f);
+		subStep.inv_dt = 1.0f / subStep.dt;
+		subStep.maxIterations = step.maxIterations;
+
+		island.SolveTOI(subStep);
+
+		// Post solve cleanup.
+		for (int32 i = 0; i < island.m_bodyCount; ++i)
 		{
-			b2Assert(island.m_contactCount <= m_contactCount);
+			// Allow bodies to participate in future TOI islands.
+			b2Body* b = island.m_bodies[i];
+			b->m_flags &= ~b2Body::e_islandFlag;
 
-			island.SolveTOI();
-
-			// Post solve cleanup.
-			for (int32 i = 0; i < island.m_bodyCount; ++i)
+			uint32 skipFlags = b2Body::e_sleepFlag | b2Body::e_staticFlag | b2Body::e_frozenFlag;
+			if (b->m_flags & skipFlags)
 			{
-				// Allow static bodies to participate in other islands.
-				b2Body* b = island.m_bodies[i];
-				if (b->m_flags & b2Body::e_staticFlag)
-				{
-					b->m_flags &= ~b2Body::e_islandFlag;
-				}
+				continue;
+			}
+
+			// Update shapes (for broad-phase). If the shapes go out of
+			// the world AABB then shapes and contacts may be destroyed,
+			// including contacts that are
+			bool inRange = b->SynchronizeShapes();
+
+			// Did the body's shapes leave the world?
+			if (inRange == false && m_boundaryListener != NULL)
+			{
+				m_boundaryListener->Violation(b);
+			}
+
+			// Invalidate all contact TOIs associated with this body.
+			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
+			{
+				cn->contact->m_flags &= ~b2Contact::e_toiFlag;
 			}
 		}
-	}
 
-	// Advance safe points for awake, dynamic bodies that did not have a TOI event.
-	for (b2Body* b = m_bodyList; b; b = b->m_next)
-	{
-		if (b->m_flags & (b2Body::e_staticFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag))
+		for (int32 i = 0; i < island.m_contactCount; ++i)
 		{
-			continue;
+			// Allow contacts to participate in future TOI islands.
+			b2Contact* c = island.m_contacts[i];
+			c->m_flags &= ~b2Contact::e_islandFlag;
 		}
 
-		b->m_position0 = b->m_xf.position;
-		b->m_angle0 = b->m_angle;
+		// Commit shape proxy movements to the broad-phase so that new contacts are created.
+		// Also, some contacts can be destroyed.
+		m_broadPhase->Commit();
 	}
 
 	m_stackAllocator.Free(stack);
 }
-#endif
+
 
 void b2World::Step(float32 dt, int32 iterations)
 {
@@ -1109,7 +1124,7 @@ void b2World::DrawDebugData()
 				b2Manifold* m = ms + i;
 				for (int j = 0; j < m->pointCount; ++j)
 				{
-					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].normalImpulse * m->normal, color);
+					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].normalForce * m->normal, color);
 				}
 			}
 		}
@@ -1128,7 +1143,7 @@ void b2World::DrawDebugData()
 
 				for (int j = 0; j < m->pointCount; ++j)
 				{
-					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].tangentImpulse * tangent, color);
+					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].tangentForce * tangent, color);
 				}
 			}
 		}

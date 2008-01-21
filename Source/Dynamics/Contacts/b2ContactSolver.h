@@ -21,6 +21,7 @@
 
 #include "../../Common/b2Math.h"
 #include "../../Collision/b2Collision.h"
+#include "../b2World.h"
 
 class b2Contact;
 class b2Body;
@@ -31,8 +32,8 @@ struct b2ContactConstraintPoint
 {
 	b2Vec2 localAnchor1;
 	b2Vec2 localAnchor2;
-	float32 normalImpulse;
-	float32 tangentImpulse;
+	float32 normalForce;
+	float32 tangentForce;
 	float32 positionImpulse;
 	float32 normalMass;
 	float32 tangentMass;
@@ -56,7 +57,7 @@ struct b2ContactConstraint
 class b2ContactSolver
 {
 public:
-	b2ContactSolver(b2Contact** contacts, int32 contactCount, b2StackAllocator* allocator);
+	b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, int32 contactCount, b2StackAllocator* allocator);
 	~b2ContactSolver();
 
 	void InitVelocityConstraints();
@@ -65,6 +66,7 @@ public:
 
 	bool SolvePositionConstraints(float32 baumgarte);
 
+	b2TimeStep m_step;
 	b2StackAllocator* m_allocator;
 	b2ContactConstraint* m_constraints;
 	int m_constraintCount;

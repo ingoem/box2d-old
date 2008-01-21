@@ -103,7 +103,6 @@ public:
 		e_persistFlag	= 0x0010,
 		e_endFlag		= 0x0020,
 		e_toiFlag		= 0x0040,
-		e_retiredFlag	= 0x0080,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
@@ -117,7 +116,6 @@ public:
 	virtual ~b2Contact() {}
 
 	float32 TimeOfImpact(b2ContactListener* listener);
-	void ResolveTOI(b2StackAllocator* allocator);
 	void Update(b2ContactListener* listener);
 	virtual void Evaluate() = 0;
 	static b2ContactRegister s_registers[e_shapeTypeCount][e_shapeTypeCount];
