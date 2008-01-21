@@ -58,7 +58,7 @@
 
         /* Link with Win32 static freeglut lib */
 #       if defined(_MSC_VER)
-#           pragma comment (lib, "freeglut_static.lib")
+//#           pragma comment (lib, "freeglut_static.lib")
 #       endif
 
 /* Windows shared library (DLL) */
