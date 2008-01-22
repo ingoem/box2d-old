@@ -211,22 +211,3 @@ void b2ContactManager::Collide()
 		c->Update(m_world->m_contactListener);
 	}
 }
-
-void b2ContactManager::Report()
-{
-	// Report contact results to the user.
-	if (m_world->m_contactListener)
-	{
-		for (b2Contact* c = m_world->m_contactList; c; c = c->GetNext())
-		{
-			b2Body* body1 = c->GetShape1()->GetBody();
-			b2Body* body2 = c->GetShape2()->GetBody();
-			if (body1->IsSleeping() && body2->IsSleeping())
-			{
-				continue;
-			}
-
-			m_world->m_contactListener->Report(c);
-		}
-	}
-}

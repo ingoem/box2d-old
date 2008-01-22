@@ -58,7 +58,7 @@ public:
 			body->SetLinearVelocity(b2Vec2(-200.0f, 0.0f));
 			body->SetAngularVelocity(m_angularVelocity);
 		}
-#elif 0
+#elif 1
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(10.0f, 0.1f);
