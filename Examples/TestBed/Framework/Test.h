@@ -41,8 +41,8 @@ struct Settings
 		drawPairs(0),
 		drawContactPoints(0),
 		drawContactNormals(0),
-		drawContactImpulses(0),
-		drawFrictionImpulses(0),
+		drawContactForces(0),
+		drawFrictionForces(0),
 		drawCOMs(0),
 		enableWarmStarting(1),
 		enablePositionCorrection(1),
@@ -61,8 +61,8 @@ struct Settings
 	int32 drawPairs;
 	int32 drawContactPoints;
 	int32 drawContactNormals;
-	int32 drawContactImpulses;
-	int32 drawFrictionImpulses;
+	int32 drawContactForces;
+	int32 drawFrictionForces;
 	int32 drawCOMs;
 	int32 drawStats;
 	int32 enableWarmStarting;

@@ -145,6 +145,7 @@ void Test::LaunchBomb()
 	}
 
 	b2BodyDef bd;
+	bd.type = b2BodyDef::e_dynamicBody;
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
 	bd.isBullet = true;
@@ -189,8 +190,8 @@ void Test::Step(Settings* settings)
 	flags += settings->drawPairs			* b2DebugDraw::e_pairBit;
 	flags += settings->drawContactPoints	* b2DebugDraw::e_contactPointBit;
 	flags += settings->drawContactNormals	* b2DebugDraw::e_contactNormalBit;
-	flags += settings->drawContactImpulses	* b2DebugDraw::e_contactImpulseBit;
-	flags += settings->drawFrictionImpulses	* b2DebugDraw::e_frictionImpulseBit;
+	flags += settings->drawContactForces	* b2DebugDraw::e_contactForceBit;
+	flags += settings->drawFrictionForces	* b2DebugDraw::e_frictionForceBit;
 	flags += settings->drawCOMs				* b2DebugDraw::e_centerOfMassBit;
 	m_debugDraw.SetFlags(flags);
 

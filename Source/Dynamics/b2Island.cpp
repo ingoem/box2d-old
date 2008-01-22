@@ -154,8 +154,14 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 		b->m_torque = 0.0f;
 
 		// Apply damping.
-		b->m_linearVelocity *= b->m_linearDamping;
-		b->m_angularVelocity *= b->m_angularDamping;
+		// ODE: dv/dt + c * v = 0
+		// Solution: v(t) = v0 * exp(-c * t)
+		// Time step: v(t + dt) = v0 * exp(-c * (t + dt)) = v0 * exp(-c * t) * exp(-c * dt) = v * exp(-c * dt)
+		// v2 = exp(-c * dt) * v1
+		// Taylor expansion:
+		// v2 = (1.0f - c * dt) * v1
+		b->m_linearVelocity *= b2Clamp(1.0f - step.dt * b->m_linearDamping, 0.0f, 1.0f);
+		b->m_angularVelocity *= b2Clamp(1.0f - step.dt * b->m_angularDamping, 0.0f, 1.0f);
 
 		// Check for large velocities.
 		if (b2Dot(b->m_linearVelocity, b->m_linearVelocity) > b2_maxLinearVelocitySquared)
@@ -303,8 +309,7 @@ void b2Island::SolveTOI(const b2TimeStep& subStep)
 {
 	b2ContactSolver contactSolver(subStep, m_contacts, m_contactCount, m_allocator);
 
-	// Initialize velocity constraints.
-	contactSolver.InitVelocityConstraints();
+	// No warm starting needed for TOI events.
 
 	// Solve velocity constraints.
 	for (int32 i = 0; i < subStep.maxIterations; ++i)
@@ -312,8 +317,8 @@ void b2Island::SolveTOI(const b2TimeStep& subStep)
 		contactSolver.SolveVelocityConstraints();
 	}
 
-	// Post-solve (store impulses for warm starting).
-	contactSolver.FinalizeVelocityConstraints();
+	// Don't store the TOI contact forces for warm starting
+	// because they can be quite large.
 
 	// Integrate positions.
 	for (int32 i = 0; i < m_bodyCount; ++i)

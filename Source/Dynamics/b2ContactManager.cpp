@@ -226,8 +226,7 @@ void b2ContactManager::Report()
 				continue;
 			}
 
-			bool newContact = (c->m_flags & b2Contact::e_beginFlag) != 0;
-			m_world->m_contactListener->Report(c->GetManifolds(), c->GetManifoldCount(), c->GetShape1(), c->GetShape2(), newContact);
+			m_world->m_contactListener->Report(c);
 		}
 	}
 }

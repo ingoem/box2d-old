@@ -141,30 +141,51 @@ b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 	m_node2.prev = NULL;
 	m_node2.next = NULL;
 	m_node2.other = NULL;
+
+	m_state = e_notTouching;
 }
 
 void b2Contact::Update(b2ContactListener* listener)
 {
-	int32 oldCount = m_manifoldCount;
-
-	// The oldCount might be positive due to a TOI event. We should
-	// still notify the user that contact has begun.
-	bool toiBegin = (m_flags & e_toiFlag) != 0;
-
 	Evaluate();
 
-	m_flags &= ~(e_beginFlag | e_persistFlag | e_endFlag | e_toiFlag);
-	if ((oldCount == 0 || toiBegin) && m_manifoldCount > 0)
+	switch (m_state)
 	{
-		m_flags |= e_beginFlag;
-	}
-	else if (oldCount > 0 && m_manifoldCount == 0)
-	{
-		m_flags |= e_endFlag;
-	}
-	else if (m_manifoldCount > 0)
-	{
-		m_flags |= e_persistFlag;
+	case e_notTouching:
+		if (m_manifoldCount > 0)
+		{
+			m_state = e_beginTouching;
+		}
+		break;
+
+	case e_beginTouching:
+		if (m_manifoldCount > 0)
+		{
+			m_state = e_touching;
+		}
+		else
+		{
+			m_state = e_endTouching;
+		}
+		break;
+
+	case e_touching:
+		if (m_manifoldCount == 0)
+		{
+			m_state = e_endTouching;
+		}
+		break;
+
+	case e_endTouching:
+		if (m_manifoldCount > 0)
+		{
+			m_state = e_beginTouching;
+		}
+		else
+		{
+			m_state = e_notTouching;
+		}
+		break;
 	}
 
 	b2Body* body1 = m_shape1->GetBody();
@@ -182,75 +203,13 @@ void b2Contact::Update(b2ContactListener* listener)
 
 	if (listener)
 	{
-		b2SolverTweaks tweaks;
-		tweaks.friction = m_friction;
-		tweaks.restitution = m_restitution;
-		tweaks.nonSolid = bool(m_flags & e_nonSolidFlag);
-
-		if (m_flags & e_beginFlag)
+		if (m_state == e_beginTouching || m_state == e_touching)
 		{
-			listener->Tweak(&tweaks, GetManifolds(), m_manifoldCount, m_shape1, m_shape2, true);
+			listener->Report(this);
 		}
-		else if (m_flags & e_endFlag)
+		else if (m_state == e_endTouching)
 		{
 			listener->End(m_shape1, m_shape2);
 		}
-		else if (m_flags & e_persistFlag)
-		{
-			listener->Tweak(&tweaks, GetManifolds(), m_manifoldCount, m_shape1, m_shape2, false);
-		}
-
-		m_friction = tweaks.friction;
-		m_restitution = tweaks.restitution;
-		if (tweaks.nonSolid)
-		{
-			m_flags |= e_nonSolidFlag;
-		}
-		else
-		{
-			m_flags &= ~e_nonSolidFlag;
-		}
 	}
-}
-
-float32 b2Contact::TimeOfImpact(b2ContactListener* listener)
-{
-	b2Body* b1 = m_shape1->GetBody();
-	b2Body* b2 = m_shape2->GetBody();
-
-	b2Sweep sweep1, sweep2;
-	b1->GetSweep(&sweep1);
-	b2->GetSweep(&sweep2);
-	float32 toi1 = b1->GetTOI();
-	float32 toi2 = b2->GetTOI();
-	b2TOIPoint point;
-
-	// Use maxTOI as an early out of the TOI calculation.
-	float32 maxTOI = b2Min(toi1, toi2);
-
-	float32 toi = b2TimeOfImpact(&point, m_shape1, sweep1, m_shape2, sweep2, maxTOI);
-	if (toi < maxTOI)
-	{
-		bool apply = true;
-		if (listener)
-		{
-			b2XForm xf1 = sweep1.GetXForm(toi);
-			b2XForm xf2 = sweep2.GetXForm(toi);
-			apply = listener->TOI(m_shape1, xf1, point.position, m_shape2, xf2, point.position);
-		}
-
-		if (apply)
-		{
-			b1->SetTOI(toi);
-			b2->SetTOI(toi);
-		}
-		else
-		{
-			toi = 1.0f;
-		}
-
-		return toi;
-	}
-
-	return 1.0f;
 }

@@ -158,11 +158,11 @@ void DebugDraw::DrawXForm(const b2XForm& xf)
 	glEnd();
 }
 
-void DebugDraw::DrawImpulse(const b2Vec2& point, const b2Vec2& impulse, const b2Color& color)
+void DebugDraw::DrawForce(const b2Vec2& point, const b2Vec2& force, const b2Color& color)
 {
-	const float32 k_impulseScale = 1.0f;
+	const float32 k_forceScale = 0.1f;
 	b2Vec2 p1 = point;
-	b2Vec2 p2 = point + k_impulseScale * impulse;
+	b2Vec2 p2 = point + k_forceScale * force;
 	DrawSegment(p1, p2, color);
 }
 

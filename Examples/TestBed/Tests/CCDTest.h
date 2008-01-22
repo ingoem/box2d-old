@@ -34,6 +34,7 @@ public:
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
 			b2Body* body = m_world->Create(&bd);
 			body->AddShape(&sd);
@@ -49,6 +50,7 @@ public:
 			//m_angularVelocity = 39.596241f;
 
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(50.0f, 20.0f);
 			b2Body* body = m_world->Create(&bd);
 			body->AddShape(&sd);
@@ -102,7 +104,7 @@ public:
 			bd3.type = b2BodyDef::e_dynamicBody;
 			bd3.isBullet = true;
 			bd3.allowSleep = false;
-			bd3.position.Set(1.0f, 100.0f);
+			bd3.position.Set(0.0f, 100.0f);
 			b2Body* b3 = m_world->Create(&bd3);
 			b3->AddShape(&sd);
 			b3->SetMassFromShapes();
@@ -113,6 +115,7 @@ public:
 
 		{
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
 			b2Body* body = m_world->Create(&bd);
 
@@ -140,6 +143,7 @@ public:
 
 		{
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(-5.0f, 20.0f);
 			bd.isBullet = true;
 			b2Body* body = m_world->Create(&bd);
@@ -157,6 +161,7 @@ public:
 		for (int32 i = 0; i < 3; ++i)
 		{
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(5.0f, 20.0f + i);
 			bd.isBullet = true;
 			b2Body* body = m_world->Create(&bd);

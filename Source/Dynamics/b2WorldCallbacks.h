@@ -21,12 +21,12 @@
 
 #include "../Common/b2Settings.h"
 
-struct b2Manifold;
 struct b2Vec2;
 struct b2XForm;
 class b2Shape;
 class b2Body;
 class b2Joint;
+class b2Contact;
 
 /// Joints and shapes are destroyed when their associated
 /// body is destroyed. Implement this listener so that you
@@ -66,75 +66,30 @@ public:
 	virtual ~b2ContactFilter() {}
 
 	/// Return true if contact calculations should be performed between these two shapes.
+	/// @warning for performance reasons this is only called when the AABBs begin to overlap.
 	virtual bool ShouldCollide(b2Shape* shape1, b2Shape* shape2);
 };
 
 /// The default contact filter.
 extern b2ContactFilter b2_defaultFilter;
 
-
-/// This structure allows you to tweak the contact solver behavior.
-struct b2SolverTweaks
-{
-	/// Set this to true if you want the contact solver to ignore this contact.
-	bool nonSolid;
-
-	/// Override the default friction determined from the shapes.
-	float32 friction;
-
-	/// Override the default restitution determined from the shapes.
-	float32 restitution;
-};
-
 /// Implement this class to get collision results. You can use these results for
-/// things like sounds and game logic. You can also use this class to tweak contact 
-/// settings. These tweaks persist until you tweak the settings again or the contact
-/// is destroyed.
+/// things like sounds and game logic. You can also get contact results by
+/// traversing the contact lists after the time step. However, you might miss
+/// some contacts.
 /// @warning You cannot create/destroy Box2D entities inside these callbacks.
 class b2ContactListener
 {
 public:
 	virtual ~b2ContactListener() {}
 
-	/// Reports a time of impact (TOI) event. Allows you to dismiss this event. You will get
-	/// the results for any new contacts the next time step. TOI events are tentative, so
-	/// you aren't guaranteed these shapes will collide.
-	/// @param shape1 the first shape.
-	/// @param xf1 the TOI transform of shape1.
-	/// @param point1 the closest point on shape1 in world coordinates.
-	/// @param shape2 the second shape.
-	/// @param xf2 the TOI transform of shape2.
-	/// @param point2 the closest point on shape2 in world coordinates.
-	/// @return false if this TOI event should be ignored.
-	virtual bool TOI(	const b2Shape* shape1, const b2XForm& xf1, const b2Vec2& point1,
-						const b2Shape* shape2, const b2XForm& xf2, const b2Vec2& point2);
+	/// Called whenever a contact is updated and the shapes are touching. A single
+	/// may be updated multiple times per time step.
+	/// @param contact the contact object.
+	virtual void Report(const b2Contact* contact) = 0;
 
-	/// Called just before contacts are solved. This allows you to adjust the solver
-	/// behavior. This also allows you to adjust the behavior of TOI events.
-	/// The manifold normal points from shape1 to shape2. The impulses stored in
-	/// the manifold are stale.
-	/// @param tweaks allows you to adjust the contact solver behavior.
-	/// @param manifolds array of contact manifolds. You may adjust this, but be careful.
-	/// @param manifoldCount the number of contact manifolds.
-	/// @param shape1 the first shape in the contact.
-	/// @param shape2 the second shape in the contact.
-	/// @param newContact true if the shapes just started touching. 
-	virtual void Tweak(	b2SolverTweaks* tweaks, b2Manifold* manifolds, int32 manifoldCount,
-						const b2Shape* shape1, const b2Shape* shape2, bool newContact) = 0;
-
-	/// Called at the end of the step with the contact results. The impulses stored in the
-	/// manifold are current (except for TOI contacts).
-	/// @param manifolds array of contact manifolds.
-	/// @param manifoldCount the number of contact manifolds.
-	/// @param shape1 the first shape in the contact.
-	/// @param shape2 the second shape in the contact.
-	/// @param newContact true if the shapes just started touching. 
-	virtual void Report(const b2Manifold* manifolds, int32 manifoldCount,
-						const b2Shape* shape1, const b2Shape* shape2, bool newContact) = 0;
-
-	/// Called when contact ends. This does not mean the contact object is destroyed, it just
-	/// means that there are no contact points. You may see a contact begin/persist and then
-	/// end in one time step.
+	/// Called when contact ends. This does not mean the contact object is destroyed,
+	/// it just means that there are no contact points.
 	/// @param shape1 the first shape in the contact.
 	/// @param shape2 the second shape in the contact.
 	virtual void End(const b2Shape* shape1, const b2Shape* shape2) = 0;
@@ -167,8 +122,8 @@ public:
 		e_pairBit				= 0x0020, ///< draw broad-phase pairs
 		e_contactPointBit		= 0x0040, ///< draw contact points
 		e_contactNormalBit		= 0x0080, ///< draw contact normals
-		e_contactImpulseBit		= 0x0100, ///< draw contact impulses
-		e_frictionImpulseBit	= 0x0200, ///< draw friction impulses
+		e_contactForceBit		= 0x0100, ///< draw contact impulses
+		e_frictionForceBit		= 0x0200, ///< draw friction impulses
 		e_centerOfMassBit		= 0x0400, ///< draw center of mass frame
 	};
 
@@ -211,10 +166,10 @@ public:
 	/// @param xf a transform.
 	virtual void DrawXForm(const b2XForm& xf) = 0;
 
-	/// Draw an impulse. Choose your own length scale.
-	/// @param point the impulse point of application in world coordinates.
-	/// @param axis the impulse vector in world coordinates.
-	virtual void DrawImpulse(const b2Vec2& point, const b2Vec2& impulse, const b2Color& color) = 0;
+	/// Draw a force. Choose your own length scale.
+	/// @param point the force point of application in world coordinates.
+	/// @param force the force vector in world coordinates.
+	virtual void DrawForce(const b2Vec2& point, const b2Vec2& force, const b2Color& color) = 0;
 
 protected:
 	uint32 m_drawFlags;

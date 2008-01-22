@@ -439,7 +439,7 @@ void b2World::Solve(const b2TimeStep& step)
 
 			// To keep islands as small as possible, we don't
 			// propagate islands across static bodies.
-			if (b->m_flags & b2Body::e_staticFlag)
+			if (b->IsStatic())
 			{
 				continue;
 			}
@@ -506,7 +506,7 @@ void b2World::Solve(const b2TimeStep& step)
 		{
 			// Allow static bodies to participate in other islands.
 			b2Body* b = island.m_bodies[i];
-			if (b->m_flags & b2Body::e_staticFlag)
+			if (b->IsStatic())
 			{
 				b->m_flags &= ~b2Body::e_islandFlag;
 			}
@@ -625,7 +625,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			}
 		}
 
-		if (minContact == NULL)
+		if (minContact == NULL || 0.95f < minTOI)
 		{
 			// No more TOI events. Done!
 			break;
@@ -641,6 +641,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 
 		// The TOI contact likely has some new contact points.
 		minContact->Update(m_contactListener);
+		minContact->m_flags &= ~b2Contact::e_toiFlag;
 
 		if (minContact->GetManifoldCount() == 0)
 		{
@@ -674,7 +675,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 
 			// To keep islands as small as possible, we don't
 			// propagate islands across static bodies.
-			if (b->m_flags & b2Body::e_staticFlag)
+			if (b->IsStatic())
 			{
 				continue;
 			}
@@ -768,7 +769,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		{
 			// Allow contacts to participate in future TOI islands.
 			b2Contact* c = island.m_contacts[i];
-			c->m_flags &= ~b2Contact::e_islandFlag;
+			c->m_flags &= ~(b2Contact::e_toiFlag | b2Contact::e_islandFlag);
 		}
 
 		// Commit shape proxy movements to the broad-phase so that new contacts are created.
@@ -1113,7 +1114,7 @@ void b2World::DrawDebugData()
 		}
 	}
 
-	if (flags & b2DebugDraw::e_contactImpulseBit)
+	if (flags & b2DebugDraw::e_contactForceBit)
 	{
 		b2Color color(0.9f, 0.9f, 0.3f);
 		for (b2Contact* c = m_contactList; c; c = c->GetNext())
@@ -1124,13 +1125,13 @@ void b2World::DrawDebugData()
 				b2Manifold* m = ms + i;
 				for (int j = 0; j < m->pointCount; ++j)
 				{
-					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].normalForce * m->normal, color);
+					m_debugDraw->DrawForce(m->points[j].position, m->points[j].normalForce * m->normal, color);
 				}
 			}
 		}
 	}
 
-	if (flags & b2DebugDraw::e_frictionImpulseBit)
+	if (flags & b2DebugDraw::e_frictionForceBit)
 	{
 		b2Color color(0.9f, 0.9f, 0.3f);
 		for (b2Contact* c = m_contactList; c; c = c->GetNext())
@@ -1143,7 +1144,7 @@ void b2World::DrawDebugData()
 
 				for (int j = 0; j < m->pointCount; ++j)
 				{
-					m_debugDraw->DrawAxis(m->points[j].position, m->points[j].tangentForce * tangent, color);
+					m_debugDraw->DrawForce(m->points[j].position, m->points[j].tangentForce * tangent, color);
 				}
 			}
 		}

@@ -26,6 +26,7 @@ public:
 	{
 		{
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
 			b2Body* body = m_world->Create(&bd);
 
@@ -49,6 +50,7 @@ public:
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				b2BodyDef bd;
+				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
 				bd.angle = b2Random(-b2_pi, b2_pi);
 				b2Body* body = m_world->Create(&bd);
@@ -71,6 +73,7 @@ public:
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				b2BodyDef bd;
+				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
 				bd.angle = b2Random(-b2_pi, b2_pi);
 				b2Body* body = m_world->Create(&bd);
@@ -102,12 +105,13 @@ public:
 			sd2.vertices[1] = b2Mul(xf2, b2Vec2(1.0f, 0.0f));
 			sd2.vertices[2] = b2Mul(xf2, b2Vec2(0.0f, 0.5f));
 			sd2.density = 2.0f;
-			sd2.isSensor = true;
 
 			for (int32 i = 0; i < 10; ++i)
 			{
 				float32 x = b2Random(-0.1f, 0.1f);
 				b2BodyDef bd;
+				bd.type = b2BodyDef::e_dynamicBody;
+				bd.isBullet = true;
 				bd.position.Set(x, 2.05f + 2.5f * i);
 				bd.angle = 0.0f;
 				b2Body* body = m_world->Create(&bd);
@@ -117,7 +121,6 @@ public:
 			}
 		}
 
-#if 1
 		{
 			b2PolygonDef sd_bottom;
 			sd_bottom.SetAsBox( 1.5f, 0.15f );
@@ -132,15 +135,14 @@ public:
 			sd_right.density = 4.0f;
 
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set( 0.0f, 2.0f );
-			bd.isBullet = true;
 			b2Body* body = m_world->Create(&bd);
 			body->AddShape(m_world->Create(&sd_bottom));
 			body->AddShape(m_world->Create(&sd_left));
 			body->AddShape(m_world->Create(&sd_right));
 			body->SetMassFromShapes();
 		}
-#endif
 	}
 
 	static Test* Create()

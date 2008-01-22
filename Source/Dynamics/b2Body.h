@@ -60,8 +60,9 @@ struct b2BodyDef
 		isBullet = false;
 	}
 
-	/// We need the shape type to setup collision filtering correctly, so
-	/// that static bodies don't collide with each other.
+	/// We need the body type to setup collision filtering correctly, so
+	/// that static bodies don't collide with each other. You can't change
+	/// this once a body is created.
 	Type type;
 
 	/// You can use this to initialized the mass properties of the body.
@@ -79,12 +80,14 @@ struct b2BodyDef
 	/// The world angle of the body in radians.
 	float32 angle;
 
-	/// Linear damping is use to reduce the linear velocity and should be in
-	/// the range [0,1], where 0 means no damping and 1 means full damping.
+	/// Linear damping is use to reduce the linear velocity. The damping parameter
+	/// can be larger than 1.0f but the damping effect becomes sensitive to the
+	/// time step when the damping parameter is large.
 	float32 linearDamping;
 
-	/// Angular damping is use to reduce the angular velocity and should be in
-	/// the range [0,1], where 0 means no damping and 1 means full damping.
+	/// Angular damping is use to reduce the angular velocity. The damping parameter
+	/// can be larger than 1.0f but the damping effect becomes sensitive to the
+	/// time step when the damping parameter is large.
 	float32 angularDamping;
 
 	/// Set this flag to false if this body should never fall asleep. Note that
@@ -98,9 +101,9 @@ struct b2BodyDef
 	bool preventRotation;
 
 	/// Is this a fast moving body that should be prevented from tunneling through
-	/// other moving bodies? Note that all bodies are prevent from tunneling through
-	/// static bodies. You should use this flag sparingly since it increases
-	/// processing time.
+	/// other moving bodies? Note that all bodies are prevented from tunneling through
+	/// static bodies.
+	/// @warning You should use this flag sparingly since it increases processing time.
 	bool isBullet;
 };
 

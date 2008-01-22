@@ -49,22 +49,23 @@ struct b2ContactRegister
 };
 
 /// The class manages contact between two shapes. A contact exists for each overlapping
-/// AABB in the broadphase (except if filtered). Therefore a contact object may exist
+/// AABB in the broad-phase (except if filtered). Therefore a contact object may exist
 /// that has no contact points.
 class b2Contact
 {
 public:
 
-	/// The contact must be in one of these states (TODO_ERIN).
+	/// The contact must be in one of these states.
 	enum State
 	{
-		e_created,			///< the contact has just been created, but not evaluated.
 		e_notTouching,		///< there are no contact points
-		e_toiTouching,		///< the contact began due to a TOI event
 		e_beginTouching,	///< the shapes just began touching
 		e_touching,			///< the shapes are still touching
 		e_endTouching,		///< the shapes just stopped touching
 	};
+
+	/// Get the contact state.
+	State GetState() const;
 
 	/// Get the manifold array.
 	virtual b2Manifold* GetManifolds() = 0;
@@ -72,10 +73,7 @@ public:
 	/// Get the number of manifolds. This is 0 or 1 between convex shapes.
 	/// This may be greater than 1 for convex-vs-concave shapes. Each
 	/// manifold holds up to two contact points with a shared contact normal.
-	int32 GetManifoldCount() const
-	{
-		return m_manifoldCount;
-	}
+	int32 GetManifoldCount() const;
 
 	/// Is this contact solid?
 	/// @return true if this contact should generate a response.
@@ -99,10 +97,7 @@ public:
 		e_nonSolidFlag	= 0x0001,
 		e_slowFlag		= 0x0002,
 		e_islandFlag	= 0x0004,
-		e_beginFlag		= 0x0008,
-		e_persistFlag	= 0x0010,
-		e_endFlag		= 0x0020,
-		e_toiFlag		= 0x0040,
+		e_toiFlag		= 0x0008,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
@@ -115,7 +110,6 @@ public:
 	b2Contact(b2Shape* shape1, b2Shape* shape2);
 	virtual ~b2Contact() {}
 
-	float32 TimeOfImpact(b2ContactListener* listener);
 	void Update(b2ContactListener* listener);
 	virtual void Evaluate() = 0;
 	static b2ContactRegister s_registers[e_shapeTypeCount][e_shapeTypeCount];
@@ -140,7 +134,19 @@ public:
 	float32 m_restitution;
 
 	float32 m_toi;
+
+	State m_state;
 };
+
+inline b2Contact::State b2Contact::GetState() const
+{
+	return m_state;
+}
+
+inline int32 b2Contact::GetManifoldCount() const
+{
+	return m_manifoldCount;
+}
 
 inline bool b2Contact::IsSolid() const
 {

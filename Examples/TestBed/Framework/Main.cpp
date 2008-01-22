@@ -287,8 +287,8 @@ int main(int argc, char** argv)
 	glui->add_checkbox_to_panel(drawPanel, "Pairs", &settings.drawPairs);
 	glui->add_checkbox_to_panel(drawPanel, "Contact Points", &settings.drawContactPoints);
 	glui->add_checkbox_to_panel(drawPanel, "Contact Normals", &settings.drawContactNormals);
-	glui->add_checkbox_to_panel(drawPanel, "Contact Impulses", &settings.drawContactImpulses);
-	glui->add_checkbox_to_panel(drawPanel, "Friction Impulses", &settings.drawFrictionImpulses);
+	glui->add_checkbox_to_panel(drawPanel, "Contact Forces", &settings.drawContactForces);
+	glui->add_checkbox_to_panel(drawPanel, "Friction Forces", &settings.drawFrictionForces);
 	glui->add_checkbox_to_panel(drawPanel, "Center of Masses", &settings.drawCOMs);
 	glui->add_checkbox_to_panel(drawPanel, "Statistics", &settings.drawStats);
 

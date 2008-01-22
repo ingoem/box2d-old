@@ -44,7 +44,7 @@ public:
 
 	void DrawXForm(const b2XForm& xf);
 
-	void DrawImpulse(const b2Vec2& point, const b2Vec2& impulse, const b2Color& color);
+	void DrawForce(const b2Vec2& point, const b2Vec2& force, const b2Color& color);
 };
 
 void DrawString(int x, int y, const char* string, ...);

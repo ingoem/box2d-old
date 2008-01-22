@@ -79,26 +79,24 @@ Version 2.0.0
 - User created shapes. DONE
 - Shape ray casts. DONE
 - Verify polygon convex and CCW. DONE
-- Use pristine freeglut. DONE
 - Deferred body destruction is gone. DONE
+- Deferred contact destruction is gone. DONE
 - JointDefs in local coordinates so that save/load works with limits. DONE
-- Wake up on apply force. DONE
+- Wake up bonies on apply force/torque/impulse. DONE
 - Improve polygon collision performance. DONE
 - Optimal OBBs for polygons. DONE
 - Debug display interface. DONE
 - Access version number. DONE
 - Improved TestBed camera. DONE
-- CCD. DONE
-- Apply position correction per TOI event. DONE
+- Continuous physics with TOI islands. DONE
 - Max velocities. DONE
-- All contact results available via contact retirement. DONE
 - Sensors. DONE.
-- Time of Impact (TOI) callbacks. DONE
-- Contact solver tweak callbacks. DONE
-- Contact callbacks with impulses. DONE
 - Body add/remove shape. DONE
-- Don't defer contact destruction (TOI events). DONE
-- Handle variable time steps.
+- Damping now works better with a variable time step. DONE
+- Use forces instead of impulses to handle variable time step.
+- Time of Impact (TOI) callbacks.
+- Contact solver tweak callbacks.
+- Contact callbacks with impulses.
 - Draw world AABB in TestBed.
 - Safe contact callback example.
 - Doxygen.

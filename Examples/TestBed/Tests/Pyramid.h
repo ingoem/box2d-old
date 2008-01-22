@@ -29,6 +29,7 @@ public:
 			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
 			b2Body* ground = m_world->Create(&bd);
 			ground->AddShape(&sd);
@@ -52,6 +53,7 @@ public:
 				for (int32 j = i; j < 25; ++j)
 				{
 					b2BodyDef bd;
+					bd.type = b2BodyDef::e_dynamicBody;
 					bd.position = y;
 					b2Body* body = m_world->Create(&bd);
 					body->AddShape(&sd);

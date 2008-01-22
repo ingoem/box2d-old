@@ -26,33 +26,38 @@ public:
 	{
 		{
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
 			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
-			body->AddShape(&sd);
-			m_world->Create(&bd);
+			b2Body* ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			float32 a = 0.5f;
-			sd.type = e_boxShape;
-			sd.SetAsBox(a, a);
+			sd.SetAsBox(0.5f, 0.5f);
 			sd.density = 1.0f;
 			sd.friction = 0.3f;
 
-			b2BodyDef bd;
-			body->AddShape(&sd);
-
-			for (int i = 0; i < 16; ++i)
+			for (int i = 0; i < 15; ++i)
 			{
+				b2BodyDef bd;
+				bd.type = b2BodyDef::e_dynamicBody;
+
+				// For this test we are using continuous physics for all boxes.
+				// This is a stress test, you normally wouldn't do this for
+				// performance reasons.
+				bd.isBullet = true;
+
 				//float32 x = b2Random(-0.1f, 0.1f);
 				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;
 				//bd.position.Set(x, 0.752f + 1.54f * i);
-				bd.position.Set(0.0f, 0.51f + 1.02f * i);
-				m_world->Create(&bd);
+				bd.position.Set(0.0f, 2.51f + 4.02f * i);
+				b2Body* body = m_world->Create(&bd);
+				body->AddShape(&sd);
+				body->SetMassFromShapes();
 			}
 		}
 	}

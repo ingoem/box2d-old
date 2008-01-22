@@ -27,6 +27,7 @@ public:
 		b2Body* ground = NULL;
 		{
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->Create(&bd);
 
@@ -50,6 +51,7 @@ public:
 			for (int32 i = 0; i < 30; ++i)
 			{
 				b2BodyDef bd;
+				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(0.5f + i, y);
 				b2Body* body = m_world->Create(&bd);
 				b2Shape* shape = m_world->Create(&sd);

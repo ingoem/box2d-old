@@ -44,23 +44,23 @@
 //#include "TimeOfImpact.h"
 //#include "VaryingFriction.h"
 //#include "VaryingRestitution.h"
-//#include "VerticalStack.h"
+#include "VerticalStack.h"
 //#include "Web.h"
 
 TestEntry g_testEntries[] =
 {
 	{"CCD Test", CCDTest::Create},
-	{"Pyramid", Pyramid::Create},
-	{"Chain", Chain::Create},
+	{"Vertical Stack", VerticalStack::Create},
 	{"Compound Shapes", CompoundShapes::Create},
+	{"Chain", Chain::Create},
 	{"Gears", Gears::Create},
+	{"Pyramid", Pyramid::Create},
 	//{"Time of Impact", TimeOfImpact::Create},
 	//{"Polygon Shapes", PolyShapes::Create},
 	//{"Distance Test", DistanceTest::Create},
 	//{"Varying Restitution", VaryingRestitution::Create},
 	//{"Apply Force", ApplyForce::Create},
 	//{"PolyCollision", PolyCollision::Create},
-	//{"Vertical Stack", VerticalStack::Create},
 	//{"Broad Phase", BroadPhaseTest::Create},
 	//{"Bridge", Bridge::Create},
 	//{"Collision Processing", CollisionProcessing::Create},

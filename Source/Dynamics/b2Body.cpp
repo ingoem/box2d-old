@@ -27,8 +27,11 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
 	b2Assert(world->m_lock == false);
 
-	m_flags = e_staticFlag;
-	
+	m_flags = 0;
+	if (bd->type == b2BodyDef::e_staticBody)
+	{
+		m_flags |= e_staticFlag;
+	}
 	if (bd->isBullet)
 	{
 		m_flags |= e_bulletFlag;
@@ -58,8 +61,8 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_prev = NULL;
 	m_next = NULL;
 
-	m_linearDamping = b2Clamp(1.0f - bd->linearDamping, 0.0f, 1.0f);
-	m_angularDamping = b2Clamp(1.0f - bd->angularDamping, 0.0f, 1.0f);
+	m_linearDamping = bd->linearDamping;
+	m_angularDamping = bd->angularDamping;
 
 	m_force.Set(0.0f, 0.0f);
 	m_torque = 0.0f;
@@ -68,11 +71,25 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_angularVelocity = 0.0f;
 
 	m_sleepTime = 0.0f;
-	m_center.SetZero();
-	m_mass = 0.0f;
+	m_mass = bd->massData.mass;
+	m_I = bd->massData.I;
+	m_center = bd->massData.center;
 	m_invMass = 0.0f;
-	m_I = 0.0f;
 	m_invI = 0.0f;
+
+	if (m_mass > 0.0f)
+	{
+		m_invMass = 1.0f / m_mass;
+	}
+
+	if (m_flags & b2Body::e_fixedRotationFlag)
+	{
+		m_I = 0.0f;
+	}
+	else if (m_I > 0.0f)
+	{
+		m_invI = 1.0f / m_I;
+	}
 
 	m_userData = bd->userData;
 
@@ -171,12 +188,8 @@ void b2Body::SetMass(const b2MassData* massData)
 	m_I = massData->I;
 	m_center = massData->center;
 
-	bool wasStatic = bool(m_flags & e_staticFlag);
-
 	if (m_mass > 0.0f)
 	{
-		m_flags &= ~e_staticFlag;
-
 		// Reposition the body origin onto the center of mass.
 		m_I -= m_mass * b2Dot(m_center, m_center);
 		b2Assert(m_I > 0.0f);
@@ -186,7 +199,6 @@ void b2Body::SetMass(const b2MassData* massData)
 	}
 	else
 	{
-		m_flags |= e_staticFlag;
 		m_invMass = 0.0f;
 		m_invI = 0.0f;
 	}
@@ -205,15 +217,6 @@ void b2Body::SetMass(const b2MassData* massData)
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
 		s->ApplyOffset(-m_center);
-	}
-
-	bool isStatic = bool(m_flags & e_staticFlag);
-	if (wasStatic != isStatic)
-	{
-		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
-		{
-			s->ResetProxy(m_world->m_broadPhase, m_xf);
-		}
 	}
 }
 
@@ -231,8 +234,6 @@ void b2Body::SetMassFromShapes()
 		s->ApplyOffset(m_center);
 	}
 
-	bool wasStatic = bool(m_flags & e_staticFlag);
-
 	m_mass = 0.0f;
 	m_I = 0.0f;
 	m_center.SetZero();
@@ -248,8 +249,6 @@ void b2Body::SetMassFromShapes()
 	// Compute center of mass, and shift the origin to the COM.
 	if (m_mass > 0.0f)
 	{
-		m_flags &= ~e_staticFlag;
-
 		m_center *= 1.0f / m_mass;
 
 		m_I -= m_mass * b2Dot(m_center, m_center);
@@ -260,7 +259,6 @@ void b2Body::SetMassFromShapes()
 	}
 	else
 	{
-		m_flags |= e_staticFlag;
 		m_invMass = 0.0f;
 		m_invI = 0.0f;
 	}
@@ -279,15 +277,6 @@ void b2Body::SetMassFromShapes()
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
 		s->ApplyOffset(-m_center);
-	}
-
-	bool isStatic = bool(m_flags & e_staticFlag);
-	if (wasStatic != isStatic)
-	{
-		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
-		{
-			s->ResetProxy(m_world->m_broadPhase, m_xf);
-		}
 	}
 }
 
