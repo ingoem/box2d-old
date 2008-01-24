@@ -255,6 +255,8 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 		}
 	}
 
+	Report();
+
 	if (allowSleep)
 	{
 		float32 minSleepTime = FLT_MAX;
@@ -343,6 +345,50 @@ void b2Island::SolveTOI(const b2TimeStep& subStep)
 		if (contactsOkay)
 		{
 			break;
+		}
+	}
+
+	Report();
+}
+
+void b2Island::Report()
+{
+	if (m_listener == NULL)
+	{
+		return;
+	}
+
+	for (int32 i = 0; i < m_contactCount; ++i)
+	{
+		b2Contact* c = m_contacts[i];
+		b2ContactPoint cp;
+		cp.shape1 = c->GetShape1();
+		cp.shape2 = c->GetShape2();
+		b2Body* b1 = cp.shape1->GetBody();
+		int32 manifoldCount = c->GetManifoldCount();
+		b2Manifold* manifolds = c->GetManifolds();
+		for (int32 j = 0; j < manifoldCount; ++j)
+		{
+			b2Manifold* manifold = manifolds + j;
+			cp.normal = manifold->normal;
+			for (int32 k = 0; k < manifold->pointCount; ++k)
+			{
+				b2ManifoldPoint* point = manifold->points + k;
+				cp.position = b2Mul(b1->GetXForm(), point->localPoint1);
+				cp.separation = point->separation;
+				cp.normalForce = point->normalForce;
+				cp.tangentForce = point->tangentForce;
+				if (point->id.features.flip & b2_newPoint)
+				{
+					point->id.features.flip &= ~b2_newPoint;
+					cp.id = point->id;
+					m_listener->Add(&cp);
+				}
+				else
+				{
+					m_listener->Persist(&cp);
+				}
+			}
 		}
 	}
 }

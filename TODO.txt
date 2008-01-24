@@ -112,6 +112,7 @@ Version 2.1.0
 - Pairs and proxies use small block allocator?
 - Bounds use growable array?
 - Don't sleep until position error is low?
+- Allow non-solid polygon edges.
 
 Version 2.2.0
 - Handle orphaned gear joint.

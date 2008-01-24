@@ -605,8 +605,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				b1->GetSweep(&sweep1, t);
 				b2->GetSweep(&sweep2, t);
 
-				b2TOIPoint point;
-				toi = b2TimeOfImpact(&point, c->m_shape1, sweep1, c->m_shape2, sweep2, 1.0f);
+				toi = b2TimeOfImpact(c->m_shape1, sweep1, c->m_shape2, sweep2, 1.0f);
 				b2Assert(0.0f <= toi && toi <= 1.0f);
 				if (toi > 0.0f && toi < 1.0f)
 				{
@@ -1077,76 +1076,6 @@ void b2World::DrawDebugData()
 		for (b2Body* b = m_bodyList; b; b = b->GetNext())
 		{
 			m_debugDraw->DrawXForm(b->GetXForm());
-		}
-	}
-
-	if (flags & b2DebugDraw::e_contactPointBit)
-	{
-		b2Color color(0.9f, 0.5f, 0.5f);
-		for (b2Contact* c = m_contactList; c; c = c->GetNext())
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					m_debugDraw->DrawPoint(m->points[j].position, color);
-				}
-			}
-		}
-	}
-
-	if (flags & b2DebugDraw::e_contactNormalBit)
-	{
-		b2Color color(0.4f, 0.9f, 0.4f);
-		for (b2Contact* c = m_contactList; c; c = c->GetNext())
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					m_debugDraw->DrawAxis(m->points[j].position, m->normal, color);
-				}
-			}
-		}
-	}
-
-	if (flags & b2DebugDraw::e_contactForceBit)
-	{
-		b2Color color(0.9f, 0.9f, 0.3f);
-		for (b2Contact* c = m_contactList; c; c = c->GetNext())
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					m_debugDraw->DrawForce(m->points[j].position, m->points[j].normalForce * m->normal, color);
-				}
-			}
-		}
-	}
-
-	if (flags & b2DebugDraw::e_frictionForceBit)
-	{
-		b2Color color(0.9f, 0.9f, 0.3f);
-		for (b2Contact* c = m_contactList; c; c = c->GetNext())
-		{
-			b2Manifold* ms = c->GetManifolds();
-			for (int32 i = 0; i < c->GetManifoldCount(); ++i)
-			{
-				b2Manifold* m = ms + i;
-				b2Vec2 tangent = b2Cross(m->normal, 1.0f);
-
-				for (int j = 0; j < m->pointCount; ++j)
-				{
-					m_debugDraw->DrawForce(m->points[j].position, m->points[j].tangentForce * tangent, color);
-				}
-			}
 		}
 	}
 }

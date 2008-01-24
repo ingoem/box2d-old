@@ -22,8 +22,7 @@
 // This algorithm uses conservative advancement to compute the time of
 // impact (TOI) of two shapes.
 // Refs: Bullet, Young Kim
-float32 b2TimeOfImpact(b2TOIPoint* tp,
-					   const b2Shape* shape1, const b2Sweep& sweep1,
+float32 b2TimeOfImpact(const b2Shape* shape1, const b2Sweep& sweep1,
 					   const b2Shape* shape2, const b2Sweep& sweep2,
 					   float32 maxTOI)
 {
@@ -137,14 +136,6 @@ float32 b2TimeOfImpact(b2TOIPoint* tp,
 	if (iter == maxIterations)
 	{
 		iter += 0;
-	}
-
-	if (t1 < 1.0f && distance > FLT_EPSILON)
-	{
-		b2Vec2 n = p2 - p1;
-		n.Normalize();
-		tp->position = 0.5f * (p1 + p2);
-		tp->normal = n;
 	}
 
 	return t1;

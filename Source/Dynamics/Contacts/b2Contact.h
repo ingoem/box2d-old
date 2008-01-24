@@ -48,24 +48,25 @@ struct b2ContactRegister
 	bool primary;
 };
 
+/// This structure is used to report contact results.
+struct b2ContactPoint
+{
+	b2Shape* shape1;		///< the first shape
+	b2Shape* shape2;		///< the second shape
+	b2Vec2 position;		///< position in world coordinates
+	b2Vec2 normal;			///< points from shape1 to shape2
+	float32 separation;		///< the separation is negative when shapes are touching
+	float32 normalForce;	///< the signed magnitude of the normal force
+	float32 tangentForce;	///< the signed magnitude of the tangent force
+	b2ContactID id;			///< the contact id identifies the features in contact
+};
+
 /// The class manages contact between two shapes. A contact exists for each overlapping
 /// AABB in the broad-phase (except if filtered). Therefore a contact object may exist
 /// that has no contact points.
 class b2Contact
 {
 public:
-
-	/// The contact must be in one of these states.
-	enum State
-	{
-		e_notTouching,		///< there are no contact points
-		e_beginTouching,	///< the shapes just began touching
-		e_touching,			///< the shapes are still touching
-		e_endTouching,		///< the shapes just stopped touching
-	};
-
-	/// Get the contact state.
-	State GetState() const;
 
 	/// Get the manifold array.
 	virtual b2Manifold* GetManifolds() = 0;
@@ -111,7 +112,7 @@ public:
 	virtual ~b2Contact() {}
 
 	void Update(b2ContactListener* listener);
-	virtual void Evaluate() = 0;
+	virtual void Evaluate(b2ContactListener* listener) = 0;
 	static b2ContactRegister s_registers[e_shapeTypeCount][e_shapeTypeCount];
 	static bool s_initialized;
 
@@ -134,14 +135,7 @@ public:
 	float32 m_restitution;
 
 	float32 m_toi;
-
-	State m_state;
 };
-
-inline b2Contact::State b2Contact::GetState() const
-{
-	return m_state;
-}
 
 inline int32 b2Contact::GetManifoldCount() const
 {

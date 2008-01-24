@@ -79,7 +79,6 @@ struct TestEntry
 };
 
 extern TestEntry g_testEntries[];
-
 // This is called when a joint in the world is implicitly destroyed
 // because an attached body is destroyed. This gives us a chance to
 // nullify the mouse joint.
@@ -98,6 +97,27 @@ public:
 	void Violation(b2Body* body);
 
 	Test* test;
+};
+
+const int32 k_maxContactPoints = 2048;
+
+class ContactListener : public b2ContactListener
+{
+public:
+	void Add(b2ContactPoint* point);
+	void Persist(b2ContactPoint* point);
+	void Remove(b2ContactPoint* point);
+
+	Test* test;
+};
+
+struct ContactPoint
+{
+	b2Vec2 normal;
+	b2Vec2 position;
+	float32 normalForce;
+	float32 tangentForce;
+	int state; // 0-add, 1-persist, 2-remove
 };
 
 class Test
@@ -122,9 +142,13 @@ public:
 protected:
 	friend class DestructionListener;
 	friend class BoundaryListener;
+	friend class ContactListener;
 
+	ContactPoint m_points[k_maxContactPoints];
+	int32 m_pointCount;
 	DestructionListener m_destructionListener;
 	BoundaryListener m_boundaryListener;
+	ContactListener m_contactListener;
 	DebugDraw m_debugDraw;
 	int32 m_textLine;
 	b2World* m_world;

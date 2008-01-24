@@ -217,7 +217,6 @@ public:
 
 	// These must be computed by concrete shape.
 	// Used for CCD.
-	float32 m_minRadius; // not used yet, purpose: to cull TOI events.
 	float32 m_maxRadius;
 
 	uint16 m_proxyId;

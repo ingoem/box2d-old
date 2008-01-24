@@ -60,7 +60,10 @@ void b2CollideCircles(
 	p1 += circle1->m_radius * manifold->normal;
 	p2 -= circle2->m_radius * manifold->normal;
 
-	manifold->points[0].position = 0.5f * (p1 + p2);
+	b2Vec2 p = 0.5f * (p1 + p2);
+
+	manifold->points[0].localPoint1 = b2MulT(xf1, p);
+	manifold->points[0].localPoint2 = b2MulT(xf2, p);
 }
 
 void b2CollidePolygonAndCircle(
@@ -103,7 +106,9 @@ void b2CollidePolygonAndCircle(
 		manifold->points[0].id.features.incidentVertex = b2_nullFeature;
 		manifold->points[0].id.features.referenceFace = b2_nullFeature;
 		manifold->points[0].id.features.flip = 0;
-		manifold->points[0].position = c - radius * manifold->normal;
+		b2Vec2 position = c - radius * manifold->normal;
+		manifold->points[0].localPoint1 = b2MulT(xf1, position);
+		manifold->points[0].localPoint2 = b2MulT(xf2, position);
 		manifold->points[0].separation = separation - radius;
 		return;
 	}
@@ -130,7 +135,9 @@ void b2CollidePolygonAndCircle(
 		manifold->points[0].id.features.incidentVertex = (uint8)vertIndex1;
 		manifold->points[0].id.features.referenceFace = b2_nullFeature;
 		manifold->points[0].id.features.flip = 0;
-		manifold->points[0].position = c - radius * manifold->normal;
+		b2Vec2 position = c - radius * manifold->normal;
+		manifold->points[0].localPoint1 = b2MulT(xf1, position);
+		manifold->points[0].localPoint2 = b2MulT(xf2, position);
 		manifold->points[0].separation = dist - radius;
 		return;
 	}
@@ -167,6 +174,8 @@ void b2CollidePolygonAndCircle(
 
 	manifold->pointCount = 1;
 	manifold->normal = b2Mul(xf1.R, d);
-	manifold->points[0].position = c - radius * manifold->normal;
+	b2Vec2 position = c - radius * manifold->normal;
+	manifold->points[0].localPoint1 = b2MulT(xf1, position);
+	manifold->points[0].localPoint2 = b2MulT(xf2, position);
 	manifold->points[0].separation = dist - radius;
 }

@@ -32,7 +32,7 @@ public:
 	b2PolygonContact(b2Shape* shape1, b2Shape* shape2);
 	~b2PolygonContact() {}
 
-	void Evaluate();
+	void Evaluate(b2ContactListener* listener);
 	b2Manifold* GetManifolds()
 	{
 		return &m_manifold;

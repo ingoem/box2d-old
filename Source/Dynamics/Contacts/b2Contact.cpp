@@ -141,52 +141,11 @@ b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 	m_node2.prev = NULL;
 	m_node2.next = NULL;
 	m_node2.other = NULL;
-
-	m_state = e_notTouching;
 }
 
 void b2Contact::Update(b2ContactListener* listener)
 {
-	Evaluate();
-
-	switch (m_state)
-	{
-	case e_notTouching:
-		if (m_manifoldCount > 0)
-		{
-			m_state = e_beginTouching;
-		}
-		break;
-
-	case e_beginTouching:
-		if (m_manifoldCount > 0)
-		{
-			m_state = e_touching;
-		}
-		else
-		{
-			m_state = e_endTouching;
-		}
-		break;
-
-	case e_touching:
-		if (m_manifoldCount == 0)
-		{
-			m_state = e_endTouching;
-		}
-		break;
-
-	case e_endTouching:
-		if (m_manifoldCount > 0)
-		{
-			m_state = e_beginTouching;
-		}
-		else
-		{
-			m_state = e_notTouching;
-		}
-		break;
-	}
+	Evaluate(listener);
 
 	b2Body* body1 = m_shape1->GetBody();
 	b2Body* body2 = m_shape2->GetBody();
@@ -199,17 +158,5 @@ void b2Contact::Update(b2ContactListener* listener)
 	else
 	{
 		m_flags |= e_slowFlag;
-	}
-
-	if (listener)
-	{
-		if (m_state == e_beginTouching || m_state == e_touching)
-		{
-			listener->Report(this);
-		}
-		else if (m_state == e_endTouching)
-		{
-			listener->End(m_shape1, m_shape2);
-		}
 	}
 }

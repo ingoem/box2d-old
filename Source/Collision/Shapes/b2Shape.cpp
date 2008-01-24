@@ -79,7 +79,6 @@ b2Shape::b2Shape(const b2ShapeDef* def)
 	m_worldNext = NULL;
 
 	m_proxyId = b2_nullProxy;
-	m_minRadius = 0.0f;
 	m_maxRadius = 0.0f;
 
 	m_categoryBits = def->categoryBits;

@@ -132,9 +132,28 @@ void b2ContactManager::Destroy(b2Contact* c)
 	b2Shape* shape2 = c->GetShape2();
 
 	// Inform the user that this contact is ending.
-	if (c->GetManifoldCount() > 0 && m_world->m_contactListener)
+	int32 manifoldCount = c->GetManifoldCount();
+	if (manifoldCount > 0 && m_world->m_contactListener)
 	{
-		m_world->m_contactListener->End(c->GetShape1(), c->GetShape2());
+		b2ContactPoint cp;
+		cp.shape1 = c->GetShape1();
+		cp.shape2 = c->GetShape2();
+		b2Body* b1 = cp.shape1->GetBody();
+		b2Manifold* manifolds = c->GetManifolds();
+		for (int32 i = 0; i < manifoldCount; ++i)
+		{
+			b2Manifold* manifold = manifolds + i;
+			cp.normal = manifold->normal;
+			for (int32 j = 0; j < manifold->pointCount; ++j)
+			{
+				b2ManifoldPoint* point = manifold->points + j;
+				cp.position = b2Mul(b1->GetXForm(), point->localPoint1);
+				cp.separation = point->separation;
+				cp.normalForce = point->normalForce;
+				cp.tangentForce = point->tangentForce;
+				m_world->m_contactListener->Remove(&cp);
+			}
+		}
 	}
 
 	// Remove from the world.

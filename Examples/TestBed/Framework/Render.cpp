@@ -112,16 +112,6 @@ void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
 	glEnd();
 }
 
-void DebugDraw::DrawPoint(const b2Vec2& p, const b2Color& color)
-{
-	glColor3f(color.r, color.g, color.b);
-	glPointSize(4.0f);
-	glBegin(GL_POINTS);
-	glVertex2f(p.x, p.y);
-	glEnd();
-	glPointSize(1.0f);
-}
-
 void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
 {
 	glColor3f(color.r, color.g, color.b);
@@ -129,14 +119,6 @@ void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& c
 	glVertex2f(p1.x, p1.y);
 	glVertex2f(p2.x, p2.y);
 	glEnd();
-}
-
-void DebugDraw::DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color& color)
-{
-	const float32 k_axisScale = 0.3f;
-	b2Vec2 p1 = point;
-	b2Vec2 p2 = point + k_axisScale	* axis;
-	DrawSegment(p1, p2, color);
 }
 
 void DebugDraw::DrawXForm(const b2XForm& xf)
@@ -158,12 +140,23 @@ void DebugDraw::DrawXForm(const b2XForm& xf)
 	glEnd();
 }
 
-void DebugDraw::DrawForce(const b2Vec2& point, const b2Vec2& force, const b2Color& color)
+void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color)
 {
-	const float32 k_forceScale = 0.1f;
-	b2Vec2 p1 = point;
-	b2Vec2 p2 = point + k_forceScale * force;
-	DrawSegment(p1, p2, color);
+	glColor3f(color.r, color.g, color.b);
+	glPointSize(size);
+	glBegin(GL_POINTS);
+	glVertex2f(p.x, p.y);
+	glEnd();
+	glPointSize(1.0f);
+}
+
+void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
+{
+	glColor3f(color.r, color.g, color.b);
+	glBegin(GL_LINES);
+	glVertex2f(p1.x, p1.y);
+	glVertex2f(p2.x, p2.y);
+	glEnd();
 }
 
 void DrawString(int x, int y, const char *string, ...)

@@ -64,6 +64,8 @@ public:
 		m_joints[m_jointCount++] = joint;
 	}
 
+	void Report();
+
 	b2StackAllocator* m_allocator;
 	b2ContactListener* m_listener;
 

@@ -51,6 +51,8 @@ public:
 				// performance reasons.
 				bd.isBullet = true;
 
+				bd.allowSleep = false;
+
 				//float32 x = b2Random(-0.1f, 0.1f);
 				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;
 				//bd.position.Set(x, 0.752f + 1.54f * i);

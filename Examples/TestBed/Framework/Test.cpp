@@ -48,6 +48,57 @@ void BoundaryListener::Violation(b2Body* body)
 	}
 }
 
+void ContactListener::Add(b2ContactPoint* point)
+{
+	if (test->m_pointCount == k_maxContactPoints)
+	{
+		return;
+	}
+
+	ContactPoint* cp = test->m_points + test->m_pointCount;
+	cp->position = point->position;
+	cp->normal = point->normal;
+	cp->normalForce = point->normalForce;
+	cp->tangentForce = point->tangentForce;
+	cp->state = 0;
+
+	++test->m_pointCount;
+}
+
+void ContactListener::Persist(b2ContactPoint* point)
+{
+	if (test->m_pointCount == k_maxContactPoints)
+	{
+		return;
+	}
+
+	ContactPoint* cp = test->m_points + test->m_pointCount;
+	cp->position = point->position;
+	cp->normal = point->normal;
+	cp->normalForce = point->normalForce;
+	cp->tangentForce = point->tangentForce;
+	cp->state = 1;
+
+	++test->m_pointCount;
+}
+
+void ContactListener::Remove(b2ContactPoint* point)
+{
+	if (test->m_pointCount == k_maxContactPoints)
+	{
+		return;
+	}
+
+	ContactPoint* cp = test->m_points + test->m_pointCount;
+	cp->position = point->position;
+	cp->normal = point->normal;
+	cp->normalForce = point->normalForce;
+	cp->tangentForce = point->tangentForce;
+	cp->state = 2;
+
+	++test->m_pointCount;
+}
+
 Test::Test()
 {
 	b2AABB worldAABB;
@@ -60,11 +111,14 @@ Test::Test()
 	m_bomb = NULL;
 	m_textLine = 30;
 	m_mouseJoint = NULL;
-	
+	m_pointCount = 0;
+
 	m_destructionListener.test = this;
 	m_boundaryListener.test = this;
+	m_contactListener.test = this;
 	m_world->SetListener(&m_destructionListener);
 	m_world->SetListener(&m_boundaryListener);
+	m_world->SetListener(&m_contactListener);
 	m_world->SetDebugDraw(&m_debugDraw);
 }
 
@@ -188,16 +242,14 @@ void Test::Step(Settings* settings)
 	flags += settings->drawAABBs			* b2DebugDraw::e_aabbBit;
 	flags += settings->drawOBBs				* b2DebugDraw::e_obbBit;
 	flags += settings->drawPairs			* b2DebugDraw::e_pairBit;
-	flags += settings->drawContactPoints	* b2DebugDraw::e_contactPointBit;
-	flags += settings->drawContactNormals	* b2DebugDraw::e_contactNormalBit;
-	flags += settings->drawContactForces	* b2DebugDraw::e_contactForceBit;
-	flags += settings->drawFrictionForces	* b2DebugDraw::e_frictionForceBit;
 	flags += settings->drawCOMs				* b2DebugDraw::e_centerOfMassBit;
 	m_debugDraw.SetFlags(flags);
 
 	b2World::s_enableWarmStarting = settings->enableWarmStarting;
 	b2World::s_enablePositionCorrection = settings->enablePositionCorrection;
 	b2World::s_enableTOI = settings->enableTOI;
+
+	m_pointCount = 0;
 
 	m_world->Step(timeStep, settings->iterationCount);
 
@@ -246,5 +298,53 @@ void Test::Step(Settings* settings)
 		glVertex2f(p1.x, p1.y);
 		glVertex2f(p2.x, p2.y);
 		glEnd();
+	}
+
+	if (settings->drawContactPoints)
+	{
+		const float32 k_forceScale = 0.1f;
+		const float32 k_axisScale = 0.3f;
+
+		for (int32 i = 0; i < m_pointCount; ++i)
+		{
+			ContactPoint* point = m_points + i;
+
+			if (point->state == 0)
+			{
+				// Add
+				DrawPoint(point->position, 10.0f, b2Color(0.3f, 0.95f, 0.3f));
+			}
+			else if (point->state == 1)
+			{
+				// Persist
+				DrawPoint(point->position, 5.0f, b2Color(0.3f, 0.3f, 0.95f));
+			}
+			else
+			{
+				// Remove
+				DrawPoint(point->position, 10.0f, b2Color(0.95f, 0.3f, 0.3f));
+			}
+
+			if (settings->drawContactNormals == 1)
+			{
+				b2Vec2 p1 = point->position;
+				b2Vec2 p2 = p1 + k_axisScale * point->normal;
+				DrawSegment(p1, p2, b2Color(0.4f, 0.9f, 0.4f));
+			}
+			else if (settings->drawContactForces == 1)
+			{
+				b2Vec2 p1 = point->position;
+				b2Vec2 p2 = p1 + k_forceScale * point->normalForce * point->normal;
+				DrawSegment(p1, p2, b2Color(0.9f, 0.9f, 0.3f));
+			}
+
+			if (settings->drawFrictionForces == 1)
+			{
+				b2Vec2 tangent = b2Cross(point->normal, 1.0f);
+				b2Vec2 p1 = point->position;
+				b2Vec2 p2 = p1 + k_forceScale * point->tangentForce * tangent;
+				DrawSegment(p1, p2, b2Color(0.9f, 0.9f, 0.3f));
+			}
+		}
 	}
 }

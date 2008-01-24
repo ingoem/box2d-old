@@ -73,7 +73,7 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 
 			for (int32 k = 0; k < c->pointCount; ++k)
 			{
-				b2ContactPoint* cp = manifold->points + k;
+				b2ManifoldPoint* cp = manifold->points + k;
 				b2ContactConstraintPoint* ccp = c->points + k;
 
 				ccp->normalForce = cp->normalForce;
@@ -81,11 +81,11 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 				ccp->separation = cp->separation;
 				ccp->positionImpulse = 0.0f;
 
-				b2Vec2 r1 = cp->position - b1->m_xf.position;
-				b2Vec2 r2 = cp->position - b2->m_xf.position;
+				b2Vec2 r1 = b2Mul(b1->m_xf.R, cp->localPoint1);
+				b2Vec2 r2 = b2Mul(b2->m_xf.R, cp->localPoint2);
 
-				ccp->localAnchor1 = b2MulT(b1->m_xf.R, r1);
-				ccp->localAnchor2 = b2MulT(b2->m_xf.R, r2);
+				ccp->localAnchor1 = cp->localPoint1;
+				ccp->localAnchor2 = cp->localPoint2;
 
 				float32 r1Sqr = b2Dot(r1, r1);
 				float32 r2Sqr = b2Dot(r2, r2);

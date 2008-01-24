@@ -27,6 +27,8 @@ class b2CircleShape;
 class b2PolygonShape;
 
 const uint8 b2_nullFeature = UCHAR_MAX;
+const uint8 b2_newPoint = 0x02;
+const uint8 b2_oldPoint = 0x04;
 
 /// Contact ids to facilitate warm starting.
 union b2ContactID
@@ -41,27 +43,25 @@ union b2ContactID
 	uint32 key;
 };
 
-/// A contact point holds details related to the geometry
-/// and dynamics of contact points.
-struct b2ContactPoint
+/// A manifold point is a contact point belonging to a contact
+/// manifold. It holds details related to the geometry and dynamics
+/// of the contact points.
+/// The point is stored in local coordinates because CCD
+/// requires sub-stepping in which the separation is stale.
+struct b2ManifoldPoint
 {
-	b2Vec2 position;
+	b2Vec2 localPoint1;
+	b2Vec2 localPoint2;
 	float32 separation;
 	float32 normalForce;
 	float32 tangentForce;
 	b2ContactID id;
 };
 
-struct b2TOIPoint
-{
-	b2Vec2 position;
-	b2Vec2 normal;
-};
-
 /// A manifold for two touching convex shapes.
 struct b2Manifold
 {
-	b2ContactPoint points[b2_maxManifoldPoints];
+	b2ManifoldPoint points[b2_maxManifoldPoints];
 	b2Vec2 normal;
 	int32 pointCount;
 };
@@ -127,11 +127,10 @@ float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
 				   const b2Shape* shape1, const b2XForm& xf1,
 				   const b2Shape* shape2, const b2XForm& xf2);
 
-/// Compute the distance between two shapes and the closest points.
+/// Compute the time when two shapes begin to touch or touch at a closer distance.
 /// @return the fraction between [0,1] in which the shapes first touch.
 /// t=0 means the shapes begin touching/overlapped, and t=1 means the shapes don't touch.
-float32 b2TimeOfImpact(b2TOIPoint* point,
-					   const b2Shape* shape1, const b2Sweep& sweep1,
+float32 b2TimeOfImpact(const b2Shape* shape1, const b2Sweep& sweep1,
 					   const b2Shape* shape2, const b2Sweep& sweep2,
 					   float32 maxTOI);
 

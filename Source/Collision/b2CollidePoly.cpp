@@ -322,9 +322,10 @@ void b2CollidePolygons(b2Manifold* manifold,
 
 		if (separation <= 0.0f)
 		{
-			b2ContactPoint* cp = manifold->points + pointCount;
+			b2ManifoldPoint* cp = manifold->points + pointCount;
 			cp->separation = separation;
-			cp->position = clipPoints2[i].v;
+			cp->localPoint1 = b2MulT(xfA, clipPoints2[i].v);
+			cp->localPoint2 = b2MulT(xfB, clipPoints2[i].v);
 			cp->id = clipPoints2[i].id;
 			cp->id.features.flip = flip;
 			++pointCount;

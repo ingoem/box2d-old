@@ -111,7 +111,6 @@ public:
 				float32 x = b2Random(-0.1f, 0.1f);
 				b2BodyDef bd;
 				bd.type = b2BodyDef::e_dynamicBody;
-				bd.isBullet = true;
 				bd.position.Set(x, 2.05f + 2.5f * i);
 				bd.angle = 0.0f;
 				b2Body* body = m_world->Create(&bd);

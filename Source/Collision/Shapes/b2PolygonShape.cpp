@@ -205,7 +205,6 @@ b2PolygonShape::b2PolygonShape(const b2ShapeDef* def)
 
 	// Create core polygon shape by shifting edges inward.
 	// Also compute the min/max radius for CCD.
-	m_minRadius = FLT_MAX;
 	m_maxRadius = -FLT_MAX;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
@@ -229,7 +228,6 @@ b2PolygonShape::b2PolygonShape(const b2ShapeDef* def)
 		A.col1.y = n2.x; A.col2.y = n2.y;
 		m_coreVertices[i] = A.Solve(d) + m_centroid;
 
-		m_minRadius = b2Min(m_minRadius, b2Min(d.x, d.y));
 		m_maxRadius = b2Max(m_maxRadius, m_coreVertices[i].Length());
 	}
 }

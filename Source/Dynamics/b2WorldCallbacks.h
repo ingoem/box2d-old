@@ -27,6 +27,7 @@ class b2Shape;
 class b2Body;
 class b2Joint;
 class b2Contact;
+struct b2ContactPoint;
 
 /// Joints and shapes are destroyed when their associated
 /// body is destroyed. Implement this listener so that you
@@ -76,23 +77,29 @@ extern b2ContactFilter b2_defaultFilter;
 /// Implement this class to get collision results. You can use these results for
 /// things like sounds and game logic. You can also get contact results by
 /// traversing the contact lists after the time step. However, you might miss
-/// some contacts.
+/// some contacts because continuous physics leads to sub-stepping.
+/// Additionally you may receive multiple callbacks for the same contact in a
+/// single time step.
+/// You should strive to make your callbacks efficient because there may be
+/// many callbacks per time step.
+/// @warning The contact separation is the last computed value.
 /// @warning You cannot create/destroy Box2D entities inside these callbacks.
 class b2ContactListener
 {
 public:
 	virtual ~b2ContactListener() {}
 
-	/// Called whenever a contact is updated and the shapes are touching. A single
-	/// may be updated multiple times per time step.
-	/// @param contact the contact object.
-	virtual void Report(const b2Contact* contact) = 0;
+	/// Called when a contact point is added. This includes the geometry
+	/// and the forces.
+	virtual void Add(b2ContactPoint* point) = 0;
 
-	/// Called when contact ends. This does not mean the contact object is destroyed,
-	/// it just means that there are no contact points.
-	/// @param shape1 the first shape in the contact.
-	/// @param shape2 the second shape in the contact.
-	virtual void End(const b2Shape* shape1, const b2Shape* shape2) = 0;
+	/// Called when a contact point persists. This includes the geometry
+	/// and the forces.
+	virtual void Persist(b2ContactPoint* point) = 0;
+
+	/// Called when a contact point is removed. This includes the last
+	/// computed geometry and forces.
+	virtual void Remove(b2ContactPoint* point) = 0;
 };
 
 /// Color for debug drawing. Each value has the range [0,1].
@@ -120,11 +127,7 @@ public:
 		e_aabbBit				= 0x0008, ///< draw axis aligned bounding boxes
 		e_obbBit				= 0x0010, ///< draw oriented bounding boxes
 		e_pairBit				= 0x0020, ///< draw broad-phase pairs
-		e_contactPointBit		= 0x0040, ///< draw contact points
-		e_contactNormalBit		= 0x0080, ///< draw contact normals
-		e_contactForceBit		= 0x0100, ///< draw contact impulses
-		e_frictionForceBit		= 0x0200, ///< draw friction impulses
-		e_centerOfMassBit		= 0x0400, ///< draw center of mass frame
+		e_centerOfMassBit		= 0x0040, ///< draw center of mass frame
 	};
 
 	/// Set the drawing flags.
@@ -151,25 +154,12 @@ public:
 	/// Draw a solid circle.
 	virtual void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) = 0;
 	
-	/// Draw a point. For example, a contact point.
-	virtual void DrawPoint(const b2Vec2& p, const b2Color& color) = 0;
-
 	/// Draw a line segment.
 	virtual void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) = 0;
-
-	/// Draw a unit length axis. Choose your own length scale.
-	/// @param point the axis origin in world coordinates.
-	/// @param axis a unit vector in world coordinates.
-	virtual void DrawAxis(const b2Vec2& point, const b2Vec2& axis, const b2Color& color) = 0;
 
 	/// Draw a transform. Choose your own length scale.
 	/// @param xf a transform.
 	virtual void DrawXForm(const b2XForm& xf) = 0;
-
-	/// Draw a force. Choose your own length scale.
-	/// @param point the force point of application in world coordinates.
-	/// @param force the force vector in world coordinates.
-	virtual void DrawForce(const b2Vec2& point, const b2Vec2& force, const b2Color& color) = 0;
 
 protected:
 	uint32 m_drawFlags;

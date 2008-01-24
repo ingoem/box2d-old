@@ -18,6 +18,7 @@
 
 #include "b2PolyAndCircleContact.h"
 #include "../b2Body.h"
+#include "../b2WorldCallbacks.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <new>
@@ -49,19 +50,42 @@ b2PolyAndCircleContact::b2PolyAndCircleContact(b2Shape* s1, b2Shape* s2)
 	m_manifold.points[0].tangentForce = 0.0f;
 }
 
-void b2PolyAndCircleContact::Evaluate()
+void b2PolyAndCircleContact::Evaluate(b2ContactListener* listener)
 {
 	b2Body* b1 = m_shape1->GetBody();
 	b2Body* b2 = m_shape2->GetBody();
+
+	b2Manifold m0;
+	memcpy(&m0, &m_manifold, sizeof(b2Manifold));
 
 	b2CollidePolygonAndCircle(&m_manifold, (b2PolygonShape*)m_shape1, b1->m_xf, (b2CircleShape*)m_shape2, b2->m_xf);
 
 	if (m_manifold.pointCount > 0)
 	{
 		m_manifoldCount = 1;
+		if (m0.pointCount == 0)
+		{
+			m_manifold.points[0].id.features.flip |= b2_newPoint;
+		}
+		else
+		{
+			m_manifold.points[0].id.features.flip &= ~b2_newPoint;
+		}
 	}
 	else
 	{
 		m_manifoldCount = 0;
+		if (m0.pointCount > 0 && listener)
+		{
+			b2ContactPoint cp;
+			cp.shape1 = m_shape1;
+			cp.shape2 = m_shape2;
+			cp.normal = m0.normal;
+			cp.position = b2Mul(b1->m_xf, m0.points[0].localPoint1);
+			cp.separation = m0.points[0].separation;
+			cp.normalForce = m0.points[0].normalForce;
+			cp.tangentForce = m0.points[0].tangentForce;
+			listener->Remove(&cp);
+		}
 	}
 }

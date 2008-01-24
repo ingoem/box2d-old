@@ -28,7 +28,6 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def)
 	m_localPosition = circleDef->localPosition;
 	m_radius = circleDef->radius;
 	m_maxRadius = m_localPosition.Length() + m_radius;
-	m_minRadius = m_radius;
 }
 
 void b2CircleShape::ApplyOffset(const b2Vec2& offset)
