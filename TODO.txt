@@ -93,16 +93,16 @@ Version 2.0.0
 - Sensors. DONE.
 - Body add/remove shape. DONE
 - Damping now works better with a variable time step. DONE
+- Time of Impact (TOI) callbacks. DONE
+- Contact solver tweak callbacks. DONE
+- Contact callbacks with impulses. DONE
+- Ragdoll contribution.
 - Use forces instead of impulses to handle variable time step.
-- Time of Impact (TOI) callbacks.
-- Contact solver tweak callbacks.
-- Contact callbacks with impulses.
 - Draw world AABB in TestBed.
 - Safe contact callback example.
 - Doxygen.
 - Update manual.
 - Car example.
-- Ragdoll contribution.
 - CMake contribution.
 
 Version 2.1.0

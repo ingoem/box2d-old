@@ -26,11 +26,11 @@
 #endif
 
 //#include "ApplyForce.h"
-//#include "Bridge.h"
+#include "Bridge.h"
 //#include "BroadPhaseTest.h"
 #include "CCDTest.h"
 #include "Chain.h"
-//#include "CollisionFiltering.h"
+#include "CollisionFiltering.h"
 //#include "CollisionProcessing.h"
 #include "CompoundShapes.h"
 //#include "DistanceTest.h"
@@ -42,8 +42,8 @@
 #include "Pyramid.h"
 //#include "SliderCrank.h"
 //#include "TimeOfImpact.h"
-//#include "VaryingFriction.h"
-//#include "VaryingRestitution.h"
+#include "VaryingFriction.h"
+#include "VaryingRestitution.h"
 #include "VerticalStack.h"
 //#include "Web.h"
 
@@ -51,24 +51,24 @@ TestEntry g_testEntries[] =
 {
 	{"CCD Test", CCDTest::Create},
 	{"Vertical Stack", VerticalStack::Create},
+	{"Collision Filtering", CollisionFiltering::Create},
+	{"Varying Friction", VaryingFriction::Create},
+	{"Varying Restitution", VaryingRestitution::Create},
 	{"Compound Shapes", CompoundShapes::Create},
 	{"Chain", Chain::Create},
 	{"Gears", Gears::Create},
 	{"Pyramid", Pyramid::Create},
+	{"Bridge", Bridge::Create},
 	//{"Time of Impact", TimeOfImpact::Create},
 	//{"Polygon Shapes", PolyShapes::Create},
 	//{"Distance Test", DistanceTest::Create},
-	//{"Varying Restitution", VaryingRestitution::Create},
 	//{"Apply Force", ApplyForce::Create},
 	//{"PolyCollision", PolyCollision::Create},
 	//{"Broad Phase", BroadPhaseTest::Create},
-	//{"Bridge", Bridge::Create},
 	//{"Collision Processing", CollisionProcessing::Create},
 	//{"Web", Web::Create},
 	//{"Pulleys", Pulleys::Create},
 	//{"Slider Crank", SliderCrank::Create},
-	//{"Collision Filtering", CollisionFiltering::Create},
 	//{"Motors and Limits", MotorsAndLimits::Create},
-	//{"Varying Friction", VaryingFriction::Create},
 	{NULL, NULL}
 };

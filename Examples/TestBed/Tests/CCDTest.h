@@ -111,7 +111,7 @@ public:
 			b3->SetLinearVelocity(b2Vec2(0.0f, -150.0f));
 		}
 #else
-		const float32 k_restitution = 1.2f;
+		const float32 k_restitution = 1.4f;
 
 		{
 			b2BodyDef bd;
@@ -158,7 +158,7 @@ public:
 			body->SetMassFromShapes();
 		}
 
-		for (int32 i = 0; i < 3; ++i)
+		for (int32 i = 0; i < 8; ++i)
 		{
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;

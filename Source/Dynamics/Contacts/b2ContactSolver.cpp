@@ -204,13 +204,13 @@ void b2ContactSolver::SolveVelocityConstraints()
 			// Relative velocity at contact
 			b2Vec2 dv = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
 
-			// Compute normal impulse
+			// Compute normal force
 			float32 vn = b2Dot(dv, normal);
 			float32 lambda = - m_step.inv_dt * ccp->normalMass * (vn - ccp->velocityBias);
 
-			// b2Clamp the accumulated impulse
-			float32 newImpulse = b2Max(ccp->normalForce + lambda, 0.0f);
-			lambda = newImpulse - ccp->normalForce;
+			// b2Clamp the accumulated force
+			float32 newForce = b2Max(ccp->normalForce + lambda, 0.0f);
+			lambda = newForce - ccp->normalForce;
 
 			// Apply contact impulse
 			b2Vec2 P = m_step.dt * lambda * normal;
@@ -221,7 +221,7 @@ void b2ContactSolver::SolveVelocityConstraints()
 			b2->m_linearVelocity += invMass2 * P;
 			b2->m_angularVelocity += invI2 * b2Cross(r2, P);
 
-			ccp->normalForce = newImpulse;
+			ccp->normalForce = newForce;
 		}
 
 		// Solve tangent constraints
@@ -235,14 +235,14 @@ void b2ContactSolver::SolveVelocityConstraints()
 			// Relative velocity at contact
 			b2Vec2 dv = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
 
-			// Compute tangent impulse
+			// Compute tangent force
 			float32 vt = b2Dot(dv, tangent);
 			float32 lambda = m_step.inv_dt * ccp->tangentMass * (-vt);
 
-			// b2Clamp the accumulated impulse
+			// b2Clamp the accumulated force
 			float32 maxFriction = c->friction * ccp->normalForce;
-			float32 newImpulse = b2Clamp(ccp->tangentForce + lambda, -maxFriction, maxFriction);
-			lambda = newImpulse - ccp->tangentForce;
+			float32 newForce = b2Clamp(ccp->tangentForce + lambda, -maxFriction, maxFriction);
+			lambda = newForce - ccp->tangentForce;
 
 			// Apply contact impulse
 			b2Vec2 P = m_step.dt * lambda * tangent;
@@ -253,7 +253,7 @@ void b2ContactSolver::SolveVelocityConstraints()
 			b2->m_linearVelocity += invMass2 * P;
 			b2->m_angularVelocity += invI2 * b2Cross(r2, P);
 
-			ccp->tangentForce = newImpulse;
+			ccp->tangentForce = newForce;
 		}
 	}
 }

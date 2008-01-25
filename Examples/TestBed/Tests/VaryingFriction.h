@@ -25,104 +25,92 @@ public:
 
 	VaryingFriction()
 	{
-		float32 scale = 2.0f;
-
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
+			sd.SetAsBox(100.0f, 20.0f);
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
-			body->AddShape(&sd);
-			m_world->Create(&bd);
+			bd.position.Set(0.0f, -20.0f);
+			b2Body* ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(6.5f, 0.125f);
-			sd.extents *= scale;
+			sd.SetAsBox(13.0f, 0.25f);
 
 			b2BodyDef bd;
-			bd.position.Set(-2.0f, 11.0f);
-			bd.position *= scale;
-
+			bd.position.Set(-4.0f, 22.0f);
 			bd.angle = -0.25f;
-			body->AddShape(&sd);
-			m_world->Create(&bd);
+
+			b2Body* ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(0.125f, 0.5f);
-			sd.extents *= scale;
+			sd.SetAsBox(0.25f, 1.0f);
 
 			b2BodyDef bd;
-			bd.position.Set(5.25f, 9.5f);
-			bd.position *= scale;
+			bd.position.Set(10.5f, 19.0f);
 
-			body->AddShape(&sd);
-			m_world->Create(&bd);
+			b2Body* ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(6.5f, 0.125f);
-			sd.extents *= scale;
+			sd.SetAsBox(13.0f, 0.25f);
 
 			b2BodyDef bd;
-			bd.position.Set(2.0f, 7.0f);
-			bd.position *= scale;
-
+			bd.position.Set(4.0f, 14.0f);
 			bd.angle = 0.25f;
-			body->AddShape(&sd);
-			m_world->Create(&bd);
+
+			b2Body* ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(0.125f, 0.5f);
-			sd.extents *= scale;
+			sd.SetAsBox(0.25f, 1.0f);
 
 			b2BodyDef bd;
-			bd.position.Set(-5.25f, 5.5f);
-			bd.position *= scale;
+			bd.position.Set(-10.5f, 11.0f);
 
-			body->AddShape(&sd);
-			m_world->Create(&bd);
+			b2Body* ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(6.5f, 0.125f);
-			sd.extents *= scale;
+			sd.SetAsBox(13.0f, 0.25f);
 
 			b2BodyDef bd;
-			bd.position.Set(-2.0f, 3.0f);
-			bd.position *= scale;
-
+			bd.position.Set(-4.0f, 6.0f);
 			bd.angle = -0.25f;
-			body->AddShape(&sd);
-			m_world->Create(&bd);
+
+			b2Body* ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(0.25f, 0.25f);
-			sd.extents *= scale;
-
+			sd.SetAsBox(0.5f, 0.5f);
 			sd.density = 25.0f;
-
-			b2BodyDef bd;
-			body->AddShape(&sd);
 
 			float friction[5] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};
 
 			for (int i = 0; i < 5; ++i)
 			{
-				sd.friction = friction[i];
-				bd.position.Set(-7.5f + 2.0f * i, 14.0f);
-				bd.position *= scale;
+				b2BodyDef bd;
+				bd.type = b2BodyDef::e_dynamicBody;
+				bd.position.Set(-15.0f + 4.0f * i, 28.0f);
 				m_world->Create(&bd);
+				b2Body* body = m_world->Create(&bd);
+
+				sd.friction = friction[i];
+				body->AddShape(&sd);
+				body->SetMassFromShapes();
 			}
 		}
 	}

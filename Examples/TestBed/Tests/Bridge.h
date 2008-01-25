@@ -27,24 +27,22 @@ public:
 		b2Body* ground = NULL;
 		{
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
 			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->AddShape(&sd);
 			ground = m_world->Create(&bd);
+			ground->AddShape(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
 			sd.SetAsBox(0.5f, 0.125f);
 			sd.density = 20.0f;
 			sd.friction = 0.2f;
 
 			b2BodyDef bd;
-			body->AddShape(&sd);
+			bd.type = b2BodyDef::e_dynamicBody;
 
 			b2RevoluteJointDef jd;
 			const int32 numPlanks = 30;
@@ -54,8 +52,13 @@ public:
 			{
 				bd.position.Set(-14.5f + 1.0f * i, 5.0f);
 				b2Body* body = m_world->Create(&bd);
+				body->AddShape(&sd);
+				body->SetMassFromShapes();
 
-				jd.anchorPoint.Set(-15.0f + 1.0f * i, 5.0f);
+				b2Vec2 anchor(-15.0f + 1.0f * i, 5.0f);
+				jd.localAnchor1 = prevBody->GetLocalPoint(anchor);
+				jd.localAnchor2 = body->GetLocalPoint(anchor);
+				jd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 				jd.body1 = prevBody;
 				jd.body2 = body;
 				m_world->Create(&jd);
@@ -63,7 +66,10 @@ public:
 				prevBody = body;
 			}
 
-			jd.anchorPoint.Set(-15.0f + 1.0f * numPlanks, 5.0f);
+			b2Vec2 anchor(-15.0f + 1.0f * numPlanks, 5.0f);
+			jd.localAnchor1 = prevBody->GetLocalPoint(anchor);
+			jd.localAnchor2 = ground->GetLocalPoint(anchor);
+			jd.referenceAngle = ground->GetAngle() - prevBody->GetAngle();
 			jd.body1 = prevBody;
 			jd.body2 = ground;
 			m_world->Create(&jd);
