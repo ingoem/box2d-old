@@ -113,6 +113,8 @@ public:
 
 struct ContactPoint
 {
+	b2Shape* shape1;
+	b2Shape* shape2;
 	b2Vec2 normal;
 	b2Vec2 position;
 	float32 normalForce;
@@ -144,6 +146,7 @@ protected:
 	friend class BoundaryListener;
 	friend class ContactListener;
 
+	b2AABB m_worldAABB;
 	ContactPoint m_points[k_maxContactPoints];
 	int32 m_pointCount;
 	DestructionListener m_destructionListener;

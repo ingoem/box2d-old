@@ -1010,6 +1010,9 @@ void b2World::DrawDebugData()
 	if (flags & b2DebugDraw::e_aabbBit)
 	{
 		b2BroadPhase* bp = m_broadPhase;
+		b2Vec2 worldLower = bp->m_worldAABB.lowerBound;
+		b2Vec2 worldUpper = bp->m_worldAABB.upperBound;
+
 		b2Vec2 invQ;
 		invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
 		b2Color color(0.9f, 0.3f, 0.9f);
@@ -1022,10 +1025,10 @@ void b2World::DrawDebugData()
 			}
 
 			b2AABB b;
-			b.lowerBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
-			b.lowerBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
-			b.upperBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
-			b.upperBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
+			b.lowerBound.x = worldLower.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
+			b.lowerBound.y = worldLower.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
+			b.upperBound.x = worldLower.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
+			b.upperBound.y = worldLower.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
 
 			b2Vec2 vs[4];
 			vs[0].Set(b.lowerBound.x, b.lowerBound.y);
@@ -1035,6 +1038,13 @@ void b2World::DrawDebugData()
 
 			m_debugDraw->DrawPolygon(vs, 4, color);
 		}
+
+		b2Vec2 vs[4];
+		vs[0].Set(worldLower.x, worldLower.y);
+		vs[1].Set(worldUpper.x, worldLower.y);
+		vs[2].Set(worldUpper.x, worldUpper.y);
+		vs[3].Set(worldLower.x, worldUpper.y);
+		m_debugDraw->DrawPolygon(vs, 4, b2Color(0.3f, 0.9f, 0.9f));
 	}
 
 	if (flags & b2DebugDraw::e_obbBit)

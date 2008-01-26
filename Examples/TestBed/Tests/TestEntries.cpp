@@ -31,7 +31,7 @@
 #include "CCDTest.h"
 #include "Chain.h"
 #include "CollisionFiltering.h"
-//#include "CollisionProcessing.h"
+#include "CollisionProcessing.h"
 #include "CompoundShapes.h"
 //#include "DistanceTest.h"
 #include "Gears.h"
@@ -49,6 +49,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Collision Processing", CollisionProcessing::Create},
 	{"CCD Test", CCDTest::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
@@ -65,7 +66,6 @@ TestEntry g_testEntries[] =
 	//{"Apply Force", ApplyForce::Create},
 	//{"PolyCollision", PolyCollision::Create},
 	//{"Broad Phase", BroadPhaseTest::Create},
-	//{"Collision Processing", CollisionProcessing::Create},
 	//{"Web", Web::Create},
 	//{"Pulleys", Pulleys::Create},
 	//{"Slider Crank", SliderCrank::Create},

@@ -56,6 +56,8 @@ void ContactListener::Add(b2ContactPoint* point)
 	}
 
 	ContactPoint* cp = test->m_points + test->m_pointCount;
+	cp->shape1 = point->shape1;
+	cp->shape2 = point->shape2;
 	cp->position = point->position;
 	cp->normal = point->normal;
 	cp->normalForce = point->normalForce;
@@ -73,6 +75,8 @@ void ContactListener::Persist(b2ContactPoint* point)
 	}
 
 	ContactPoint* cp = test->m_points + test->m_pointCount;
+	cp->shape1 = point->shape1;
+	cp->shape2 = point->shape2;
 	cp->position = point->position;
 	cp->normal = point->normal;
 	cp->normalForce = point->normalForce;
@@ -90,6 +94,8 @@ void ContactListener::Remove(b2ContactPoint* point)
 	}
 
 	ContactPoint* cp = test->m_points + test->m_pointCount;
+	cp->shape1 = point->shape1;
+	cp->shape2 = point->shape2;
 	cp->position = point->position;
 	cp->normal = point->normal;
 	cp->normalForce = point->normalForce;
@@ -101,13 +107,12 @@ void ContactListener::Remove(b2ContactPoint* point)
 
 Test::Test()
 {
-	b2AABB worldAABB;
-	worldAABB.lowerBound.Set(-100.0f, -100.0f);
-	worldAABB.upperBound.Set(100.0f, 200.0f);
+	m_worldAABB.lowerBound.Set(-100.0f, -100.0f);
+	m_worldAABB.upperBound.Set(100.0f, 200.0f);
 	b2Vec2 gravity;
 	gravity.Set(0.0f, -10.0f);
 	bool doSleep = true;
-	m_world = new b2World(worldAABB, gravity, doSleep);
+	m_world = new b2World(m_worldAABB, gravity, doSleep);
 	m_bomb = NULL;
 	m_textLine = 30;
 	m_mouseJoint = NULL;
