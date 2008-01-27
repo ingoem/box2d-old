@@ -43,23 +43,16 @@ struct b2PulleyJointDef : public b2JointDef
 		collideConnected = true;
 	}
 
-	/// Utility to set local anchor points from world anchor points.
-	/// This also computes length1 and length2.
-	/// @param anchor1 world position of the anchor on body1.
-	/// @param anchor2 world position of the anchor on body2.
-	/// @warning body1 and body2 must be set.
-	void SetInWorld(const b2Vec2& anchor1, const b2Vec2& anchor2);
-
-	/// The first ground anchor. This point never moves.
+	/// The first ground anchor in world coordinates. This point never moves.
 	b2Vec2 groundAnchor1;
 
-	/// The second ground anchor. This point never moves.
+	/// The second ground anchor in world coordinates. This point never moves.
 	b2Vec2 groundAnchor2;
 
-	/// The local anchor point in body1.
+	/// The local anchor point relative to body1's origin.
 	b2Vec2 localAnchor1;
 
-	/// The local anchor point in body2.
+	/// The local anchor point relative to body2's origin.
 	b2Vec2 localAnchor2;
 
 	/// The a reference length for the segment attached to body1.
@@ -90,8 +83,8 @@ public:
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 
-	b2Vec2 GetReactionForce(float32 invTimeStep) const;
-	float32 GetReactionTorque(float32 invTimeStep) const;
+	b2Vec2 GetReactionForce() const;
+	float32 GetReactionTorque() const;
 
 	/// Get the first ground anchor.
 	b2Vec2 GetGroundAnchor1() const;
@@ -112,7 +105,7 @@ public:
 
 	b2PulleyJoint(const b2PulleyJointDef* data);
 
-	void InitVelocityConstraints();
+	void InitVelocityConstraints(const b2TimeStep& step);
 	void SolveVelocityConstraints(const b2TimeStep& step);
 	bool SolvePositionConstraints();
 
@@ -137,9 +130,9 @@ public:
 	float32 m_limitMass2;
 
 	// Impulses for accumulation/warm starting.
-	float32 m_pulleyImpulse;
-	float32 m_limitImpulse1;
-	float32 m_limitImpulse2;
+	float32 m_force;
+	float32 m_limitForce1;
+	float32 m_limitForce2;
 
 	// Position impulses for accumulation.
 	float32 m_limitPositionImpulse1;

@@ -85,8 +85,8 @@ public:
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 
-	b2Vec2 GetReactionForce(float32 invTimeStep) const;
-	float32 GetReactionTorque(float32 invTimeStep) const;
+	b2Vec2 GetReactionForce() const;
+	float32 GetReactionTorque() const;
 
 	/// Get the current joint translation, usually in meters.
 	float32 GetJointTranslation() const;
@@ -122,13 +122,13 @@ public:
 	void SetMaxMotorForce(float32 torque);
 
 	/// Get the current motor torque, usually in N.
-	float32 GetMotorForce(float32 invTimeStep) const;
+	float32 GetMotorForce() const;
 
 	//--------------- Internals Below -------------------
 
 	b2PrismaticJoint(const b2PrismaticJointDef* def);
 
-	void InitVelocityConstraints();
+	void InitVelocityConstraints(const b2TimeStep& step);
 	void SolveVelocityConstraints(const b2TimeStep& step);
 	bool SolvePositionConstraints();
 
@@ -140,15 +140,15 @@ public:
 
 	b2Jacobian m_linearJacobian;
 	float32 m_linearMass;				// effective mass for point-to-line constraint.
-	float32 m_linearImpulse;
+	float32 m_force;
 	
 	float32 m_angularMass;			// effective mass for angular constraint.
-	float32 m_angularImpulse;
+	float32 m_torque;
 
 	b2Jacobian m_motorJacobian;
 	float32 m_motorMass;			// effective mass for motor/limit translational constraint.
-	float32 m_motorImpulse;
-	float32 m_limitImpulse;
+	float32 m_motorForce;
+	float32 m_limitForce;
 	float32 m_limitPositionImpulse;
 
 	float32 m_lowerTranslation;

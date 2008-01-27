@@ -190,7 +190,7 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 
 	for (int32 i = 0; i < m_jointCount; ++i)
 	{
-		m_joints[i]->InitVelocityConstraints();
+		m_joints[i]->InitVelocityConstraints(step);
 	}
 
 	// Solve velocity constraints.

@@ -20,15 +20,6 @@
 #include "../b2Body.h"
 #include "../b2World.h"
 
-void b2DistanceJointDef::Build(	const b2XForm& xf1, const b2XForm& xf2,
-								const b2Vec2& anchor1, const b2Vec2& anchor2)
-{
-	localAnchor1 = b2MulT(xf1, anchor1);
-	localAnchor2 = b2MulT(xf2, anchor2);
-	b2Vec2 d = anchor2 - anchor1;
-	length = d.Length();
-}
-
 // C = norm(p2 - p1) - L
 // u = (p2 - p1) / norm(p2 - p1)
 // Cdot = dot(u, v2 + cross(w2, r2) - v1 - cross(w1, r1))
@@ -43,15 +34,18 @@ b2DistanceJoint::b2DistanceJoint(const b2DistanceJointDef* def)
 	m_localAnchor1 = def->localAnchor1;
 	m_localAnchor2 = def->localAnchor2;
 	m_length = def->length;
-	m_impulse = 0.0f;
+	m_force = 0.0f;
 }
 
-void b2DistanceJoint::InitVelocityConstraints()
+void b2DistanceJoint::InitVelocityConstraints(const b2TimeStep& step)
 {
+	b2Body* b1 = m_body1;
+	b2Body* b2 = m_body2;
+
 	// Compute the effective mass matrix.
-	b2Vec2 r1 = b2Mul(m_body1->m_xf.R, m_localAnchor1);
-	b2Vec2 r2 = b2Mul(m_body2->m_xf.R, m_localAnchor2);
-	m_u = m_body2->m_xf.position + r2 - m_body1->m_xf.position - r1;
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	m_u = b2->m_xf.position + r2 - b1->m_xf.position - r1;
 
 	// Handle singularity.
 	float32 length = m_u.Length();
@@ -66,50 +60,55 @@ void b2DistanceJoint::InitVelocityConstraints()
 
 	float32 cr1u = b2Cross(r1, m_u);
 	float32 cr2u = b2Cross(r2, m_u);
-	m_mass = m_body1->m_invMass + m_body1->m_invI * cr1u * cr1u + m_body2->m_invMass + m_body2->m_invI * cr2u * cr2u;
+	m_mass = b1->m_invMass + b1->m_invI * cr1u * cr1u + b2->m_invMass + b2->m_invI * cr2u * cr2u;
 	b2Assert(m_mass > FLT_EPSILON);
 	m_mass = 1.0f / m_mass;
 
 	if (b2World::s_enableWarmStarting)
 	{
-		b2Vec2 P = m_impulse * m_u;
-		m_body1->m_linearVelocity -= m_body1->m_invMass * P;
-		m_body1->m_angularVelocity -= m_body1->m_invI * b2Cross(r1, P);
-		m_body2->m_linearVelocity += m_body2->m_invMass * P;
-		m_body2->m_angularVelocity += m_body2->m_invI * b2Cross(r2, P);
+		b2Vec2 P = step.dt * m_force * m_u;
+		b1->m_linearVelocity -= b1->m_invMass * P;
+		b1->m_angularVelocity -= b1->m_invI * b2Cross(r1, P);
+		b2->m_linearVelocity += b2->m_invMass * P;
+		b2->m_angularVelocity += b2->m_invI * b2Cross(r2, P);
 	}
 	else
 	{
-		m_impulse = 0.0f;
+		m_force = 0.0f;
 	}
 }
 
 void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
-	B2_NOT_USED(step);
+	b2Body* b1 = m_body1;
+	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(m_body1->m_xf.R, m_localAnchor1);
-	b2Vec2 r2 = b2Mul(m_body2->m_xf.R, m_localAnchor2);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
 
 	// Cdot = dot(u, v + cross(w, r))
-	b2Vec2 v1 = m_body1->m_linearVelocity + b2Cross(m_body1->m_angularVelocity, r1);
-	b2Vec2 v2 = m_body2->m_linearVelocity + b2Cross(m_body2->m_angularVelocity, r2);
+	b2Vec2 v1 = b1->m_linearVelocity + b2Cross(b1->m_angularVelocity, r1);
+	b2Vec2 v2 = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2);
 	float32 Cdot = b2Dot(m_u, v2 - v1);
-	float32 impulse = -m_mass * Cdot;
-	m_impulse += impulse;
+	float32 force = -step.inv_dt * m_mass * Cdot;
+	m_force += force;
 
-	b2Vec2 P = impulse * m_u;
-	m_body1->m_linearVelocity -= m_body1->m_invMass * P;
-	m_body1->m_angularVelocity -= m_body1->m_invI * b2Cross(r1, P);
-	m_body2->m_linearVelocity += m_body2->m_invMass * P;
-	m_body2->m_angularVelocity += m_body2->m_invI * b2Cross(r2, P);
+	b2Vec2 P = step.dt * force * m_u;
+	b1->m_linearVelocity -= b1->m_invMass * P;
+	b1->m_angularVelocity -= b1->m_invI * b2Cross(r1, P);
+	b2->m_linearVelocity += b2->m_invMass * P;
+	b2->m_angularVelocity += b2->m_invI * b2Cross(r2, P);
 }
 
 bool b2DistanceJoint::SolvePositionConstraints()
 {
-	b2Vec2 r1 = b2Mul(m_body1->m_xf.R, m_localAnchor1);
-	b2Vec2 r2 = b2Mul(m_body2->m_xf.R, m_localAnchor2);
-	b2Vec2 d = m_body2->m_xf.position + r2 - m_body1->m_xf.position - r1;
+	b2Body* b1 = m_body1;
+	b2Body* b2 = m_body2;
+
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+
+	b2Vec2 d = b2->m_xf.position + r2 - b1->m_xf.position - r1;
 
 	float32 length = d.Normalize();
 	float32 C = length - m_length;
@@ -119,35 +118,34 @@ bool b2DistanceJoint::SolvePositionConstraints()
 	m_u = d;
 	b2Vec2 P = impulse * m_u;
 
-	m_body1->m_xf.position -= m_body1->m_invMass * P;
-	m_body1->m_angle -= m_body1->m_invI * b2Cross(r1, P);
-	m_body2->m_xf.position += m_body2->m_invMass * P;
-	m_body2->m_angle += m_body2->m_invI * b2Cross(r2, P);
+	b1->m_xf.position -= b1->m_invMass * P;
+	b1->m_angle -= b1->m_invI * b2Cross(r1, P);
+	b2->m_xf.position += b2->m_invMass * P;
+	b2->m_angle += b2->m_invI * b2Cross(r2, P);
 
-	m_body1->m_xf.R.Set(m_body1->m_angle);
-	m_body2->m_xf.R.Set(m_body2->m_angle);
+	b1->m_xf.R.Set(b1->m_angle);
+	b2->m_xf.R.Set(b2->m_angle);
 
 	return b2Abs(C) < b2_linearSlop;
 }
 
 b2Vec2 b2DistanceJoint::GetAnchor1() const
 {
-	return b2Mul(m_body1->m_xf, m_localAnchor1);
+	return m_body1->GetWorldPoint(m_localAnchor1);
 }
 
 b2Vec2 b2DistanceJoint::GetAnchor2() const
 {
-	return b2Mul(m_body2->m_xf, m_localAnchor2);
+	return m_body2->GetWorldPoint(m_localAnchor2);
 }
 
-b2Vec2 b2DistanceJoint::GetReactionForce(float32 invTimeStep) const
+b2Vec2 b2DistanceJoint::GetReactionForce() const
 {
-	b2Vec2 F = (m_impulse * invTimeStep) * m_u;
+	b2Vec2 F = m_force * m_u;
 	return F;
 }
 
-float32 b2DistanceJoint::GetReactionTorque(float32 invTimeStep) const
+float32 b2DistanceJoint::GetReactionTorque() const
 {
-	B2_NOT_USED(invTimeStep);
 	return 0.0f;
 }

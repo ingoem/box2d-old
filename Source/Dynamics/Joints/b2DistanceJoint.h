@@ -34,19 +34,17 @@ struct b2DistanceJointDef : public b2JointDef
 		type = e_distanceJoint;
 		localAnchor1.Set(0.0f, 0.0f);
 		localAnchor2.Set(0.0f, 0.0f);
+		length = 1.0f;
 	}
 
-	/// Build anchor points and length from world transforms and world anchor points.
-	/// @param xf1 transform of body 1.
-	/// @param xf2 transform of body 2.
-	/// @param anchor1 world position of anchor1.
-	/// @param anchor2 world position of anchor2.
-	void Build(	const b2XForm& xf1, const b2XForm& xf2,
-				const b2Vec2& anchor1, const b2Vec2& anchor2);
-
-	float32 length;
+	/// The local anchor point relative to body1's origin.
 	b2Vec2 localAnchor1;
+
+	/// The local anchor point relative to body2's origin.
 	b2Vec2 localAnchor2;
+
+	/// The equilibrium length between the anchor points.
+	float32 length;
 };
 
 /// A distance joint constrains two points on two bodies
@@ -55,25 +53,26 @@ struct b2DistanceJointDef : public b2JointDef
 class b2DistanceJoint : public b2Joint
 {
 public:
+
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 
-	b2Vec2 GetReactionForce(float32 invTimeStep) const;
-	float32 GetReactionTorque(float32 invTimeStep) const;
+	b2Vec2 GetReactionForce() const;
+	float32 GetReactionTorque() const;
 
 	//--------------- Internals Below -------------------
 
 	b2DistanceJoint(const b2DistanceJointDef* data);
 
-	void InitVelocityConstraints();
+	void InitVelocityConstraints(const b2TimeStep& step);
 	void SolveVelocityConstraints(const b2TimeStep& step);
 	bool SolvePositionConstraints();
 
 	b2Vec2 m_localAnchor1;
 	b2Vec2 m_localAnchor2;
 	b2Vec2 m_u;
-	float32 m_impulse;
-	float32 m_mass;	// effective mass for the constraint.
+	float32 m_force;
+	float32 m_mass;		// effective mass for the constraint.
 	float32 m_length;
 };
 

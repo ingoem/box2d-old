@@ -392,7 +392,7 @@ inline float32 b2Body::GetInertia() const
 
 inline b2Vec2 b2Body::GetWorldPoint(const b2Vec2& localPoint)
 {
-	return b2Mul(m_xf, localPoint);
+	return b2Mul(m_xf, localPoint - m_center);
 }
 
 inline b2Vec2 b2Body::GetWorldVector(const b2Vec2& localVector)
@@ -402,7 +402,7 @@ inline b2Vec2 b2Body::GetWorldVector(const b2Vec2& localVector)
 
 inline b2Vec2 b2Body::GetLocalPoint(const b2Vec2& worldPoint)
 {
-	return b2MulT(m_xf, worldPoint);
+	return b2MulT(m_xf, worldPoint) + m_center;
 }
 
 inline b2Vec2 b2Body::GetLocalVector(const b2Vec2& worldVector)

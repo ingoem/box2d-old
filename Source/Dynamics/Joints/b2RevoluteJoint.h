@@ -89,8 +89,8 @@ public:
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 
-	b2Vec2 GetReactionForce(float32 invTimeStep) const;
-	float32 GetReactionTorque(float32 invTimeStep) const;
+	b2Vec2 GetReactionForce() const;
+	float32 GetReactionTorque() const;
 
 	/// Get the current joint angle in radians.
 	float32 GetJointAngle() const;
@@ -126,25 +126,25 @@ public:
 	void SetMaxMotorTorque(float32 torque);
 
 	/// Get the current motor torque, usually in N-m.
-	float32 GetMotorTorque(float32 invTimeStep) const;
+	float32 GetMotorTorque() const;
 
 	//--------------- Internals Below -------------------
 
 	b2RevoluteJoint(const b2RevoluteJointDef* def);
 
-	void InitVelocityConstraints();
+	void InitVelocityConstraints(const b2TimeStep& step);
 	void SolveVelocityConstraints(const b2TimeStep& step);
 
 	bool SolvePositionConstraints();
 
-	b2Vec2 m_localAnchor1;
+	b2Vec2 m_localAnchor1;	// relative
 	b2Vec2 m_localAnchor2;
-	b2Vec2 m_ptpImpulse;
-	float32 m_motorImpulse;
-	float32 m_limitImpulse;
+	b2Vec2 m_pivotForce;
+	float32 m_motorForce;
+	float32 m_limitForce;
 	float32 m_limitPositionImpulse;
 
-	b2Mat22 m_ptpMass;		// effective mass for point-to-point constraint.
+	b2Mat22 m_pivotMass;		// effective mass for point-to-point constraint.
 	float32 m_motorMass;	// effective mass for motor/limit angular constraint.
 	
 	bool m_enableMotor;

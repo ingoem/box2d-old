@@ -46,16 +46,17 @@ public:
 	b2Vec2 GetAnchor1() const;
 	b2Vec2 GetAnchor2() const;
 
-	b2Vec2 GetReactionForce(float32 invTimeStep) const;
-	float32 GetReactionTorque(float32 invTimeStep) const;
+	b2Vec2 GetReactionForce() const;
+	float32 GetReactionTorque() const;
 
+	/// Use this to update the target point.
 	void SetTarget(const b2Vec2& target);
 
 	//--------------- Internals Below -------------------
 
 	b2MouseJoint(const b2MouseJointDef* def);
 
-	void InitVelocityConstraints();
+	void InitVelocityConstraints(const b2TimeStep& step);
 	void SolveVelocityConstraints(const b2TimeStep& step);
 	bool SolvePositionConstraints()
 	{
@@ -64,9 +65,9 @@ public:
 
 	b2Vec2 m_localAnchor;
 	b2Vec2 m_target;
-	b2Vec2 m_impulse;
+	b2Vec2 m_force;
 
-	b2Mat22 m_ptpMass;		// effective mass for point-to-point constraint.
+	b2Mat22 m_mass;		// effective mass for point-to-point constraint.
 	b2Vec2 m_C;				// position error
 	float32 m_maxForce;
 	float32 m_beta;			// bias factor

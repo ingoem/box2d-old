@@ -98,19 +98,32 @@ struct b2JointDef
 class b2Joint
 {
 public:
+
+	/// Get the type of the concrete joint.
 	b2JointType GetType() const;
 
+	/// Get the first body attached to this joint.
 	b2Body* GetBody1();
+
+	/// Get the second body attached to this joint.
 	b2Body* GetBody2();
 
+	/// Get the anchor point on body1 in world coordinates.
 	virtual b2Vec2 GetAnchor1() const = 0;
+
+	/// Get the anchor point on body2 in world coordinates.
 	virtual b2Vec2 GetAnchor2() const = 0;
 
-	virtual b2Vec2 GetReactionForce(float32 invTimeStep) const = 0;
-	virtual float32 GetReactionTorque(float32 invTimeStep) const = 0;
+	/// Get the reaction force on body2 at the joint anchor.
+	virtual b2Vec2 GetReactionForce() const = 0;
 
+	/// Get the reaction torque on body2.
+	virtual float32 GetReactionTorque() const = 0;
+
+	/// Get the next joint the world joint list.
 	b2Joint* GetNext();
 
+	/// Get the user data pointer.
 	void* GetUserData();
 
 	//--------------- Internals Below -------------------
@@ -121,7 +134,7 @@ public:
 	b2Joint(const b2JointDef* def);
 	virtual ~b2Joint() {}
 
-	virtual void InitVelocityConstraints() = 0;
+	virtual void InitVelocityConstraints(const b2TimeStep& step) = 0;
 	virtual void SolveVelocityConstraints(const b2TimeStep& step) = 0;
 
 	// This returns true if the position errors are within tolerance.
