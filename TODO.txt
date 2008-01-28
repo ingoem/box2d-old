@@ -98,8 +98,8 @@ Version 2.0.0
 - Safe contact callback example. DONE
 - Draw world AABB in TestBed. DONE
 - Use forces instead of impulses to handle variable time step. DONE
+- Ragdoll contribution. DONE
 - Sensors with overlap report.
-- Ragdoll contribution.
 - Car example.
 - Doxygen.
 - Update manual.

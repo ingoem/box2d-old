@@ -2,31 +2,48 @@
 
 int16 BipedDef::count = 0;
 
-BipedDef::BipedDef(b2Vec2 p)
+const float32 k_scale = 3.0f;
+
+BipedDef::BipedDef()
 {
-	SetMotorTorque(0.0f);
-	SetMotorSpeed(0);
-	SetDensity(130);
-	SetRestitution(0.30f);
-	SetLinearDamping(0.005f);
+	LFootDef.type				= b2BodyDef::e_dynamicBody;
+	RFootDef.type				= b2BodyDef::e_dynamicBody;
+	LCalfDef.type				= b2BodyDef::e_dynamicBody;
+	RCalfDef.type				= b2BodyDef::e_dynamicBody;
+	LThighDef.type				= b2BodyDef::e_dynamicBody;
+	RThighDef.type				= b2BodyDef::e_dynamicBody;
+	PelvisDef.type				= b2BodyDef::e_dynamicBody;
+	StomachDef.type				= b2BodyDef::e_dynamicBody;
+	ChestDef.type				= b2BodyDef::e_dynamicBody;
+	NeckDef.type				= b2BodyDef::e_dynamicBody;
+	HeadDef.type				= b2BodyDef::e_dynamicBody;
+	LUpperArmDef.type			= b2BodyDef::e_dynamicBody;
+	RUpperArmDef.type			= b2BodyDef::e_dynamicBody;
+	LForearmDef.type			= b2BodyDef::e_dynamicBody;
+	RForearmDef.type			= b2BodyDef::e_dynamicBody;
+	LHandDef.type				= b2BodyDef::e_dynamicBody;
+	RHandDef.type				= b2BodyDef::e_dynamicBody;
+
+	SetMotorTorque(2.0f);
+	SetMotorSpeed(0.0f);
+	SetDensity(20.0f);
+	SetRestitution(0.0f);
+	SetLinearDamping(0.0f);
 	SetAngularDamping(0.005f);
 	SetGroupIndex(--count);
 	EnableMotor();
 	EnableLimit();
 	
 	DefaultVertices();
-	AddShapes();
 	DefaultPositions();
 	DefaultJoints();
 
-	position = p;
 	LFootPoly.friction = RFootPoly.friction = 0.85f;
-	LFootPoly.restitution = 0;
 }
 
 void BipedDef::IsFast(bool b)
 {
-	NOT_USED(b);
+	B2_NOT_USED(b);
 	/*
 	LFootDef.isFast			= b;
 	RFootDef.isFast			= b;
@@ -46,16 +63,6 @@ void BipedDef::IsFast(bool b)
 	LHandDef.isFast			= b;
 	RHandDef.isFast			= b;
 	*/
-}
-
-void BipedDef::SetPosition(float x, float y)
-{
-	position = b2Vec2(x, y);
-}
-
-void BipedDef::SetPosition(b2Vec2 p)
-{
-	position = p;
 }
 
 void BipedDef::SetGroupIndex(int16 i)
@@ -123,22 +130,22 @@ void BipedDef::SetAngularDamping(float f)
 
 void BipedDef::SetMotorTorque(float f)
 {
-	LAnkleDef.motorTorque		= f;
-	RAnkleDef.motorTorque		= f;
-	LKneeDef.motorTorque		= f;
-	RKneeDef.motorTorque		= f;
-	LHipDef.motorTorque			= f;
-	RHipDef.motorTorque			= f;
-	LowerAbsDef.motorTorque		= f;
-	UpperAbsDef.motorTorque		= f;
-	LowerNeckDef.motorTorque	= f;
-	UpperNeckDef.motorTorque	= f;
-	LShoulderDef.motorTorque	= f;
-	RShoulderDef.motorTorque	= f;
-	LElbowDef.motorTorque		= f;
-	RElbowDef.motorTorque		= f;
-	LWristDef.motorTorque		= f;
-	RWristDef.motorTorque		= f;
+	LAnkleDef.maxMotorTorque		= f;
+	RAnkleDef.maxMotorTorque		= f;
+	LKneeDef.maxMotorTorque		= f;
+	RKneeDef.maxMotorTorque		= f;
+	LHipDef.maxMotorTorque			= f;
+	RHipDef.maxMotorTorque			= f;
+	LowerAbsDef.maxMotorTorque		= f;
+	UpperAbsDef.maxMotorTorque		= f;
+	LowerNeckDef.maxMotorTorque	= f;
+	UpperNeckDef.maxMotorTorque	= f;
+	LShoulderDef.maxMotorTorque	= f;
+	RShoulderDef.maxMotorTorque	= f;
+	LElbowDef.maxMotorTorque		= f;
+	RElbowDef.maxMotorTorque		= f;
+	LWristDef.maxMotorTorque		= f;
+	RWristDef.maxMotorTorque		= f;
 }
 
 void BipedDef::SetMotorSpeed(float f)
@@ -271,175 +278,219 @@ void BipedDef::DefaultVertices()
 {
 	{	// feet
 		LFootPoly.vertexCount = RFootPoly.vertexCount = 5;
-		LFootPoly.vertices[0] = RFootPoly.vertices[0] = b2Vec2(.033f,.143f);
-		LFootPoly.vertices[1] = RFootPoly.vertices[1] = b2Vec2(.023f,.033f);
-		LFootPoly.vertices[2] = RFootPoly.vertices[2] = b2Vec2(.267f,.035f);
-		LFootPoly.vertices[3] = RFootPoly.vertices[3] = b2Vec2(.265f,.065f);
-		LFootPoly.vertices[4] = RFootPoly.vertices[4] = b2Vec2(.117f,.143f);
+		LFootPoly.vertices[0] = RFootPoly.vertices[0] = k_scale * b2Vec2(.033f,.143f);
+		LFootPoly.vertices[1] = RFootPoly.vertices[1] = k_scale * b2Vec2(.023f,.033f);
+		LFootPoly.vertices[2] = RFootPoly.vertices[2] = k_scale * b2Vec2(.267f,.035f);
+		LFootPoly.vertices[3] = RFootPoly.vertices[3] = k_scale * b2Vec2(.265f,.065f);
+		LFootPoly.vertices[4] = RFootPoly.vertices[4] = k_scale * b2Vec2(.117f,.143f);
 	}
 	{	// calves
 		LCalfPoly.vertexCount = RCalfPoly.vertexCount = 4;
-		LCalfPoly.vertices[0] = RCalfPoly.vertices[0] = b2Vec2(.089f,.016f);
-		LCalfPoly.vertices[1] = RCalfPoly.vertices[1] = b2Vec2(.178f,.016f);
-		LCalfPoly.vertices[2] = RCalfPoly.vertices[2] = b2Vec2(.205f,.417f);
-		LCalfPoly.vertices[3] = RCalfPoly.vertices[3] = b2Vec2(.095f,.417f);
+		LCalfPoly.vertices[0] = RCalfPoly.vertices[0] = k_scale * b2Vec2(.089f,.016f);
+		LCalfPoly.vertices[1] = RCalfPoly.vertices[1] = k_scale * b2Vec2(.178f,.016f);
+		LCalfPoly.vertices[2] = RCalfPoly.vertices[2] = k_scale * b2Vec2(.205f,.417f);
+		LCalfPoly.vertices[3] = RCalfPoly.vertices[3] = k_scale * b2Vec2(.095f,.417f);
 	}
 	{	// thighs
 		LThighPoly.vertexCount = RThighPoly.vertexCount = 4;
-		LThighPoly.vertices[0] = RThighPoly.vertices[0] = b2Vec2(.137f,.032f);
-		LThighPoly.vertices[1] = RThighPoly.vertices[1] = b2Vec2(.243f,.032f);
-		LThighPoly.vertices[2] = RThighPoly.vertices[2] = b2Vec2(.318f,.343f);
-		LThighPoly.vertices[3] = RThighPoly.vertices[3] = b2Vec2(.142f,.343f);
+		LThighPoly.vertices[0] = RThighPoly.vertices[0] = k_scale * b2Vec2(.137f,.032f);
+		LThighPoly.vertices[1] = RThighPoly.vertices[1] = k_scale * b2Vec2(.243f,.032f);
+		LThighPoly.vertices[2] = RThighPoly.vertices[2] = k_scale * b2Vec2(.318f,.343f);
+		LThighPoly.vertices[3] = RThighPoly.vertices[3] = k_scale * b2Vec2(.142f,.343f);
 	}
 	{	// pelvis
 		PelvisPoly.vertexCount = 5;
-		PelvisPoly.vertices[0].Set(.105f,.051f);
-		PelvisPoly.vertices[1].Set(.277f,.053f);
-		PelvisPoly.vertices[2].Set(.320f,.233f);
-		PelvisPoly.vertices[3].Set(.112f,.233f);
-		PelvisPoly.vertices[4].Set(.067f,.152f);
+		PelvisPoly.vertices[0] = k_scale * b2Vec2(.105f,.051f);
+		PelvisPoly.vertices[1] = k_scale * b2Vec2(.277f,.053f);
+		PelvisPoly.vertices[2] = k_scale * b2Vec2(.320f,.233f);
+		PelvisPoly.vertices[3] = k_scale * b2Vec2(.112f,.233f);
+		PelvisPoly.vertices[4] = k_scale * b2Vec2(.067f,.152f);
 	}
 	{	// stomach
 		StomachPoly.vertexCount = 4;
-		StomachPoly.vertices[0].Set(.088f,.043f);
-		StomachPoly.vertices[1].Set(.284f,.043f);
-		StomachPoly.vertices[2].Set(.295f,.231f);
-		StomachPoly.vertices[3].Set(.100f,.231f);
+		StomachPoly.vertices[0] = k_scale * b2Vec2(.088f,.043f);
+		StomachPoly.vertices[1] = k_scale * b2Vec2(.284f,.043f);
+		StomachPoly.vertices[2] = k_scale * b2Vec2(.295f,.231f);
+		StomachPoly.vertices[3] = k_scale * b2Vec2(.100f,.231f);
 	}
 	{	// chest
 		ChestPoly.vertexCount = 4;
-		ChestPoly.vertices[0].Set(.091f,.042f);
-		ChestPoly.vertices[1].Set(.283f,.042f);
-		ChestPoly.vertices[2].Set(.177f,.289f);
-		ChestPoly.vertices[3].Set(.065f,.289f);
+		ChestPoly.vertices[0] = k_scale * b2Vec2(.091f,.042f);
+		ChestPoly.vertices[1] = k_scale * b2Vec2(.283f,.042f);
+		ChestPoly.vertices[2] = k_scale * b2Vec2(.177f,.289f);
+		ChestPoly.vertices[3] = k_scale * b2Vec2(.065f,.289f);
 	}
 	{	// head
-		HeadCirc.radius = .115f;
+		HeadCirc.radius = k_scale * .115f;
 	}
 	{	// neck
 		NeckPoly.vertexCount = 4;
-		NeckPoly.vertices[0].Set(.038f,.054f);
-		NeckPoly.vertices[1].Set(.149f,.054f);
-		NeckPoly.vertices[2].Set(.154f,.102f);
-		NeckPoly.vertices[3].Set(.054f,.113f);
+		NeckPoly.vertices[0] = k_scale * b2Vec2(.038f,.054f);
+		NeckPoly.vertices[1] = k_scale * b2Vec2(.149f,.054f);
+		NeckPoly.vertices[2] = k_scale * b2Vec2(.154f,.102f);
+		NeckPoly.vertices[3] = k_scale * b2Vec2(.054f,.113f);
 	}
 	{	// upper arms
 		LUpperArmPoly.vertexCount = RUpperArmPoly.vertexCount = 5;
-		LUpperArmPoly.vertices[0] = RUpperArmPoly.vertices[0] = b2Vec2(.092f,.059f);
-		LUpperArmPoly.vertices[1] = RUpperArmPoly.vertices[1] = b2Vec2(.159f,.059f);
-		LUpperArmPoly.vertices[2] = RUpperArmPoly.vertices[2] = b2Vec2(.169f,.335f);
-		LUpperArmPoly.vertices[3] = RUpperArmPoly.vertices[3] = b2Vec2(.078f,.335f);
-		LUpperArmPoly.vertices[4] = RUpperArmPoly.vertices[4] = b2Vec2(.064f,.248f);
+		LUpperArmPoly.vertices[0] = RUpperArmPoly.vertices[0] = k_scale * b2Vec2(.092f,.059f);
+		LUpperArmPoly.vertices[1] = RUpperArmPoly.vertices[1] = k_scale * b2Vec2(.159f,.059f);
+		LUpperArmPoly.vertices[2] = RUpperArmPoly.vertices[2] = k_scale * b2Vec2(.169f,.335f);
+		LUpperArmPoly.vertices[3] = RUpperArmPoly.vertices[3] = k_scale * b2Vec2(.078f,.335f);
+		LUpperArmPoly.vertices[4] = RUpperArmPoly.vertices[4] = k_scale * b2Vec2(.064f,.248f);
 	}
 	{	// forearms
 		LForearmPoly.vertexCount = RForearmPoly.vertexCount = 4;
-		LForearmPoly.vertices[0] = RForearmPoly.vertices[0] = b2Vec2(.082f,.054f);
-		LForearmPoly.vertices[1] = RForearmPoly.vertices[1] = b2Vec2(.138f,.054f);
-		LForearmPoly.vertices[2] = RForearmPoly.vertices[2] = b2Vec2(.149f,.296f);
-		LForearmPoly.vertices[3] = RForearmPoly.vertices[3] = b2Vec2(.088f,.296f);
+		LForearmPoly.vertices[0] = RForearmPoly.vertices[0] = k_scale * b2Vec2(.082f,.054f);
+		LForearmPoly.vertices[1] = RForearmPoly.vertices[1] = k_scale * b2Vec2(.138f,.054f);
+		LForearmPoly.vertices[2] = RForearmPoly.vertices[2] = k_scale * b2Vec2(.149f,.296f);
+		LForearmPoly.vertices[3] = RForearmPoly.vertices[3] = k_scale * b2Vec2(.088f,.296f);
 	}
 	{	// hands
 		LHandPoly.vertexCount = RHandPoly.vertexCount = 5;
-		LHandPoly.vertices[0] = RHandPoly.vertices[0] = b2Vec2(.066f,.031f);
-		LHandPoly.vertices[1] = RHandPoly.vertices[1] = b2Vec2(.123f,.020f);
-		LHandPoly.vertices[2] = RHandPoly.vertices[2] = b2Vec2(.160f,.127f);
-		LHandPoly.vertices[3] = RHandPoly.vertices[3] = b2Vec2(.127f,.178f);
-		LHandPoly.vertices[4] = RHandPoly.vertices[4] = b2Vec2(.074f,.178f);;
+		LHandPoly.vertices[0] = RHandPoly.vertices[0] = k_scale * b2Vec2(.066f,.031f);
+		LHandPoly.vertices[1] = RHandPoly.vertices[1] = k_scale * b2Vec2(.123f,.020f);
+		LHandPoly.vertices[2] = RHandPoly.vertices[2] = k_scale * b2Vec2(.160f,.127f);
+		LHandPoly.vertices[3] = RHandPoly.vertices[3] = k_scale * b2Vec2(.127f,.178f);
+		LHandPoly.vertices[4] = RHandPoly.vertices[4] = k_scale * b2Vec2(.074f,.178f);;
 	}
 }
 
 void BipedDef::DefaultJoints()
 {
+	//b.LAnkleDef.body1		= LFoot;
+	//b.LAnkleDef.body2		= LCalf;
+	//b.RAnkleDef.body1		= RFoot;
+	//b.RAnkleDef.body2		= RCalf;
 	{	// ankles
-		LAnkleDef.anchorPoint	= RAnkleDef.anchorPoint		= b2Vec2(-.045f,-.75f);
-		LAnkleDef.lowerAngle	= RAnkleDef.lowerAngle		= -0.523598776f;
-		LAnkleDef.upperAngle	= RAnkleDef.upperAngle		= 0.523598776f;
+		b2Vec2 anchor = k_scale * b2Vec2(-.045f,-.75f);
+		LAnkleDef.localAnchor1		= RAnkleDef.localAnchor1	= anchor - LFootDef.position;
+		LAnkleDef.localAnchor2		= RAnkleDef.localAnchor2	= anchor - LCalfDef.position;
+		LAnkleDef.referenceAngle	= RAnkleDef.referenceAngle	= 0.0f;
+		LAnkleDef.lowerAngle		= RAnkleDef.lowerAngle		= -0.523598776f;
+		LAnkleDef.upperAngle		= RAnkleDef.upperAngle		= 0.523598776f;
 	}
+
+	//b.LKneeDef.body1		= LCalf;
+	//b.LKneeDef.body2		= LThigh;
+	//b.RKneeDef.body1		= RCalf;
+	//b.RKneeDef.body2		= RThigh;
 	{	// knees
-		LKneeDef.anchorPoint	= RKneeDef.anchorPoint		= b2Vec2(-.030f,-.355f);
+		b2Vec2 anchor = k_scale * b2Vec2(-.030f,-.355f);
+		LKneeDef.localAnchor1	= RKneeDef.localAnchor1		= anchor - LCalfDef.position;
+		LKneeDef.localAnchor2	= RKneeDef.localAnchor2		= anchor - LThighDef.position;
+		LKneeDef.referenceAngle	= RKneeDef.referenceAngle	= 0.0f;
 		LKneeDef.lowerAngle		= RKneeDef.lowerAngle		= 0;
 		LKneeDef.upperAngle		= RKneeDef.upperAngle		= 2.61799388f;
 	}
+
+	//b.LHipDef.body1			= LThigh;
+	//b.LHipDef.body2			= Pelvis;
+	//b.RHipDef.body1			= RThigh;
+	//b.RHipDef.body2			= Pelvis;
 	{	// hips
-		LHipDef.anchorPoint		= RHipDef.anchorPoint		= b2Vec2(.005f,-.045f);
+		b2Vec2 anchor = k_scale * b2Vec2(.005f,-.045f);
+		LHipDef.localAnchor1	= RHipDef.localAnchor1		= anchor - LThighDef.position;
+		LHipDef.localAnchor2	= RHipDef.localAnchor2		= anchor - PelvisDef.position;
+		LHipDef.referenceAngle	= RHipDef.referenceAngle	= 0.0f;
 		LHipDef.lowerAngle		= RHipDef.lowerAngle		= -2.26892803f;
 		LHipDef.upperAngle		= RHipDef.upperAngle		= 0;
 	}
+
+	//b.LowerAbsDef.body1		= Pelvis;
+	//b.LowerAbsDef.body2		= Stomach;
 	{	// lower abs
-		LowerAbsDef.anchorPoint		= b2Vec2(.035f,.135f);
+		b2Vec2 anchor = k_scale * b2Vec2(.035f,.135f);
+		LowerAbsDef.localAnchor1	= anchor - PelvisDef.position;
+		LowerAbsDef.localAnchor2	= anchor - StomachDef.position;
+		LowerAbsDef.referenceAngle	= 0.0f;
 		LowerAbsDef.lowerAngle		= -0.523598776f;
 		LowerAbsDef.upperAngle		= 0.523598776f;
 	}
+
+	//b.UpperAbsDef.body1		= Stomach;
+	//b.UpperAbsDef.body2		= Chest;
 	{	// upper abs
-		UpperAbsDef.anchorPoint		= b2Vec2(.045f,.320f);
+		b2Vec2 anchor = k_scale * b2Vec2(.045f,.320f);
+		UpperAbsDef.localAnchor1	= anchor - StomachDef.position;
+		UpperAbsDef.localAnchor2	= anchor - ChestDef.position;
+		UpperAbsDef.referenceAngle	= 0.0f;
 		UpperAbsDef.lowerAngle		= -0.523598776f;
 		UpperAbsDef.upperAngle		= 0.174532925f;
 	}
+
+	//b.LowerNeckDef.body1	= Chest;
+	//b.LowerNeckDef.body2	= Neck;
 	{	// lower neck
-		LowerNeckDef.anchorPoint	= b2Vec2(-.015f,.575f);
+		b2Vec2 anchor = k_scale * b2Vec2(-.015f,.575f);
+		LowerNeckDef.localAnchor1	= anchor - ChestDef.position;
+		LowerNeckDef.localAnchor2	= anchor - NeckDef.position;
+		LowerNeckDef.referenceAngle	= 0.0f;
 		LowerNeckDef.lowerAngle		= -0.174532925f;
 		LowerNeckDef.upperAngle		= 0.174532925f;
 	}
+
+	//b.UpperNeckDef.body1	= Chest;
+	//b.UpperNeckDef.body2	= Head;
 	{	// upper neck
-		UpperNeckDef.anchorPoint	= b2Vec2(-.005f,.630f);
+		b2Vec2 anchor = k_scale * b2Vec2(-.005f,.630f);
+		UpperNeckDef.localAnchor1	= anchor - ChestDef.position;
+		UpperNeckDef.localAnchor2	= anchor - HeadDef.position;
+		UpperNeckDef.referenceAngle	= 0.0f;
 		UpperNeckDef.lowerAngle		= -0.610865238f;
 		UpperNeckDef.upperAngle		= 0.785398163f;
 	}
+
+	//b.LShoulderDef.body1	= Chest;
+	//b.LShoulderDef.body2	= LUpperArm;
+	//b.RShoulderDef.body1	= Chest;
+	//b.RShoulderDef.body2	= RUpperArm;
 	{	// shoulders
-		LShoulderDef.anchorPoint	= RShoulderDef.anchorPoint		= b2Vec2(-.015f,.545f);
+		b2Vec2 anchor = k_scale * b2Vec2(-.015f,.545f);
+		LShoulderDef.localAnchor1	= RShoulderDef.localAnchor1		= anchor - ChestDef.position;
+		LShoulderDef.localAnchor2	= RShoulderDef.localAnchor2		= anchor - LUpperArmDef.position;
+		LShoulderDef.referenceAngle	= RShoulderDef.referenceAngle	= 0.0f;
 		LShoulderDef.lowerAngle		= RShoulderDef.lowerAngle		= -1.04719755f;
 		LShoulderDef.upperAngle		= RShoulderDef.upperAngle		= 3.14159265f;
 	}
+
+	//b.LElbowDef.body1		= LForearm;
+	//b.LElbowDef.body2		= LUpperArm;
+	//b.RElbowDef.body1		= RForearm;
+	//b.RElbowDef.body2		= RUpperArm;
 	{	// elbows
-		LElbowDef.anchorPoint		= RElbowDef.anchorPoint			= b2Vec2(-.005f,.290f);
-		LElbowDef.lowerAngle		= RElbowDef.lowerAngle			= -2.7925268f;
-		LElbowDef.upperAngle		= RElbowDef.upperAngle			= 0;
+		b2Vec2 anchor = k_scale * b2Vec2(-.005f,.290f);
+		LElbowDef.localAnchor1		= RElbowDef.localAnchor1	= anchor - LForearmDef.position;
+		LElbowDef.localAnchor2		= RElbowDef.localAnchor2	= anchor - LUpperArmDef.position;
+		LElbowDef.referenceAngle	= RElbowDef.referenceAngle	= 0.0f;
+		LElbowDef.lowerAngle		= RElbowDef.lowerAngle		= -2.7925268f;
+		LElbowDef.upperAngle		= RElbowDef.upperAngle		= 0;
 	}
+
+	//b.LWristDef.body1		= LHand;
+	//b.LWristDef.body2		= LForearm;
+	//b.RWristDef.body1		= RHand;
+	//b.RWristDef.body2		= RForearm;
 	{	// wrists
-		LWristDef.anchorPoint		= RWristDef.anchorPoint			= b2Vec2(-.010f,.045f);
-		LWristDef.lowerAngle		= RWristDef.lowerAngle			= -0.174532925f;
-		LWristDef.upperAngle		= RWristDef.upperAngle			= 0.174532925f;
+		b2Vec2 anchor = k_scale * b2Vec2(-.010f,.045f);
+		LWristDef.localAnchor1		= RWristDef.localAnchor1	= anchor - LHandDef.position;
+		LWristDef.localAnchor2		= RWristDef.localAnchor2	= anchor - LForearmDef.position;
+		LWristDef.referenceAngle	= RWristDef.referenceAngle	= 0.0f;
+		LWristDef.lowerAngle		= RWristDef.lowerAngle		= -0.174532925f;
+		LWristDef.upperAngle		= RWristDef.upperAngle		= 0.174532925f;
 	}
-	{	// wrists
-		LWristDef.anchorPoint		= RWristDef.anchorPoint			= b2Vec2(-.010f,.045f);
-		LWristDef.lowerAngle		= RWristDef.lowerAngle			= -0.174532925f;
-		LWristDef.upperAngle		= RWristDef.upperAngle			= 0.174532925f;
-	}
-	// mid neck:	-0.010f, 0.600f
 }
 
 void BipedDef::DefaultPositions()
 {
-	LFootDef.position		= RFootDef.position			= b2Vec2(-.122f,-.901f);
-	LCalfDef.position		= RCalfDef.position			= b2Vec2(-.177f,-.771f);
-	LThighDef.position		= RThighDef.position		= b2Vec2(-.217f,-.391f);
-	LUpperArmDef.position	= RUpperArmDef.position		= b2Vec2(-.127f,.228f);
-	LForearmDef.position	= RForearmDef.position		= b2Vec2(-.117f,-.011f);
-	LHandDef.position		= RHandDef.position			= b2Vec2(-.112f,-.136f);
-	PelvisDef.position									= b2Vec2(-.177f,-.101f);
-	StomachDef.position									= b2Vec2(-.142f,.088f);
-	ChestDef.position									= b2Vec2(-.132f,.282f);
-	NeckDef.position									= b2Vec2(-.102f,.518f);
-	HeadDef.position									= b2Vec2(.022f,.738f);
-}
-
-void BipedDef::AddShapes()
-{
-	LFootDef.AddShape(&LFootPoly);
-	RFootDef.AddShape(&RFootPoly);
-	LCalfDef.AddShape(&LCalfPoly);
-	RCalfDef.AddShape(&RCalfPoly);
-	LThighDef.AddShape(&LThighPoly);
-	RThighDef.AddShape(&RThighPoly);
-	PelvisDef.AddShape(&PelvisPoly);
-	StomachDef.AddShape(&StomachPoly);
-	ChestDef.AddShape(&ChestPoly);
-	NeckDef.AddShape(&NeckPoly);
-	HeadDef.AddShape(&HeadCirc);
-	LUpperArmDef.AddShape(&LUpperArmPoly);
-	RUpperArmDef.AddShape(&RUpperArmPoly);
-	LForearmDef.AddShape(&LForearmPoly);
-	RForearmDef.AddShape(&RForearmPoly);
-	LHandDef.AddShape(&LHandPoly);
-	RHandDef.AddShape(&RHandPoly);
+	LFootDef.position		= RFootDef.position			= k_scale * b2Vec2(-.122f,-.901f);
+	LCalfDef.position		= RCalfDef.position			= k_scale * b2Vec2(-.177f,-.771f);
+	LThighDef.position		= RThighDef.position		= k_scale * b2Vec2(-.217f,-.391f);
+	LUpperArmDef.position	= RUpperArmDef.position		= k_scale * b2Vec2(-.127f,.228f);
+	LForearmDef.position	= RForearmDef.position		= k_scale * b2Vec2(-.117f,-.011f);
+	LHandDef.position		= RHandDef.position			= k_scale * b2Vec2(-.112f,-.136f);
+	PelvisDef.position									= k_scale * b2Vec2(-.177f,-.101f);
+	StomachDef.position									= k_scale * b2Vec2(-.142f,.088f);
+	ChestDef.position									= k_scale * b2Vec2(-.132f,.282f);
+	NeckDef.position									= k_scale * b2Vec2(-.102f,.518f);
+	HeadDef.position									= k_scale * b2Vec2(.022f,.738f);
 }

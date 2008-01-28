@@ -26,6 +26,7 @@
 #endif
 
 //#include "ApplyForce.h"
+#include "BipedTest.h"
 #include "Bridge.h"
 //#include "BroadPhaseTest.h"
 #include "CCDTest.h"
@@ -49,6 +50,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Biped Test", BipedTest::Create},
 	{"Collision Processing", CollisionProcessing::Create},
 	{"CCD Test", CCDTest::Create},
 	{"Vertical Stack", VerticalStack::Create},

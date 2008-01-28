@@ -131,6 +131,7 @@ Test::~Test()
 {
 	// By deleting the world, we delete the bomb, mouse joint, etc.
 	delete m_world;
+	m_world = NULL;
 }
 
 void Test::MouseDown(const b2Vec2& p)

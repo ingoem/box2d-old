@@ -1,184 +1,187 @@
 #include "Biped.h"
+#include "BipedDef.h"
 
-Biped::Biped(b2World* w, const BipedDef* bd)				
+Biped::Biped(b2World* w, const b2Vec2& position)				
 {
-	BipedDef b(*bd);
+	m_world = w;
 
-	// update positions
-	b.LFootDef.position += b.position;
-	b.RFootDef.position += b.position;
-	b.LCalfDef.position += b.position;
-	b.RCalfDef.position += b.position;
-	b.LThighDef.position += b.position;
-	b.RThighDef.position += b.position;
-	b.PelvisDef.position += b.position;
-	b.StomachDef.position += b.position;
-	b.ChestDef.position += b.position;
-	b.NeckDef.position += b.position;
-	b.HeadDef.position += b.position;
-	b.LUpperArmDef.position += b.position;
-	b.RUpperArmDef.position += b.position;
-	b.LForearmDef.position += b.position;
-	b.RForearmDef.position += b.position;
-	b.LHandDef.position += b.position;
-	b.RHandDef.position += b.position;
-
-	b.LAnkleDef.anchorPoint += b.position;
-	b.RAnkleDef.anchorPoint += b.position;
-	b.LKneeDef.anchorPoint += b.position;
-	b.RKneeDef.anchorPoint += b.position;
-	b.LHipDef.anchorPoint += b.position;
-	b.RHipDef.anchorPoint += b.position;
-	b.LowerAbsDef.anchorPoint += b.position;
-	b.UpperAbsDef.anchorPoint += b.position;
-	b.LowerNeckDef.anchorPoint += b.position;
-	b.UpperNeckDef.anchorPoint += b.position;
-	b.LElbowDef.anchorPoint += b.position;
-	b.RElbowDef.anchorPoint += b.position;
-	b.LShoulderDef.anchorPoint += b.position;
-	b.RShoulderDef.anchorPoint += b.position;
-	b.LWristDef.anchorPoint += b.position;
-	b.RWristDef.anchorPoint += b.position;
+	BipedDef def;
+	b2BodyDef bd;
 
 	// create body parts
-	LFoot		= w->CreateBody(&b.LFootDef);
-	RFoot		= w->CreateBody(&b.RFootDef);
-	LCalf		= w->CreateBody(&b.LCalfDef);
-	RCalf		= w->CreateBody(&b.RCalfDef);
-	LThigh		= w->CreateBody(&b.LThighDef);
-	RThigh		= w->CreateBody(&b.RThighDef);
-	Pelvis		= w->CreateBody(&b.PelvisDef);
-	Stomach		= w->CreateBody(&b.StomachDef);
-	Chest		= w->CreateBody(&b.ChestDef);
-	Neck		= w->CreateBody(&b.NeckDef);
-	Head		= w->CreateBody(&b.HeadDef);
-	LUpperArm	= w->CreateBody(&b.LUpperArmDef);
-	RUpperArm	= w->CreateBody(&b.RUpperArmDef);
-	LForearm	= w->CreateBody(&b.LForearmDef);
-	RForearm	= w->CreateBody(&b.RForearmDef);
-	LHand		= w->CreateBody(&b.LHandDef);
-	RHand		= w->CreateBody(&b.RHandDef);
+	bd = def.LFootDef;
+	bd.position += position;
+	LFoot = w->Create(&bd);
+	LFoot->AddShape(&def.LFootPoly);
+	LFoot->SetMassFromShapes();
+
+	bd = def.RFootDef;
+	bd.position += position;
+	RFoot = w->Create(&bd);
+	RFoot->AddShape(&def.RFootPoly);
+	RFoot->SetMassFromShapes();
+
+	bd = def.LCalfDef;
+	bd.position += position;
+	LCalf = w->Create(&bd);
+	LCalf->AddShape(&def.LCalfPoly);
+	LCalf->SetMassFromShapes();
+
+	bd = def.RCalfDef;
+	bd.position += position;
+	RCalf = w->Create(&bd);
+	RCalf->AddShape(&def.RCalfPoly);
+	RCalf->SetMassFromShapes();
+
+	bd = def.LThighDef;
+	bd.position += position;
+	LThigh = w->Create(&bd);
+	LThigh->AddShape(&def.LThighPoly);
+	LThigh->SetMassFromShapes();
+
+	bd = def.RThighDef;
+	bd.position += position;
+	RThigh = w->Create(&bd);
+	RThigh->AddShape(&def.RThighPoly);
+	RThigh->SetMassFromShapes();
+
+	bd = def.PelvisDef;
+	bd.position += position;
+	Pelvis = w->Create(&bd);
+	Pelvis->AddShape(&def.PelvisPoly);
+	Pelvis->SetMassFromShapes();
+
+	bd = def.PelvisDef;
+	bd.position += position;
+	Stomach = w->Create(&bd);
+	Stomach->AddShape(&def.StomachPoly);
+	Stomach->SetMassFromShapes();
+
+	bd = def.ChestDef;
+	bd.position += position;
+	Chest = w->Create(&bd);
+	Chest->AddShape(&def.ChestPoly);
+	Chest->SetMassFromShapes();
+
+	bd = def.NeckDef;
+	bd.position += position;
+	Neck = w->Create(&bd);
+	Neck->AddShape(&def.NeckPoly);
+	Neck->SetMassFromShapes();
+
+	bd = def.HeadDef;
+	bd.position += position;
+	Head = w->Create(&bd);
+	Head->AddShape(&def.HeadCirc);
+	Head->SetMassFromShapes();
+
+	bd = def.LUpperArmDef;
+	bd.position += position;
+	LUpperArm = w->Create(&bd);
+	LUpperArm->AddShape(&def.LUpperArmPoly);
+	LUpperArm->SetMassFromShapes();
+
+	bd = def.RUpperArmDef;
+	bd.position += position;
+	RUpperArm = w->Create(&bd);
+	RUpperArm->AddShape(&def.RUpperArmPoly);
+	RUpperArm->SetMassFromShapes();
+
+	bd = def.LForearmDef;
+	bd.position += position;
+	LForearm = w->Create(&bd);
+	LForearm->AddShape(&def.LForearmPoly);
+	LForearm->SetMassFromShapes();
+
+	bd = def.RForearmDef;
+	bd.position += position;
+	RForearm = w->Create(&bd);
+	RForearm->AddShape(&def.RForearmPoly);
+	RForearm->SetMassFromShapes();
+
+	bd = def.LHandDef;
+	bd.position += position;
+	LHand = w->Create(&bd);
+	LHand->AddShape(&def.LHandPoly);
+	LHand->SetMassFromShapes();
+
+	bd = def.RHandDef;
+	bd.position += position;
+	RHand = w->Create(&bd);
+	RHand->AddShape(&def.RHandPoly);
+	RHand->SetMassFromShapes();
 	
 	// link body parts
-	b.LAnkleDef.body1		= LFoot;
-	b.LAnkleDef.body2		= LCalf;
-	b.RAnkleDef.body1		= RFoot;
-	b.RAnkleDef.body2		= RCalf;
-	b.LKneeDef.body1		= LCalf;
-	b.LKneeDef.body2		= LThigh;
-	b.RKneeDef.body1		= RCalf;
-	b.RKneeDef.body2		= RThigh;
-	b.LHipDef.body1			= LThigh;
-	b.LHipDef.body2			= Pelvis;
-	b.RHipDef.body1			= RThigh;
-	b.RHipDef.body2			= Pelvis;
-	b.LowerAbsDef.body1		= Pelvis;
-	b.LowerAbsDef.body2		= Stomach;
-	b.UpperAbsDef.body1		= Stomach;
-	b.UpperAbsDef.body2		= Chest;
-	b.LowerNeckDef.body1	= Chest;
-	b.LowerNeckDef.body2	= Neck;
-	b.UpperNeckDef.body1	= Chest;
-	b.UpperNeckDef.body2	= Head;
-	b.LShoulderDef.body1	= Chest;
-	b.LShoulderDef.body2	= LUpperArm;
-	b.RShoulderDef.body1	= Chest;
-	b.RShoulderDef.body2	= RUpperArm;
-	b.LElbowDef.body1		= LForearm;
-	b.LElbowDef.body2		= LUpperArm;
-	b.RElbowDef.body1		= RForearm;
-	b.RElbowDef.body2		= RUpperArm;
-	b.LWristDef.body1		= LHand;
-	b.LWristDef.body2		= LForearm;
-	b.RWristDef.body1		= RHand;
-	b.RWristDef.body2		= RForearm;
+	def.LAnkleDef.body1		= LFoot;
+	def.LAnkleDef.body2		= LCalf;
+	def.RAnkleDef.body1		= RFoot;
+	def.RAnkleDef.body2		= RCalf;
+	def.LKneeDef.body1		= LCalf;
+	def.LKneeDef.body2		= LThigh;
+	def.RKneeDef.body1		= RCalf;
+	def.RKneeDef.body2		= RThigh;
+	def.LHipDef.body1		= LThigh;
+	def.LHipDef.body2		= Pelvis;
+	def.RHipDef.body1		= RThigh;
+	def.RHipDef.body2		= Pelvis;
+	def.LowerAbsDef.body1	= Pelvis;
+	def.LowerAbsDef.body2	= Stomach;
+	def.UpperAbsDef.body1	= Stomach;
+	def.UpperAbsDef.body2	= Chest;
+	def.LowerNeckDef.body1	= Chest;
+	def.LowerNeckDef.body2	= Neck;
+	def.UpperNeckDef.body1	= Chest;
+	def.UpperNeckDef.body2	= Head;
+	def.LShoulderDef.body1	= Chest;
+	def.LShoulderDef.body2	= LUpperArm;
+	def.RShoulderDef.body1	= Chest;
+	def.RShoulderDef.body2	= RUpperArm;
+	def.LElbowDef.body1		= LForearm;
+	def.LElbowDef.body2		= LUpperArm;
+	def.RElbowDef.body1		= RForearm;
+	def.RElbowDef.body2		= RUpperArm;
+	def.LWristDef.body1		= LHand;
+	def.LWristDef.body2		= LForearm;
+	def.RWristDef.body1		= RHand;
+	def.RWristDef.body2		= RForearm;
 	
 	// create joints
-	LAnkle		= (b2RevoluteJoint*)w->CreateJoint(&b.LAnkleDef);
-	RAnkle		= (b2RevoluteJoint*)w->CreateJoint(&b.RAnkleDef);
-	LKnee		= (b2RevoluteJoint*)w->CreateJoint(&b.LKneeDef);
-	RKnee		= (b2RevoluteJoint*)w->CreateJoint(&b.RKneeDef);
-	LHip		= (b2RevoluteJoint*)w->CreateJoint(&b.LHipDef);
-	RHip		= (b2RevoluteJoint*)w->CreateJoint(&b.RHipDef);
-	LowerAbs	= (b2RevoluteJoint*)w->CreateJoint(&b.LowerAbsDef);
-	UpperAbs	= (b2RevoluteJoint*)w->CreateJoint(&b.UpperAbsDef);
-	LowerNeck	= (b2RevoluteJoint*)w->CreateJoint(&b.LowerNeckDef);
-	UpperNeck	= (b2RevoluteJoint*)w->CreateJoint(&b.UpperNeckDef);
-	LShoulder	= (b2RevoluteJoint*)w->CreateJoint(&b.LShoulderDef);
-	RShoulder	= (b2RevoluteJoint*)w->CreateJoint(&b.RShoulderDef);
-	LElbow		= (b2RevoluteJoint*)w->CreateJoint(&b.LElbowDef);
-	RElbow		= (b2RevoluteJoint*)w->CreateJoint(&b.RElbowDef);
-	LWrist		= (b2RevoluteJoint*)w->CreateJoint(&b.LWristDef);
-	RWrist		= (b2RevoluteJoint*)w->CreateJoint(&b.RWristDef);
+	LAnkle		= (b2RevoluteJoint*)w->Create(&def.LAnkleDef);
+	RAnkle		= (b2RevoluteJoint*)w->Create(&def.RAnkleDef);
+	LKnee		= (b2RevoluteJoint*)w->Create(&def.LKneeDef);
+	RKnee		= (b2RevoluteJoint*)w->Create(&def.RKneeDef);
+	LHip		= (b2RevoluteJoint*)w->Create(&def.LHipDef);
+	RHip		= (b2RevoluteJoint*)w->Create(&def.RHipDef);
+	LowerAbs	= (b2RevoluteJoint*)w->Create(&def.LowerAbsDef);
+	UpperAbs	= (b2RevoluteJoint*)w->Create(&def.UpperAbsDef);
+	LowerNeck	= (b2RevoluteJoint*)w->Create(&def.LowerNeckDef);
+	UpperNeck	= (b2RevoluteJoint*)w->Create(&def.UpperNeckDef);
+	LShoulder	= (b2RevoluteJoint*)w->Create(&def.LShoulderDef);
+	RShoulder	= (b2RevoluteJoint*)w->Create(&def.RShoulderDef);
+	LElbow		= (b2RevoluteJoint*)w->Create(&def.LElbowDef);
+	RElbow		= (b2RevoluteJoint*)w->Create(&def.RElbowDef);
+	LWrist		= (b2RevoluteJoint*)w->Create(&def.LWristDef);
+	RWrist		= (b2RevoluteJoint*)w->Create(&def.RWristDef);
 }
 
-
-void Biped::SetMotorTorque(float f)
-{
-	LAnkle->SetMotorTorque(f);
-	RAnkle->SetMotorTorque(f);
-	LKnee->SetMotorTorque(f);
-	RKnee->SetMotorTorque(f);
-	LHip->SetMotorTorque(f);
-	RHip->SetMotorTorque(f);
-	LowerAbs->SetMotorTorque(f);
-	UpperAbs->SetMotorTorque(f);
-	LowerNeck->SetMotorTorque(f);
-	UpperNeck->SetMotorTorque(f);
-	LShoulder->SetMotorTorque(f);
-	RShoulder->SetMotorTorque(f);
-	LElbow->SetMotorTorque(f);
-	RElbow->SetMotorTorque(f);
-	LWrist->SetMotorTorque(f);
-	RWrist->SetMotorTorque(f);
-}
-
-float Biped::GetMass()
-{
-	return	LFoot->GetMass()
-		+	RFoot->GetMass()
-		+	LCalf->GetMass()
-		+	RCalf->GetMass()
-		+	LThigh->GetMass()
-		+	RThigh->GetMass()
-		+	Pelvis->GetMass()
-		+	Stomach->GetMass()
-		+	Chest->GetMass()
-		+	Neck->GetMass()		
-		+	Head->GetMass()			
-		+	LUpperArm->GetMass()	
-		+	RUpperArm->GetMass()	
-		+	LForearm->GetMass()		
-		+	RForearm->GetMass()		
-		+	LHand->GetMass()		
-		+	RHand->GetMass();
-}
-
-b2Vec2 Biped::GetCenterPosition()
-{
-	b2Vec2 p = 
-			LFoot->GetCenterPosition()
-		+	RFoot->GetCenterPosition()
-		+	LCalf->GetCenterPosition()
-		+	RCalf->GetCenterPosition()
-		+	LThigh->GetCenterPosition()
-		+	RThigh->GetCenterPosition()
-		+	Pelvis->GetCenterPosition()
-		+	Stomach->GetCenterPosition()
-		+	Chest->GetCenterPosition()
-		+	Neck->GetCenterPosition()		
-		+	Head->GetCenterPosition()			
-		+	LUpperArm->GetCenterPosition()	
-		+	RUpperArm->GetCenterPosition()	
-		+	LForearm->GetCenterPosition()		
-		+	RForearm->GetCenterPosition()		
-		+	LHand->GetCenterPosition()		
-		+	RHand->GetCenterPosition();
-	p.x /= 17; 
-	p.y /= 17;
-	return p;
-}
 
 Biped::~Biped(void)
 {
+	m_world->Destroy(LFoot);
+	m_world->Destroy(RFoot);
+	m_world->Destroy(LCalf);
+	m_world->Destroy(RCalf);
+	m_world->Destroy(LThigh);
+	m_world->Destroy(RThigh);
+	m_world->Destroy(Pelvis);
+	m_world->Destroy(Stomach);
+	m_world->Destroy(Chest);
+	m_world->Destroy(Neck);
+	m_world->Destroy(Head);
+	m_world->Destroy(LUpperArm);
+	m_world->Destroy(RUpperArm);
+	m_world->Destroy(LForearm);
+	m_world->Destroy(RForearm);
+	m_world->Destroy(LHand);
+	m_world->Destroy(RHand);
 }

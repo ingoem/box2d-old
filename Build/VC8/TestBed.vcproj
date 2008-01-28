@@ -206,6 +206,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\Biped.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Examples\TestBed\Tests\Biped.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Examples\TestBed\Tests\BipedDef.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Examples\TestBed\Tests\BipedDef.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\Bridge.h"
 				>
 			</File>

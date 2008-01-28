@@ -91,7 +91,11 @@ void b2PrismaticJoint::InitVelocityConstraints(const b2TimeStep& step)
 	m_linearMass = 1.0f / m_linearMass;
 
 	// Compute angular constraint effective mass.
-	m_angularMass = 1.0f / (invI1 + invI2);
+	m_angularMass = invI1 + invI2;
+	if (m_angularMass > FLT_EPSILON)
+	{
+		m_angularMass = 1.0f / m_angularMass;
+	}
 
 	// Compute motor and limit terms.
 	if (m_enableLimit || m_enableMotor)

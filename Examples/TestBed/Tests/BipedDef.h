@@ -1,9 +1,14 @@
-#pragma once
+#ifndef BIPED_DEF_H
+#define BIPED_DEF_H
+
 #include "Box2D.h"
 
 class BipedDef
 {
 public:
+	BipedDef();
+	~BipedDef(void);
+
 	void SetMotorTorque(float);
 	void SetMotorSpeed(float);
 	void SetDensity(float);
@@ -21,17 +26,14 @@ public:
 	void SetPosition(float, float);
 	void SetPosition(b2Vec2);
 	void IsFast(bool);
-	static int16 count;
-	b2Vec2 position;
 
-	BipedDef(b2Vec2=b2Vec2(0,0));
-	~BipedDef(void);
+	static int16 count;
 
 	b2BodyDef			LFootDef, RFootDef, LCalfDef, RCalfDef, LThighDef, RThighDef, 
 						PelvisDef, StomachDef, ChestDef, NeckDef, HeadDef, 
 						LUpperArmDef, RUpperArmDef, LForearmDef, RForearmDef, LHandDef, RHandDef;
 	
-	b2PolyDef			LFootPoly, RFootPoly, LCalfPoly, RCalfPoly, LThighPoly, RThighPoly,
+	b2PolygonDef		LFootPoly, RFootPoly, LCalfPoly, RCalfPoly, LThighPoly, RThighPoly,
 						PelvisPoly, StomachPoly, ChestPoly, NeckPoly,
 						LUpperArmPoly, RUpperArmPoly, LForearmPoly, RForearmPoly, LHandPoly, RHandPoly;
 	
@@ -44,5 +46,6 @@ public:
 	void DefaultVertices();
 	void DefaultPositions();
 	void DefaultJoints();
-	void AddShapes();
 };
+
+#endif

@@ -1,15 +1,17 @@
-#pragma once
-#include "Box2D.h"
-#include "BipedDef.h"
+#ifndef BIPED_H
+#define BIPED_H
 
+#include "Box2D.h"
+
+// Ragdoll class thanks to darkzerox.
 class Biped
 {
 public:
-	void SetMotorTorque(float);
-	float GetMass();
-	b2Vec2 GetCenterPosition();
-	Biped(b2World*, const BipedDef*);
-	~Biped(void);
+	Biped(b2World*, const b2Vec2& position);
+	~Biped();
+
+private:
+	b2World* m_world;
 
 	b2Body				*LFoot, *RFoot, *LCalf, *RCalf, *LThigh, *RThigh,
 						*Pelvis, *Stomach, *Chest, *Neck, *Head,
@@ -19,3 +21,5 @@ public:
 						*LowerAbs, *UpperAbs, *LowerNeck, *UpperNeck,
 						*LShoulder, *RShoulder, *LElbow, *RElbow, *LWrist, *RWrist;
 };
+
+#endif
