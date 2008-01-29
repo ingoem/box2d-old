@@ -12,103 +12,103 @@ Biped::Biped(b2World* w, const b2Vec2& position)
 	bd = def.LFootDef;
 	bd.position += position;
 	LFoot = w->Create(&bd);
-	LFoot->AddShape(&def.LFootPoly);
+	LFoot->Create(&def.LFootPoly);
 	LFoot->SetMassFromShapes();
 
 	bd = def.RFootDef;
 	bd.position += position;
 	RFoot = w->Create(&bd);
-	RFoot->AddShape(&def.RFootPoly);
+	RFoot->Create(&def.RFootPoly);
 	RFoot->SetMassFromShapes();
 
 	bd = def.LCalfDef;
 	bd.position += position;
 	LCalf = w->Create(&bd);
-	LCalf->AddShape(&def.LCalfPoly);
+	LCalf->Create(&def.LCalfPoly);
 	LCalf->SetMassFromShapes();
 
 	bd = def.RCalfDef;
 	bd.position += position;
 	RCalf = w->Create(&bd);
-	RCalf->AddShape(&def.RCalfPoly);
+	RCalf->Create(&def.RCalfPoly);
 	RCalf->SetMassFromShapes();
 
 	bd = def.LThighDef;
 	bd.position += position;
 	LThigh = w->Create(&bd);
-	LThigh->AddShape(&def.LThighPoly);
+	LThigh->Create(&def.LThighPoly);
 	LThigh->SetMassFromShapes();
 
 	bd = def.RThighDef;
 	bd.position += position;
 	RThigh = w->Create(&bd);
-	RThigh->AddShape(&def.RThighPoly);
+	RThigh->Create(&def.RThighPoly);
 	RThigh->SetMassFromShapes();
 
 	bd = def.PelvisDef;
 	bd.position += position;
 	Pelvis = w->Create(&bd);
-	Pelvis->AddShape(&def.PelvisPoly);
+	Pelvis->Create(&def.PelvisPoly);
 	Pelvis->SetMassFromShapes();
 
 	bd = def.PelvisDef;
 	bd.position += position;
 	Stomach = w->Create(&bd);
-	Stomach->AddShape(&def.StomachPoly);
+	Stomach->Create(&def.StomachPoly);
 	Stomach->SetMassFromShapes();
 
 	bd = def.ChestDef;
 	bd.position += position;
 	Chest = w->Create(&bd);
-	Chest->AddShape(&def.ChestPoly);
+	Chest->Create(&def.ChestPoly);
 	Chest->SetMassFromShapes();
 
 	bd = def.NeckDef;
 	bd.position += position;
 	Neck = w->Create(&bd);
-	Neck->AddShape(&def.NeckPoly);
+	Neck->Create(&def.NeckPoly);
 	Neck->SetMassFromShapes();
 
 	bd = def.HeadDef;
 	bd.position += position;
 	Head = w->Create(&bd);
-	Head->AddShape(&def.HeadCirc);
+	Head->Create(&def.HeadCirc);
 	Head->SetMassFromShapes();
 
 	bd = def.LUpperArmDef;
 	bd.position += position;
 	LUpperArm = w->Create(&bd);
-	LUpperArm->AddShape(&def.LUpperArmPoly);
+	LUpperArm->Create(&def.LUpperArmPoly);
 	LUpperArm->SetMassFromShapes();
 
 	bd = def.RUpperArmDef;
 	bd.position += position;
 	RUpperArm = w->Create(&bd);
-	RUpperArm->AddShape(&def.RUpperArmPoly);
+	RUpperArm->Create(&def.RUpperArmPoly);
 	RUpperArm->SetMassFromShapes();
 
 	bd = def.LForearmDef;
 	bd.position += position;
 	LForearm = w->Create(&bd);
-	LForearm->AddShape(&def.LForearmPoly);
+	LForearm->Create(&def.LForearmPoly);
 	LForearm->SetMassFromShapes();
 
 	bd = def.RForearmDef;
 	bd.position += position;
 	RForearm = w->Create(&bd);
-	RForearm->AddShape(&def.RForearmPoly);
+	RForearm->Create(&def.RForearmPoly);
 	RForearm->SetMassFromShapes();
 
 	bd = def.LHandDef;
 	bd.position += position;
 	LHand = w->Create(&bd);
-	LHand->AddShape(&def.LHandPoly);
+	LHand->Create(&def.LHandPoly);
 	LHand->SetMassFromShapes();
 
 	bd = def.RHandDef;
 	bd.position += position;
 	RHand = w->Create(&bd);
-	RHand->AddShape(&def.RHandPoly);
+	RHand->Create(&def.RHandPoly);
 	RHand->SetMassFromShapes();
 	
 	// link body parts

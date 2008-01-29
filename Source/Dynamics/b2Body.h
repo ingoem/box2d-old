@@ -111,24 +111,17 @@ struct b2BodyDef
 class b2Body
 {
 public:
-	/// Add a shape. The shape must be created with b2World::Create.
-	/// The shape must have not been already added to this or any other
-	/// body. This function may be expensive so you should try to add
-	/// shapes using the body definition.
-	/// @param shape the shape to be added.
-	void AddShape(b2Shape* shape);
-
-	/// Convenience function, automatically creates a shape and adds it.
+	/// Creates a shape and attach it to this body.
 	/// @param shapeDef the shape definition.
-	b2Shape* AddShape(b2ShapeDef* shapeDef);
+	/// @warning This function is locked during callbacks.
+	b2Shape* Create(b2ShapeDef* shapeDef);
 
-	/// Remove a shape. It is up to you to destroy the shape with
-	/// b2World::Destroy. This removes the shape from the broad-phase and
-	/// therefore destroys any contacts associated with this shape. If you
-	/// don't want to keep the shape, you can just call b2World::Destroy
-	/// instead.
+	/// Destroy a shape. This removes the shape from the broad-phase and
+	/// therefore destroys any contacts associated with this shape. All shapes
+	/// attached to a body are implicitly destroyed when the body is destroyed.
 	/// @param shape the shape to be removed.
-	void RemoveShape(b2Shape* shape);
+	/// @warning This function is locked during callbacks.
+	void Destroy(b2Shape* shape);
 
 	/// Set the mass properties. Note that this changes the center of mass position.
 	/// If you are not sure how to compute mass properties, use SetMassFromShapes.

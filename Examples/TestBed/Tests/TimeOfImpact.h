@@ -34,7 +34,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 20.0f);
 			bd.angle = 0.0f;
-			body->AddShape(m_shape1);
+			body->Create(m_shape1);
 			m_world->Create(&bd);
 		}
 
@@ -45,7 +45,7 @@ public:
 			m_shape2 = (b2PolygonShape*)m_world->Create(&sd);
 
 			b2BodyDef bd;
-			body->AddShape(m_shape2);
+			body->Create(m_shape2);
 			bd.position.Set(9.6363468f, 28.050615f);
 			bd.angle = 1.6408679f;
 			m_world->Create(&bd);

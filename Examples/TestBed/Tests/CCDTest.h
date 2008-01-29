@@ -37,7 +37,7 @@ public:
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
 			b2Body* body = m_world->Create(&bd);
-			body->AddShape(&sd);
+			body->Create(&sd);
 		}
 
 		{
@@ -53,7 +53,7 @@ public:
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(50.0f, 20.0f);
 			b2Body* body = m_world->Create(&bd);
-			body->AddShape(&sd);
+			body->Create(&sd);
 			body->SetMassFromShapes();
 			body->SetLinearVelocity(b2Vec2(-200.0f, 0.0f));
 			body->SetAngularVelocity(m_angularVelocity);
@@ -68,7 +68,7 @@ public:
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -0.2f);
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -83,7 +83,7 @@ public:
 			bd1.allowSleep = false;
 			bd1.position.Set(0.0f, 20.0f);
 			b2Body* b1 = m_world->Create(&bd1);
-			b1->AddShape(&sd);
+			b1->Create(&sd);
 			b1->SetMassFromShapes();
 			b1->SetLinearVelocity(b2Vec2(0.0f, -100.0f));
 
@@ -94,7 +94,7 @@ public:
 			bd2.allowSleep = false;
 			bd2.position.Set(0.0f, 20.2f);
 			b2Body* b2 = m_world->Create(&bd2);
-			b2->AddShape(&sd);
+			b2->Create(&sd);
 			b2->SetMassFromShapes();
 			b2->SetLinearVelocity(b2Vec2(0.0f, -100.0f));
 
@@ -106,7 +106,7 @@ public:
 			bd3.allowSleep = false;
 			bd3.position.Set(0.0f, 100.0f);
 			b2Body* b3 = m_world->Create(&bd3);
-			b3->AddShape(&sd);
+			b3->Create(&sd);
 			b3->SetMassFromShapes();
 			b3->SetLinearVelocity(b2Vec2(0.0f, -150.0f));
 		}
@@ -124,21 +124,16 @@ public:
 			sd.restitution = k_restitution;
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(-10.0f, 0.0f), 0.0f);
-			b2Shape* shape1 = m_world->Create(&sd);
+			body->Create(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(10.0f, 0.0f), 0.0f);
-			b2Shape* shape2 = m_world->Create(&sd);
+			body->Create(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, -10.0f), 0.5f * b2_pi);
-			b2Shape* shape3 = m_world->Create(&sd);
+			body->Create(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, 10.0f), -0.5f * b2_pi);
-			b2Shape* shape4 = m_world->Create(&sd);
-
-			body->AddShape(shape1);
-			body->AddShape(shape2);
-			body->AddShape(shape3);
-			body->AddShape(shape4);
+			body->Create(&sd);
 		}
 
 		{
@@ -153,8 +148,7 @@ public:
 			sd.SetAsBox(0.1f, 4.0f);
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
-			b2Shape* shape = m_world->Create(&sd);
-			body->AddShape(shape);
+			body->Create(&sd);
 			body->SetMassFromShapes();
 		}
 
@@ -171,8 +165,7 @@ public:
 			sd.radius = 0.25f;
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
-			b2Shape* shape = m_world->Create(&sd);
-			body->AddShape(shape);
+			body->Create(&sd);
 			body->SetMassFromShapes();
 		}
 #endif

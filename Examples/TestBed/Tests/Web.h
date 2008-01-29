@@ -33,7 +33,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->AddShape(&sd);
+			body->Create(&sd);
 			ground = m_world->Create(&bd);
 		}
 
@@ -45,7 +45,7 @@ public:
 			sd.friction = 0.2f;
 
 			b2BodyDef bd;
-			body->AddShape(&sd);
+			body->Create(&sd);
 
 			bd.position.Set(-5.0f, 5.0f);
 			m_bodies[0] = m_world->Create(&bd);

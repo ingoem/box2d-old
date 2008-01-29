@@ -32,7 +32,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->AddShape(&sd);
+			body->Create(&sd);
 			ground = m_world->Create(&bd);
 		}
 
@@ -47,7 +47,7 @@ public:
 			sd.density = 5.0f;
 
 			b2BodyDef bd;
-			body->AddShape(&sd);
+			body->Create(&sd);
 
 			bd.position.Set(-10.0f, y);
 			b2Body* body1 = m_world->Create(&bd);

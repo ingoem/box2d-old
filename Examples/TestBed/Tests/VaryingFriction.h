@@ -32,7 +32,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -20.0f);
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -44,7 +44,7 @@ public:
 			bd.angle = -0.25f;
 
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -55,7 +55,7 @@ public:
 			bd.position.Set(10.5f, 19.0f);
 
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -67,7 +67,7 @@ public:
 			bd.angle = 0.25f;
 
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -78,7 +78,7 @@ public:
 			bd.position.Set(-10.5f, 11.0f);
 
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -90,7 +90,7 @@ public:
 			bd.angle = -0.25f;
 
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -109,7 +109,7 @@ public:
 				b2Body* body = m_world->Create(&bd);
 
 				sd.friction = friction[i];
-				body->AddShape(&sd);
+				body->Create(&sd);
 				body->SetMassFromShapes();
 			}
 		}

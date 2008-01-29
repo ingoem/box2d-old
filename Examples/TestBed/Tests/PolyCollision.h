@@ -37,7 +37,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			body->AddShape(&sd);
+			body->Create(&sd);
 			m_body1 = m_world->Create(&bd);
 		}
 
@@ -50,7 +50,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			body->AddShape(&sd);
+			body->Create(&sd);
 			m_body2 = m_world->Create(&bd);
 		}
 

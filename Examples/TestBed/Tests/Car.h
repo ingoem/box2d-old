@@ -27,15 +27,6 @@ class Car : public Test
 public:
 	Car()
 	{
-		// initialize world
-		b2Vec2 gravity;
-		b2AABB aabb;
-
-		aabb.lowerBound.Set(-50,-50);
-		aabb.upperBound.Set(200,100);
-		gravity.Set(0, -9.80665f);
-
-		m_world = new b2World(aabb, gravity, true);
 		/*
 		{	// car body
 		b2PolygonDef	box;
@@ -48,17 +39,16 @@ public:
 		box.groupIndex	= -1;
 
 		body.position.Set(10,2.8f);
-		body.AddShape(&box);
+		body.Create(&box);
 
 		m_vehicle = m_world->Create(&body);
 		}
 		*/
 		{	// car body
 			b2PolygonDef	poly1, poly2;
-			b2BodyDef	body;
+			b2BodyDef	bd;
 
 			// bottom half
-			poly1.type = e_polygonShape;
 			poly1.vertexCount = 5;
 			poly1.vertices[4].Set(-2.2f,-0.74f);
 			poly1.vertices[3].Set(-2.2f,0);
@@ -84,11 +74,12 @@ public:
 			poly2.friction		= 0.68f;
 			poly2.groupIndex	= -1;
 
-			body.AddShape(&poly1);
-			body.AddShape(&poly2);
+			bd.type = b2BodyDef::e_dynamicBody;
 			body.position.Set(10,2.8f);
 
 			m_vehicle = m_world->Create(&body);
+			m_vehicle->Create(&poly1);
+			m_vehicle->Create(&poly2);
 		}
 
 		{	// ground
@@ -100,7 +91,7 @@ public:
 			box.friction	= 0.62f;
 
 			body.position.Set(10,1);
-			body.AddShape(&box);
+			body.Create(&box);
 
 			m_world->Create(&body);
 		}
@@ -119,7 +110,7 @@ public:
 			body.angularDamping = 0.02f;
 			body.allowSleep = false;
 			body.position.Set(11.2f,2);
-			body.AddShape(&circ);
+			body.Create(&circ);
 
 			m_rightWheel = m_world->Create(&body);
 			body.position.Set(8.8f,2);
@@ -136,7 +127,7 @@ public:
 			circ.groupIndex	= -1;
 
 			body.position = m_leftWheel->GetCenterPosition();
-			body.AddShape(&circ);
+			body.Create(&circ);
 
 			leftAxle = m_world->Create(&body);
 			body.position = m_rightWheel->GetCenterPosition();
@@ -183,7 +174,7 @@ public:
 			box.friction	= 0.1f;
 
 			body.position.Set(10,40);
-			body.AddShape(&box);
+			body.Create(&box);
 
 			//m_world->Create(&body);
 		}
@@ -196,7 +187,7 @@ public:
 			box.friction	= 0.62f;
 			box.localRotation	= 0.1f * b2_pi;
 			body.position.Set(27,3.1f);
-			body.AddShape(&box);
+			body.Create(&box);
 
 			m_world->Create(&body);
 		}
@@ -209,7 +200,7 @@ public:
 			box.friction	= 0.62f;
 			box.localRotation	= -0.1f * b2_pi;
 			body.position.Set(55,3.1f);
-			body.AddShape(&box);
+			body.Create(&box);
 
 			m_world->Create(&body);
 		}
@@ -222,7 +213,7 @@ public:
 			box.friction	= 0.62f;
 			box.localRotation	= 0.03f * b2_pi;
 			body.position.Set(71,2);
-			body.AddShape(&box);
+			body.Create(&box);
 
 			m_world->Create(&body);
 		}
@@ -235,7 +226,7 @@ public:
 			box.friction	= 0.62f;
 			box.localRotation	= 0.15f * b2_pi;
 			body.position.Set(80,4);
-			body.AddShape(&box);
+			body.Create(&box);
 
 			m_world->Create(&body);
 		}
@@ -248,7 +239,7 @@ public:
 			box.friction	= 0.62f;
 			box.localRotation	= 0;
 			body.position.Set(140,2);
-			body.AddShape(&box);
+			body.Create(&box);
 
 			m_world->Create(&body);
 		}

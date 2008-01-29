@@ -29,6 +29,7 @@
 #include "BipedTest.h"
 #include "Bridge.h"
 //#include "BroadPhaseTest.h"
+//#include "Car.h"
 #include "CCDTest.h"
 #include "Chain.h"
 #include "CollisionFiltering.h"
@@ -50,6 +51,7 @@
 
 TestEntry g_testEntries[] =
 {
+	//{"Car", Car::Create},
 	{"Biped Test", BipedTest::Create},
 	{"Collision Processing", CollisionProcessing::Create},
 	{"CCD Test", CCDTest::Create},

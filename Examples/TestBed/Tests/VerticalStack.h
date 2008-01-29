@@ -32,7 +32,7 @@ public:
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -58,7 +58,7 @@ public:
 				//bd.position.Set(x, 0.752f + 1.54f * i);
 				bd.position.Set(0.0f, 2.51f + 4.02f * i);
 				b2Body* body = m_world->Create(&bd);
-				body->AddShape(&sd);
+				body->Create(&sd);
 				body->SetMassFromShapes();
 			}
 		}

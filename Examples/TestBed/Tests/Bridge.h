@@ -32,7 +32,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -52,7 +52,7 @@ public:
 			{
 				bd.position.Set(-14.5f + 1.0f * i, 5.0f);
 				b2Body* body = m_world->Create(&bd);
-				body->AddShape(&sd);
+				body->Create(&sd);
 				body->SetMassFromShapes();
 
 				b2Vec2 anchor(-15.0f + 1.0f * i, 5.0f);

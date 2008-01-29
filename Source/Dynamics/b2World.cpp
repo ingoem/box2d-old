@@ -94,86 +94,6 @@ void b2World::SetDebugDraw(b2DebugDraw* debugDraw)
 	m_debugDraw = debugDraw;
 }
 
-b2Shape* b2World::Create(const b2ShapeDef* def)
-{
-	b2Assert(m_lock == false);
-	if (m_lock == true)
-	{
-		return NULL;
-	}
-
-	b2Shape* s = b2Shape::Create(def, &m_blockAllocator);
-
-	// Connect to doubly linked shape list.
-	s->m_worldPrev = NULL;
-	s->m_worldNext = m_shapeList;
-
-	if (m_shapeList)
-	{
-		m_shapeList->m_worldPrev = s;
-	}
-
-	m_shapeList = s;
-	
-	++m_shapeCount;
-
-	return s;
-}
-
-void b2World::Destroy(b2Shape* s)
-{
-	b2Assert(m_shapeCount > 0);
-	b2Assert(m_lock == false);
-	if (m_lock == true)
-	{
-		return;
-	}
-
-	// Remove from doubly linked list.
-	if (s->m_worldPrev)
-	{
-		s->m_worldPrev->m_worldNext = s->m_worldNext;
-	}
-
-	if (s->m_worldNext)
-	{
-		s->m_worldNext->m_worldPrev = s->m_worldPrev;
-	}
-
-	if (s == m_shapeList)
-	{
-		m_shapeList = s->m_worldNext;
-	}
-
-	--m_shapeCount;
-
-	if (s->m_body != NULL)
-	{
-		// Remove from the body's singly linked list.
-		b2Assert(s->m_body->m_shapeCount > 0);
-		b2Shape** node = &s->m_body->m_shapeList;
-		bool found = false;
-		while (*node != NULL)
-		{
-			if (*node == s)
-			{
-				*node = s->m_bodyNext;
-				found = true;
-				break;
-			}
-
-			node = &(*node)->m_bodyNext;
-		}
-		b2Assert(found);
-
-		--s->m_body->m_shapeCount;
-	}
-
-	s->DestroyProxy(m_broadPhase);
-	b2Shape::Destroy(s, &m_blockAllocator);
-	s = NULL;
-}
-
 b2Body* b2World::Create(const b2BodyDef* def)
 {
 	b2Assert(m_lock == false);
@@ -235,7 +155,27 @@ void b2World::Destroy(b2Body* b)
 			m_destructionListener->SayGoodbye(s0);
 		}
 
-		Destroy(s0);
+		// Remove from doubly linked list.
+		if (s0->m_worldPrev)
+		{
+			s0->m_worldPrev->m_worldNext = s0->m_worldNext;
+		}
+
+		if (s0->m_worldNext)
+		{
+			s0->m_worldNext->m_worldPrev = s0->m_worldPrev;
+		}
+
+		if (s0 == m_shapeList)
+		{
+			m_shapeList = s0->m_worldNext;
+		}
+
+		b2Assert(m_shapeCount > 0);
+		--m_shapeCount;
+
+		s0->DestroyProxy(m_broadPhase);
+		b2Shape::Destroy(s0, &m_blockAllocator);
 	}
 
 	// Remove world body list.

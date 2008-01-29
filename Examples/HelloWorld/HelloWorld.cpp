@@ -65,11 +65,8 @@ int main(int argc, char** argv)
 	// make the ground body static (fixed).
 	groundShapeDef.density = 0.0f;
 
-	// Create the ground shape;
-	b2Shape* groundShape = world.Create(&groundShapeDef);
-
 	// Add the ground shape to the ground body.
-	groundBody->AddShape(groundShape);
+	groundBody->Create(&groundShapeDef);
 
 	// Define the dynamic body. We set its position and call the body factory.
 	b2BodyDef bodyDef;
@@ -87,11 +84,8 @@ int main(int argc, char** argv)
 	// Override the default friction.
 	shapeDef.friction = 0.3f;
 
-	// Create the box shape.
-	b2Shape* boxShape = world.Create(&shapeDef);
-
 	// Add the shape to the body.
-	body->AddShape(boxShape);
+	body->Create(&shapeDef);
 
 	// Now tell the dynamic body to compute it's mass properties base
 	// on its shape.

@@ -40,21 +40,16 @@ public:
 			sd.restitution = k_restitution;
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(-10.0f, 0.0f), 0.0f);
-			b2Shape* shape1 = m_world->Create(&sd);
+			body->Create(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(10.0f, 0.0f), 0.0f);
-			b2Shape* shape2 = m_world->Create(&sd);
+			body->Create(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, -10.0f), 0.5f * b2_pi);
-			b2Shape* shape3 = m_world->Create(&sd);
+			body->Create(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, 10.0f), -0.5f * b2_pi);
-			b2Shape* shape4 = m_world->Create(&sd);
-
-			body->AddShape(shape1);
-			body->AddShape(shape2);
-			body->AddShape(shape3);
-			body->AddShape(shape4);
+			body->Create(&sd);
 		}
 
 		m_biped = new Biped(m_world, b2Vec2(0.0f, 20.0f));
@@ -73,8 +68,7 @@ public:
 			sd.radius = 0.25f;
 			sd.density = 15.0f;
 			sd.restitution = k_restitution;
-			b2Shape* shape = m_world->Create(&sd);
-			body->AddShape(shape);
+			body->Create(&sd);
 			body->SetMassFromShapes();
 		}
 	}

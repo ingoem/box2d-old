@@ -33,7 +33,7 @@ public:
 			bd.position.Set(0.0f, -10.0f);
 
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -52,7 +52,7 @@ public:
 				b2Body* body = m_world->Create(&bd);
 
 				sd.restitution = restitution[i];
-				body->AddShape(&sd);
+				body->Create(&sd);
 				body->SetMassFromShapes();
 			}
 		}

@@ -33,7 +33,7 @@ public:
 
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		{
@@ -53,7 +53,7 @@ public:
 			bd1.type = b2BodyDef::e_dynamicBody;
 			bd1.position.Set(-3.0f, 12.0f);
 			b2Body* body1 = m_world->Create(&bd1);
-			body1->AddShape(&circle1);
+			body1->Create(&circle1);
 			body1->SetMassFromShapes();
 
 			b2RevoluteJointDef jd1;
@@ -68,7 +68,7 @@ public:
 			bd2.type = b2BodyDef::e_dynamicBody;
 			bd2.position.Set(0.0f, 12.0f);
 			b2Body* body2 = m_world->Create(&bd2);
-			body2->AddShape(&circle2);
+			body2->Create(&circle2);
 			body2->SetMassFromShapes();
 
 			b2RevoluteJointDef jd2;
@@ -83,7 +83,7 @@ public:
 			bd3.type = b2BodyDef::e_dynamicBody;
 			bd3.position.Set(2.5f, 12.0f);
 			b2Body* body3 = m_world->Create(&bd3);
-			body3->AddShape(&box);
+			body3->Create(&box);
 			body3->SetMassFromShapes();
 
 			b2PrismaticJointDef jd3;

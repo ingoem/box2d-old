@@ -38,7 +38,7 @@ public:
 			bd.position.Set(0.0f, -10.0f);
 			
 			b2Body* ground = m_world->Create(&bd);
-			ground->AddShape(&sd);
+			ground->Create(&sd);
 		}
 
 		float32 xLo = -5.0f, xHi = 5.0f;
@@ -57,7 +57,7 @@ public:
 		triangleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
 		b2Body* body1 = m_world->Create(&triangleBodyDef);
-		body1->AddShape(&triangleShapeDef);
+		body1->Create(&triangleShapeDef);
 		body1->SetMassFromShapes();
 
 		// Large triangle (recycle definitions)
@@ -67,7 +67,7 @@ public:
 		triangleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
 		b2Body* body2 = m_world->Create(&triangleBodyDef);
-		body2->AddShape(&triangleShapeDef);
+		body2->Create(&triangleShapeDef);
 		body2->SetMassFromShapes();
 		
 		// Small box
@@ -80,7 +80,7 @@ public:
 		boxBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
 		b2Body* body3 = m_world->Create(&boxBodyDef);
-		body3->AddShape(&boxShapeDef);
+		body3->Create(&boxShapeDef);
 		body3->SetMassFromShapes();
 
 		// Large box (recycle definitions)
@@ -88,7 +88,7 @@ public:
 		boxBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 		
 		b2Body* body4 = m_world->Create(&boxBodyDef);
-		body4->AddShape(&boxShapeDef);
+		body4->Create(&boxShapeDef);
 		body4->SetMassFromShapes();
 
 		// Small circle
@@ -101,7 +101,7 @@ public:
 		circleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
 		b2Body* body5 = m_world->Create(&circleBodyDef);
-		body5->AddShape(&circleShapeDef);
+		body5->Create(&circleShapeDef);
 		body5->SetMassFromShapes();
 
 		// Large circle
@@ -109,7 +109,7 @@ public:
 		circleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
 		b2Body* body6 = m_world->Create(&circleBodyDef);
-		body6->AddShape(&circleShapeDef);
+		body6->Create(&circleShapeDef);
 		body6->SetMassFromShapes();
 	}
 

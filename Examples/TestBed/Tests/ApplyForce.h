@@ -33,7 +33,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->AddShape(&sd);
+			body->Create(&sd);
 			m_world->Create(&bd);
 
 			bd.position.Set(30.0f, 50.0f);
@@ -73,8 +73,8 @@ public:
 			sd2.restitution = 0.9f;
 
 			b2BodyDef bd;
-			body->AddShape(&sd1);
-			body->AddShape(&sd2);
+			body->Create(&sd1);
+			body->Create(&sd2);
 			bd.allowSleep = false;
 			bd.angularDamping = 0.02f;
 			bd.linearDamping = 0.02f;

@@ -216,8 +216,7 @@ void Test::LaunchBomb()
 	sd.radius = 0.3f;
 	sd.density = 20.0f;
 	sd.restitution = 0.1f;
-	b2Shape* shape = m_world->Create(&sd);
-	m_bomb->AddShape(shape);
+	m_bomb->Create(&sd);
 	
 	m_bomb->SetMassFromShapes();
 }

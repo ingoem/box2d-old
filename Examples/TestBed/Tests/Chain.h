@@ -33,8 +33,7 @@ public:
 
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
-			b2Shape* shape = m_world->Create(&sd);
-			ground->AddShape(shape);
+			ground->Create(&sd);
 		}
 
 		{
@@ -54,8 +53,7 @@ public:
 				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(0.5f + i, y);
 				b2Body* body = m_world->Create(&bd);
-				b2Shape* shape = m_world->Create(&sd);
-				body->AddShape(shape);
+				body->Create(&sd);
 				body->SetMassFromShapes();
 
 				b2Vec2 anchor(float32(i), y);

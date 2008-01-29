@@ -88,7 +88,6 @@ static b2Vec2 ComputeCentroid(const b2Vec2* vs, int32 count)
 }
 
 // http://www.geometrictools.com/Documentation/MinimumAreaRectangle.pdf
-// TODO_ERIN verify
 static void ComputeOBB(b2OBB* obb, const b2Vec2* vs, int32 count)
 {
 	b2Assert(count <= b2_maxPolygonVertices);
@@ -221,6 +220,8 @@ b2PolygonShape::b2PolygonShape(const b2ShapeDef* def)
 
 		// Shifting the edge inward by b2_toiSlop should
 		// not cause the plane to pass the centroid.
+
+		// Your shape has a radius/extent less than b2_toiSlop.
 		b2Assert(d.x >= 0.0f);
 		b2Assert(d.y >= 0.0f);
 		b2Mat22 A;

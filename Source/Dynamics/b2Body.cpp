@@ -103,27 +103,7 @@ b2Body::~b2Body()
 	// shapes and joints are destroyed in b2World::Destroy
 }
 
-void b2Body::AddShape(b2Shape* shape)
-{
-	b2Assert(m_world->m_lock == false);
-	if (m_world->m_lock == true)
-	{
-		return;
-	}
-
-	// Did you already add this shape to a body?
-	b2Assert(shape->m_body == NULL);
-	b2Assert(shape->m_bodyNext == NULL);
-
-	shape->m_bodyNext = m_shapeList;
-	m_shapeList = shape;
-	++m_shapeCount;
-
-	shape->m_body = this;
-	shape->CreateProxy(m_world->m_broadPhase, m_xf);
-}
-
-b2Shape* b2Body::AddShape(b2ShapeDef* shapeDef)
+b2Shape* b2Body::Create(b2ShapeDef* def)
 {
 	b2Assert(m_world->m_lock == false);
 	if (m_world->m_lock == true)
@@ -131,29 +111,48 @@ b2Shape* b2Body::AddShape(b2ShapeDef* shapeDef)
 		return NULL;
 	}
 
-	b2Shape* shape = m_world->Create(shapeDef);
+	b2Shape* s = b2Shape::Create(def, &m_world->m_blockAllocator);
 
-	shape->m_bodyNext = m_shapeList;
-	m_shapeList = shape;
+	// Connect to doubly linked shape list.
+	s->m_worldPrev = NULL;
+	s->m_worldNext = m_world->m_shapeList;
+
+	if (m_world->m_shapeList)
+	{
+		m_world->m_shapeList->m_worldPrev = s;
+	}
+
+	m_world->m_shapeList = s;
+
+	++m_world->m_shapeCount;
+
+	s->m_bodyNext = m_shapeList;
+	m_shapeList = s;
 	++m_shapeCount;
 
-	shape->m_body = this;
-	shape->CreateProxy(m_world->m_broadPhase, m_xf);
+	s->m_body = this;
+	s->CreateProxy(m_world->m_broadPhase, m_xf);
 
-	return shape;
+	return s;
 }
 
-void b2Body::RemoveShape(b2Shape* shape)
+void b2Body::Destroy(b2Shape* s)
 {
-	b2Assert(shape->m_body != NULL);
+	b2Assert(m_world->m_lock == false);
+	if (m_world->m_lock == true)
+	{
+		return;
+	}
+
+	b2Assert(s->m_body == NULL);
 	b2Assert(m_shapeCount > 0);
 	b2Shape** node = &m_shapeList;
 	bool found = false;
 	while (*node != NULL)
 	{
-		if (*node == shape)
+		if (*node == s)
 		{
-			*node = shape->m_bodyNext;
+			*node = s->m_bodyNext;
 			found = true;
 			break;
 		}
@@ -164,10 +163,32 @@ void b2Body::RemoveShape(b2Shape* shape)
 	// You tried to remove a shape that is not attached to this body.
 	b2Assert(found);
 
-	shape->m_body = NULL;
-	shape->m_bodyNext = NULL;
+	s->m_body = NULL;
+	s->m_bodyNext = NULL;
 
 	--m_shapeCount;
+
+	// Remove from doubly linked list.
+	if (s->m_worldPrev)
+	{
+		s->m_worldPrev->m_worldNext = s->m_worldNext;
+	}
+
+	if (s->m_worldNext)
+	{
+		s->m_worldNext->m_worldPrev = s->m_worldPrev;
+	}
+
+	if (s == m_world->m_shapeList)
+	{
+		m_world->m_shapeList = s->m_worldNext;
+	}
+
+	b2Assert(m_world->m_shapeCount > 0);
+	--m_world->m_shapeCount;
+
+	s->DestroyProxy(m_world->m_broadPhase);
+	b2Shape::Destroy(s, &m_world->m_blockAllocator);
 }
 
 // TODO_ERIN adjust linear velocity and torque to account for movement of center.
