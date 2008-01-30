@@ -744,7 +744,7 @@ Always delete gear joints before the revolute/prismatic joints on the gears. Oth
 <dt>contact</dt>
 <dd>An object that manages contact between a pair of shapes over a number of time steps. A contact object is present while the two shapes' axis-aligned bounding boxes overlap.</dd>
 <dt>contact manifold</dt>
-<dd>A contact object will create contact manifold objects when the shape pair actually touches. A manifold has a single normal vector and up to two contact points. The idea is that there is some one dimensional region where the two convex 2D shapes overlap. Multiple manifolds are possible when a convex shape collides with a non-convex shape (like a line segment soup).</dd>
+<dd>A contact object will create contact manifold objects when the shape pair actually touches. A manifold has a single normal vector and up to two contact points. The idea is that there is some one dimensional region where the two convex 2D shapes overlap. Multiple manifolds are possible when a convex shape collides with a non-convex shape (like a line segment soup). By convention the normal points from shape1 to shape2 in the b2Contact object.</dd>
 <dt>contact point</dt>
 <dd>A contact point belongs to a contact manifold and position, separation, impulses, and a feature based id. The contact's normal vector is held in it's parent manifold.</dd>
 <dt>contact separation</dt>
