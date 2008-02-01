@@ -168,19 +168,6 @@ public:
 	/// @param massData returns the mass data for this shape.
 	virtual void ComputeMass(b2MassData* massData) const = 0;
 
-	/// TODO_ERIN
-	virtual float32 ComputePerimeter() const { return 0.0f; }
-
-	/// TODO_ERIN
-	virtual float32 ComputeArea() const { return 0.0f; }
-
-	/// TODO_ERIN
-	virtual float32 ComputeSubmergedArea(const b2XForm& xf, const b2Vec2& normal, float32 offset) const
-	{
-		B2_NOT_USED(xf); B2_NOT_USED(normal); B2_NOT_USED(offset);
-		return 0.0f;
-	}
-
 	//--------------- Internals Below -------------------
 
 	static b2Shape* Create(const b2ShapeDef* def, b2BlockAllocator* allocator);
@@ -191,33 +178,28 @@ public:
 
 	void CreateProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
 	void DestroyProxy(b2BroadPhase* broadPhase);
-	bool Synchronize(b2BroadPhase* broadPhase,
-					const b2XForm& xf1,
-					const b2XForm& xf2);
+	bool Synchronize(b2BroadPhase* broadPhase, const b2XForm& xf1, const b2XForm& xf2);
 	void ResetProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
-	virtual void ApplyOffset(const b2Vec2& offset) = 0;
 
-	float32 GetMinRadius() const;
-	float32 GetMaxRadius() const;
+	virtual void UpdateSweepRadius(const b2Vec2& center) = 0;
+
+	float32 GetSweepRadius() const;
+
+	b2ShapeType m_type;
 
 	b2Shape* m_bodyNext;
 
 	b2Shape* m_worldPrev;
 	b2Shape* m_worldNext;
 
-	b2ShapeType m_type;
-
-	void* m_userData;
-
 	b2Body* m_body;
+
+	// Sweep radius relative to the parent body's center of mass.
+	float32 m_sweepRadius;
 
 	float32 m_density;
 	float32 m_friction;
 	float32 m_restitution;
-
-	// These must be computed by concrete shape.
-	// Used for CCD.
-	float32 m_maxRadius;
 
 	uint16 m_proxyId;
 	uint16 m_categoryBits;
@@ -225,6 +207,8 @@ public:
 	int16 m_groupIndex;
 
 	bool m_isSensor;
+
+	void* m_userData;
 };
 
 inline b2ShapeType b2Shape::GetType() const
@@ -257,9 +241,9 @@ inline b2Shape* b2Shape::GetBodyNext()
 	return m_bodyNext;
 }
 
-inline float32 b2Shape::GetMaxRadius() const
+inline float32 b2Shape::GetSweepRadius() const
 {
-	return m_maxRadius;
+	return m_sweepRadius;
 }
 
 #endif

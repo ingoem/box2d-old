@@ -216,13 +216,15 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 			continue;
 
 		// Store positions for continuous collision.
-		b->m_position0 = b->m_xf.position;
-		b->m_angle0 = b->m_angle;
+		b->m_sweep.c0 = b->m_sweep.c;
+		b->m_sweep.a0 = b->m_sweep.a;
 
 		// Integrate
-		b->m_xf.position += step.dt * b->m_linearVelocity;
-		b->m_angle += step.dt * b->m_angularVelocity;
-		b->m_xf.R.Set(b->m_angle);
+		b->m_sweep.c += step.dt * b->m_linearVelocity;
+		b->m_sweep.a += step.dt * b->m_angularVelocity;
+
+		// Compute new transform
+		b->SynchronizeTransform();
 
 		// Note: shapes are synchronized later.
 	}
@@ -255,7 +257,7 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 		}
 	}
 
-	Report();
+	Report(contactSolver.m_constraints);
 
 	if (allowSleep)
 	{
@@ -300,8 +302,6 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 				b->m_flags |= b2Body::e_sleepFlag;
 				b->m_linearVelocity = b2Vec2_zero;
 				b->m_angularVelocity = 0.0f;
-				b->m_position0 = b->m_xf.position;
-				b->m_angle0 = b->m_angle;
 			}
 		}
 	}
@@ -330,28 +330,35 @@ void b2Island::SolveTOI(const b2TimeStep& subStep)
 		if (b->IsStatic())
 			continue;
 
+		// Store positions for continuous collision.
+		b->m_sweep.c0 = b->m_sweep.c;
+		b->m_sweep.a0 = b->m_sweep.a;
+
 		// Integrate
-		b->m_xf.position += subStep.dt * b->m_linearVelocity;
-		b->m_angle += subStep.dt * b->m_angularVelocity;
-		b->m_xf.R.Set(b->m_angle);
+		b->m_sweep.c += subStep.dt * b->m_linearVelocity;
+		b->m_sweep.a += subStep.dt * b->m_angularVelocity;
+
+		// Compute new transform
+		b->SynchronizeTransform();
 
 		// Note: shapes are synchronized later.
 	}
 
 	// Solve position constraints.
+	const float32 k_toiBaumgarte = 0.75f;
 	for (int32 i = 0; i < subStep.maxIterations; ++i)
 	{
-		bool contactsOkay = contactSolver.SolvePositionConstraints(0.75f);
+		bool contactsOkay = contactSolver.SolvePositionConstraints(k_toiBaumgarte);
 		if (contactsOkay)
 		{
 			break;
 		}
 	}
 
-	Report();
+	Report(contactSolver.m_constraints);
 }
 
-void b2Island::Report()
+void b2Island::Report(b2ContactConstraint* constraints)
 {
 	if (m_listener == NULL)
 	{
@@ -361,6 +368,7 @@ void b2Island::Report()
 	for (int32 i = 0; i < m_contactCount; ++i)
 	{
 		b2Contact* c = m_contacts[i];
+		b2ContactConstraint* cc = constraints + i;
 		b2ContactPoint cp;
 		cp.shape1 = c->GetShape1();
 		cp.shape2 = c->GetShape2();
@@ -374,10 +382,15 @@ void b2Island::Report()
 			for (int32 k = 0; k < manifold->pointCount; ++k)
 			{
 				b2ManifoldPoint* point = manifold->points + k;
+				b2ContactConstraintPoint* ccp = cc->points + k;
 				cp.position = b2Mul(b1->GetXForm(), point->localPoint1);
 				cp.separation = point->separation;
-				cp.normalForce = point->normalForce;
-				cp.tangentForce = point->tangentForce;
+
+				// TOI constraint results are not stored, so get
+				// the result from the constraint.
+				cp.normalForce = ccp->normalForce;
+				cp.tangentForce = ccp->tangentForce;
+
 				if (point->id.features.flip & b2_newPoint)
 				{
 					point->id.features.flip &= ~b2_newPoint;

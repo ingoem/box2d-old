@@ -93,19 +93,6 @@ struct b2OBB
 	b2Vec2 extents;
 };
 
-/// This describes the motion of a body/shape for TOI computation.
-struct b2Sweep
-{
-	/// Get the transform at a specific time.
-	/// @param t the normalized time in [0,1].
-	b2XForm GetXForm(float32 t) const;
-
-	b2Vec2 position;
-	b2Vec2 velocity;
-	float32 angle;
-	float32 omega;
-};
-
 /// Compute the collision manifold between two circles.
 void b2CollideCircles(b2Manifold* manifold,
 					  const b2CircleShape* circle1, const b2XForm& xf1,
@@ -128,11 +115,11 @@ float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
 				   const b2Shape* shape2, const b2XForm& xf2);
 
 /// Compute the time when two shapes begin to touch or touch at a closer distance.
+/// @warning the sweeps must have the same time interval.
 /// @return the fraction between [0,1] in which the shapes first touch.
-/// t=0 means the shapes begin touching/overlapped, and t=1 means the shapes don't touch.
+/// fraction=0 means the shapes begin touching/overlapped, and fraction=1 means the shapes don't touch.
 float32 b2TimeOfImpact(const b2Shape* shape1, const b2Sweep& sweep1,
-					   const b2Shape* shape2, const b2Sweep& sweep2,
-					   float32 maxTOI);
+					   const b2Shape* shape2, const b2Sweep& sweep2);
 
 
 // ---------------- Inline Functions ------------------------------------------
@@ -158,14 +145,6 @@ inline bool b2TestOverlap(const b2AABB& a, const b2AABB& b)
 		return false;
 
 	return true;
-}
-
-inline b2XForm b2Sweep::GetXForm(float32 toi) const
-{
-	b2XForm xf;
-	xf.position = position + toi * velocity;
-	xf.R.Set(angle + toi * omega);
-	return xf;
 }
 
 #endif

@@ -81,7 +81,7 @@ public:
 		triangleShapeDef.vertices[2] *= 2.0f;
 		triangleShapeDef.groupIndex = k_largeGroup;
 		triangleBodyDef.position.Set(-5.0f, 6.0f);
-		triangleBodyDef.preventRotation = true; // look at me!
+		triangleBodyDef.fixedRotation = true; // look at me!
 
 		b2Body* body2 = m_world->Create(&triangleBodyDef);
 		body2->Create(&triangleShapeDef);

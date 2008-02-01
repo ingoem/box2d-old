@@ -287,7 +287,7 @@ void Test::Step(Settings* settings)
 	if (m_mouseJoint)
 	{
 		b2Body* body = m_mouseJoint->m_body2;
-		b2Vec2 p1 = body->m_xf.position + b2Mul(body->m_xf.R, m_mouseJoint->m_localAnchor);
+		b2Vec2 p1 = body->GetWorldPoint(m_mouseJoint->m_localAnchor);
 		b2Vec2 p2 = m_mouseJoint->m_target;
 
 		glPointSize(4.0f);
@@ -307,7 +307,7 @@ void Test::Step(Settings* settings)
 
 	if (settings->drawContactPoints)
 	{
-		const float32 k_forceScale = 0.1f;
+		const float32 k_forceScale = 0.01f;
 		const float32 k_axisScale = 0.3f;
 
 		for (int32 i = 0; i < m_pointCount; ++i)

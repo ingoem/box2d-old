@@ -47,7 +47,7 @@ public:
 			sd.restitution = 0.0f;
 
 			m_angularVelocity = b2Random(-50.0f, 50.0f);
-			//m_angularVelocity = 39.596241f;
+			//m_angularVelocity = 8.5009336f;
 
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
@@ -137,6 +137,30 @@ public:
 		}
 
 		{
+			b2PolygonDef sd_bottom;
+			sd_bottom.SetAsBox( 1.5f, 0.15f );
+			sd_bottom.density = 4.0f;
+
+			b2PolygonDef sd_left;
+			sd_left.SetAsBox(0.15f, 2.7f, b2Vec2(-1.45f, 2.35f), 0.2f);
+			sd_left.density = 4.0f;
+
+			b2PolygonDef sd_right;
+			sd_right.SetAsBox(0.15f, 2.7f, b2Vec2(1.45f, 2.35f), -0.2f);
+			sd_right.density = 4.0f;
+
+			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
+			bd.position.Set( 0.0f, 15.0f );
+			b2Body* body = m_world->Create(&bd);
+			body->Create(&sd_bottom);
+			body->Create(&sd_left);
+			body->Create(&sd_right);
+			body->SetMassFromShapes();
+		}
+
+#if 0
+		{
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(-5.0f, 20.0f);
@@ -151,8 +175,9 @@ public:
 			body->Create(&sd);
 			body->SetMassFromShapes();
 		}
+#endif
 
-		for (int32 i = 0; i < 8; ++i)
+		for (int32 i = 0; i < 0; ++i)
 		{
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;

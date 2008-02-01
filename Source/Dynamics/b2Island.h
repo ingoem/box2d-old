@@ -26,6 +26,7 @@ class b2Body;
 class b2Joint;
 class b2StackAllocator;
 class b2ContactListener;
+struct b2ContactConstraint;
 struct b2TimeStep;
 
 class b2Island
@@ -64,7 +65,7 @@ public:
 		m_joints[m_jointCount++] = joint;
 	}
 
-	void Report();
+	void Report(b2ContactConstraint* constraints);
 
 	b2StackAllocator* m_allocator;
 	b2ContactListener* m_listener;

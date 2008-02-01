@@ -142,9 +142,9 @@ void DebugDraw::DrawXForm(const b2XForm& xf)
 
 void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color)
 {
-	glColor3f(color.r, color.g, color.b);
 	glPointSize(size);
 	glBegin(GL_POINTS);
+	glColor3f(color.r, color.g, color.b);
 	glVertex2f(p.x, p.y);
 	glEnd();
 	glPointSize(1.0f);

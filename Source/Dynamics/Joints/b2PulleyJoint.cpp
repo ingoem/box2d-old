@@ -69,11 +69,11 @@ void b2PulleyJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
-	b2Vec2 p1 = b1->m_xf.position + r1;
-	b2Vec2 p2 = b2->m_xf.position + r2;
+	b2Vec2 p1 = b1->m_sweep.c + r1;
+	b2Vec2 p2 = b2->m_sweep.c + r2;
 
 	b2Vec2 s1 = m_ground->m_xf.position + m_groundAnchor1;
 	b2Vec2 s2 = m_ground->m_xf.position + m_groundAnchor2;
@@ -162,8 +162,8 @@ void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep& step)
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
 	{
 		b2Vec2 v1 = b1->m_linearVelocity + b2Cross(b1->m_angularVelocity, r1);
@@ -219,11 +219,11 @@ bool b2PulleyJoint::SolvePositionConstraints()
 	float32 linearError = 0.0f;
 
 	{
-		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
-		b2Vec2 p1 = b1->m_xf.position + r1;
-		b2Vec2 p2 = b2->m_xf.position + r2;
+		b2Vec2 p1 = b1->m_sweep.c + r1;
+		b2Vec2 p2 = b2->m_sweep.c + r2;
 
 		// Get the pulley axes.
 		m_u1 = p1 - s1;
@@ -258,19 +258,19 @@ bool b2PulleyJoint::SolvePositionConstraints()
 		b2Vec2 P1 = -impulse * m_u1;
 		b2Vec2 P2 = -m_ratio * impulse * m_u2;
 
-		b1->m_xf.position += b1->m_invMass * P1;
-		b1->m_angle += b1->m_invI * b2Cross(r1, P1);
-		b2->m_xf.position += b2->m_invMass * P2;
-		b2->m_angle += b2->m_invI * b2Cross(r2, P2);
+		b1->m_sweep.c += b1->m_invMass * P1;
+		b1->m_sweep.a += b1->m_invI * b2Cross(r1, P1);
+		b2->m_sweep.c += b2->m_invMass * P2;
+		b2->m_sweep.a += b2->m_invI * b2Cross(r2, P2);
 
-		b1->m_xf.R.Set(b1->m_angle);
-		b2->m_xf.R.Set(b2->m_angle);
+		b1->SynchronizeTransform();
+		b2->SynchronizeTransform();
 	}
 
 	if (m_limitState1 == e_atUpperLimit)
 	{
-		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-		b2Vec2 p1 = b1->m_xf.position + r1;
+		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+		b2Vec2 p1 = b1->m_sweep.c + r1;
 
 		m_u1 = p1 - s1;
 		float32 length1 = m_u1.Length();
@@ -293,15 +293,16 @@ bool b2PulleyJoint::SolvePositionConstraints()
 		impulse = m_limitPositionImpulse1 - oldLimitPositionImpulse;
 
 		b2Vec2 P1 = -impulse * m_u1;
-		b1->m_xf.position += b1->m_invMass * P1;
-		b1->m_angle += b1->m_invI * b2Cross(r1, P1);
-		b1->m_xf.R.Set(b1->m_angle);
+		b1->m_sweep.c += b1->m_invMass * P1;
+		b1->m_sweep.a += b1->m_invI * b2Cross(r1, P1);
+
+		b1->SynchronizeTransform();
 	}
 
 	if (m_limitState2 == e_atUpperLimit)
 	{
-		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
-		b2Vec2 p2 = b2->m_xf.position + r2;
+		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+		b2Vec2 p2 = b2->m_sweep.c + r2;
 
 		m_u2 = p2 - s2;
 		float32 length2 = m_u2.Length();
@@ -324,9 +325,10 @@ bool b2PulleyJoint::SolvePositionConstraints()
 		impulse = m_limitPositionImpulse2 - oldLimitPositionImpulse;
 
 		b2Vec2 P2 = -impulse * m_u2;
-		b2->m_xf.position += b2->m_invMass * P2;
-		b2->m_angle += b2->m_invI * b2Cross(r2, P2);
-		b2->m_xf.R.Set(b2->m_angle);
+		b2->m_sweep.c += b2->m_invMass * P2;
+		b2->m_sweep.a += b2->m_invI * b2Cross(r2, P2);
+
+		b2->SynchronizeTransform();
 	}
 
 	return linearError < b2_linearSlop;

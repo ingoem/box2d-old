@@ -23,48 +23,42 @@
 // impact (TOI) of two shapes.
 // Refs: Bullet, Young Kim
 float32 b2TimeOfImpact(const b2Shape* shape1, const b2Sweep& sweep1,
-					   const b2Shape* shape2, const b2Sweep& sweep2,
-					   float32 maxTOI)
+					   const b2Shape* shape2, const b2Sweep& sweep2)
 {
-	b2Vec2 x1Start = sweep1.position;
-	float32 a1Start = sweep1.angle;
-	b2Vec2 v1 = sweep1.velocity;
-	float32 omega1 = sweep1.omega;
+	float32 r1 = shape1->GetSweepRadius();
+	float32 r2 = shape2->GetSweepRadius();
 
-	b2Vec2 x2Start = sweep2.position;
-	float32 a2Start = sweep2.angle;
-	b2Vec2 v2 = sweep2.velocity;
-	float32 omega2 = sweep2.omega;
+	b2Assert(sweep1.t0 == sweep2.t0);
+	b2Assert(1.0f - sweep1.t0 > FLT_EPSILON);
 
-	float32 r1 = shape1->GetMaxRadius();
-	float32 r2 = shape2->GetMaxRadius();
+	float32 t0 = sweep1.t0;
+	b2Vec2 v1 = sweep1.c - sweep1.c0;
+	b2Vec2 v2 = sweep2.c - sweep2.c0;
+	float32 omega1 = sweep1.a - sweep1.a0;
+	float32 omega2 = sweep2.a - sweep2.a0;
 
-	b2Vec2 x1 = x1Start;
-	float32 a1 = a1Start;
-	b2Vec2 x2 = x2Start;
-	float32 a2 = a2Start;
-
-	b2XForm xf1, xf2;
-	xf1.position = x1;
-	xf1.R.Set(a1);
-
-	xf2.position = x2;
-	xf2.R.Set(a2);
+	float32 alpha = 0.0f;
 
 	b2Vec2 p1, p2;
-	float32 t1 = 0.0f;
-	const int32 maxIterations = 20;
+	const int32 k_maxIterations = 20;	// TODO_ERIN b2Settings
 	int32 iter = 0;
 	b2Vec2 normal = b2Vec2_zero;
 	float32 distance = 0.0f;
 	float32 targetDistance = 0.0f;
 	for(;;)
 	{
-		// Get the accurate distance between shapes.
+		float32 t = (1.0f - alpha) * t0 + alpha;
+		b2XForm xf1, xf2;
+		sweep1.GetXForm(&xf1, t);
+		sweep2.GetXForm(&xf2, t);
+
+		// Get the distance between shapes.
 		distance = b2Distance(&p1, &p2, shape1, xf1, shape2, xf2);
 
 		if (iter == 0)
 		{
+			// Compute a reasonable target distance to give some breathing room
+			// for conservative advancement.
 			if (distance > 2.0f * b2_toiSlop)
 			{
 				targetDistance = 1.5f * b2_toiSlop;
@@ -75,7 +69,7 @@ float32 b2TimeOfImpact(const b2Shape* shape1, const b2Sweep& sweep1,
 			}
 		}
 
-		if (distance - targetDistance < 0.05f * b2_toiSlop || iter == maxIterations)
+		if (distance - targetDistance < 0.05f * b2_toiSlop || iter == k_maxIterations)
 		{
 			break;
 		}
@@ -87,56 +81,32 @@ float32 b2TimeOfImpact(const b2Shape* shape1, const b2Sweep& sweep1,
 		float32 approachVelocityBound = b2Dot(normal, v1 - v2) + b2Abs(omega1) * r1 + b2Abs(omega2) * r2;
 		if (b2Abs(approachVelocityBound) < FLT_EPSILON)
 		{
-			t1 = 1.0f;
+			alpha = 1.0f;
 			break;
 		}
 
 		// Get the conservative time increment. Don't advance all the way.
-		float32 dt = (distance - targetDistance) / approachVelocityBound;
+		float32 dAlpha = (distance - targetDistance) / approachVelocityBound;
 		//float32 dt = (distance - 0.5f * b2_linearSlop) / approachVelocityBound;
-		float32 t2 = t1 + dt;
+		float32 newAlpha = alpha + dAlpha;
 
-		// The shapes may be moving apart.
-		if (t2 < 0.0f || 1.0f < t2)
+		// The shapes may be moving apart or a safe distance apart.
+		if (newAlpha < 0.0f || 1.0f < newAlpha)
 		{
-			t1 = 1.0f;
+			alpha = 1.0f;
 			break;
 		}
 
 		// Ensure significant advancement.
-		if (t2 < (1.0f + 100.0f * FLT_EPSILON) * t1)
+		if (newAlpha < (1.0f + 100.0f * FLT_EPSILON) * alpha)
 		{
 			break;
 		}
 
-		if (t2 > maxTOI)
-		{
-			t1 = 1.0f;
-			break;
-		}
-
-		t1 = t2;
-
-		// Move forward conservatively.
-		x1 = x1Start + t1 * v1;
-		a1 = a1Start + t1 * omega1;
-		x2 = x2Start + t1 * v2;
-		a2 = a2Start + t1 * omega2;
-
-		xf1.position = x1;
-		xf1.R.Set(a1);
-
-		xf2.position = x2;
-		xf2.R.Set(a2);
+		alpha = newAlpha;
 
 		++iter;
 	}
 
-	// Debug
-	if (iter == maxIterations)
-	{
-		iter += 0;
-	}
-
-	return t1;
+	return alpha;
 }

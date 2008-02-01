@@ -61,8 +61,8 @@ void b2RevoluteJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Body* b2 = m_body2;
 
 	// Compute the effective mass matrix.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
 	// K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
 	//      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r1.y*r1.y -r1.x*r1.y]
@@ -94,7 +94,7 @@ void b2RevoluteJoint::InitVelocityConstraints(const b2TimeStep& step)
 
 	if (m_enableLimit)
 	{
-		float32 jointAngle = b2->m_angle - b1->m_angle - m_referenceAngle;
+		float32 jointAngle = b2->m_sweep.a - b1->m_sweep.a - m_referenceAngle;
 		if (b2Abs(m_upperAngle - m_lowerAngle) < 2.0f * b2_angularSlop)
 		{
 			m_limitState = e_equalLimits;
@@ -149,8 +149,8 @@ void b2RevoluteJoint::SolveVelocityConstraints(const b2TimeStep& step)
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
 	// Solve point-to-point constraint
 	b2Vec2 pivotCdot = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
@@ -213,11 +213,11 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 	float32 positionError = 0.0f;
 
 	// Solve point-to-point position error.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
-	b2Vec2 p1 = b1->m_xf.position + r1;
-	b2Vec2 p2 = b2->m_xf.position + r2;
+	b2Vec2 p1 = b1->m_sweep.c + r1;
+	b2Vec2 p2 = b2->m_sweep.c + r2;
 	b2Vec2 ptpC = p2 - p1;
 
 	positionError = ptpC.Length();
@@ -244,20 +244,21 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 	b2Mat22 K = K1 + K2 + K3;
 	b2Vec2 impulse = K.Solve(-ptpC);
 
-	b1->m_xf.position -= b1->m_invMass * impulse;
-	b1->m_angle -= b1->m_invI * b2Cross(r1, impulse);
-	b1->m_xf.R.Set(b1->m_angle);
+	b1->m_sweep.c -= b1->m_invMass * impulse;
+	b1->m_sweep.a -= b1->m_invI * b2Cross(r1, impulse);
 
-	b2->m_xf.position += b2->m_invMass * impulse;
-	b2->m_angle += b2->m_invI * b2Cross(r2, impulse);
-	b2->m_xf.R.Set(b2->m_angle);
+	b2->m_sweep.c += b2->m_invMass * impulse;
+	b2->m_sweep.a += b2->m_invI * b2Cross(r2, impulse);
+
+	b1->SynchronizeTransform();
+	b2->SynchronizeTransform();
 
 	// Handle limits.
 	float32 angularError = 0.0f;
 
 	if (m_enableLimit && m_limitState != e_inactiveLimit)
 	{
-		float32 angle = b2->m_angle - b1->m_angle - m_referenceAngle;
+		float32 angle = b2->m_sweep.a - b1->m_sweep.a - m_referenceAngle;
 		float32 limitImpulse = 0.0f;
 
 		if (m_limitState == e_equalLimits)
@@ -292,10 +293,11 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 			limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
 		}
 
-		b1->m_angle -= b1->m_invI * limitImpulse;
-		b1->m_xf.R.Set(b1->m_angle);
-		b2->m_angle += b2->m_invI * limitImpulse;
-		b2->m_xf.R.Set(b2->m_angle);
+		b1->m_sweep.a -= b1->m_invI * limitImpulse;
+		b2->m_sweep.a += b2->m_invI * limitImpulse;
+
+		b1->SynchronizeTransform();
+		b2->SynchronizeTransform();
 	}
 
 	return positionError <= b2_linearSlop && angularError <= b2_angularSlop;
@@ -325,7 +327,7 @@ float32 b2RevoluteJoint::GetJointAngle() const
 {
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
-	return b2->m_angle - b1->m_angle;
+	return b2->m_sweep.a - b1->m_sweep.a - m_referenceAngle;
 }
 
 float32 b2RevoluteJoint::GetJointSpeed() const

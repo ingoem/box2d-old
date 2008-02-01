@@ -41,7 +41,7 @@ public:
 			sd.density = 1.0f;
 			sd.friction = 0.3f;
 
-			for (int i = 0; i < 15; ++i)
+			for (int i = 0; i < 10; ++i)
 			{
 				b2BodyDef bd;
 				bd.type = b2BodyDef::e_dynamicBody;

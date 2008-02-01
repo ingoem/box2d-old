@@ -116,7 +116,7 @@ void b2GearJoint::InitVelocityConstraints(const b2TimeStep& step)
 	else
 	{
 		b2Vec2 ug = b2Mul(g1->m_xf.R, m_prismatic1->m_localXAxis1);
-		b2Vec2 r = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
+		b2Vec2 r = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
 		float32 crug = b2Cross(r, ug);
 		m_J.linear1 = -ug;
 		m_J.angular1 = -crug;
@@ -131,7 +131,7 @@ void b2GearJoint::InitVelocityConstraints(const b2TimeStep& step)
 	else
 	{
 		b2Vec2 ug = b2Mul(g2->m_xf.R, m_prismatic2->m_localXAxis1);
-		b2Vec2 r = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+		b2Vec2 r = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 		float32 crug = b2Cross(r, ug);
 		m_J.linear2 = -m_ratio * ug;
 		m_J.angular2 = -m_ratio * crug;
@@ -205,24 +205,25 @@ bool b2GearJoint::SolvePositionConstraints()
 
 	float32 impulse = -m_mass * C;
 
-	b1->m_xf.position += b1->m_invMass * impulse * m_J.linear1;
-	b1->m_angle += b1->m_invI * impulse * m_J.angular1;
-	b2->m_xf.position += b2->m_invMass * impulse * m_J.linear2;
-	b2->m_angle += b2->m_invI * impulse * m_J.angular2;
-	b1->m_xf.R.Set(b1->m_angle);
-	b2->m_xf.R.Set(b2->m_angle);
+	b1->m_sweep.c += b1->m_invMass * impulse * m_J.linear1;
+	b1->m_sweep.a += b1->m_invI * impulse * m_J.angular1;
+	b2->m_sweep.c += b2->m_invMass * impulse * m_J.linear2;
+	b2->m_sweep.a += b2->m_invI * impulse * m_J.angular2;
+
+	b1->SynchronizeTransform();
+	b2->SynchronizeTransform();
 
 	return linearError < b2_linearSlop;
 }
 
 b2Vec2 b2GearJoint::GetAnchor1() const
 {
-	return b2Mul(m_body1->m_xf, m_localAnchor1 - m_body1->m_center);
+	return m_body1->GetWorldPoint(m_localAnchor1);
 }
 
 b2Vec2 b2GearJoint::GetAnchor2() const
 {
-	return b2Mul(m_body2->m_xf, m_localAnchor2 - m_body2->m_center);
+	return m_body2->GetWorldPoint(m_localAnchor2);
 }
 
 b2Vec2 b2GearJoint::GetReactionForce() const
@@ -235,7 +236,7 @@ b2Vec2 b2GearJoint::GetReactionForce() const
 float32 b2GearJoint::GetReactionTorque() const
 {
 	// TODO_ERIN not tested
-	b2Vec2 r = b2Mul(m_body2->m_xf.R, m_localAnchor2 - m_body2->m_center);
+	b2Vec2 r = b2Mul(m_body2->m_xf.R, m_localAnchor2 - m_body2->GetLocalCenter());
 	b2Vec2 F = m_force * m_J.linear2;
 	float32 T = m_force * m_J.angular2 - b2Cross(r, F);
 	return T;

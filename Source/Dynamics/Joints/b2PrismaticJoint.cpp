@@ -44,7 +44,7 @@ b2PrismaticJoint::b2PrismaticJoint(const b2PrismaticJointDef* def)
 	m_localAnchor2 = def->localAnchor2;
 	m_localXAxis1 = def->localAxis1;
 	m_localYAxis1 = b2Cross(1.0f, m_localXAxis1);
-	m_refAngle = m_body2->m_angle - m_body1->m_angle;
+	m_refAngle = def->referenceAngle;
 
 	m_linearJacobian.SetZero();
 	m_linearMass = 0.0f;
@@ -73,8 +73,8 @@ void b2PrismaticJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Body* b2 = m_body2;
 
 	// Compute the effective masses.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
 	float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
 	float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
@@ -82,7 +82,7 @@ void b2PrismaticJoint::InitVelocityConstraints(const b2TimeStep& step)
 	// Compute point to line constraint effective mass.
 	// J = [-ay1 -cross(d+r1,ay1) ay1 cross(r2,ay1)]
 	b2Vec2 ay1 = b2Mul(b1->m_xf.R, m_localYAxis1);
-	b2Vec2 e = b2->m_xf.position + r2 - b1->m_xf.position;
+	b2Vec2 e = b2->m_sweep.c + r2 - b1->m_sweep.c;	// e = d + r1
 
 	m_linearJacobian.Set(-ay1, -b2Cross(e, ay1), ay1, b2Cross(r2, ay1));
 	m_linearMass =	invMass1 + invI1 * m_linearJacobian.angular1 * m_linearJacobian.angular1 +
@@ -261,10 +261,10 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 	float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
 	float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
-	b2Vec2 p1 = b1->m_xf.position + r1;
-	b2Vec2 p2 = b2->m_xf.position + r2;
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 p1 = b1->m_sweep.c + r1;
+	b2Vec2 p2 = b2->m_sweep.c + r2;
 	b2Vec2 d = p2 - p1;
 	b2Vec2 ay1 = b2Mul(b1->m_xf.R, m_localYAxis1);
 
@@ -274,35 +274,36 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 	linearC = b2Clamp(linearC, -b2_maxLinearCorrection, b2_maxLinearCorrection);
 	float32 linearImpulse = -m_linearMass * linearC;
 
-	b1->m_xf.position += (invMass1 * linearImpulse) * m_linearJacobian.linear1;
-	b1->m_angle += invI1 * linearImpulse * m_linearJacobian.angular1;
-	//b1->m_xf.R.Set(b1->m_rotation); // updated by angular constraint
-	b2->m_xf.position += (invMass2 * linearImpulse) * m_linearJacobian.linear2;
-	b2->m_angle += invI2 * linearImpulse * m_linearJacobian.angular2;
-	//b2->m_xf.R.Set(b2->m_rotation); // updated by angular constraint
+	b1->m_sweep.c += (invMass1 * linearImpulse) * m_linearJacobian.linear1;
+	b1->m_sweep.a += invI1 * linearImpulse * m_linearJacobian.angular1;
+	//b1->SynchronizeTransform(); // updated by angular constraint
+	b2->m_sweep.c += (invMass2 * linearImpulse) * m_linearJacobian.linear2;
+	b2->m_sweep.a += invI2 * linearImpulse * m_linearJacobian.angular2;
+	//b2->SynchronizeTransform(); // updated by angular constraint
 
 	float32 positionError = b2Abs(linearC);
 
 	// Solve angular constraint.
-	float32 angularC = b2->m_angle - b1->m_angle - m_refAngle;
+	float32 angularC = b2->m_sweep.a - b1->m_sweep.a - m_refAngle;
 	// Prevent overly large corrections.
 	angularC = b2Clamp(angularC, -b2_maxAngularCorrection, b2_maxAngularCorrection);
 	float32 angularImpulse = -m_angularMass * angularC;
 
-	b1->m_angle -= b1->m_invI * angularImpulse;
-	b1->m_xf.R.Set(b1->m_angle);
-	b2->m_angle += b2->m_invI * angularImpulse;
-	b2->m_xf.R.Set(b2->m_angle);
+	b1->m_sweep.a -= b1->m_invI * angularImpulse;
+	b2->m_sweep.a += b2->m_invI * angularImpulse;
+
+	b1->SynchronizeTransform();
+	b2->SynchronizeTransform();
 
 	float32 angularError = b2Abs(angularC);
 
 	// Solve linear limit constraint.
 	if (m_enableLimit && m_limitState != e_inactiveLimit)
 	{
-		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
-		b2Vec2 p1 = b1->m_xf.position + r1;
-		b2Vec2 p2 = b2->m_xf.position + r2;
+		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+		b2Vec2 p1 = b1->m_sweep.c + r1;
+		b2Vec2 p2 = b2->m_sweep.c + r2;
 		b2Vec2 d = p2 - p1;
 		b2Vec2 ax1 = b2Mul(b1->m_xf.R, m_localXAxis1);
 
@@ -341,12 +342,13 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 			limitImpulse = m_limitPositionImpulse - oldLimitImpulse;
 		}
 
-		b1->m_xf.position += (invMass1 * limitImpulse) * m_motorJacobian.linear1;
-		b1->m_angle += invI1 * limitImpulse * m_motorJacobian.angular1;
-		b1->m_xf.R.Set(b1->m_angle);
-		b2->m_xf.position += (invMass2 * limitImpulse) * m_motorJacobian.linear2;
-		b2->m_angle += invI2 * limitImpulse * m_motorJacobian.angular2;
-		b2->m_xf.R.Set(b2->m_angle);
+		b1->m_sweep.c += (invMass1 * limitImpulse) * m_motorJacobian.linear1;
+		b1->m_sweep.a += invI1 * limitImpulse * m_motorJacobian.angular1;
+		b2->m_sweep.c += (invMass2 * limitImpulse) * m_motorJacobian.linear2;
+		b2->m_sweep.a += invI2 * limitImpulse * m_motorJacobian.angular2;
+
+		b1->SynchronizeTransform();
+		b2->SynchronizeTransform();
 	}
 
 	return positionError <= b2_linearSlop && angularError <= b2_angularSlop;
@@ -394,10 +396,10 @@ float32 b2PrismaticJoint::GetJointSpeed() const
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
-	b2Vec2 p1 = b1->m_xf.position + r1;
-	b2Vec2 p2 = b2->m_xf.position + r2;
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 p1 = b1->m_sweep.c + r1;
+	b2Vec2 p2 = b2->m_sweep.c + r2;
 	b2Vec2 d = p2 - p1;
 	b2Vec2 axis = b1->GetWorldVector(m_localXAxis1);
 

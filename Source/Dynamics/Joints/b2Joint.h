@@ -57,12 +57,17 @@ struct b2Jacobian
 	float32 Compute(const b2Vec2& x1, float32 a1, const b2Vec2& x2, float32 a2);
 };
 
-struct b2JointNode
+/// A joint edge is used to connect bodies and joints together
+/// in a joint graph where each body is a node and each joint
+/// is an edge. A joint edge belongs to a doubly linked list
+/// maintained in each attached body. Each joint has two joint
+/// nodes, one for each attached body.
+struct b2JointEdge
 {
-	b2Body* other;
-	b2Joint* joint;
-	b2JointNode* prev;
-	b2JointNode* next;
+	b2Body* other;			///< provides quick access to the other body attached.
+	b2Joint* joint;			///< the joint
+	b2JointEdge* prev;		///< the previous joint edge in the body's joint list
+	b2JointEdge* next;		///< the next joint edge in the body's joint list
 };
 
 /// Joint definitions are used to construct joints.
@@ -144,8 +149,8 @@ public:
 	b2JointType m_type;
 	b2Joint* m_prev;
 	b2Joint* m_next;
-	b2JointNode m_node1;
-	b2JointNode m_node2;
+	b2JointEdge m_node1;
+	b2JointEdge m_node2;
 	b2Body* m_body1;
 	b2Body* m_body2;
 

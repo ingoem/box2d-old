@@ -43,9 +43,9 @@ void b2DistanceJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Body* b2 = m_body2;
 
 	// Compute the effective mass matrix.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
-	m_u = b2->m_xf.position + r2 - b1->m_xf.position - r1;
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	m_u = b2->m_sweep.c + r2 - b1->m_sweep.c - r1;
 
 	// Handle singularity.
 	float32 length = m_u.Length();
@@ -83,8 +83,8 @@ void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep& step)
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
 	// Cdot = dot(u, v + cross(w, r))
 	b2Vec2 v1 = b1->m_linearVelocity + b2Cross(b1->m_angularVelocity, r1);
@@ -105,10 +105,10 @@ bool b2DistanceJoint::SolvePositionConstraints()
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->m_center);
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->m_center);
+	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
 
-	b2Vec2 d = b2->m_xf.position + r2 - b1->m_xf.position - r1;
+	b2Vec2 d = b2->m_sweep.c + r2 - b1->m_sweep.c - r1;
 
 	float32 length = d.Normalize();
 	float32 C = length - m_length;
@@ -118,13 +118,13 @@ bool b2DistanceJoint::SolvePositionConstraints()
 	m_u = d;
 	b2Vec2 P = impulse * m_u;
 
-	b1->m_xf.position -= b1->m_invMass * P;
-	b1->m_angle -= b1->m_invI * b2Cross(r1, P);
-	b2->m_xf.position += b2->m_invMass * P;
-	b2->m_angle += b2->m_invI * b2Cross(r2, P);
+	b1->m_sweep.c -= b1->m_invMass * P;
+	b1->m_sweep.a -= b1->m_invI * b2Cross(r1, P);
+	b2->m_sweep.c += b2->m_invMass * P;
+	b2->m_sweep.a += b2->m_invI * b2Cross(r2, P);
 
-	b1->m_xf.R.Set(b1->m_angle);
-	b2->m_xf.R.Set(b2->m_angle);
+	b1->SynchronizeTransform();
+	b2->SynchronizeTransform();
 
 	return b2Abs(C) < b2_linearSlop;
 }

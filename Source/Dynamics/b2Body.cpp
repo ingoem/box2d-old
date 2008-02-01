@@ -19,10 +19,8 @@
 #include "b2Body.h"
 #include "b2World.h"
 #include "Joints/b2Joint.h"
-//#include "Contacts/b2Contact.h"
 #include "../Collision/Shapes/b2Shape.h"
 
-// TODO_ERIN use Type and MassData.
 b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 {
 	b2Assert(world->m_lock == false);
@@ -36,7 +34,7 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	{
 		m_flags |= e_bulletFlag;
 	}
-	if (bd->preventRotation)
+	if (bd->fixedRotation)
 	{
 		m_flags |= e_fixedRotationFlag;
 	}
@@ -49,12 +47,15 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 		m_flags |= e_sleepFlag;
 	}
 
-	m_xf.position = bd->position;
-	m_angle = bd->angle;
-	m_xf.R.Set(m_angle);
-	m_position0 = m_xf.position;
-	m_angle0 = m_angle;
 	m_world = world;
+
+	m_xf.position = bd->position;
+	m_xf.R.Set(bd->angle);
+
+	m_sweep.localCenter = bd->massData.center;
+	m_sweep.t0 = 1.0f;
+	m_sweep.a0 = m_sweep.a = bd->angle;
+	m_sweep.c0 = m_sweep.c = b2Mul(m_xf, m_sweep.localCenter);
 
 	m_jointList = NULL;
 	m_contactList = NULL;
@@ -73,7 +74,6 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_sleepTime = 0.0f;
 	m_mass = bd->massData.mass;
 	m_I = bd->massData.I;
-	m_center = bd->massData.center;
 	m_invMass = 0.0f;
 	m_invI = 0.0f;
 
@@ -131,7 +131,12 @@ b2Shape* b2Body::Create(b2ShapeDef* def)
 	++m_shapeCount;
 
 	s->m_body = this;
+
+	// Add the shape to the world's broad-phase.
 	s->CreateProxy(m_world->m_broadPhase, m_xf);
+
+	// Compute the sweep radius for CCD.
+	s->UpdateSweepRadius(m_sweep.localCenter);
 
 	return s;
 }
@@ -144,7 +149,7 @@ void b2Body::Destroy(b2Shape* s)
 		return;
 	}
 
-	b2Assert(s->m_body == NULL);
+	b2Assert(s->m_body == this);
 	b2Assert(m_shapeCount > 0);
 	b2Shape** node = &m_shapeList;
 	bool found = false;
@@ -194,89 +199,72 @@ void b2Body::Destroy(b2Shape* s)
 // TODO_ERIN adjust linear velocity and torque to account for movement of center.
 void b2Body::SetMass(const b2MassData* massData)
 {
-	// Move center of mass position back to origin.
-	b2Vec2 shift;
-	shift = b2Mul(m_xf.R, m_center);
-	m_xf.position -= shift;
-	m_position0 -= shift;
-
-	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	b2Assert(m_world->m_lock == false);
+	if (m_world->m_lock == true)
 	{
-		s->ApplyOffset(m_center);
+		return;
 	}
 
 	m_mass = massData->mass;
 	m_I = massData->I;
-	m_center = massData->center;
 
 	if (m_mass > 0.0f)
 	{
-		// Reposition the body origin onto the center of mass.
-		m_I -= m_mass * b2Dot(m_center, m_center);
-		b2Assert(m_I > 0.0f);
-
 		m_invMass = 1.0f / m_mass;
-		m_invI = 1.0f / m_I;
 	}
 	else
 	{
 		m_invMass = 0.0f;
-		m_invI = 0.0f;
 	}
 
-	if (m_flags & e_fixedRotationFlag)
+	if (m_I > 0.0f && (m_flags & e_fixedRotationFlag) == 0)
+	{
+		m_invI = 1.0f / m_I;
+	}
+	else
 	{
 		m_I = 0.0f;
 		m_invI = 0.0f;
 	}
 
-	// Move to new center of mass position.
-	shift = b2Mul(m_xf.R, m_center);
-	m_xf.position += shift;
-	m_position0 += shift;
+	// Move center of mass.
+	m_sweep.localCenter = massData->center;
+	m_sweep.c0 = m_sweep.c = b2Mul(m_xf, m_sweep.localCenter);
 
+	// Update the sweep radii of all child shapes.
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		s->ApplyOffset(-m_center);
+		s->UpdateSweepRadius(m_sweep.localCenter);
 	}
 }
 
 // TODO_ERIN adjust linear velocity and torque to account for movement of center.
 void b2Body::SetMassFromShapes()
 {
-	// Move center of mass position back to origin.
-	b2Vec2 shift;
-	shift = b2Mul(m_xf.R, m_center);
-	m_xf.position -= shift;
-	m_position0 -= shift;
-
-	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	b2Assert(m_world->m_lock == false);
+	if (m_world->m_lock == true)
 	{
-		s->ApplyOffset(m_center);
+		return;
 	}
 
+	// Compute mass data from shapes. Each shape has its own density.
 	m_mass = 0.0f;
 	m_I = 0.0f;
-	m_center.SetZero();
+	b2Vec2 center = b2Vec2_zero;
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
 		b2MassData massData;
 		s->ComputeMass(&massData);
 		m_mass += massData.mass;
-		m_center += massData.mass * massData.center;
+		center += massData.mass * massData.center;
 		m_I += massData.I;
 	}
 
 	// Compute center of mass, and shift the origin to the COM.
 	if (m_mass > 0.0f)
 	{
-		m_center *= 1.0f / m_mass;
-
-		m_I -= m_mass * b2Dot(m_center, m_center);
-		b2Assert(m_I > 0.0f);
-
 		m_invMass = 1.0f / m_mass;
-		m_invI = 1.0f / m_I;
+		center *= m_invMass;
 	}
 	else
 	{
@@ -284,24 +272,31 @@ void b2Body::SetMassFromShapes()
 		m_invI = 0.0f;
 	}
 
-	if (m_flags & e_fixedRotationFlag)
+	if (m_I > 0.0f && (m_flags & e_fixedRotationFlag) == 0)
+	{
+		// Center the inertia about the center of mass.
+		m_I -= m_mass * b2Dot(center, center);
+		b2Assert(m_I > 0.0f);
+		m_invI = 1.0f / m_I;
+	}
+	else
 	{
 		m_I = 0.0f;
 		m_invI = 0.0f;
 	}
 
-	// Move to new center of mass position.
-	shift = b2Mul(m_xf.R, m_center);
-	m_xf.position += shift;
-	m_position0 += shift;
+	// Move center of mass.
+	m_sweep.localCenter = center;
+	m_sweep.c0 = m_sweep.c = b2Mul(m_xf, m_sweep.localCenter);
 
+	// Update the sweep radii of all child shapes.
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		s->ApplyOffset(-m_center);
+		s->UpdateSweepRadius(m_sweep.localCenter);
 	}
 }
 
-bool b2Body::SetOriginPosition(const b2Vec2& position, float angle)
+bool b2Body::SetXForm(const b2Vec2& position, float angle)
 {
 	b2Assert(m_world->m_lock == false);
 	if (m_world->m_lock == true)
@@ -314,12 +309,11 @@ bool b2Body::SetOriginPosition(const b2Vec2& position, float angle)
 		return false;
 	}
 
-	m_angle = angle;
-	m_xf.R.Set(m_angle);
-	m_xf.position = position + b2Mul(m_xf.R, m_center);
+	m_xf.R.Set(angle);
+	m_xf.position = position;
 
-	m_position0 = m_xf.position;
-	m_angle0 = m_angle;
+	m_sweep.c0 = m_sweep.c = b2Mul(m_xf, m_sweep.localCenter);
+	m_sweep.a0 = m_sweep.a = angle;
 
 	bool freeze = false;
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
@@ -354,12 +348,14 @@ bool b2Body::SetOriginPosition(const b2Vec2& position, float angle)
 
 bool b2Body::SynchronizeShapes()
 {
-	b2XForm xf0(m_position0, b2Mat22(m_angle0));
+	b2XForm xf1;
+	xf1.R.Set(m_sweep.a0);
+	xf1.position = m_sweep.c0 - b2Mul(xf1.R, m_sweep.localCenter);
 
 	bool inRange = true;
 	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
 	{
-		inRange = s->Synchronize(m_world->m_broadPhase, xf0, m_xf);
+		inRange = s->Synchronize(m_world->m_broadPhase, xf1, m_xf);
 		if (inRange == false)
 		{
 			break;

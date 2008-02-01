@@ -33,14 +33,6 @@ class b2ContactListener;
 typedef b2Contact* b2ContactCreateFcn(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator);
 typedef void b2ContactDestroyFcn(b2Contact* contact, b2BlockAllocator* allocator);
 
-struct b2ContactNode
-{
-	b2Body* other;
-	b2Contact* contact;
-	b2ContactNode* prev;
-	b2ContactNode* next;
-};
-
 struct b2ContactRegister
 {
 	b2ContactCreateFcn* createFcn;
@@ -48,7 +40,20 @@ struct b2ContactRegister
 	bool primary;
 };
 
-/// This structure is used to report contact results.
+/// A contact edge is used to connect bodies and contacts together
+/// in a contact graph where each body is a node and each contact
+/// is an edge. A contact edge belongs to a doubly linked list
+/// maintained in each attached body. Each contact has two contact
+/// nodes, one for each attached body.
+struct b2ContactEdge
+{
+	b2Body* other;			///< provides quick access to the other body attached.
+	b2Contact* contact;		///< the contact
+	b2ContactEdge* prev;	///< the previous contact edge in the body's contact list
+	b2ContactEdge* next;	///< the next contact edge in the body's contact list
+};
+
+/// This structure is used to report contact points.
 struct b2ContactPoint
 {
 	b2Shape* shape1;		///< the first shape
@@ -124,8 +129,8 @@ public:
 	b2Contact* m_next;
 
 	// Nodes for connecting bodies.
-	b2ContactNode m_node1;
-	b2ContactNode m_node2;
+	b2ContactEdge m_node1;
+	b2ContactEdge m_node2;
 
 	b2Shape* m_shape1;
 	b2Shape* m_shape2;

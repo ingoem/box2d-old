@@ -128,10 +128,10 @@ void b2World::Destroy(b2Body* b)
 	}
 
 	// Delete the attached joints.
-	b2JointNode* jn = b->m_jointList;
+	b2JointEdge* jn = b->m_jointList;
 	while (jn)
 	{
-		b2JointNode* jn0 = jn;
+		b2JointEdge* jn0 = jn;
 		jn = jn->next;
 
 		if (m_destructionListener)
@@ -385,7 +385,7 @@ void b2World::Solve(const b2TimeStep& step)
 			}
 
 			// Search all contacts connected to this body.
-			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
+			for (b2ContactEdge* cn = b->m_contactList; cn; cn = cn->next)
 			{
 				// Has this contact already been added to an island?
 				if (cn->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_nonSolidFlag))
@@ -416,7 +416,7 @@ void b2World::Solve(const b2TimeStep& step)
 			}
 
 			// Search all joints connect to this body.
-			for (b2JointNode* jn = b->m_jointList; jn; jn = jn->next)
+			for (b2JointEdge* jn = b->m_jointList; jn; jn = jn->next)
 			{
 				if (jn->joint->m_islandFlag == true)
 				{
@@ -492,7 +492,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
 	{
 		b->m_flags &= ~b2Body::e_islandFlag;
-		b->m_t = 0.0f;
+		b->m_sweep.t0 = 0.0f;
 	}
 
 	for (b2Contact* c = m_contactList; c; c = c->m_next)
@@ -536,21 +536,31 @@ void b2World::SolveTOI(const b2TimeStep& step)
 					continue;
 				}
 
-				float32 t1 = b1->m_t;
-				float32 t2 = b2->m_t;
-				float32 t = b2Max(t1, t2);
-				b2Assert(t < 1.0f);
+				// Put the sweeps onto the same time interval.
+				float32 t0 = b1->m_sweep.t0;
+				
+				if (b1->m_sweep.t0 < b2->m_sweep.t0)
+				{
+					t0 = b2->m_sweep.t0;
+					b1->m_sweep.Advance(t0);
+				}
+				else if (b2->m_sweep.t0 < b1->m_sweep.t0)
+				{
+					t0 = b1->m_sweep.t0;
+					b2->m_sweep.Advance(t0);
+				}
 
-				b2Sweep sweep1, sweep2;
-				b1->GetSweep(&sweep1, t);
-				b2->GetSweep(&sweep2, t);
+				b2Assert(t0 < 1.0f);
 
-				toi = b2TimeOfImpact(c->m_shape1, sweep1, c->m_shape2, sweep2, 1.0f);
+				// Compute the time of impact.
+				toi = b2TimeOfImpact(c->m_shape1, b1->m_sweep, c->m_shape2, b2->m_sweep);
 				b2Assert(0.0f <= toi && toi <= 1.0f);
+
 				if (toi > 0.0f && toi < 1.0f)
 				{
-					toi = b2Min(t + toi * (1.0f - t), 1.0f);
+					toi = b2Min((1.0f - toi) * t0 + toi, 1.0f);
 				}
+
 
 				c->m_toi = toi;
 				c->m_flags |= b2Contact::e_toiFlag;
@@ -570,13 +580,13 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			break;
 		}
 
-		// Teleport the bodies to the TOI.
+		// Advance the bodies to the TOI.
 		b2Shape* s1 = minContact->GetShape1();
 		b2Shape* s2 = minContact->GetShape2();
 		b2Body* b1 = s1->GetBody();
 		b2Body* b2 = s2->GetBody();
-		b1->SetStepFraction(minTOI);
-		b2->SetStepFraction(minTOI);
+		b1->Advance(minTOI);
+		b2->Advance(minTOI);
 
 		// The TOI contact likely has some new contact points.
 		minContact->Update(m_contactListener);
@@ -620,7 +630,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			}
 
 			// Search all contacts connected to this body.
-			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
+			for (b2ContactEdge* cn = b->m_contactList; cn; cn = cn->next)
 			{
 				// Does the TOI island still have space for contacts?
 				if (island.m_contactCount == island.m_contactCapacity)
@@ -655,7 +665,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				// March forward, this can do no harm since this is the min TOI.
 				if (other->IsStatic() == false)
 				{
-					other->SetStepFraction(minTOI);
+					other->Advance(minTOI);
 					other->WakeUp();
 				}
 
@@ -667,7 +677,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 
 		b2TimeStep subStep;
 		subStep.dt = (1.0f - minTOI) * step.dt;
-		b2Assert(subStep.dt > 0.0f);
+		b2Assert(subStep.dt > FLT_EPSILON);
 		subStep.inv_dt = 1.0f / subStep.dt;
 		subStep.maxIterations = step.maxIterations;
 
@@ -697,8 +707,9 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				m_boundaryListener->Violation(b);
 			}
 
-			// Invalidate all contact TOIs associated with this body.
-			for (b2ContactNode* cn = b->m_contactList; cn; cn = cn->next)
+			// Invalidate all contact TOIs associated with this body. Some of these
+			// may not be in the island because they were not touching.
+			for (b2ContactEdge* cn = b->m_contactList; cn; cn = cn->next)
 			{
 				cn->contact->m_flags &= ~b2Contact::e_toiFlag;
 			}

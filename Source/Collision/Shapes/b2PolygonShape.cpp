@@ -204,7 +204,6 @@ b2PolygonShape::b2PolygonShape(const b2ShapeDef* def)
 
 	// Create core polygon shape by shifting edges inward.
 	// Also compute the min/max radius for CCD.
-	m_maxRadius = -FLT_MAX;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
 		int32 i1 = i - 1 >= 0 ? i - 1 : m_vertexCount - 1;
@@ -228,26 +227,24 @@ b2PolygonShape::b2PolygonShape(const b2ShapeDef* def)
 		A.col1.x = n1.x; A.col2.x = n1.y;
 		A.col1.y = n2.x; A.col2.y = n2.y;
 		m_coreVertices[i] = A.Solve(d) + m_centroid;
-
-		m_maxRadius = b2Max(m_maxRadius, m_coreVertices[i].Length());
 	}
 }
 
-void b2PolygonShape::ApplyOffset(const b2Vec2& offset)
+void b2PolygonShape::UpdateSweepRadius(const b2Vec2& center)
 {
+	// Update the sweep radius (maximum radius) as measured from
+	// a local center point.
+	m_sweepRadius = 0.0f;
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
-		m_vertices[i] += offset;
-		m_coreVertices[i] += offset;
+		b2Vec2 d = m_coreVertices[i] - center;
+		m_sweepRadius = b2Max(m_sweepRadius, d.Length());
 	}
-
-	m_centroid += offset;
-	m_obb.center += offset;
 }
 
-bool b2PolygonShape::TestPoint(const b2XForm& transform, const b2Vec2& p) const
+bool b2PolygonShape::TestPoint(const b2XForm& xf, const b2Vec2& p) const
 {
-	b2Vec2 pLocal = b2MulT(transform.R, p - transform.position);
+	b2Vec2 pLocal = b2MulT(xf.R, p - xf.position);
 
 	for (int32 i = 0; i < m_vertexCount; ++i)
 	{
@@ -262,7 +259,7 @@ bool b2PolygonShape::TestPoint(const b2XForm& transform, const b2Vec2& p) const
 }
 
 bool b2PolygonShape::TestSegment(
-	const b2XForm& transform,
+	const b2XForm& xf,
 	float32* lambda,
 	b2Vec2* normal,
 	const b2Segment& segment,
@@ -270,8 +267,8 @@ bool b2PolygonShape::TestSegment(
 {
 	float32 lower = 0.0f, upper = maxLambda;
 
-	b2Vec2 p1 = b2MulT(transform.R, segment.p1 - transform.position);
-	b2Vec2 p2 = b2MulT(transform.R, segment.p2 - transform.position);
+	b2Vec2 p1 = b2MulT(xf.R, segment.p1 - xf.position);
+	b2Vec2 p2 = b2MulT(xf.R, segment.p2 - xf.position);
 	b2Vec2 d = p2 - p1;
 	int32 index = -1;
 
@@ -306,20 +303,19 @@ bool b2PolygonShape::TestSegment(
 	if (index >= 0)
 	{
 		*lambda = lower;
-		*normal = b2Mul(transform.R, m_normals[index]);
+		*normal = b2Mul(xf.R, m_normals[index]);
 		return true;
 	}
 
 	return false;
-
 }
 
-void b2PolygonShape::ComputeAABB(b2AABB* aabb, const b2XForm& transform) const
+void b2PolygonShape::ComputeAABB(b2AABB* aabb, const b2XForm& xf) const
 {
-	b2Mat22 R = b2Mul(transform.R, m_obb.R);
+	b2Mat22 R = b2Mul(xf.R, m_obb.R);
 	b2Mat22 absR = b2Abs(R);
 	b2Vec2 h = b2Mul(absR, m_obb.extents);
-	b2Vec2 position = transform.position + b2Mul(transform.R, m_obb.center);
+	b2Vec2 position = xf.position + b2Mul(xf.R, m_obb.center);
 	aabb->lowerBound = position - h;
 	aabb->upperBound = position + h;
 }

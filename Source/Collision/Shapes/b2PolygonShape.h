@@ -96,7 +96,7 @@ public:
 	
 	b2PolygonShape(const b2ShapeDef* def);
 
-	void ApplyOffset(const b2Vec2& offset);
+	void UpdateSweepRadius(const b2Vec2& center);
 
 	b2Vec2 GetFirstVertex(const b2XForm& xf) const;
 	b2Vec2 Centroid(const b2XForm& xf) const;

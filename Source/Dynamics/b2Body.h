@@ -28,8 +28,8 @@
 class b2Joint;
 class b2Contact;
 class b2World;
-struct b2JointNode;
-struct b2ContactNode;
+struct b2JointEdge;
+struct b2ContactEdge;
 
 /// A body definition holds all the data needed to construct a rigid body.
 /// You can safely re-use body definitions.
@@ -56,7 +56,7 @@ struct b2BodyDef
 		angularDamping = 0.0f;
 		allowSleep = true;
 		isSleeping = false;
-		preventRotation = false;
+		fixedRotation = false;
 		isBullet = false;
 	}
 
@@ -98,7 +98,7 @@ struct b2BodyDef
 	bool isSleeping;
 
 	/// Should this body be prevented from rotating? Useful for characters.
-	bool preventRotation;
+	bool fixedRotation;
 
 	/// Is this a fast moving body that should be prevented from tunneling through
 	/// other moving bodies? Note that all bodies are prevented from tunneling through
@@ -125,6 +125,7 @@ public:
 
 	/// Set the mass properties. Note that this changes the center of mass position.
 	/// If you are not sure how to compute mass properties, use SetMassFromShapes.
+	/// The inertia tensor is assumed to be relative to the center of mass.
 	/// @param massData the mass properties.
 	void SetMass(const b2MassData* massData);
 
@@ -140,26 +141,25 @@ public:
 	/// @param angle the new world rotation angle of the body in radians.
 	/// @return false if the movement put a shape outside the world. In this case the
 	/// body is automatically frozen.
-	bool SetOriginPosition(const b2Vec2& position, float32 angle);
+	bool SetXForm(const b2Vec2& position, float32 angle);
 
-	/// Get the position of the body's origin. The body's origin does not
-	/// necessarily coincide with the center of mass. It depends on how the
-	/// shapes are created.
+	/// Get the body transform for the body's origin.
+	/// @return the world transform of the body's origin.
+	const b2XForm& GetXForm() const;
+
+	/// Get the world body origin position.
 	/// @return the world position of the body's origin.
-	b2Vec2 GetOriginPosition() const;
+	const b2Vec2& GetPosition() const;
 
 	/// Get the angle in radians.
 	/// @return the current world rotation angle in radians.
 	float32 GetAngle() const;
 
-	/// Get the rotation matrix.
-	/// @return the world rotation matrix.
-	const b2Mat22& GetRotationMatrix() const;
+	/// Get the world position of the center of mass.
+	const b2Vec2& GetWorldCenter() const;
 
-	/// Get the body's transform, which includes the center of mass position.
-	/// The body's center of mass does not necessarily coincide with the body's origin.
-	/// @return the world transform of the center of mass frame.
-	const b2XForm& GetXForm() const;
+	/// Get the local position of the center of mass.
+	const b2Vec2& GetLocalCenter() const;
 
 	/// Set the linear velocity of the center of mass.
 	/// @param v the new linear velocity of the center of mass.
@@ -177,14 +177,14 @@ public:
 	/// @return the angular velocity in radians/second.
 	float32 GetAngularVelocity() const;
 
-	/// Apply a force at a world point. Additive. If the force is not
+	/// Apply a force at a world point. If the force is not
 	/// applied at the center of mass, it will generate a torque and
 	/// affect the angular velocity. This wakes up the body.
 	/// @param force the world force vector, usually in Newtons (N).
 	/// @param point the world position of the point of application.
 	void ApplyForce(const b2Vec2& force, const b2Vec2& point);
 
-	/// Apply a torque. Additive. This affects the angular velocity
+	/// Apply a torque. This affects the angular velocity
 	/// without affecting the linear velocity of the center of mass.
 	/// This wakes up the body.
 	/// @param torque about the z-axis (out of the screen), usually in N-m.
@@ -250,10 +250,10 @@ public:
 	b2Shape* GetShapeList();
 
 	/// Get the list of all joints attached to this body.
-	b2JointNode* GetJointList();
+	b2JointEdge* GetJointList();
 
 	/// Get the list of all contacts attached to this body.
-	b2ContactNode* GetContactList();
+	b2ContactEdge* GetContactList();
 
 	/// Get the next body in the world's body list.
 	b2Body* GetNext();
@@ -282,35 +282,25 @@ public:
 
 	bool SynchronizeShapes();
 
+	void SynchronizeTransform();
+
 	// This is used to prevent connected bodies from colliding.
 	// It may lie, depending on the collideConnected flag.
 	bool IsConnected(const b2Body* other) const;
 
-	void GetSweep(b2Sweep* sweep) const;
-	void GetSweep(b2Sweep* sweep, float32 t) const;
-
-	void SetTOI(float32 toi);
-	float32 GetTOI() const;
-
-	void SetStepFraction(float32 t);
+	void Advance(float32 t);
 
 	uint32 m_flags;
 
-	b2XForm m_xf;	// center of mass transform
-	float32 m_angle;
+	b2XForm m_xf;		// the body origin transform
 
-	// Conservative advancement data.
-	b2Vec2 m_position0;
-	float32 m_angle0;
-	float32 m_t;
+	b2Sweep m_sweep;	// the swept motion for CCD
 
 	b2Vec2 m_linearVelocity;
 	float32 m_angularVelocity;
 
 	b2Vec2 m_force;
 	float32 m_torque;
-
-	b2Vec2 m_center;	// local vector from client origin to center of mass
 
 	b2World* m_world;
 	b2Body* m_prev;
@@ -319,8 +309,8 @@ public:
 	b2Shape* m_shapeList;
 	int32 m_shapeCount;
 
-	b2JointNode* m_jointList;
-	b2ContactNode* m_contactList;
+	b2JointEdge* m_jointList;
+	b2ContactEdge* m_contactList;
 
 	float32 m_mass, m_invMass;
 	float32 m_I, m_invI;
@@ -333,24 +323,29 @@ public:
 	void* m_userData;
 };
 
-inline b2Vec2 b2Body::GetOriginPosition() const
+inline const b2XForm& b2Body::GetXForm() const
 {
-	return b2Mul(m_xf, -m_center);
+	return m_xf;
 }
 
-inline const b2Mat22& b2Body::GetRotationMatrix() const
+inline const b2Vec2& b2Body::GetPosition() const
 {
-	return m_xf.R;
+	return m_xf.position;
 }
 
 inline float32 b2Body::GetAngle() const
 {
-	return m_angle;
+	return m_sweep.a;
 }
 
-inline const b2XForm& b2Body::GetXForm() const
+inline const b2Vec2& b2Body::GetWorldCenter() const
 {
-	return m_xf;
+	return m_sweep.c;
+}
+
+inline const b2Vec2& b2Body::GetLocalCenter() const
+{
+	return m_sweep.localCenter;
 }
 
 inline void b2Body::SetLinearVelocity(const b2Vec2& v)
@@ -385,7 +380,7 @@ inline float32 b2Body::GetInertia() const
 
 inline b2Vec2 b2Body::GetWorldPoint(const b2Vec2& localPoint)
 {
-	return b2Mul(m_xf, localPoint - m_center);
+	return b2Mul(m_xf, localPoint);
 }
 
 inline b2Vec2 b2Body::GetWorldVector(const b2Vec2& localVector)
@@ -395,7 +390,7 @@ inline b2Vec2 b2Body::GetWorldVector(const b2Vec2& localVector)
 
 inline b2Vec2 b2Body::GetLocalPoint(const b2Vec2& worldPoint)
 {
-	return b2MulT(m_xf, worldPoint) + m_center;
+	return b2MulT(m_xf, worldPoint);
 }
 
 inline b2Vec2 b2Body::GetLocalVector(const b2Vec2& worldVector)
@@ -459,12 +454,12 @@ inline b2Shape* b2Body::GetShapeList()
 	return m_shapeList;
 }
 
-inline b2ContactNode* b2Body::GetContactList()
+inline b2ContactEdge* b2Body::GetContactList()
 {
 	return m_contactList;
 }
 
-inline b2JointNode* b2Body::GetJointList()
+inline b2JointEdge* b2Body::GetJointList()
 {
 	return m_jointList;
 }
@@ -481,7 +476,7 @@ inline void* b2Body::GetUserData()
 
 inline bool b2Body::IsConnected(const b2Body* other) const
 {
-	for (b2JointNode* jn = m_jointList; jn; jn = jn->next)
+	for (b2JointEdge* jn = m_jointList; jn; jn = jn->next)
 	{
 		if (jn->other == other)
 			return jn->joint->m_collideConnected == false;
@@ -494,7 +489,7 @@ inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point)
 {
 	WakeUp();
 	m_force += force;
-	m_torque += b2Cross(point - m_xf.position, force);
+	m_torque += b2Cross(point - m_sweep.c, force);
 }
 
 inline void b2Body::ApplyTorque(float32 torque)
@@ -507,51 +502,22 @@ inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
 {
 	WakeUp();
 	m_linearVelocity += m_invMass * impulse;
-	m_angularVelocity += m_invI * b2Cross(point - m_xf.position, impulse);
+	m_angularVelocity += m_invI * b2Cross(point - m_sweep.c, impulse);
 }
 
-inline void b2Body::GetSweep(b2Sweep* sweep) const
+inline void b2Body::SynchronizeTransform()
 {
-	sweep->position = m_position0;
-	sweep->angle = m_angle0;
-	sweep->velocity = m_xf.position - m_position0;
-	sweep->omega = m_angle - m_angle0;
+	m_xf.R.Set(m_sweep.a);
+	m_xf.position = m_sweep.c - b2Mul(m_xf.R, m_sweep.localCenter);
 }
 
-inline void b2Body::GetSweep(b2Sweep* sweep, float32 t) const
+inline void b2Body::Advance(float32 t)
 {
-	float32 dt = t - m_t;
-	b2Assert(dt >= 0.0f);
-
-	b2Vec2 p0 = m_position0 + dt * (m_xf.position - m_position0);
-	float32 a0 = m_angle0 + dt * (m_angle - m_angle0);
-
-	sweep->position = p0;
-	sweep->angle = a0;
-	sweep->velocity = m_xf.position - p0;
-	sweep->omega = m_angle - a0;
-}
-
-inline void b2Body::SetTOI(float32 toi)
-{
-	m_t = toi;
-}
-
-inline float32 b2Body::GetTOI() const
-{
-	return m_t;
-}
-
-inline void b2Body::SetStepFraction(float32 t)
-{
-	b2Assert(m_t < 1.0f);
-	float32 s = (t - m_t) / (1.0f - m_t);
-	m_position0 += s * (m_xf.position - m_position0);
-	m_angle0 += s * (m_angle - m_angle0);
-	m_xf.position = m_position0;
-	m_angle = m_angle0;
-	m_xf.R.Set(m_angle);
-	m_t = t;
+	// Advance to the new safe time.
+	m_sweep.Advance(t);
+	m_sweep.c = m_sweep.c0;
+	m_sweep.a = m_sweep.a0;
+	SynchronizeTransform();
 }
 
 #endif

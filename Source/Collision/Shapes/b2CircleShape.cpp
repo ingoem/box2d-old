@@ -27,13 +27,14 @@ b2CircleShape::b2CircleShape(const b2ShapeDef* def)
 	m_type = e_circleShape;
 	m_localPosition = circleDef->localPosition;
 	m_radius = circleDef->radius;
-	m_maxRadius = m_localPosition.Length() + m_radius;
 }
 
-void b2CircleShape::ApplyOffset(const b2Vec2& offset)
+void b2CircleShape::UpdateSweepRadius(const b2Vec2& center)
 {
-	m_localPosition += offset;
-	m_maxRadius = m_localPosition.Length() + m_radius;
+	// Update the sweep radius (maximum radius) as measured from
+	// a local center point.
+	b2Vec2 d = m_localPosition - center;
+	m_sweepRadius = d.Length() + m_radius - b2_toiSlop;
 }
 
 bool b2CircleShape::TestPoint(const b2XForm& transform, const b2Vec2& p) const

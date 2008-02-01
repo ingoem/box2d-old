@@ -205,6 +205,27 @@ struct b2XForm
 	b2Mat22 R;
 };
 
+/// This describes the motion of a body/shape for TOI computation.
+/// Shapes are defined with respect to the body origin, which may
+/// no coincide with the center of mass. However, to support dynamics
+/// we must interpolate the center of mass position.
+struct b2Sweep
+{
+	/// Get the interpolated transform at a specific time.
+	/// @param t the normalized time in [0,1].
+	void GetXForm(b2XForm* xf, float32 t) const;
+
+	/// Advance the sweep forward, yielding a new initial state.
+	/// @param t the new initial time.
+	void Advance(float32 t);
+
+	b2Vec2 localCenter;	///< local center of mass position
+	b2Vec2 c0, c;		///< center world positions
+	float32 a0, a;		///< world angles
+	float32 t0;			///< time interval = [t0,1], where t0 is in [0,1]
+};
+
+
 extern const b2Vec2 b2Vec2_zero;
 extern const b2Mat22 b2Mat22_identity;
 extern const b2XForm b2XForm_identity;

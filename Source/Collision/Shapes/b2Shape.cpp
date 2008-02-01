@@ -73,13 +73,13 @@ b2Shape::b2Shape(const b2ShapeDef* def)
 	m_restitution = def->restitution;
 	m_density = def->density;
 	m_body = NULL;
+	m_sweepRadius = 0.0f;
 
 	m_bodyNext = NULL;
 	m_worldPrev = NULL;
 	m_worldNext = NULL;
 
 	m_proxyId = b2_nullProxy;
-	m_maxRadius = 0.0f;
 
 	m_categoryBits = def->categoryBits;
 	m_maskBits = def->maskBits;

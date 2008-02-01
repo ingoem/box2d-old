@@ -70,7 +70,7 @@ public:
 
 	b2CircleShape(const b2ShapeDef* def);
 
-	void ApplyOffset(const b2Vec2& offset);
+	void UpdateSweepRadius(const b2Vec2& center);
 
 	// Local position in parent body
 	b2Vec2 m_localPosition;
