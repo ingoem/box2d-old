@@ -20,7 +20,7 @@
 #include "b2CircleShape.h"
 #include "b2PolygonShape.h"
 #include "../b2Collision.h"
-#include "../b2Broadphase.h"
+#include "../b2BroadPhase.h"
 #include "../../Common/b2BlockAllocator.h"
 
 #include <new>

@@ -115,7 +115,7 @@ struct b2Color
 class b2DebugDraw
 {
 public:
-	b2DebugDraw::b2DebugDraw();
+	b2DebugDraw();
 
 	virtual ~b2DebugDraw() {}
 
