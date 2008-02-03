@@ -41,12 +41,11 @@ public:
 			b2PolygonDef sd;
 			sd.SetAsBox(1.0f, 1.0f);
 			sd.density = 0.0f;
-			m_shape1 = m_world->Create(&sd);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			body->Create(m_shape1);
 			m_body1 = m_world->Create(&bd);
+			m_shape1 = m_body1->Create(&sd);
 		}
 #endif
 
@@ -68,17 +67,17 @@ public:
 			sd.vertices[2].Set(0.0f, 15.0f);
 			sd.density = 1.0f;
 #endif
-			m_shape2 = m_world->Create(&sd);
-
 			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
 #if 0
 			bd.position.Set(-48.377853f, 0.49244255f);
 			bd.rotation = 90.475891f;
 #else
 			bd.position.Set(0.0f, 10.0f);
 #endif
-			body->Create(m_shape2);
 			m_body2 = m_world->Create(&bd);
+			m_shape2 = m_body2->Create(&sd);
+			m_body2->SetMassFromShapes();
 		}
 
 		m_world->m_gravity.Set(0.0f, 0.0f);
@@ -97,23 +96,9 @@ public:
 
 	void Step(Settings* settings)
 	{
-		B2_NOT_USED(settings);
-
-		uint32 flags = 0;
-		flags += settings->drawShapes			* b2DebugDraw::e_shapeBit;
-		flags += settings->drawJoints			* b2DebugDraw::e_jointBit;
-		flags += settings->drawCoreShapes		* b2DebugDraw::e_coreShapeBit;
-		flags += settings->drawAABBs			* b2DebugDraw::e_aabbBit;
-		flags += settings->drawOBBs				* b2DebugDraw::e_obbBit;
-		flags += settings->drawPairs			* b2DebugDraw::e_pairBit;
-		flags += settings->drawContactPoints	* b2DebugDraw::e_contactPointBit;
-		flags += settings->drawContactNormals	* b2DebugDraw::e_contactNormalBit;
-		flags += settings->drawContactForces	* b2DebugDraw::e_contactForceBit;
-		flags += settings->drawFrictionForces	* b2DebugDraw::e_frictionForceBit;
-		flags += settings->drawCOMs				* b2DebugDraw::e_centerOfMassBit;
-		m_debugDraw.SetFlags(flags);
-
-		m_world->Step(0.0f, 0);
+		settings->pause = 1;
+		Test::Step(settings);
+		settings->pause = 0;
 
 		b2Vec2 x1, x2;
 		float32 distance = b2Distance(&x1, &x2, m_shape1, m_body1->GetXForm(), m_shape2, m_body2->GetXForm());
@@ -143,40 +128,37 @@ public:
 
 	void Keyboard(unsigned char key)
 	{
+		b2Vec2 p = m_body2->GetPosition();
+		float32 a = m_body2->GetAngle();
+
 		switch (key)
 		{
 		case 'a':
-			m_body2->m_xf.position.x -= 0.1f;
-			m_body2->SynchronizeShapes();
+			p.x -= 0.1f;
 			break;
 
 		case 'd':
-			m_body2->m_xf.position.x += 0.1f;
-			m_body2->SynchronizeShapes();
+			p.x += 0.1f;
 			break;
 
 		case 's':
-			m_body2->m_xf.position.y -= 0.1f;
-			m_body2->SynchronizeShapes();
+			p.y -= 0.1f;
 			break;
 
 		case 'w':
-			m_body2->m_xf.position.y += 0.1f;
-			m_body2->SynchronizeShapes();
+			p.y += 0.1f;
 			break;
 
 		case 'q':
-			m_body2->m_angle += 0.1f * b2_pi;
-			m_body2->m_xf.R.Set(m_body2->m_angle);
-			m_body2->SynchronizeShapes();
+			a += 0.1f * b2_pi;
 			break;
 
 		case 'e':
-			m_body2->m_angle -= 0.1f * b2_pi;
-			m_body2->m_xf.R.Set(m_body2->m_angle);
-			m_body2->SynchronizeShapes();
+			a -= 0.1f * b2_pi;
 			break;
 		}
+
+		m_body2->SetXForm(p, a);
 	}
 
 	b2Body* m_body1;

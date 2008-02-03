@@ -29,37 +29,40 @@ public:
 		b2Body* ground = NULL;
 		{
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
 			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->Create(&sd);
 			ground = m_world->Create(&bd);
+			ground->Create(&sd);
 		}
 
 		{
 			// Define crank.
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
 			sd.SetAsBox(0.5f, 2.0f);
 			sd.density = 1.0f;
-
-			b2BodyDef bd;
-			body->Create(&sd);
 
 			b2RevoluteJointDef rjd;
 
 			b2Body* prevBody = ground;
 
+			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(0.0f, 7.0f);
 			b2Body* body = m_world->Create(&bd);
+			body->Create(&sd);
+			body->SetMassFromShapes();
 
-			rjd.anchorPoint.Set(0.0f, 5.0f);
+			b2Vec2 anchor;
+			anchor.Set(0.0f, 5.0f);
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
+			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
+			rjd.localAnchor2 = body->GetLocalPoint(anchor);
+			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 			rjd.motorSpeed = 1.0f * b2_pi;
-			rjd.motorTorque = 10000.0f;
+			rjd.maxMotorTorque = 10000.0f;
 			rjd.enableMotor = true;
 			m_joint1 = (b2RevoluteJoint*)m_world->Create(&rjd);
 
@@ -69,10 +72,15 @@ public:
 			sd.SetAsBox(0.5f, 4.0f);
 			bd.position.Set(0.0f, 13.0f);
 			body = m_world->Create(&bd);
+			body->Create(&sd);
+			body->SetMassFromShapes();
 
-			rjd.anchorPoint.Set(0.0f, 9.0f);
+			anchor.Set(0.0f, 9.0f);
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
+			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
+			rjd.localAnchor2 = body->GetLocalPoint(anchor);
+			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 			rjd.enableMotor = false;
 			m_world->Create(&rjd);
 
@@ -82,19 +90,30 @@ public:
 			sd.SetAsBox(1.5f, 1.5f);
 			bd.position.Set(0.0f, 17.0f);
 			body = m_world->Create(&bd);
+			body->Create(&sd);
+			body->SetMassFromShapes();
 
-			rjd.anchorPoint.Set(0.0f, 17.0f);
+			anchor.Set(0.0f, 17.0f);
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
+			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
+			rjd.localAnchor2 = body->GetLocalPoint(anchor);
+			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 			m_world->Create(&rjd);
 
 			b2PrismaticJointDef pjd;
-			pjd.anchorPoint.Set(0.0f, 17.0f);
+			anchor.Set(0.0f, 17.0f);
 			pjd.body1 = ground;
 			pjd.body2 = body;
-			pjd.axis.Set(0.0f, 1.0f);
+			pjd.localAnchor1 = ground->GetLocalPoint(anchor);
+			pjd.localAnchor2 = body->GetLocalPoint(anchor);
+			pjd.referenceAngle = body->GetAngle() - ground->GetAngle();
+
+			b2Vec2 axis;
+			axis.Set(0.0f, 1.0f);
+			pjd.localAxis1 = ground->GetLocalVector(axis);
 			pjd.motorSpeed = 0.0f;		// joint friction
-			pjd.motorForce = 1000.0f;
+			pjd.maxMotorForce = 1000.0f;
 			pjd.enableMotor = true;
 
 			m_joint2 = (b2PrismaticJoint*)m_world->Create(&pjd);
@@ -102,7 +121,9 @@ public:
 			// Create a payload
 			sd.density = 2.0f;
 			bd.position.Set(0.0f, 23.0f);
-			m_world->Create(&bd);
+			body = m_world->Create(&bd);
+			body->Create(&sd);
+			body->SetMassFromShapes();
 		}
 	}
 
@@ -127,7 +148,7 @@ public:
 		Test::Step(settings);
 		DrawString(5, m_textLine, "Keys: (f) toggle friction, (m) toggle motor");
 		m_textLine += 15;
-		float32 torque = m_joint1->GetMotorTorque(settings->hz);
+		float32 torque = m_joint1->GetMotorTorque();
 		DrawString(5, m_textLine, "Motor Torque = %5.0f", torque);
 		m_textLine += 15;
 	}

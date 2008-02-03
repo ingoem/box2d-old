@@ -118,6 +118,9 @@ public:
 	/// Set the motor speed, usually in meters per second.
 	void SetMotorSpeed(float32 speed);
 
+	/// Get the motor speed, usually in meters per second.
+	float32 GetMotorSpeed() const;
+
 	/// Set the maximum motor torque, usually in N.
 	void SetMaxMotorForce(float32 torque);
 
@@ -160,5 +163,10 @@ public:
 	bool m_enableMotor;
 	b2LimitState m_limitState;
 };
+
+inline float32 b2PrismaticJoint::GetMotorSpeed() const
+{
+	return m_motorSpeed;
+}
 
 #endif

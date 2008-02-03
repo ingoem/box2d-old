@@ -73,7 +73,7 @@ struct b2PulleyJointDef : public b2JointDef
 
 /// The pulley joint is connected to two bodies and two fixed ground points.
 /// The pulley supports a ratio such that:
-/// length1 + ratio * length2 = constant
+/// length1 + ratio * length2 <= constant
 /// Yes, the force transmitted is scaled by the ratio.
 /// The pulley also enforces a maximum length limit on both sides. This is
 /// useful to prevent one side of the pulley hitting the top.
@@ -135,9 +135,11 @@ public:
 	float32 m_limitForce2;
 
 	// Position impulses for accumulation.
+	float32 m_positionImpulse;
 	float32 m_limitPositionImpulse1;
 	float32 m_limitPositionImpulse2;
 
+	b2LimitState m_state;
 	b2LimitState m_limitState1;
 	b2LimitState m_limitState2;
 };

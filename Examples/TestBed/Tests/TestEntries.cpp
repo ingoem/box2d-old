@@ -25,54 +25,56 @@
 #include "freeglut/gl/glut.h"
 #endif
 
-//#include "ApplyForce.h"
+#include "ApplyForce.h"
 #include "BipedTest.h"
 #include "Bridge.h"
-//#include "BroadPhaseTest.h"
-//#include "Car.h"
+#include "BroadPhaseTest.h"
+#include "Car.h"
 #include "CCDTest.h"
 #include "Chain.h"
 #include "CollisionFiltering.h"
 #include "CollisionProcessing.h"
 #include "CompoundShapes.h"
-//#include "DistanceTest.h"
+#include "DistanceTest.h"
+#include "Dominos.h"
 #include "Gears.h"
-//#include "MotorsAndLimits.h"
-//#include "PolyCollision.h"
-//#include "PolyShapes.h"
-//#include "Pulleys.h"
+#include "MotorsAndLimits.h"
+#include "PolyCollision.h"
+#include "PolyShapes.h"
+#include "Pulleys.h"
 #include "Pyramid.h"
-//#include "SliderCrank.h"
-//#include "TimeOfImpact.h"
+#include "SliderCrank.h"
+#include "TimeOfImpact.h"
 #include "VaryingFriction.h"
 #include "VaryingRestitution.h"
 #include "VerticalStack.h"
-//#include "Web.h"
+#include "Web.h"
 
 TestEntry g_testEntries[] =
 {
-	//{"Car", Car::Create},
+	{"Car", Car::Create},
+	{"Dominos", Dominos::Create},
+	{"Biped Test", BipedTest::Create},
+	{"Pyramid", Pyramid::Create},
+	{"Motors and Limits", MotorsAndLimits::Create},
+	{"Slider Crank", SliderCrank::Create},
 	{"CCD Test", CCDTest::Create},
+	{"Compound Shapes", CompoundShapes::Create},
 	{"Bridge", Bridge::Create},
 	{"Chain", Chain::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"Vertical Stack", VerticalStack::Create},
-	{"Biped Test", BipedTest::Create},
 	{"Collision Processing", CollisionProcessing::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
-	{"Compound Shapes", CompoundShapes::Create},
 	{"Gears", Gears::Create},
-	{"Pyramid", Pyramid::Create},
-	//{"Time of Impact", TimeOfImpact::Create},
-	//{"Polygon Shapes", PolyShapes::Create},
-	//{"Distance Test", DistanceTest::Create},
-	//{"Apply Force", ApplyForce::Create},
-	//{"PolyCollision", PolyCollision::Create},
-	//{"Broad Phase", BroadPhaseTest::Create},
-	//{"Web", Web::Create},
-	//{"Pulleys", Pulleys::Create},
-	//{"Slider Crank", SliderCrank::Create},
-	//{"Motors and Limits", MotorsAndLimits::Create},
+	{"Web", Web::Create},
+	{"Apply Force", ApplyForce::Create},
+	{"Pulleys", Pulleys::Create},
+	{"Polygon Shapes", PolyShapes::Create},
+	{"Time of Impact", TimeOfImpact::Create},
+	{"Distance Test", DistanceTest::Create},
+	{"PolyCollision", PolyCollision::Create},
+	{"Broad Phase", BroadPhaseTest::Create},
 	{NULL, NULL}
 };

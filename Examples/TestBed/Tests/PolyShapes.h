@@ -37,8 +37,8 @@ public:
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->Create(m_world->Create(&sd));
-			m_world->Create(&bd);
+			b2Body* ground = m_world->Create(&bd);
+			ground->Create(&sd);
 		}
 
 		sds[0].vertexCount = 3;
@@ -99,22 +99,29 @@ public:
 		}
 
 		b2BodyDef bd;
-
-		if (index < 4)
-		{
-			body->Create(m_world->Create(sds + index));
-		}
-		else
-		{
-			body->Create(m_world->Create(&circleDef));
-			bd.angularDamping = 0.02f;
-		}
+		bd.type = b2BodyDef::e_dynamicBody;
 
 		float32 x = b2Random(-2.0f, 2.0f);
 		bd.position.Set(x, 10.0f);
 		bd.angle = b2Random(-b2_pi, b2_pi);
 
+		if (index == 4)
+		{
+			bd.angularDamping = 0.02f;
+		}
+
 		bodies[bodyIndex] = m_world->Create(&bd);
+
+		if (index < 4)
+		{
+			bodies[bodyIndex]->Create(sds + index);
+		}
+		else
+		{
+			bodies[bodyIndex]->Create(&circleDef);
+		}
+		bodies[bodyIndex]->SetMassFromShapes();
+
 		bodyIndex = (bodyIndex + 1) % k_maxBodies;
 	}
 

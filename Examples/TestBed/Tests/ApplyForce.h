@@ -26,62 +26,65 @@ public:
 	{
 		m_world->m_gravity.Set(0.0f, 0.0f);
 
+		const float32 k_restitution = 0.4f;
+
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-			sd.restitution = 0.9f;
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
+			bd.type = b2BodyDef::e_staticBody;
+			bd.position.Set(0.0f, 20.0f);
+			b2Body* body = m_world->Create(&bd);
+
+			b2PolygonDef sd;
+			sd.density = 0.0f;
+			sd.restitution = k_restitution;
+
+			sd.SetAsBox(0.2f, 20.0f, b2Vec2(-20.0f, 0.0f), 0.0f);
 			body->Create(&sd);
-			m_world->Create(&bd);
 
-			bd.position.Set(30.0f, 50.0f);
-			bd.angle = 0.5f * b2_pi;
-			m_world->Create(&bd);
+			sd.SetAsBox(0.2f, 20.0f, b2Vec2(20.0f, 0.0f), 0.0f);
+			body->Create(&sd);
 
-			bd.position.Set(-30.0f, 50.0f);
-			bd.angle = -0.5f * b2_pi;
-			m_world->Create(&bd);
+			sd.SetAsBox(0.2f, 20.0f, b2Vec2(0.0f, -20.0f), 0.5f * b2_pi);
+			body->Create(&sd);
 
-			bd.position.Set(0.0f, 40.0f);
-			bd.angle = 0.0f;
-			m_world->Create(&bd);
+			sd.SetAsBox(0.2f, 20.0f, b2Vec2(0.0f, 20.0f), -0.5f * b2_pi);
+			body->Create(&sd);
 		}
 
 		{
+			b2XForm xf1;
+			xf1.R.Set(0.3524f * b2_pi);
+			xf1.position = b2Mul(xf1.R, b2Vec2(1.0f, 0.0f));
+
 			b2PolygonDef sd1;
 			sd1.vertexCount = 3;
-			sd1.vertices[0].Set(-1.0f, 0.0f);
-			sd1.vertices[1].Set(1.0f, 0.0f);
-			sd1.vertices[2].Set(0.0f, 0.5f);
-			sd1.localRotation = 0.3524f * b2_pi;
-			b2Mat22 R1(sd1.localRotation);
-			sd1.localPosition = b2Mul(R1, b2Vec2(1.0f, 0.0f));
+			sd1.vertices[0] = b2Mul(xf1, b2Vec2(-1.0f, 0.0f));
+			sd1.vertices[1] = b2Mul(xf1, b2Vec2(1.0f, 0.0f));
+			sd1.vertices[2] = b2Mul(xf1, b2Vec2(0.0f, 0.5f));
 			sd1.density = 2.0f;
-			sd1.restitution = 0.9f;
+
+			b2XForm xf2;
+			xf2.R.Set(-0.3524f * b2_pi);
+			xf2.position = b2Mul(xf2.R, b2Vec2(-1.0f, 0.0f));
 
 			b2PolygonDef sd2;
 			sd2.vertexCount = 3;
-			sd2.vertices[0].Set(-1.0f, 0.0f);
-			sd2.vertices[1].Set(1.0f, 0.0f);
-			sd2.vertices[2].Set(0.0f, 0.5f);
-			sd2.localRotation = -0.3524f * b2_pi;
-			b2Mat22 R2(sd2.localRotation);
-			sd2.localPosition = b2Mul(R2, b2Vec2(-1.0f, 0.0f));
+			sd2.vertices[0] = b2Mul(xf2, b2Vec2(-1.0f, 0.0f));
+			sd2.vertices[1] = b2Mul(xf2, b2Vec2(1.0f, 0.0f));
+			sd2.vertices[2] = b2Mul(xf2, b2Vec2(0.0f, 0.5f));
 			sd2.density = 2.0f;
-			sd2.restitution = 0.9f;
 
 			b2BodyDef bd;
-			body->Create(&sd1);
-			body->Create(&sd2);
-			bd.allowSleep = false;
-			bd.angularDamping = 0.02f;
-			bd.linearDamping = 0.02f;
+			bd.type = b2BodyDef::e_dynamicBody;
+			bd.angularDamping = 2.0f;
+			bd.linearDamping = 0.1f;
 
 			bd.position.Set(0.0f, 1.05f);
 			bd.angle = b2_pi;
 			m_body = m_world->Create(&bd);
+			m_body->Create(&sd1);
+			m_body->Create(&sd2);
+			m_body->SetMassFromShapes();
 		}
 	}
 

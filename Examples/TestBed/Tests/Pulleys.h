@@ -27,54 +27,51 @@ public:
 		b2Body* ground = NULL;
 		{
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
 			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->Create(&sd);
 			ground = m_world->Create(&bd);
+			ground->Create(&sd);
 		}
 
 		{
 			float32 a = 2.0f;
+			float32 b = 4.0f;
 			float32 y = 16.0f;
 			float32 L = 12.0f;
 
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
-			sd.SetAsBox(2.0f * a, a);
+			sd.SetAsBox(a, b);
 			sd.density = 5.0f;
 
 			b2BodyDef bd;
-			body->Create(&sd);
+			bd.type = b2BodyDef::e_dynamicBody;
 
 			bd.position.Set(-10.0f, y);
 			b2Body* body1 = m_world->Create(&bd);
+			body1->Create(&sd);
+			body1->SetMassFromShapes();
 
 			bd.position.Set(10.0f, y);
 			b2Body* body2 = m_world->Create(&bd);
+			body2->Create(&sd);
+			body2->SetMassFromShapes();
 
 			b2PulleyJointDef pulleyDef;
 			pulleyDef.body1 = body1;
 			pulleyDef.body2 = body2;
-			pulleyDef.anchorPoint1.Set(-10.0f, y + a);
-			pulleyDef.anchorPoint2.Set(10.0f, y + a);
-			pulleyDef.groundPoint1.Set(-10.0f, y + a + L);
-			pulleyDef.groundPoint2.Set(10.0f, y + a + L);
+			pulleyDef.localAnchor1.Set(0.0f, b);
+			pulleyDef.localAnchor2.Set(0.0f, b);
+			pulleyDef.groundAnchor1.Set(-10.0f, y + b + L);
+			pulleyDef.groundAnchor2.Set(10.0f, y + b + L);
 			pulleyDef.ratio = 2.0f;
-
+			pulleyDef.length1 = L;
+			pulleyDef.length2 = L;
 			pulleyDef.maxLength1 = 28.0f;
 			pulleyDef.maxLength2 = 12.0f;
 
 			m_joint1 = (b2PulleyJoint*)m_world->Create(&pulleyDef);
-
-			b2PrismaticJointDef prismDef;
-			prismDef.body1 = ground;
-			prismDef.body2 = body2;
-			prismDef.axis.Set(0.0f, 1.0f);
-			prismDef.anchorPoint = body2->GetCenterPosition();
-			m_joint2 = (b2PrismaticJoint*)m_world->Create(&prismDef);
 		}
 	}
 
@@ -103,7 +100,6 @@ public:
 	}
 
 	b2PulleyJoint* m_joint1;
-	b2PrismaticJoint* m_joint2;
 };
 
 #endif

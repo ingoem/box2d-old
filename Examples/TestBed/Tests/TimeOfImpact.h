@@ -29,26 +29,26 @@ public:
 			sd.density = 0.0f;
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(10.0f, 0.0f), 0.0f);
-			m_shape1 = m_world->Create(&sd);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 20.0f);
 			bd.angle = 0.0f;
-			body->Create(m_shape1);
-			m_world->Create(&bd);
+			m_body1 = m_world->Create(&bd);
+			m_shape1 = m_body1->Create(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(0.25f, 0.25f);
 			sd.density = 1.0f;
-			m_shape2 = (b2PolygonShape*)m_world->Create(&sd);
 
 			b2BodyDef bd;
-			body->Create(m_shape2);
+			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(9.6363468f, 28.050615f);
 			bd.angle = 1.6408679f;
-			m_world->Create(&bd);
+			m_body2 = m_world->Create(&bd);
+			m_shape2 = (b2PolygonShape*)m_body2->Create(&sd);
+			m_body2->SetMassFromShapes();
 		}
 	}
 
@@ -63,67 +63,54 @@ public:
 
 	void Step(Settings* settings)
 	{
-		B2_NOT_USED(settings);
-
-		uint32 flags = 0;
-		flags += settings->drawShapes			* b2DebugDraw::e_shapeBit;
-		flags += settings->drawJoints			* b2DebugDraw::e_jointBit;
-		flags += settings->drawCoreShapes		* b2DebugDraw::e_coreShapeBit;
-		flags += settings->drawAABBs			* b2DebugDraw::e_aabbBit;
-		flags += settings->drawOBBs				* b2DebugDraw::e_obbBit;
-		flags += settings->drawPairs			* b2DebugDraw::e_pairBit;
-		flags += settings->drawContactPoints	* b2DebugDraw::e_contactPointBit;
-		flags += settings->drawContactNormals	* b2DebugDraw::e_contactNormalBit;
-		flags += settings->drawContactForces	* b2DebugDraw::e_contactForceBit;
-		flags += settings->drawFrictionForces	* b2DebugDraw::e_frictionForceBit;
-		flags += settings->drawCOMs				* b2DebugDraw::e_centerOfMassBit;
-		m_debugDraw.SetFlags(flags);
-
-		m_world->Step(0.0f, 0);
+		settings->pause = 1;
+		Test::Step(settings);
+		settings->pause = 0;
 
 		b2Sweep sweep1;
-		sweep1.position.Set(0.0f, 20.0f);
-		sweep1.angle = 0.0f;
-		sweep1.velocity = b2Vec2_zero;
-		sweep1.omega = 0.0f;
+		sweep1.c0.Set(0.0f, 20.0f);
+		sweep1.a0 = 0.0f;
+		sweep1.c = sweep1.c0;
+		sweep1.a = sweep1.a0;
+		sweep1.t0 = 0.0f;
+		sweep1.localCenter = m_body1->GetLocalCenter();
 
 		b2Sweep sweep2;
-		sweep2.position.Set(9.6363468f, 28.050615f);
-		sweep2.angle = 1.6408679f;
-		sweep2.velocity.Set(-0.075121880f, 0.27358246f);
-		sweep2.omega = -10.434675f;
+		sweep2.c0.Set(9.6363468f, 28.050615f);
+		sweep2.a0 = 1.6408679f;
+		sweep2.c = sweep2.c0 + b2Vec2(-0.075121880f, 0.27358246f);
+		sweep2.a = sweep2.a0 - 10.434675f;
+		sweep2.t0 = 0.0f;
+		sweep2.localCenter = m_body2->GetLocalCenter();
 
-		b2Vec2 x1, x2;
-		float32 toi = b2TimeOfImpact(&x1, &x2, m_shape1, sweep1, m_shape2, sweep2, 1.0f);
+		float32 toi = b2TimeOfImpact(m_shape1, sweep1, m_shape2, sweep2);
 
 		DrawString(5, m_textLine, "toi = %g", toi);
 		m_textLine += 15;
 
-		b2XForm xf2 = sweep2.GetXForm(toi);
-		b2Vec2 vertices[b2_maxPolygonVertices];
-		const b2Vec2* localVertices = m_shape2->GetVertices();
+		b2XForm xf2;
+		sweep2.GetXForm(&xf2, toi);
 		int32 vertexCount = m_shape2->GetVertexCount();
+		b2Vec2 vertices[b2_maxPolygonVertices];
+		const b2Vec2* localVertices;
+		
+		localVertices = m_shape2->GetVertices();
 		for (int32 i = 0; i < vertexCount; ++i)
 		{
 			vertices[i] = b2Mul(xf2, localVertices[i]);
 		}
 		m_debugDraw.DrawPolygon(vertices, vertexCount, b2Color(0.5f, 0.7f, 0.9f));
 
-		glPointSize(4.0f);
-		glColor3f(1.0f, 0.0f, 0.0f);
-		glBegin(GL_POINTS);
-		glVertex2f(x1.x, x1.y);
-		glVertex2f(x2.x, x2.y);
-		glEnd();
-		glPointSize(1.0f);
-
-		glColor3f(1.0f, 1.0f, 0.0f);
-		glBegin(GL_LINES);
-		glVertex2f(x1.x, x1.y);
-		glVertex2f(x2.x, x2.y);
-		glEnd();
+		localVertices = m_shape2->GetCoreVertices();
+		for (int32 i = 0; i < vertexCount; ++i)
+		{
+			vertices[i] = b2Mul(xf2, localVertices[i]);
+		}
+		m_debugDraw.DrawPolygon(vertices, vertexCount, b2Color(0.5f, 0.7f, 0.9f));
 	}
 
+	b2Body* m_body1;
+	b2Body* m_body2;
 	b2Shape* m_shape1;
 	b2PolygonShape* m_shape2;
 };

@@ -122,6 +122,9 @@ public:
 	/// Set the motor speed in radians per second.
 	void SetMotorSpeed(float32 speed);
 
+	/// Get the motor speed in radians per second.
+	float32 GetMotorSpeed() const;
+
 	/// Set the maximum motor torque, usually in N-m.
 	void SetMaxMotorTorque(float32 torque);
 
@@ -157,5 +160,10 @@ public:
 	float32 m_upperAngle;
 	b2LimitState m_limitState;
 };
+
+inline float32 b2RevoluteJoint::GetMotorSpeed() const
+{
+	return m_motorSpeed;
+}
 
 #endif

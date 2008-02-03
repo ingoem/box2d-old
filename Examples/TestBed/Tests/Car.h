@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2008 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -16,8 +16,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-
-
 #ifndef CAR_H
 #define CAR_H
 
@@ -27,26 +25,9 @@ class Car : public Test
 public:
 	Car()
 	{
-		/*
 		{	// car body
-		b2PolygonDef	box;
-		b2BodyDef	body;
-
-		box.SetAsBox(2.2225f,0.73787f);
-		box.type		= e_boxShape;
-		box.density		= 227.6f;
-		box.friction	= 0.68f;
-		box.groupIndex	= -1;
-
-		body.position.Set(10,2.8f);
-		body.Create(&box);
-
-		m_vehicle = m_world->Create(&body);
-		}
-		*/
-		{	// car body
-			b2PolygonDef	poly1, poly2;
-			b2BodyDef	bd;
+			b2PolygonDef poly1, poly2;
+			b2BodyDef bd;
 
 			// bottom half
 			poly1.vertexCount = 5;
@@ -57,12 +38,11 @@ public:
 			poly1.vertices[0].Set(2.2f,-0.74f);
 			poly1.groupIndex = -1;
 
-			poly1.density		= 300;
+			poly1.density		= 20.0f;
 			poly1.friction		= 0.68f;
 			poly1.groupIndex	= -1;
 
 			// top half
-			poly2.type = e_polygonShape;
 			poly2.vertexCount = 4;
 			poly2.vertices[3].Set(-1.7f,0);
 			poly2.vertices[2].Set(-1.3f,0.7f);
@@ -70,178 +50,157 @@ public:
 			poly2.vertices[0].Set(1.0f,0);
 			poly2.groupIndex = -1;
 
-			poly2.density		= 300;
+			poly2.density		= 5.0f;
 			poly2.friction		= 0.68f;
 			poly2.groupIndex	= -1;
 
 			bd.type = b2BodyDef::e_dynamicBody;
-			body.position.Set(10,2.8f);
+			bd.position.Set(-35.0f, 2.8f);
 
-			m_vehicle = m_world->Create(&body);
+			m_vehicle = m_world->Create(&bd);
 			m_vehicle->Create(&poly1);
 			m_vehicle->Create(&poly2);
+			m_vehicle->SetMassFromShapes();
 		}
 
 		{	// ground
-			b2PolygonDef	box;
-			b2BodyDef	body;
+			b2PolygonDef box;
+			box.SetAsBox(19.5f, 0.5f);
+			box.friction = 0.62f;
 
-			box.SetAsBox(9.5,0.5);
-			box.density		= 0;
-			box.friction	= 0.62f;
+			b2BodyDef bd;
+			bd.position.Set(-25.0f, 1.0f);
 
-			body.position.Set(10,1);
-			body.Create(&box);
-
-			m_world->Create(&body);
+			b2Body* ground = m_world->Create(&bd);
+			ground->Create(&box);
 		}
-
 
 		{	// vehicle wheels
 			b2CircleDef	circ;
-			b2BodyDef	body;
+			circ.density = 40.0f;
+			circ.radius = 0.38608f;
+			circ.friction = 0.8f;
+			circ.groupIndex = -1;
 
-			circ.density		= 945;
-			circ.radius			= 0.38608f;
-			circ.friction		= 0.8f;
-			circ.restitution	= 0.3f;
-			circ.groupIndex		= -1;
+			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
+			bd.allowSleep = false;
+			bd.position.Set(-33.8f, 2.0f);
 
-			body.angularDamping = 0.02f;
-			body.allowSleep = false;
-			body.position.Set(11.2f,2);
-			body.Create(&circ);
+			m_rightWheel = m_world->Create(&bd);
+			m_rightWheel->Create(&circ);
+			m_rightWheel->SetMassFromShapes();
 
-			m_rightWheel = m_world->Create(&body);
-			body.position.Set(8.8f,2);
-			m_leftWheel = m_world->Create(&body);
+			bd.position.Set(-36.2f, 2.0f);
+			m_leftWheel = m_world->Create(&bd);
+			m_leftWheel->Create(&circ);
+			m_leftWheel->SetMassFromShapes();
 		}
 
-		{	// axles
-			b2CircleDef circ;
-			b2BodyDef	body;
-			b2Body		*leftAxle, *rightAxle;
+		{	// join wheels to chassis
+			b2Vec2 anchor;
+			b2RevoluteJointDef jd;
+			jd.body1 = m_vehicle;
+			jd.body2 = m_leftWheel;
+			jd.collideConnected = false;
+			anchor = m_leftWheel->GetWorldCenter();
+			jd.localAnchor1 = m_vehicle->GetLocalPoint(anchor);
+			jd.localAnchor2 = m_leftWheel->GetLocalPoint(anchor);
+			jd.referenceAngle = m_leftWheel->GetAngle() - m_vehicle->GetAngle();
+			jd.enableMotor = true;
+			jd.maxMotorTorque = 10.0f;
+			jd.motorSpeed = 0.0f;
+			m_leftJoint = (b2RevoluteJoint*)m_world->Create(&jd);
 
-			circ.radius		= 0.10f;
-			circ.density	= 235;
-			circ.groupIndex	= -1;
-
-			body.position = m_leftWheel->GetCenterPosition();
-			body.Create(&circ);
-
-			leftAxle = m_world->Create(&body);
-			body.position = m_rightWheel->GetCenterPosition();
-			rightAxle = m_world->Create(&body);
-
-			{	// join wheels to axles
-				b2RevoluteJointDef	joint;
-				joint.body1 = leftAxle;
-				joint.body2 = m_leftWheel;
-				joint.collideConnected = false;
-				joint.anchorPoint = leftAxle->GetCenterPosition();
-				m_world->Create(&joint);
-				joint.body1 = rightAxle;
-				joint.body2 = m_rightWheel;
-				joint.anchorPoint = rightAxle->GetCenterPosition();
-				m_world->Create(&joint);
-			}
-			{	// join axles to car
-				b2PrismaticJointDef	joint;
-				joint.body1 = leftAxle;
-				joint.body2 = m_vehicle;
-				joint.collideConnected = false;
-				joint.lowerTranslation = -0.2f;
-				joint.upperTranslation = 0.2f;
-				joint.enableLimit = true;
-				joint.motorForce = 20000;
-				joint.enableMotor = true;
-				joint.motorSpeed = 0;
-				joint.axis.Set(0,1);
-				joint.anchorPoint = leftAxle->GetCenterPosition();
-				m_world->Create(&joint);
-				joint.body1 = rightAxle;
-				joint.anchorPoint = rightAxle->GetCenterPosition();
-				m_world->Create(&joint);
-			}
+			jd.body1 = m_vehicle;
+			jd.body2 = m_rightWheel;
+			jd.collideConnected = false;
+			anchor = m_rightWheel->GetWorldCenter();
+			jd.localAnchor1 = m_vehicle->GetLocalPoint(anchor);
+			jd.localAnchor2 = m_rightWheel->GetLocalPoint(anchor);
+			jd.referenceAngle = m_rightWheel->GetAngle() - m_vehicle->GetAngle();
+			m_rightJoint = (b2RevoluteJoint*)m_world->Create(&jd);
 		}
-		{	// falling person
-			b2PolygonDef	box;
-			b2BodyDef	body;
 
-			box.SetAsBox(0.5f,1.7f);
-			box.type		= e_boxShape;
-			box.density		= 1000;
-			box.friction	= 0.1f;
-
-			body.position.Set(10,40);
-			body.Create(&box);
-
-			//m_world->Create(&body);
-		}
 		{	// more ground
-			b2PolygonDef	box;
-			b2BodyDef	body;
+			b2PolygonDef box;
+			b2BodyDef bd;
 
-			box.SetAsBox(9.5,0.5);
-			box.density		= 0;
-			box.friction	= 0.62f;
-			box.localRotation	= 0.1f * b2_pi;
-			body.position.Set(27,3.1f);
-			body.Create(&box);
+			box.SetAsBox(9.5f, 0.5f, b2Vec2_zero, 0.1f * b2_pi);
+			box.friction = 0.62f;
+			bd.position.Set(27.0f - 30.0f, 3.1f);
 
-			m_world->Create(&body);
+			b2Body* ground = m_world->Create(&bd);
+			ground->Create(&box);
 		}
+
 		{	// more ground
-			b2PolygonDef	box;
-			b2BodyDef	body;
+			b2PolygonDef box;
+			b2BodyDef bd;
 
-			box.SetAsBox(9.5,0.5);
-			box.density		= 0;
-			box.friction	= 0.62f;
-			box.localRotation	= -0.1f * b2_pi;
-			body.position.Set(55,3.1f);
-			body.Create(&box);
+			box.SetAsBox(9.5f, 0.5f, b2Vec2_zero, -0.1f * b2_pi);
+			box.friction = 0.62f;
+			bd.position.Set(55.0f - 30.0f, 3.1f);
 
-			m_world->Create(&body);
+			b2Body* ground = m_world->Create(&bd);
+			ground->Create(&box);
 		}
+
 		{	// more ground
-			b2PolygonDef	box;
-			b2BodyDef	body;
+			b2PolygonDef box;
+			b2BodyDef bd;
 
-			box.SetAsBox(9.5,0.5);
-			box.density		= 0;
-			box.friction	= 0.62f;
-			box.localRotation	= 0.03f * b2_pi;
-			body.position.Set(71,2);
-			body.Create(&box);
+			box.SetAsBox(9.5f, 0.5f, b2Vec2_zero, 0.03f * b2_pi);
+			box.friction = 0.62f;
+			bd.position.Set(41.0f, 2.0f);
 
-			m_world->Create(&body);
+			b2Body* ground = m_world->Create(&bd);
+			ground->Create(&box);
 		}
+
 		{	// more ground
-			b2PolygonDef	box;
-			b2BodyDef	body;
+			b2PolygonDef box;
+			b2BodyDef bd;
 
-			box.SetAsBox(5,0.5);
-			box.density		= 0;
-			box.friction	= 0.62f;
-			box.localRotation	= 0.15f * b2_pi;
-			body.position.Set(80,4);
-			body.Create(&box);
+			box.SetAsBox(5.0f, 0.5f, b2Vec2_zero, 0.15f * b2_pi);
+			box.friction = 0.62f;
+			bd.position.Set(50.0f, 4.0f);
 
-			m_world->Create(&body);
+			b2Body* ground = m_world->Create(&bd);
+			ground->Create(&box);
 		}
+
 		{	// more ground
-			b2PolygonDef	box;
-			b2BodyDef	body;
+			b2PolygonDef box;
+			b2BodyDef bd;
 
-			box.SetAsBox(30,0.5);
-			box.density		= 0;
-			box.friction	= 0.62f;
-			box.localRotation	= 0;
-			body.position.Set(140,2);
-			body.Create(&box);
+			box.SetAsBox(20.0f, 0.5f);
+			box.friction = 0.62f;
+			bd.position.Set(85.0f, 2.0f);
 
-			m_world->Create(&body);
+			b2Body* ground = m_world->Create(&bd);
+			ground->Create(&box);
+		}
+	}
+
+	void Keyboard(unsigned char key)
+	{
+		switch (key)
+		{
+		case ',':
+			m_leftJoint->SetMaxMotorTorque(800.0f);
+			m_leftJoint->SetMotorSpeed(12.0f);
+			break;
+
+		case '.':
+			m_leftJoint->SetMaxMotorTorque(1200.0f);
+			m_leftJoint->SetMotorSpeed(-36.0f);
+			break;
+
+		case '/':
+			m_leftJoint->SetMaxMotorTorque(100.0f);
+			m_leftJoint->SetMotorSpeed(0.0f);
+			break;
 		}
 	}
 
@@ -250,7 +209,11 @@ public:
 		return new Car;
 	}
 
-	b2Body *m_leftWheel, *m_rightWheel, *m_vehicle;
+	b2Body* m_leftWheel;
+	b2Body* m_rightWheel;
+	b2Body* m_vehicle;
+	b2RevoluteJoint* m_rightJoint;
+	b2RevoluteJoint* m_leftJoint;
 };
 
 #endif

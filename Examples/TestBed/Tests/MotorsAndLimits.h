@@ -27,39 +27,43 @@ public:
 		b2Body* ground = NULL;
 		{
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
 			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			body->Create(&sd);
 			ground = m_world->Create(&bd);
+			ground->Create(&sd);
 		}
 
 		{
 			b2PolygonDef sd;
-			sd.type = e_boxShape;
 			sd.SetAsBox(2.0f, 0.5f);
 			sd.density = 5.0f;
 			sd.friction = 0.05f;
 
 			b2BodyDef bd;
-			body->Create(&sd);
+			bd.type = b2BodyDef::e_dynamicBody;
 
 			b2RevoluteJointDef rjd;
-			
+			b2Vec2 anchor, axis;
+
 			b2Body* body = NULL;
 			b2Body* prevBody = ground;
 			const float32 y = 8.0f;
 
 			bd.position.Set(3.0f, y);
 			body = m_world->Create(&bd);
+			body->Create(&sd);
+			body->SetMassFromShapes();
 
-			rjd.anchorPoint.Set(0.0f, y);
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
+			anchor.Set(0.0f, y);
+			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
+			rjd.localAnchor2 = body->GetLocalPoint(anchor);
+			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 			rjd.motorSpeed = 1.0f * b2_pi;
-			rjd.motorTorque = 10000.0f;
+			rjd.maxMotorTorque = 10000.0f;
 			rjd.enableMotor = true;
 			
 			m_joint1 = (b2RevoluteJoint*)m_world->Create(&rjd);
@@ -68,18 +72,20 @@ public:
 
 			bd.position.Set(9.0f, y);
 			body = m_world->Create(&bd);
+			body->Create(&sd);
+			body->SetMassFromShapes();
 
-			rjd.anchorPoint.Set(6.0f, y);
+			anchor.Set(6.0f, y);
 			rjd.body1 = prevBody;
 			rjd.body2 = body;
+			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
+			rjd.localAnchor2 = body->GetLocalPoint(anchor);
+			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 			rjd.motorSpeed = 0.5f * b2_pi;
-			rjd.motorTorque = 2000.0f;
+			rjd.maxMotorTorque = 2000.0f;
 			rjd.enableMotor = true;
 			rjd.lowerAngle = - 0.5f * b2_pi;
 			rjd.upperAngle = 0.5f * b2_pi;
-			//rjd.enableMotor = false;
-			//rjd.minAngle = 0.0f;
-			//rjd.maxAngle = 0.0f;
 			rjd.enableLimit = true;
 
 			m_joint2 = (b2RevoluteJoint*)m_world->Create(&rjd);
@@ -87,14 +93,22 @@ public:
 			bd.position.Set(-10.0f, 10.0f);
 			bd.angle = 0.5f * b2_pi;
 			body = m_world->Create(&bd);
+			body->Create(&sd);
+			body->SetMassFromShapes();
 
 			b2PrismaticJointDef pjd;
-			pjd.anchorPoint.Set(-10.0f, 10.0f);
 			pjd.body1 = ground;
 			pjd.body2 = body;
-			pjd.axis.Set(1.0f, 0.0f);
+
+			anchor.Set(-10.0f, 10.0f);
+			pjd.localAnchor1 = ground->GetLocalPoint(anchor);
+			pjd.localAnchor2 = body->GetLocalPoint(anchor);
+			pjd.referenceAngle = body->GetAngle() - ground->GetAngle();
+
+			axis.Set(1.0f, 0.0f);
+			pjd.localAxis1 = ground->GetLocalVector(axis);
 			pjd.motorSpeed = 10.0f;
-			pjd.motorForce = 1000.0f;
+			pjd.maxMotorForce = 1000.0f;
 			pjd.enableMotor = true;
 			pjd.lowerTranslation = 0.0f;
 			pjd.upperTranslation = 20.0f;
@@ -109,25 +123,23 @@ public:
 		switch (key)
 		{
 		case 'l':
-			m_joint2->m_enableLimit = !m_joint2->m_enableLimit;
-			m_joint3->m_enableLimit = !m_joint3->m_enableLimit;
-			m_joint2->m_body1->WakeUp();
-			m_joint2->m_body2->WakeUp();
-			m_joint3->m_body2->WakeUp();
+			m_joint2->EnableLimit(!m_joint2->IsLimitEnabled());
+			m_joint3->EnableLimit(!m_joint3->IsLimitEnabled());
+			m_joint2->GetBody1()->WakeUp();
+			m_joint3->GetBody2()->WakeUp();
 			break;
 
 		case 'm':
-			m_joint1->m_enableMotor = !m_joint1->m_enableMotor;
-			m_joint2->m_enableMotor = !m_joint2->m_enableMotor;
-			m_joint3->m_enableMotor = !m_joint3->m_enableMotor;
-			m_joint2->m_body1->WakeUp();
-			m_joint2->m_body2->WakeUp();
-			m_joint3->m_body2->WakeUp();
+			m_joint1->EnableMotor(!m_joint1->IsMotorEnabled());
+			m_joint2->EnableMotor(!m_joint2->IsMotorEnabled());
+			m_joint3->EnableMotor(!m_joint3->IsMotorEnabled());
+			m_joint2->GetBody1()->WakeUp();
+			m_joint3->GetBody2()->WakeUp();
 			break;
 
 		case 'p':
-			m_joint3->m_body2->WakeUp();
-			m_joint3->m_motorSpeed = -m_joint3->m_motorSpeed;
+			m_joint3->GetBody2()->WakeUp();
+			m_joint3->SetMotorSpeed(-m_joint3->GetMotorSpeed());
 			break;
 		}
 	}
@@ -137,9 +149,9 @@ public:
 		Test::Step(settings);
 		DrawString(5, m_textLine, "Keys: (l) limits, (m) motors, (p) prismatic speed");
 		m_textLine += 15;
-		float32 torque1 = m_joint1->GetMotorTorque(settings->hz);
-		float32 torque2 = m_joint2->GetMotorTorque(settings->hz);
-		float32 force3 = m_joint3->GetMotorForce(settings->hz);
+		float32 torque1 = m_joint1->GetMotorTorque();
+		float32 torque2 = m_joint2->GetMotorTorque();
+		float32 force3 = m_joint3->GetMotorForce();
 		DrawString(5, m_textLine, "Motor Torque = %4.0f, %4.0f : Motor Force = %4.0f", torque1, torque2, force3);
 		m_textLine += 15;
 	}

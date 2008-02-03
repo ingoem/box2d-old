@@ -107,8 +107,8 @@ void ContactListener::Remove(b2ContactPoint* point)
 
 Test::Test()
 {
-	m_worldAABB.lowerBound.Set(-100.0f, -100.0f);
-	m_worldAABB.upperBound.Set(100.0f, 200.0f);
+	m_worldAABB.lowerBound.Set(-200.0f, -100.0f);
+	m_worldAABB.upperBound.Set(200.0f, 200.0f);
 	b2Vec2 gravity;
 	gravity.Set(0.0f, -10.0f);
 	bool doSleep = true;
