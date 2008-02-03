@@ -99,8 +99,9 @@ Version 2.0.0
 - Draw world AABB in TestBed. DONE
 - Use forces instead of impulses to handle variable time step. DONE
 - Ragdoll contribution. DONE
+- Car example. DONE
+- Constraint graph and shapes support changes in center of mass. DONE
 - Sensors with overlap report.
-- Car example.
 - Doxygen.
 - Update manual.
 - CMake contribution.
