@@ -1036,7 +1036,9 @@ void b2World::DrawDebugData()
 	{
 		for (b2Body* b = m_bodyList; b; b = b->GetNext())
 		{
-			m_debugDraw->DrawXForm(b->GetXForm());
+			b2XForm xf = b->GetXForm();
+			xf.position = b->GetWorldCenter();
+			m_debugDraw->DrawXForm(xf);
 		}
 	}
 }

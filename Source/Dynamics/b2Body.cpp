@@ -150,6 +150,8 @@ void b2Body::Destroy(b2Shape* s)
 	}
 
 	b2Assert(s->m_body == this);
+	s->DestroyProxy(m_world->m_broadPhase);
+
 	b2Assert(m_shapeCount > 0);
 	b2Shape** node = &m_shapeList;
 	bool found = false;
@@ -192,7 +194,6 @@ void b2Body::Destroy(b2Shape* s)
 	b2Assert(m_world->m_shapeCount > 0);
 	--m_world->m_shapeCount;
 
-	s->DestroyProxy(m_world->m_broadPhase);
 	b2Shape::Destroy(s, &m_world->m_blockAllocator);
 }
 

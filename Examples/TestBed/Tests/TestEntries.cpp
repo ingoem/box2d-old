@@ -43,6 +43,7 @@
 #include "PolyShapes.h"
 #include "Pulleys.h"
 #include "Pyramid.h"
+#include "ShapeEditing.h"
 #include "SliderCrank.h"
 #include "TimeOfImpact.h"
 #include "VaryingFriction.h"
@@ -52,6 +53,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Shape Editing", ShapeEditing::Create},
 	{"Car", Car::Create},
 	{"Dominos", Dominos::Create},
 	{"Biped Test", BipedTest::Create},
