@@ -67,3 +67,28 @@ blockquote {
 	border: thin dotted Silver;
 	background: InfoBackground;
 }
+
+ul {
+	list-style-type: square;
+	list-style-position: inside;
+}
+
+ul li {
+	margin-left: 0em;
+	padding-left: 2em;
+	
+}
+
+ul ul li {
+	font-size: 0.8em;
+}
+
+ul li a:link {color: #990033; font-family: verdana; font-size: 1.1em; text-decoration: none}
+ul li a:visited {color: #990033; font-family: verdana; font-size: 1.1em; text-decoration: none}
+ul li a:active {color: #364ba6; font-family: verdana; font-size: 1.1em; text-decoration: none}
+ul li a:hover {color: #fff; background-color: #000000}
+
+ul li.bold {
+	font-weight:bold;	
+}
+
