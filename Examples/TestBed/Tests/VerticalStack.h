@@ -22,11 +22,18 @@
 class VerticalStack : public Test
 {
 public:
+
+	static const int32 k_maxIndices = 32;
+
 	VerticalStack()
 	{
+		int32 index = 0;
+
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
+			m_indices[index] = index;
+			sd.userData = m_indices + index++;
 
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
@@ -50,14 +57,17 @@ public:
 				// This is a stress test, you normally wouldn't do this for
 				// performance reasons.
 				bd.isBullet = true;
-
-				bd.allowSleep = false;
+				bd.allowSleep = true;
 
 				//float32 x = b2Random(-0.1f, 0.1f);
 				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;
 				//bd.position.Set(x, 0.752f + 1.54f * i);
 				bd.position.Set(0.0f, 2.51f + 4.02f * i);
 				b2Body* body = m_world->Create(&bd);
+
+				b2Assert(index < k_maxIndices);
+				m_indices[index] = index;
+				sd.userData = m_indices + index++;
 				body->Create(&sd);
 				body->SetMassFromShapes();
 			}
@@ -68,6 +78,8 @@ public:
 	{
 		return new VerticalStack;
 	}
+
+	int32 m_indices[k_maxIndices];
 };
 
 #endif

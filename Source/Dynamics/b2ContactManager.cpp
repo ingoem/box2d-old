@@ -151,6 +151,7 @@ void b2ContactManager::Destroy(b2Contact* c)
 				cp.separation = point->separation;
 				cp.normalForce = point->normalForce;
 				cp.tangentForce = point->tangentForce;
+				cp.id = point->id;
 				m_world->m_contactListener->Remove(&cp);
 			}
 		}

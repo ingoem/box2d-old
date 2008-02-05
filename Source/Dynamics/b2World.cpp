@@ -574,7 +574,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			}
 		}
 
-		if (minContact == NULL || 1.0f - 10.0f * FLT_EPSILON < minTOI)
+		if (minContact == NULL || 1.0f - 100.0f * FLT_EPSILON < minTOI)
 		{
 			// No more TOI events. Done!
 			break;

@@ -399,6 +399,7 @@ void b2Island::Report(b2ContactConstraint* constraints)
 				}
 				else
 				{
+					cp.id = point->id;
 					m_listener->Persist(&cp);
 				}
 			}

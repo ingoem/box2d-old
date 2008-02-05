@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2006-2008 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -57,7 +57,7 @@ public:
 
 			for (int i = 0; i < 10; ++i)
 			{
-				bd.position.Set(-6.0f + 1.0f * i, 11.125f);
+				bd.position.Set(-6.0f + 1.0f * i, 11.25f);
 				b2Body* body = m_world->Create(&bd);
 				body->Create(&sd);
 				body->SetMassFromShapes();
@@ -94,6 +94,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(-0.9f, 1.0f);
+			bd.angle = -0.15f;
+
 			b3 = m_world->Create(&bd);
 			b3->Create(&sd);
 			b3->SetMassFromShapes();
@@ -107,7 +109,6 @@ public:
 		jd.body2 = b3;
 		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
 		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
-		jd.referenceAngle = jd.body2->GetAngle() - jd.body1->GetAngle();
 		jd.collideConnected = true;
 		m_world->Create(&jd);
 
@@ -135,48 +136,95 @@ public:
 
 		b2Body* b5;
 		{
+			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
+			bd.position.Set(6.5f, 3.0f);
+			b5 = m_world->Create(&bd);
+
 			b2PolygonDef sd;
-			sd.SetAsBox(1.0f, 1.0f);
 			sd.density = 10.0f;
 			sd.friction = 0.1f;
 
-			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
-			bd.position.Set(6.0f, 2.5f);
-			b5 = m_world->Create(&bd);
+			sd.SetAsBox(1.0f, 0.1f, b2Vec2(0.0f, -0.9f), 0.0f);
 			b5->Create(&sd);
+
+			sd.SetAsBox(0.1f, 1.0f, b2Vec2(-0.9f, 0.0f), 0.0f);
+			b5->Create(&sd);
+
+			sd.SetAsBox(0.1f, 1.0f, b2Vec2(0.9f, 0.0f), 0.0f);
+			b5->Create(&sd);
+
 			b5->SetMassFromShapes();
 		}
 
-		anchor.Set(6.0f, 2.6f);
+		anchor.Set(6.0f, 2.0f);
 		jd.body1 = b1;
 		jd.body2 = b5;
 		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
 		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
-		jd.referenceAngle = jd.body2->GetAngle() - jd.body1->GetAngle();
 		m_world->Create(&jd);
 
 		b2Body* b6;
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(1.0f, 0.1f);
-			sd.density = 10.0f;
+			sd.density = 30.0f;
+			sd.friction = 0.2f;
 
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
-			bd.position.Set(6.0f, 3.6f);
+			bd.position.Set(6.5f, 4.1f);
 			b6 = m_world->Create(&bd);
 			b6->Create(&sd);
 			b6->SetMassFromShapes();
 		}
 
-		anchor.Set(7.0f, 3.5f);
+		anchor.Set(7.5f, 4.0f);
 		jd.body1 = b5;
 		jd.body2 = b6;
 		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
 		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
-		jd.referenceAngle = jd.body2->GetAngle() - jd.body1->GetAngle();
 		m_world->Create(&jd);
+
+		b2Body* b7;
+		{
+			b2PolygonDef sd;
+			sd.SetAsBox(0.1f, 1.0f);
+			sd.density = 10.0f;
+
+			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
+			bd.position.Set(7.4f, 1.0f);
+
+			b7 = m_world->Create(&bd);
+			b7->Create(&sd);
+			b7->SetMassFromShapes();
+		}
+
+		b2DistanceJointDef djd;
+		djd.body1 = b3;
+		djd.body2 = b7;
+		djd.localAnchor1.Set(6.0f, 0.0f);
+		djd.localAnchor2.Set(0.0f, -1.0f);
+		b2Vec2 d = djd.body2->GetWorldPoint(djd.localAnchor2) - djd.body1->GetWorldPoint(djd.localAnchor1);
+		djd.length = d.Length();
+		m_world->Create(&djd);
+
+		{
+			b2CircleDef sd;
+			sd.radius = 0.2f;
+			sd.density = 10.0f;
+
+			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
+			for (int32 i = 0; i < 4; ++i)
+			{
+				bd.position.Set(5.9f + 2.0f * sd.radius * i, 2.4f);
+				b2Body* body = m_world->Create(&bd);
+				body->Create(&sd);
+				body->SetMassFromShapes();
+			}
+		}
 	}
 
 	static Test* Create()

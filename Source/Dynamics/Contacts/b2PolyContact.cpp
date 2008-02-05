@@ -121,6 +121,7 @@ void b2PolygonContact::Evaluate(b2ContactListener* listener)
 			cp.separation = mp0->separation;
 			cp.normalForce = mp0->normalForce;
 			cp.tangentForce = mp0->tangentForce;
+			cp.id = mp0->id;
 			listener->Remove(&cp);
 		}
 	}
