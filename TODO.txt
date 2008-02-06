@@ -101,7 +101,7 @@ Version 2.0.0
 - Ragdoll contribution. DONE
 - Car example. DONE
 - Constraint graph and shapes support changes in center of mass. DONE
-- Sensors with overlap report.
+- Sensors with overlap report. DONE
 - Doxygen.
 - Update manual.
 - CMake contribution.
