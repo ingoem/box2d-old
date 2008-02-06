@@ -38,6 +38,9 @@ namespace
 	float32 viewZoom = 1.0f;
 	b2Vec2 viewCenter(0.0f, 20.0f);
 	int tx, ty, tw, th;
+	bool rMouseDown;
+	b2Vec2 lastp;
+
 }
 
 void Resize(int32 w, int32 h)
@@ -215,6 +218,18 @@ void Mouse(int32 button, int32 state, int32 x, int32 y)
 		{
 			test->MouseUp();
 		}
+	} else if (button == GLUT_RIGHT_BUTTON)
+	{
+		if (state == GLUT_DOWN)
+		{	
+			lastp = ConvertScreenToWorld(x, y);
+			rMouseDown = true;
+		}
+
+		if (state == GLUT_UP)
+		{
+			rMouseDown = false;
+		}
 	}
 }
 
@@ -222,6 +237,26 @@ void MouseMotion(int32 x, int32 y)
 {
 	b2Vec2 p = ConvertScreenToWorld(x, y);
 	test->MouseMove(p);
+	
+	if (rMouseDown){
+		b2Vec2 diff = p - lastp;
+		viewCenter.x -= diff.x;
+		viewCenter.y -= diff.y;
+		Resize(width, height);
+		lastp = ConvertScreenToWorld(x, y);
+	}
+}
+
+void MouseWheel(int wheel, int direction, int x, int y)
+{	B2_NOT_USED(wheel);
+	B2_NOT_USED(x);
+	B2_NOT_USED(y);
+	if (direction > 0) {
+		viewZoom /= 1.1f;
+	} else {
+		viewZoom *= 1.1f;
+	}
+	Resize(width, height);
 }
 
 void Pause(int)
@@ -253,6 +288,7 @@ int main(int argc, char** argv)
 	GLUI_Master.set_glutKeyboardFunc(Keyboard);
 	GLUI_Master.set_glutSpecialFunc(KeyboardSpecial);
 	GLUI_Master.set_glutMouseFunc(Mouse);
+	glutMouseWheelFunc(MouseWheel);
 	glutMotionFunc(MouseMotion);
 
 	glui = GLUI_Master.create_glui_subwindow( mainWindow, 

@@ -43,6 +43,7 @@
 #include "PolyShapes.h"
 #include "Pulleys.h"
 #include "Pyramid.h"
+#include "SensorTest.h"
 #include "ShapeEditing.h"
 #include "SliderCrank.h"
 #include "TimeOfImpact.h"
@@ -53,6 +54,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Sensor Test", SensorTest::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"Vertical Stack", VerticalStack::Create},

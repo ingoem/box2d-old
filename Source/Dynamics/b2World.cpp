@@ -730,7 +730,6 @@ void b2World::SolveTOI(const b2TimeStep& step)
 	m_stackAllocator.Free(stack);
 }
 
-
 void b2World::Step(float32 dt, int32 iterations)
 {
 	m_lock = true;

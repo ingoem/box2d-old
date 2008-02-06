@@ -85,6 +85,7 @@ void b2PolyAndCircleContact::Evaluate(b2ContactListener* listener)
 			cp.separation = m0.points[0].separation;
 			cp.normalForce = m0.points[0].normalForce;
 			cp.tangentForce = m0.points[0].tangentForce;
+			cp.id = m0.points[0].id;
 			listener->Remove(&cp);
 		}
 	}

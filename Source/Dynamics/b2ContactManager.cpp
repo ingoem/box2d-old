@@ -229,5 +229,44 @@ void b2ContactManager::Collide()
 		}
 
 		c->Update(m_world->m_contactListener);
+
+		if (c->IsSolid() == false && m_world->m_contactListener)
+		{
+			// report the sensor.
+			b2ContactPoint cp;
+			cp.shape1 = c->GetShape1();
+			cp.shape2 = c->GetShape2();
+			
+			// sensors have no force.
+			cp.normalForce = 0.0f;
+			cp.tangentForce = 0.0f;
+
+			b2Body* b1 = cp.shape1->GetBody();
+			int32 manifoldCount = c->GetManifoldCount();
+			b2Manifold* manifolds = c->GetManifolds();
+			for (int32 i = 0; i < manifoldCount; ++i)
+			{
+				b2Manifold* manifold = manifolds + i;
+				cp.normal = manifold->normal;
+				for (int32 j = 0; j < manifold->pointCount; ++j)
+				{
+					b2ManifoldPoint* point = manifold->points + j;
+					cp.position = b2Mul(b1->GetXForm(), point->localPoint1);
+					cp.separation = point->separation;
+
+					if (point->id.features.flip & b2_newPoint)
+					{
+						point->id.features.flip &= ~b2_newPoint;
+						cp.id = point->id;
+						m_world->m_contactListener->Add(&cp);
+					}
+					else
+					{
+						cp.id = point->id;
+						m_world->m_contactListener->Persist(&cp);
+					}
+				}
+			}
+		}
 	}
 }
