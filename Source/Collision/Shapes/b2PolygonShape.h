@@ -21,7 +21,8 @@
 
 #include "b2Shape.h"
 
-/// Convex polygon, vertices must be in CCW order.
+/// Convex polygon. The vertices must be in CCW order for a right-handed
+/// coordinate system with the z-axis coming out of the screen.
 struct b2PolygonDef : public b2ShapeDef
 {
 	b2PolygonDef()

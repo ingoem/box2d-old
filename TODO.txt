@@ -102,7 +102,7 @@ Version 2.0.0
 - Car example. DONE
 - Constraint graph and shapes support changes in center of mass. DONE
 - Sensors with overlap report. DONE
-- Doxygen.
+- Doxygen. DONE
 - Update manual.
 - CMake contribution.
 
