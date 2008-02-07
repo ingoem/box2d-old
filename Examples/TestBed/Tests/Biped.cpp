@@ -11,104 +11,104 @@ Biped::Biped(b2World* w, const b2Vec2& position)
 	// create body parts
 	bd = def.LFootDef;
 	bd.position += position;
-	LFoot = w->Create(&bd);
-	LFoot->Create(&def.LFootPoly);
+	LFoot = w->CreateBody(&bd);
+	LFoot->CreateShape(&def.LFootPoly);
 	LFoot->SetMassFromShapes();
 
 	bd = def.RFootDef;
 	bd.position += position;
-	RFoot = w->Create(&bd);
-	RFoot->Create(&def.RFootPoly);
+	RFoot = w->CreateBody(&bd);
+	RFoot->CreateShape(&def.RFootPoly);
 	RFoot->SetMassFromShapes();
 
 	bd = def.LCalfDef;
 	bd.position += position;
-	LCalf = w->Create(&bd);
-	LCalf->Create(&def.LCalfPoly);
+	LCalf = w->CreateBody(&bd);
+	LCalf->CreateShape(&def.LCalfPoly);
 	LCalf->SetMassFromShapes();
 
 	bd = def.RCalfDef;
 	bd.position += position;
-	RCalf = w->Create(&bd);
-	RCalf->Create(&def.RCalfPoly);
+	RCalf = w->CreateBody(&bd);
+	RCalf->CreateShape(&def.RCalfPoly);
 	RCalf->SetMassFromShapes();
 
 	bd = def.LThighDef;
 	bd.position += position;
-	LThigh = w->Create(&bd);
-	LThigh->Create(&def.LThighPoly);
+	LThigh = w->CreateBody(&bd);
+	LThigh->CreateShape(&def.LThighPoly);
 	LThigh->SetMassFromShapes();
 
 	bd = def.RThighDef;
 	bd.position += position;
-	RThigh = w->Create(&bd);
-	RThigh->Create(&def.RThighPoly);
+	RThigh = w->CreateBody(&bd);
+	RThigh->CreateShape(&def.RThighPoly);
 	RThigh->SetMassFromShapes();
 
 	bd = def.PelvisDef;
 	bd.position += position;
-	Pelvis = w->Create(&bd);
-	Pelvis->Create(&def.PelvisPoly);
+	Pelvis = w->CreateBody(&bd);
+	Pelvis->CreateShape(&def.PelvisPoly);
 	Pelvis->SetMassFromShapes();
 
 	bd = def.PelvisDef;
 	bd.position += position;
-	Stomach = w->Create(&bd);
-	Stomach->Create(&def.StomachPoly);
+	Stomach = w->CreateBody(&bd);
+	Stomach->CreateShape(&def.StomachPoly);
 	Stomach->SetMassFromShapes();
 
 	bd = def.ChestDef;
 	bd.position += position;
-	Chest = w->Create(&bd);
-	Chest->Create(&def.ChestPoly);
+	Chest = w->CreateBody(&bd);
+	Chest->CreateShape(&def.ChestPoly);
 	Chest->SetMassFromShapes();
 
 	bd = def.NeckDef;
 	bd.position += position;
-	Neck = w->Create(&bd);
-	Neck->Create(&def.NeckPoly);
+	Neck = w->CreateBody(&bd);
+	Neck->CreateShape(&def.NeckPoly);
 	Neck->SetMassFromShapes();
 
 	bd = def.HeadDef;
 	bd.position += position;
-	Head = w->Create(&bd);
-	Head->Create(&def.HeadCirc);
+	Head = w->CreateBody(&bd);
+	Head->CreateShape(&def.HeadCirc);
 	Head->SetMassFromShapes();
 
 	bd = def.LUpperArmDef;
 	bd.position += position;
-	LUpperArm = w->Create(&bd);
-	LUpperArm->Create(&def.LUpperArmPoly);
+	LUpperArm = w->CreateBody(&bd);
+	LUpperArm->CreateShape(&def.LUpperArmPoly);
 	LUpperArm->SetMassFromShapes();
 
 	bd = def.RUpperArmDef;
 	bd.position += position;
-	RUpperArm = w->Create(&bd);
-	RUpperArm->Create(&def.RUpperArmPoly);
+	RUpperArm = w->CreateBody(&bd);
+	RUpperArm->CreateShape(&def.RUpperArmPoly);
 	RUpperArm->SetMassFromShapes();
 
 	bd = def.LForearmDef;
 	bd.position += position;
-	LForearm = w->Create(&bd);
-	LForearm->Create(&def.LForearmPoly);
+	LForearm = w->CreateBody(&bd);
+	LForearm->CreateShape(&def.LForearmPoly);
 	LForearm->SetMassFromShapes();
 
 	bd = def.RForearmDef;
 	bd.position += position;
-	RForearm = w->Create(&bd);
-	RForearm->Create(&def.RForearmPoly);
+	RForearm = w->CreateBody(&bd);
+	RForearm->CreateShape(&def.RForearmPoly);
 	RForearm->SetMassFromShapes();
 
 	bd = def.LHandDef;
 	bd.position += position;
-	LHand = w->Create(&bd);
-	LHand->Create(&def.LHandPoly);
+	LHand = w->CreateBody(&bd);
+	LHand->CreateShape(&def.LHandPoly);
 	LHand->SetMassFromShapes();
 
 	bd = def.RHandDef;
 	bd.position += position;
-	RHand = w->Create(&bd);
-	RHand->Create(&def.RHandPoly);
+	RHand = w->CreateBody(&bd);
+	RHand->CreateShape(&def.RHandPoly);
 	RHand->SetMassFromShapes();
 	
 	// link body parts
@@ -146,42 +146,42 @@ Biped::Biped(b2World* w, const b2Vec2& position)
 	def.RWristDef.body2		= RForearm;
 	
 	// create joints
-	LAnkle		= (b2RevoluteJoint*)w->Create(&def.LAnkleDef);
-	RAnkle		= (b2RevoluteJoint*)w->Create(&def.RAnkleDef);
-	LKnee		= (b2RevoluteJoint*)w->Create(&def.LKneeDef);
-	RKnee		= (b2RevoluteJoint*)w->Create(&def.RKneeDef);
-	LHip		= (b2RevoluteJoint*)w->Create(&def.LHipDef);
-	RHip		= (b2RevoluteJoint*)w->Create(&def.RHipDef);
-	LowerAbs	= (b2RevoluteJoint*)w->Create(&def.LowerAbsDef);
-	UpperAbs	= (b2RevoluteJoint*)w->Create(&def.UpperAbsDef);
-	LowerNeck	= (b2RevoluteJoint*)w->Create(&def.LowerNeckDef);
-	UpperNeck	= (b2RevoluteJoint*)w->Create(&def.UpperNeckDef);
-	LShoulder	= (b2RevoluteJoint*)w->Create(&def.LShoulderDef);
-	RShoulder	= (b2RevoluteJoint*)w->Create(&def.RShoulderDef);
-	LElbow		= (b2RevoluteJoint*)w->Create(&def.LElbowDef);
-	RElbow		= (b2RevoluteJoint*)w->Create(&def.RElbowDef);
-	LWrist		= (b2RevoluteJoint*)w->Create(&def.LWristDef);
-	RWrist		= (b2RevoluteJoint*)w->Create(&def.RWristDef);
+	LAnkle		= (b2RevoluteJoint*)w->CreateJoint(&def.LAnkleDef);
+	RAnkle		= (b2RevoluteJoint*)w->CreateJoint(&def.RAnkleDef);
+	LKnee		= (b2RevoluteJoint*)w->CreateJoint(&def.LKneeDef);
+	RKnee		= (b2RevoluteJoint*)w->CreateJoint(&def.RKneeDef);
+	LHip		= (b2RevoluteJoint*)w->CreateJoint(&def.LHipDef);
+	RHip		= (b2RevoluteJoint*)w->CreateJoint(&def.RHipDef);
+	LowerAbs	= (b2RevoluteJoint*)w->CreateJoint(&def.LowerAbsDef);
+	UpperAbs	= (b2RevoluteJoint*)w->CreateJoint(&def.UpperAbsDef);
+	LowerNeck	= (b2RevoluteJoint*)w->CreateJoint(&def.LowerNeckDef);
+	UpperNeck	= (b2RevoluteJoint*)w->CreateJoint(&def.UpperNeckDef);
+	LShoulder	= (b2RevoluteJoint*)w->CreateJoint(&def.LShoulderDef);
+	RShoulder	= (b2RevoluteJoint*)w->CreateJoint(&def.RShoulderDef);
+	LElbow		= (b2RevoluteJoint*)w->CreateJoint(&def.LElbowDef);
+	RElbow		= (b2RevoluteJoint*)w->CreateJoint(&def.RElbowDef);
+	LWrist		= (b2RevoluteJoint*)w->CreateJoint(&def.LWristDef);
+	RWrist		= (b2RevoluteJoint*)w->CreateJoint(&def.RWristDef);
 }
 
 
 Biped::~Biped(void)
 {
-	m_world->Destroy(LFoot);
-	m_world->Destroy(RFoot);
-	m_world->Destroy(LCalf);
-	m_world->Destroy(RCalf);
-	m_world->Destroy(LThigh);
-	m_world->Destroy(RThigh);
-	m_world->Destroy(Pelvis);
-	m_world->Destroy(Stomach);
-	m_world->Destroy(Chest);
-	m_world->Destroy(Neck);
-	m_world->Destroy(Head);
-	m_world->Destroy(LUpperArm);
-	m_world->Destroy(RUpperArm);
-	m_world->Destroy(LForearm);
-	m_world->Destroy(RForearm);
-	m_world->Destroy(LHand);
-	m_world->Destroy(RHand);
+	m_world->DestroyBody(LFoot);
+	m_world->DestroyBody(RFoot);
+	m_world->DestroyBody(LCalf);
+	m_world->DestroyBody(RCalf);
+	m_world->DestroyBody(LThigh);
+	m_world->DestroyBody(RThigh);
+	m_world->DestroyBody(Pelvis);
+	m_world->DestroyBody(Stomach);
+	m_world->DestroyBody(Chest);
+	m_world->DestroyBody(Neck);
+	m_world->DestroyBody(Head);
+	m_world->DestroyBody(LUpperArm);
+	m_world->DestroyBody(RUpperArm);
+	m_world->DestroyBody(LForearm);
+	m_world->DestroyBody(RForearm);
+	m_world->DestroyBody(LHand);
+	m_world->DestroyBody(RHand);
 }

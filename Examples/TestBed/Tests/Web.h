@@ -32,8 +32,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -46,23 +46,23 @@ public:
 			bd.type = b2BodyDef::e_dynamicBody;
 
 			bd.position.Set(-5.0f, 5.0f);
-			m_bodies[0] = m_world->Create(&bd);
-			m_bodies[0]->Create(&sd);
+			m_bodies[0] = m_world->CreateBody(&bd);
+			m_bodies[0]->CreateShape(&sd);
 			m_bodies[0]->SetMassFromShapes();
 
 			bd.position.Set(5.0f, 5.0f);
-			m_bodies[1] = m_world->Create(&bd);
-			m_bodies[1]->Create(&sd);
+			m_bodies[1] = m_world->CreateBody(&bd);
+			m_bodies[1]->CreateShape(&sd);
 			m_bodies[1]->SetMassFromShapes();
 
 			bd.position.Set(5.0f, 15.0f);
-			m_bodies[2] = m_world->Create(&bd);
-			m_bodies[2]->Create(&sd);
+			m_bodies[2] = m_world->CreateBody(&bd);
+			m_bodies[2]->CreateShape(&sd);
 			m_bodies[2]->SetMassFromShapes();
 
 			bd.position.Set(-5.0f, 15.0f);
-			m_bodies[3] = m_world->Create(&bd);
-			m_bodies[3]->Create(&sd);
+			m_bodies[3] = m_world->CreateBody(&bd);
+			m_bodies[3]->CreateShape(&sd);
 			m_bodies[3]->SetMassFromShapes();
 
 			b2DistanceJointDef jd;
@@ -75,7 +75,7 @@ public:
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
 			jd.length = (p1 - p2).Length();
-			m_joints[0] = m_world->Create(&jd);
+			m_joints[0] = m_world->CreateJoint(&jd);
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[1];
@@ -84,7 +84,7 @@ public:
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
 			jd.length = (p1 - p2).Length();
-			m_joints[1] = m_world->Create(&jd);
+			m_joints[1] = m_world->CreateJoint(&jd);
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[2];
@@ -93,7 +93,7 @@ public:
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
 			jd.length = (p1 - p2).Length();
-			m_joints[2] = m_world->Create(&jd);
+			m_joints[2] = m_world->CreateJoint(&jd);
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[3];
@@ -102,7 +102,7 @@ public:
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
 			jd.length = (p1 - p2).Length();
-			m_joints[3] = m_world->Create(&jd);
+			m_joints[3] = m_world->CreateJoint(&jd);
 
 			jd.body1 = m_bodies[0];
 			jd.body2 = m_bodies[1];
@@ -111,7 +111,7 @@ public:
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
 			jd.length = (p1 - p2).Length();
-			m_joints[4] = m_world->Create(&jd);
+			m_joints[4] = m_world->CreateJoint(&jd);
 
 			jd.body1 = m_bodies[1];
 			jd.body2 = m_bodies[2];
@@ -120,7 +120,7 @@ public:
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
 			jd.length = (p1 - p2).Length();
-			m_joints[5] = m_world->Create(&jd);
+			m_joints[5] = m_world->CreateJoint(&jd);
 
 			jd.body1 = m_bodies[2];
 			jd.body2 = m_bodies[3];
@@ -129,7 +129,7 @@ public:
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
 			jd.length = (p1 - p2).Length();
-			m_joints[6] = m_world->Create(&jd);
+			m_joints[6] = m_world->CreateJoint(&jd);
 
 			jd.body1 = m_bodies[3];
 			jd.body2 = m_bodies[0];
@@ -138,7 +138,7 @@ public:
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
 			jd.length = (p1 - p2).Length();
-			m_joints[7] = m_world->Create(&jd);
+			m_joints[7] = m_world->CreateJoint(&jd);
 		}
 	}
 
@@ -151,7 +151,7 @@ public:
 			{
 				if (m_bodies[i])
 				{
-					m_world->Destroy(m_bodies[i]);
+					m_world->DestroyBody(m_bodies[i]);
 					m_bodies[i] = NULL;
 					break;
 				}
@@ -163,7 +163,7 @@ public:
 			{
 				if (m_joints[i])
 				{
-					m_world->Destroy(m_joints[i]);
+					m_world->DestroyJoint(m_joints[i]);
 					m_joints[i] = NULL;
 					break;
 				}

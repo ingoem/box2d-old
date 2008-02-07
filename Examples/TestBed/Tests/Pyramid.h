@@ -31,8 +31,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -55,8 +55,8 @@ public:
 					b2BodyDef bd;
 					bd.type = b2BodyDef::e_dynamicBody;
 					bd.position = y;
-					b2Body* body = m_world->Create(&bd);
-					body->Create(&sd);
+					b2Body* body = m_world->CreateBody(&bd);
+					body->CreateShape(&sd);
 					body->SetMassFromShapes();
 
 					y += deltaY;

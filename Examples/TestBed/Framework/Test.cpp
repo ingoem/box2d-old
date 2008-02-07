@@ -174,7 +174,7 @@ void Test::MouseDown(const b2Vec2& p)
 		md.body2 = body;
 		md.target = p;
 		md.maxForce = 1000.0f * body->m_mass;
-		m_mouseJoint = (b2MouseJoint*)m_world->Create(&md);
+		m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
 		body->WakeUp();
 	}
 }
@@ -183,7 +183,7 @@ void Test::MouseUp()
 {
 	if (m_mouseJoint)
 	{
-		m_world->Destroy(m_mouseJoint);
+		m_world->DestroyJoint(m_mouseJoint);
 		m_mouseJoint = NULL;
 	}
 }
@@ -200,7 +200,7 @@ void Test::LaunchBomb()
 {
 	if (m_bomb)
 	{
-		m_world->Destroy(m_bomb);
+		m_world->DestroyBody(m_bomb);
 		m_bomb = NULL;
 	}
 
@@ -209,14 +209,14 @@ void Test::LaunchBomb()
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
 	bd.isBullet = true;
-	m_bomb = m_world->Create(&bd);
+	m_bomb = m_world->CreateBody(&bd);
 	m_bomb->SetLinearVelocity(-5.0f * bd.position);
 
 	b2CircleDef sd;
 	sd.radius = 0.3f;
 	sd.density = 20.0f;
 	sd.restitution = 0.1f;
-	m_bomb->Create(&sd);
+	m_bomb->CreateShape(&sd);
 	
 	m_bomb->SetMassFromShapes();
 }
@@ -262,7 +262,7 @@ void Test::Step(Settings* settings)
 
 	if (m_bomb != NULL && m_bomb->IsFrozen())
 	{
-		m_world->Destroy(m_bomb);
+		m_world->DestroyBody(m_bomb);
 		m_bomb = NULL;
 	}
 

@@ -31,8 +31,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -49,13 +49,13 @@ public:
 			bd.type = b2BodyDef::e_dynamicBody;
 
 			bd.position.Set(-10.0f, y);
-			b2Body* body1 = m_world->Create(&bd);
-			body1->Create(&sd);
+			b2Body* body1 = m_world->CreateBody(&bd);
+			body1->CreateShape(&sd);
 			body1->SetMassFromShapes();
 
 			bd.position.Set(10.0f, y);
-			b2Body* body2 = m_world->Create(&bd);
-			body2->Create(&sd);
+			b2Body* body2 = m_world->CreateBody(&bd);
+			body2->CreateShape(&sd);
 			body2->SetMassFromShapes();
 
 			b2PulleyJointDef pulleyDef;
@@ -71,7 +71,7 @@ public:
 			pulleyDef.maxLength1 = 28.0f;
 			pulleyDef.maxLength2 = 12.0f;
 
-			m_joint1 = (b2PulleyJoint*)m_world->Create(&pulleyDef);
+			m_joint1 = (b2PulleyJoint*)m_world->CreateJoint(&pulleyDef);
 		}
 	}
 

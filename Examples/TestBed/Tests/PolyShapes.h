@@ -37,8 +37,8 @@ public:
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		sds[0].vertexCount = 3;
@@ -94,7 +94,7 @@ public:
 	{
 		if (bodies[bodyIndex] != NULL)
 		{
-			m_world->Destroy(bodies[bodyIndex]);
+			m_world->DestroyBody(bodies[bodyIndex]);
 			bodies[bodyIndex] = NULL;
 		}
 
@@ -110,15 +110,15 @@ public:
 			bd.angularDamping = 0.02f;
 		}
 
-		bodies[bodyIndex] = m_world->Create(&bd);
+		bodies[bodyIndex] = m_world->CreateBody(&bd);
 
 		if (index < 4)
 		{
-			bodies[bodyIndex]->Create(sds + index);
+			bodies[bodyIndex]->CreateShape(sds + index);
 		}
 		else
 		{
-			bodies[bodyIndex]->Create(&circleDef);
+			bodies[bodyIndex]->CreateShape(&circleDef);
 		}
 		bodies[bodyIndex]->SetMassFromShapes();
 
@@ -131,7 +131,7 @@ public:
 		{
 			if (bodies[i] != NULL)
 			{
-				m_world->Destroy(bodies[i]);
+				m_world->DestroyBody(bodies[i]);
 				bodies[i] = NULL;
 				return;
 			}

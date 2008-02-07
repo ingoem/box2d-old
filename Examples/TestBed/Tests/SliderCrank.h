@@ -33,8 +33,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -50,8 +50,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(0.0f, 7.0f);
-			b2Body* body = m_world->Create(&bd);
-			body->Create(&sd);
+			b2Body* body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
 			b2Vec2 anchor;
@@ -64,15 +64,15 @@ public:
 			rjd.motorSpeed = 1.0f * b2_pi;
 			rjd.maxMotorTorque = 10000.0f;
 			rjd.enableMotor = true;
-			m_joint1 = (b2RevoluteJoint*)m_world->Create(&rjd);
+			m_joint1 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
 
 			prevBody = body;
 
 			// Define follower.
 			sd.SetAsBox(0.5f, 4.0f);
 			bd.position.Set(0.0f, 13.0f);
-			body = m_world->Create(&bd);
-			body->Create(&sd);
+			body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
 			anchor.Set(0.0f, 9.0f);
@@ -82,15 +82,15 @@ public:
 			rjd.localAnchor2 = body->GetLocalPoint(anchor);
 			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 			rjd.enableMotor = false;
-			m_world->Create(&rjd);
+			m_world->CreateJoint(&rjd);
 
 			prevBody = body;
 
 			// Define piston
 			sd.SetAsBox(1.5f, 1.5f);
 			bd.position.Set(0.0f, 17.0f);
-			body = m_world->Create(&bd);
-			body->Create(&sd);
+			body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
 			anchor.Set(0.0f, 17.0f);
@@ -99,7 +99,7 @@ public:
 			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
 			rjd.localAnchor2 = body->GetLocalPoint(anchor);
 			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
-			m_world->Create(&rjd);
+			m_world->CreateJoint(&rjd);
 
 			b2PrismaticJointDef pjd;
 			anchor.Set(0.0f, 17.0f);
@@ -116,13 +116,13 @@ public:
 			pjd.maxMotorForce = 1000.0f;
 			pjd.enableMotor = true;
 
-			m_joint2 = (b2PrismaticJoint*)m_world->Create(&pjd);
+			m_joint2 = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
 
 			// Create a payload
 			sd.density = 2.0f;
 			bd.position.Set(0.0f, 23.0f);
-			body = m_world->Create(&bd);
-			body->Create(&sd);
+			body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 		}
 	}

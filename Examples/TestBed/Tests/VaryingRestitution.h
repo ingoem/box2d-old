@@ -32,8 +32,8 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -49,10 +49,10 @@ public:
 				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(-10.0f + 3.0f * i, 20.0f);
 
-				b2Body* body = m_world->Create(&bd);
+				b2Body* body = m_world->CreateBody(&bd);
 
 				sd.restitution = restitution[i];
-				body->Create(&sd);
+				body->CreateShape(&sd);
 				body->SetMassFromShapes();
 			}
 		}

@@ -31,8 +31,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -52,8 +52,8 @@ public:
 			const float32 y = 8.0f;
 
 			bd.position.Set(3.0f, y);
-			body = m_world->Create(&bd);
-			body->Create(&sd);
+			body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
 			rjd.body1 = prevBody;
@@ -66,13 +66,13 @@ public:
 			rjd.maxMotorTorque = 10000.0f;
 			rjd.enableMotor = true;
 			
-			m_joint1 = (b2RevoluteJoint*)m_world->Create(&rjd);
+			m_joint1 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
 
 			prevBody = body;
 
 			bd.position.Set(9.0f, y);
-			body = m_world->Create(&bd);
-			body->Create(&sd);
+			body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
 			anchor.Set(6.0f, y);
@@ -88,12 +88,12 @@ public:
 			rjd.upperAngle = 0.5f * b2_pi;
 			rjd.enableLimit = true;
 
-			m_joint2 = (b2RevoluteJoint*)m_world->Create(&rjd);
+			m_joint2 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
 
 			bd.position.Set(-10.0f, 10.0f);
 			bd.angle = 0.5f * b2_pi;
-			body = m_world->Create(&bd);
-			body->Create(&sd);
+			body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
 			b2PrismaticJointDef pjd;
@@ -114,7 +114,7 @@ public:
 			pjd.upperTranslation = 20.0f;
 			pjd.enableLimit = true;
 
-			m_joint3 = (b2PrismaticJoint*)m_world->Create(&pjd);
+			m_joint3 = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
 		}
 	}
 

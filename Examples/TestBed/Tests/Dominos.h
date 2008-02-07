@@ -32,8 +32,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			b1 = m_world->Create(&bd);
-			b1->Create(&sd);
+			b1 = m_world->CreateBody(&bd);
+			b1->CreateShape(&sd);
 		}
 
 		{
@@ -42,8 +42,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(-1.5f, 10.0f);
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -58,8 +58,8 @@ public:
 			for (int i = 0; i < 10; ++i)
 			{
 				bd.position.Set(-6.0f + 1.0f * i, 11.25f);
-				b2Body* body = m_world->Create(&bd);
-				body->Create(&sd);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateShape(&sd);
 				body->SetMassFromShapes();
 			}
 		}
@@ -70,8 +70,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(1.0f, 6.0f);
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		b2Body* b2;
@@ -81,8 +81,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(-7.0f, 4.0f);
-			b2 = m_world->Create(&bd);
-			b2->Create(&sd);
+			b2 = m_world->CreateBody(&bd);
+			b2->CreateShape(&sd);
 		}
 
 		b2Body* b3;
@@ -96,8 +96,8 @@ public:
 			bd.position.Set(-0.9f, 1.0f);
 			bd.angle = -0.15f;
 
-			b3 = m_world->Create(&bd);
-			b3->Create(&sd);
+			b3 = m_world->CreateBody(&bd);
+			b3->CreateShape(&sd);
 			b3->SetMassFromShapes();
 		}
 
@@ -110,7 +110,7 @@ public:
 		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
 		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
 		jd.collideConnected = true;
-		m_world->Create(&jd);
+		m_world->CreateJoint(&jd);
 
 		b2Body* b4;
 		{
@@ -121,8 +121,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(-10.0f, 15.0f);
-			b4 = m_world->Create(&bd);
-			b4->Create(&sd);
+			b4 = m_world->CreateBody(&bd);
+			b4->CreateShape(&sd);
 			b4->SetMassFromShapes();
 		}
 
@@ -132,27 +132,27 @@ public:
 		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
 		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
 		jd.referenceAngle = jd.body2->GetAngle() - jd.body1->GetAngle();
-		m_world->Create(&jd);
+		m_world->CreateJoint(&jd);
 
 		b2Body* b5;
 		{
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(6.5f, 3.0f);
-			b5 = m_world->Create(&bd);
+			b5 = m_world->CreateBody(&bd);
 
 			b2PolygonDef sd;
 			sd.density = 10.0f;
 			sd.friction = 0.1f;
 
 			sd.SetAsBox(1.0f, 0.1f, b2Vec2(0.0f, -0.9f), 0.0f);
-			b5->Create(&sd);
+			b5->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 1.0f, b2Vec2(-0.9f, 0.0f), 0.0f);
-			b5->Create(&sd);
+			b5->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 1.0f, b2Vec2(0.9f, 0.0f), 0.0f);
-			b5->Create(&sd);
+			b5->CreateShape(&sd);
 
 			b5->SetMassFromShapes();
 		}
@@ -162,7 +162,7 @@ public:
 		jd.body2 = b5;
 		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
 		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
-		m_world->Create(&jd);
+		m_world->CreateJoint(&jd);
 
 		b2Body* b6;
 		{
@@ -174,8 +174,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(6.5f, 4.1f);
-			b6 = m_world->Create(&bd);
-			b6->Create(&sd);
+			b6 = m_world->CreateBody(&bd);
+			b6->CreateShape(&sd);
 			b6->SetMassFromShapes();
 		}
 
@@ -184,7 +184,7 @@ public:
 		jd.body2 = b6;
 		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
 		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
-		m_world->Create(&jd);
+		m_world->CreateJoint(&jd);
 
 		b2Body* b7;
 		{
@@ -196,8 +196,8 @@ public:
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(7.4f, 1.0f);
 
-			b7 = m_world->Create(&bd);
-			b7->Create(&sd);
+			b7 = m_world->CreateBody(&bd);
+			b7->CreateShape(&sd);
 			b7->SetMassFromShapes();
 		}
 
@@ -208,7 +208,7 @@ public:
 		djd.localAnchor2.Set(0.0f, -1.0f);
 		b2Vec2 d = djd.body2->GetWorldPoint(djd.localAnchor2) - djd.body1->GetWorldPoint(djd.localAnchor1);
 		djd.length = d.Length();
-		m_world->Create(&djd);
+		m_world->CreateJoint(&djd);
 
 		{
 			b2CircleDef sd;
@@ -220,8 +220,8 @@ public:
 			for (int32 i = 0; i < 4; ++i)
 			{
 				bd.position.Set(5.9f + 2.0f * sd.radius * i, 2.4f);
-				b2Body* body = m_world->Create(&bd);
-				body->Create(&sd);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateShape(&sd);
 				body->SetMassFromShapes();
 			}
 		}

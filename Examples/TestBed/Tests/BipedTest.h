@@ -33,23 +33,23 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
-			b2Body* body = m_world->Create(&bd);
+			b2Body* body = m_world->CreateBody(&bd);
 
 			b2PolygonDef sd;
 			sd.density = 0.0f;
 			sd.restitution = k_restitution;
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(-10.0f, 0.0f), 0.0f);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(10.0f, 0.0f), 0.0f);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, -10.0f), 0.5f * b2_pi);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, 10.0f), -0.5f * b2_pi);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 		}
 
 		m_biped = new Biped(m_world, b2Vec2(0.0f, 20.0f));
@@ -60,7 +60,7 @@ public:
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(5.0f, 20.0f + i);
 			bd.isBullet = true;
-			b2Body* body = m_world->Create(&bd);
+			b2Body* body = m_world->CreateBody(&bd);
 			body->SetLinearVelocity(b2Vec2(0.0f, -100.0f));
 			body->SetAngularVelocity(b2Random(-50.0f, 50.0f));
 
@@ -68,7 +68,7 @@ public:
 			sd.radius = 0.25f;
 			sd.density = 15.0f;
 			sd.restitution = k_restitution;
-			body->Create(&sd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 		}
 	}

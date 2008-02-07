@@ -29,12 +29,12 @@ public:
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
 			sd.friction = 0.3f;
-			m_shape1 = m_world->Create(&sd);
+			m_shape1 = m_world->CreateShape(&sd);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			body->Create(m_shape1);
-			m_body1 = m_world->Create(&bd);
+			m_body1 = m_world->CreateBody(&bd);
 		}
 #else
 		{
@@ -44,8 +44,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			m_body1 = m_world->Create(&bd);
-			m_shape1 = m_body1->Create(&sd);
+			m_body1 = m_world->CreateBody(&bd);
+			m_shape1 = m_body1->CreateShape(&sd);
 		}
 #endif
 
@@ -75,8 +75,8 @@ public:
 #else
 			bd.position.Set(0.0f, 10.0f);
 #endif
-			m_body2 = m_world->Create(&bd);
-			m_shape2 = m_body2->Create(&sd);
+			m_body2 = m_world->CreateBody(&bd);
+			m_shape2 = m_body2->CreateShape(&sd);
 			m_body2->SetMassFromShapes();
 		}
 

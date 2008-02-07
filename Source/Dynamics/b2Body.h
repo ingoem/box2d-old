@@ -114,14 +114,14 @@ public:
 	/// Creates a shape and attach it to this body.
 	/// @param shapeDef the shape definition.
 	/// @warning This function is locked during callbacks.
-	b2Shape* Create(b2ShapeDef* shapeDef);
+	b2Shape* CreateShape(b2ShapeDef* shapeDef);
 
 	/// Destroy a shape. This removes the shape from the broad-phase and
 	/// therefore destroys any contacts associated with this shape. All shapes
 	/// attached to a body are implicitly destroyed when the body is destroyed.
 	/// @param shape the shape to be removed.
 	/// @warning This function is locked during callbacks.
-	void Destroy(b2Shape* shape);
+	void DestroyShape(b2Shape* shape);
 
 	/// Set the mass properties. Note that this changes the center of mass position.
 	/// If you are not sure how to compute mass properties, use SetMassFromShapes.

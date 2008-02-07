@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 	// Call the body factory which allocates memory for the ground body
 	// from a pool and creates the ground box shape (also from a pool).
 	// The body is also added to the world.
-	b2Body* groundBody = world.Create(&groundBodyDef);
+	b2Body* groundBody = world.CreateBody(&groundBodyDef);
 
 	// Define the ground box shape.
 	b2PolygonDef groundShapeDef;
@@ -66,13 +66,13 @@ int main(int argc, char** argv)
 	groundShapeDef.density = 0.0f;
 
 	// Add the ground shape to the ground body.
-	groundBody->Create(&groundShapeDef);
+	groundBody->CreateShape(&groundShapeDef);
 
 	// Define the dynamic body. We set its position and call the body factory.
 	b2BodyDef bodyDef;
 	bodyDef.type = b2BodyDef::e_dynamicBody;
 	bodyDef.position.Set(0.0f, 4.0f);
-	b2Body* body = world.Create(&bodyDef);
+	b2Body* body = world.CreateBody(&bodyDef);
 
 	// Define another box shape for our dynamic body.
 	b2PolygonDef shapeDef;
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 	shapeDef.friction = 0.3f;
 
 	// Add the shape to the body.
-	body->Create(&shapeDef);
+	body->CreateShape(&shapeDef);
 
 	// Now tell the dynamic body to compute it's mass properties base
 	// on its shape.

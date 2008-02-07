@@ -59,12 +59,12 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_broadPhase = new (mem) b2BroadPhase(worldAABB, &m_contactManager);
 
 	b2BodyDef bd;
-	m_groundBody = Create(&bd);
+	m_groundBody = CreateBody(&bd);
 }
 
 b2World::~b2World()
 {
-	Destroy(m_groundBody);
+	DestroyBody(m_groundBody);
 	m_broadPhase->~b2BroadPhase();
 	b2Free(m_broadPhase);
 }
@@ -94,7 +94,7 @@ void b2World::SetDebugDraw(b2DebugDraw* debugDraw)
 	m_debugDraw = debugDraw;
 }
 
-b2Body* b2World::Create(const b2BodyDef* def)
+b2Body* b2World::CreateBody(const b2BodyDef* def)
 {
 	b2Assert(m_lock == false);
 	if (m_lock == true)
@@ -118,7 +118,7 @@ b2Body* b2World::Create(const b2BodyDef* def)
 	return b;
 }
 
-void b2World::Destroy(b2Body* b)
+void b2World::DestroyBody(b2Body* b)
 {
 	b2Assert(m_bodyCount > 0);
 	b2Assert(m_lock == false);
@@ -139,7 +139,7 @@ void b2World::Destroy(b2Body* b)
 			m_destructionListener->SayGoodbye(jn0->joint);
 		}
 
-		Destroy(jn0->joint);
+		DestroyJoint(jn0->joint);
 	}
 
 	// Delete the attached shapes. This destroys broad-phase
@@ -199,7 +199,7 @@ void b2World::Destroy(b2Body* b)
 	m_blockAllocator.Free(b, sizeof(b2Body));
 }
 
-b2Joint* b2World::Create(const b2JointDef* def)
+b2Joint* b2World::CreateJoint(const b2JointDef* def)
 {
 	b2Assert(m_lock == false);
 
@@ -244,7 +244,7 @@ b2Joint* b2World::Create(const b2JointDef* def)
 	return j;
 }
 
-void b2World::Destroy(b2Joint* j)
+void b2World::DestroyJoint(b2Joint* j)
 {
 	b2Assert(m_lock == false);
 

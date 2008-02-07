@@ -29,11 +29,11 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->Create(&bd);
+			ground = m_world->CreateBody(&bd);
 
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
-			ground->Create(&sd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -52,8 +52,8 @@ public:
 				b2BodyDef bd;
 				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(0.5f + i, y);
-				b2Body* body = m_world->Create(&bd);
-				body->Create(&sd);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateShape(&sd);
 				body->SetMassFromShapes();
 
 				b2Vec2 anchor(float32(i), y);
@@ -62,7 +62,7 @@ public:
 				jd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 				jd.body1 = prevBody;
 				jd.body2 = body;
-				m_world->Create(&jd);
+				m_world->CreateJoint(&jd);
 
 				prevBody = body;
 			}

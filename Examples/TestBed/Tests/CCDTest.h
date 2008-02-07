@@ -36,8 +36,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
-			b2Body* body = m_world->Create(&bd);
-			body->Create(&sd);
+			b2Body* body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 		}
 
 		{
@@ -52,8 +52,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(50.0f, 20.0f);
-			b2Body* body = m_world->Create(&bd);
-			body->Create(&sd);
+			b2Body* body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 			body->SetLinearVelocity(b2Vec2(-200.0f, 0.0f));
 			body->SetAngularVelocity(m_angularVelocity);
@@ -67,8 +67,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -0.2f);
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -83,7 +83,7 @@ public:
 			bd1.allowSleep = false;
 			bd1.position.Set(0.0f, 20.0f);
 			b2Body* b1 = m_world->Create(&bd1);
-			b1->Create(&sd);
+			b1->CreateShape(&sd);
 			b1->SetMassFromShapes();
 			b1->SetLinearVelocity(b2Vec2(0.0f, -100.0f));
 
@@ -94,7 +94,7 @@ public:
 			bd2.allowSleep = false;
 			bd2.position.Set(0.0f, 20.2f);
 			b2Body* b2 = m_world->Create(&bd2);
-			b2->Create(&sd);
+			b2->CreateShape(&sd);
 			b2->SetMassFromShapes();
 			b2->SetLinearVelocity(b2Vec2(0.0f, -100.0f));
 
@@ -106,7 +106,7 @@ public:
 			bd3.allowSleep = false;
 			bd3.position.Set(0.0f, 100.0f);
 			b2Body* b3 = m_world->Create(&bd3);
-			b3->Create(&sd);
+			b3->CreateShape(&sd);
 			b3->SetMassFromShapes();
 			b3->SetLinearVelocity(b2Vec2(0.0f, -150.0f));
 		}
@@ -117,23 +117,23 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
-			b2Body* body = m_world->Create(&bd);
+			b2Body* body = m_world->CreateBody(&bd);
 
 			b2PolygonDef sd;
 			sd.density = 0.0f;
 			sd.restitution = k_restitution;
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(-10.0f, 0.0f), 0.0f);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(10.0f, 0.0f), 0.0f);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, -10.0f), 0.5f * b2_pi);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, 10.0f), -0.5f * b2_pi);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 		}
 
 		{
@@ -152,10 +152,10 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set( 0.0f, 15.0f );
-			b2Body* body = m_world->Create(&bd);
-			body->Create(&sd_bottom);
-			body->Create(&sd_left);
-			body->Create(&sd_right);
+			b2Body* body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd_bottom);
+			body->CreateShape(&sd_left);
+			body->CreateShape(&sd_right);
 			body->SetMassFromShapes();
 		}
 
@@ -165,14 +165,14 @@ public:
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(-5.0f, 20.0f);
 			bd.isBullet = true;
-			b2Body* body = m_world->Create(&bd);
+			b2Body* body = m_world->CreateBody(&bd);
 			body->SetAngularVelocity(b2Random(-50.0f, 50.0f));
 
 			b2PolygonDef sd;
 			sd.SetAsBox(0.1f, 4.0f);
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
-			body->Create(&sd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 		}
 #endif
@@ -183,14 +183,14 @@ public:
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(5.0f, 20.0f + i);
 			bd.isBullet = true;
-			b2Body* body = m_world->Create(&bd);
+			b2Body* body = m_world->CreateBody(&bd);
 			body->SetAngularVelocity(b2Random(-50.0f, 50.0f));
 
 			b2CircleDef sd;
 			sd.radius = 0.25f;
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
-			body->Create(&sd);
+			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 		}
 #endif

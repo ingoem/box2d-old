@@ -32,23 +32,23 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
-			b2Body* body = m_world->Create(&bd);
+			b2Body* body = m_world->CreateBody(&bd);
 
 			b2PolygonDef sd;
 			sd.density = 0.0f;
 			sd.restitution = k_restitution;
 
 			sd.SetAsBox(0.2f, 20.0f, b2Vec2(-20.0f, 0.0f), 0.0f);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.2f, 20.0f, b2Vec2(20.0f, 0.0f), 0.0f);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.2f, 20.0f, b2Vec2(0.0f, -20.0f), 0.5f * b2_pi);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 
 			sd.SetAsBox(0.2f, 20.0f, b2Vec2(0.0f, 20.0f), -0.5f * b2_pi);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 		}
 
 		{
@@ -81,9 +81,9 @@ public:
 
 			bd.position.Set(0.0f, 1.05f);
 			bd.angle = b2_pi;
-			m_body = m_world->Create(&bd);
-			m_body->Create(&sd1);
-			m_body->Create(&sd2);
+			m_body = m_world->CreateBody(&bd);
+			m_body->CreateShape(&sd1);
+			m_body->CreateShape(&sd2);
 			m_body->SetMassFromShapes();
 		}
 	}

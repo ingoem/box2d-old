@@ -32,19 +32,19 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		b2BodyDef bodydef;
 		bodydef.type = b2BodyDef::e_dynamicBody;
 		bodydef.position.Set(0.0f, 10.0f);
-		m_body = m_world->Create(&bodydef);
+		m_body = m_world->CreateBody(&bodydef);
 
 		b2PolygonDef sd;
 		sd.SetAsBox(4.0f, 4.0f, b2Vec2(0.0f, 0.0f), 0.0f);
 		sd.density = 10.0f;
-		m_shape1 = m_body->Create(&sd);
+		m_shape1 = m_body->CreateShape(&sd);
 		m_body->SetMassFromShapes();
 
 		m_shape2 = NULL;
@@ -61,7 +61,7 @@ public:
 				sd.radius = 3.0f;
 				sd.density = 10.0f;
 				sd.localPosition.Set(0.5f, -4.0f);
-				m_shape2 = m_body->Create(&sd);
+				m_shape2 = m_body->CreateShape(&sd);
 				m_body->SetMassFromShapes();
 				m_body->WakeUp();
 			}
@@ -70,7 +70,7 @@ public:
 		case 'd':
 			if (m_shape2 != NULL)
 			{
-				m_body->Destroy(m_shape2);
+				m_body->DestroyShape(m_shape2);
 				m_shape2 = NULL;
 				m_body->SetMassFromShapes();
 				m_body->WakeUp();

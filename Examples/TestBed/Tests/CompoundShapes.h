@@ -29,11 +29,11 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
-			b2Body* body = m_world->Create(&bd);
+			b2Body* body = m_world->CreateBody(&bd);
 
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
-			body->Create(&sd);
+			body->CreateShape(&sd);
 		}
 
 		{
@@ -54,9 +54,9 @@ public:
 				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
 				bd.angle = b2Random(-b2_pi, b2_pi);
-				b2Body* body = m_world->Create(&bd);
-				body->Create(&sd1);
-				body->Create(&sd2);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateShape(&sd1);
+				body->CreateShape(&sd2);
 				body->SetMassFromShapes();
 			}
 		}
@@ -77,9 +77,9 @@ public:
 				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
 				bd.angle = b2Random(-b2_pi, b2_pi);
-				b2Body* body = m_world->Create(&bd);
-				body->Create(&sd1);
-				body->Create(&sd2);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateShape(&sd1);
+				body->CreateShape(&sd2);
 				body->SetMassFromShapes();
 			}
 		}
@@ -114,9 +114,9 @@ public:
 				bd.type = b2BodyDef::e_dynamicBody;
 				bd.position.Set(x, 2.05f + 2.5f * i);
 				bd.angle = 0.0f;
-				b2Body* body = m_world->Create(&bd);
-				body->Create(&sd1);
-				body->Create(&sd2);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateShape(&sd1);
+				body->CreateShape(&sd2);
 				body->SetMassFromShapes();
 			}
 		}
@@ -137,10 +137,10 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set( 0.0f, 2.0f );
-			b2Body* body = m_world->Create(&bd);
-			body->Create(&sd_bottom);
-			body->Create(&sd_left);
-			body->Create(&sd_right);
+			b2Body* body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd_bottom);
+			body->CreateShape(&sd_left);
+			body->CreateShape(&sd_right);
 			body->SetMassFromShapes();
 		}
 	}

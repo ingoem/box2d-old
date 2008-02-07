@@ -51,8 +51,8 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		// Small triangle
@@ -71,8 +71,8 @@ public:
 		triangleBodyDef.type = b2BodyDef::e_dynamicBody;
 		triangleBodyDef.position.Set(-5.0f, 2.0f);
 
-		b2Body* body1 = m_world->Create(&triangleBodyDef);
-		body1->Create(&triangleShapeDef);
+		b2Body* body1 = m_world->CreateBody(&triangleBodyDef);
+		body1->CreateShape(&triangleShapeDef);
 		body1->SetMassFromShapes();
 
 		// Large triangle (recycle definitions)
@@ -83,8 +83,8 @@ public:
 		triangleBodyDef.position.Set(-5.0f, 6.0f);
 		triangleBodyDef.fixedRotation = true; // look at me!
 
-		b2Body* body2 = m_world->Create(&triangleBodyDef);
-		body2->Create(&triangleShapeDef);
+		b2Body* body2 = m_world->CreateBody(&triangleBodyDef);
+		body2->CreateShape(&triangleShapeDef);
 		body2->SetMassFromShapes();
 
 		// Small box
@@ -100,8 +100,8 @@ public:
 		boxBodyDef.type = b2BodyDef::e_dynamicBody;
 		boxBodyDef.position.Set(0.0f, 2.0f);
 
-		b2Body* body3 = m_world->Create(&boxBodyDef);
-		body3->Create(&boxShapeDef);
+		b2Body* body3 = m_world->CreateBody(&boxBodyDef);
+		body3->CreateShape(&boxShapeDef);
 		body3->SetMassFromShapes();
 
 		// Large box (recycle definitions)
@@ -109,8 +109,8 @@ public:
 		boxShapeDef.groupIndex = k_largeGroup;
 		boxBodyDef.position.Set(0.0f, 6.0f);
 
-		b2Body* body4 = m_world->Create(&boxBodyDef);
-		body4->Create(&boxShapeDef);
+		b2Body* body4 = m_world->CreateBody(&boxBodyDef);
+		body4->CreateShape(&boxShapeDef);
 		body4->SetMassFromShapes();
 
 		// Small circle
@@ -126,8 +126,8 @@ public:
 		circleBodyDef.type = b2BodyDef::e_dynamicBody;
 		circleBodyDef.position.Set(5.0f, 2.0f);
 		
-		b2Body* body5 = m_world->Create(&circleBodyDef);
-		body5->Create(&circleShapeDef);
+		b2Body* body5 = m_world->CreateBody(&circleBodyDef);
+		body5->CreateShape(&circleShapeDef);
 		body5->SetMassFromShapes();
 
 		// Large circle
@@ -135,8 +135,8 @@ public:
 		circleShapeDef.groupIndex = k_largeGroup;
 		circleBodyDef.position.Set(5.0f, 6.0f);
 
-		b2Body* body6 = m_world->Create(&circleBodyDef);
-		body6->Create(&circleShapeDef);
+		b2Body* body6 = m_world->CreateBody(&circleBodyDef);
+		body6->CreateShape(&circleShapeDef);
 		body6->SetMassFromShapes();
 	}
 	static Test* Create()

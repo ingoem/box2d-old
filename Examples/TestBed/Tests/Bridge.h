@@ -31,8 +31,8 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -51,8 +51,8 @@ public:
 			for (int i = 0; i < numPlanks; ++i)
 			{
 				bd.position.Set(-14.5f + 1.0f * i, 5.0f);
-				b2Body* body = m_world->Create(&bd);
-				body->Create(&sd);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateShape(&sd);
 				body->SetMassFromShapes();
 
 				b2Vec2 anchor(-15.0f + 1.0f * i, 5.0f);
@@ -61,7 +61,7 @@ public:
 				jd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
 				jd.body1 = prevBody;
 				jd.body2 = body;
-				m_world->Create(&jd);
+				m_world->CreateJoint(&jd);
 
 				prevBody = body;
 			}
@@ -72,7 +72,7 @@ public:
 			jd.referenceAngle = ground->GetAngle() - prevBody->GetAngle();
 			jd.body1 = prevBody;
 			jd.body2 = ground;
-			m_world->Create(&jd);
+			m_world->CreateJoint(&jd);
 		}
 	}
 

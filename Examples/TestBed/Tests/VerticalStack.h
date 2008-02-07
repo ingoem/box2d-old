@@ -38,8 +38,8 @@ public:
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
-			b2Body* ground = m_world->Create(&bd);
-			ground->Create(&sd);
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -63,12 +63,12 @@ public:
 				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;
 				//bd.position.Set(x, 0.752f + 1.54f * i);
 				bd.position.Set(0.0f, 2.51f + 4.02f * i);
-				b2Body* body = m_world->Create(&bd);
+				b2Body* body = m_world->CreateBody(&bd);
 
 				b2Assert(index < k_maxIndices);
 				m_indices[index] = index;
 				sd.userData = m_indices + index++;
-				body->Create(&sd);
+				body->CreateShape(&sd);
 				body->SetMassFromShapes();
 			}
 		}

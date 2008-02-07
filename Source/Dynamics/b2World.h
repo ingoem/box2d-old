@@ -78,22 +78,22 @@ public:
 	/// Create a rigid body given a definition. No reference to the definition
 	/// is retained.
 	/// @warning This function is locked during callbacks.
-	b2Body* Create(const b2BodyDef* def);
+	b2Body* CreateBody(const b2BodyDef* def);
 
 	/// Destroy a rigid body given a definition. No reference to the definition
 	/// is retained. This function is locked during callbacks.
 	/// @warning This automatically deletes all associated shapes and joints.
 	/// @warning This function is locked during callbacks.
-	void Destroy(b2Body* body);
+	void DestroyBody(b2Body* body);
 
 	/// Create a joint to constrain bodies together. No reference to the definition
 	/// is retained. This may cause the connected bodies to cease colliding.
 	/// @warning This function is locked during callbacks.
-	b2Joint* Create(const b2JointDef* def);
+	b2Joint* CreateJoint(const b2JointDef* def);
 
 	/// Destroy a joint. This may cause the connected bodies to begin colliding.
 	/// @warning This function is locked during callbacks.
-	void Destroy(b2Joint* joint);
+	void DestroyJoint(b2Joint* joint);
 
 	/// The world provides a single static ground body with no collision shapes.
 	/// You can use this to simplify the creation of joints.

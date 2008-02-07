@@ -103,7 +103,7 @@ b2Body::~b2Body()
 	// shapes and joints are destroyed in b2World::Destroy
 }
 
-b2Shape* b2Body::Create(b2ShapeDef* def)
+b2Shape* b2Body::CreateShape(b2ShapeDef* def)
 {
 	b2Assert(m_world->m_lock == false);
 	if (m_world->m_lock == true)
@@ -141,7 +141,7 @@ b2Shape* b2Body::Create(b2ShapeDef* def)
 	return s;
 }
 
-void b2Body::Destroy(b2Shape* s)
+void b2Body::DestroyShape(b2Shape* s)
 {
 	b2Assert(m_world->m_lock == false);
 	if (m_world->m_lock == true)
