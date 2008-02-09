@@ -48,6 +48,10 @@ struct b2RevoluteJointDef : public b2JointDef
 		enableMotor = false;
 	}
 
+	/// Initialize the bodies, anchors, and reference angle using the world
+	/// anchor.
+	void Initialize(b2Body* body1, b2Body* body2, const b2Vec2& anchor);
+
 	/// The local anchor point relative to body1's origin.
 	b2Vec2 localAnchor1;
 

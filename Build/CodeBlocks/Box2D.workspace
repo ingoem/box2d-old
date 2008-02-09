@@ -7,6 +7,10 @@
 		</Project>
 		<Project filename="TestBed.cbp" active="1">
 			<Depends filename="Engine.cbp" />
+			<Depends filename="FreeGLUT.cbp" />
+			<Depends filename="GLUI.cbp" />
 		</Project>
+		<Project filename="FreeGLUT.cbp" />
+		<Project filename="GLUI.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

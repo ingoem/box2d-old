@@ -21,7 +21,7 @@
 
 #include "b2Joint.h"
 
-const float32 b2_minPulleyLength = b2_lengthUnitsPerMeter;
+const float32 b2_minPulleyLength = 2.0f * b2_lengthUnitsPerMeter;
 
 /// Pulley joint definition. This requires two ground anchors,
 /// two dynamic body anchor points, max lengths for each side,
@@ -42,6 +42,12 @@ struct b2PulleyJointDef : public b2JointDef
 		ratio = 1.0f;
 		collideConnected = true;
 	}
+
+	/// Initialize the bodies, anchors, lengths, max lengths, and ratio using the world anchors.
+	void Initialize(b2Body* body1, b2Body* body2,
+					const b2Vec2& groundAnchor1, const b2Vec2& groundAnchor2,
+					const b2Vec2& anchor1, const b2Vec2& anchor2,
+					float32 ratio);
 
 	/// The first ground anchor in world coordinates. This point never moves.
 	b2Vec2 groundAnchor1;

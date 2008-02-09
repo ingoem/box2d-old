@@ -56,22 +56,14 @@ public:
 				body->SetMassFromShapes();
 
 				b2Vec2 anchor(-15.0f + 1.0f * i, 5.0f);
-				jd.localAnchor1 = prevBody->GetLocalPoint(anchor);
-				jd.localAnchor2 = body->GetLocalPoint(anchor);
-				jd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
-				jd.body1 = prevBody;
-				jd.body2 = body;
+				jd.Initialize(prevBody, body, anchor);
 				m_world->CreateJoint(&jd);
 
 				prevBody = body;
 			}
 
 			b2Vec2 anchor(-15.0f + 1.0f * numPlanks, 5.0f);
-			jd.localAnchor1 = prevBody->GetLocalPoint(anchor);
-			jd.localAnchor2 = ground->GetLocalPoint(anchor);
-			jd.referenceAngle = ground->GetAngle() - prevBody->GetAngle();
-			jd.body1 = prevBody;
-			jd.body2 = ground;
+			jd.Initialize(prevBody, ground, anchor);
 			m_world->CreateJoint(&jd);
 		}
 	}

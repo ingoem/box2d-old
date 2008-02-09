@@ -37,6 +37,16 @@
 // Cdot = = -dot(ax1, v1) - dot(cross(d + r1, ax1), w1) + dot(ax1, v2) + dot(cross(r2, ax1), v2)
 // J = [-ax1 -cross(d+r1,ax1) ax1 cross(r2,ax1)]
 
+void b2PrismaticJointDef::Initialize(b2Body* b1, b2Body* b2, const b2Vec2& anchor, const b2Vec2& axis)
+{
+	body1 = b1;
+	body2 = b2;
+	localAnchor1 = body1->GetLocalPoint(anchor);
+	localAnchor2 = body2->GetLocalPoint(anchor);
+	localAxis1 = body1->GetLocalVector(axis);
+	referenceAngle = body2->GetAngle() - body1->GetAngle();
+}
+
 b2PrismaticJoint::b2PrismaticJoint(const b2PrismaticJointDef* def)
 : b2Joint(def)
 {

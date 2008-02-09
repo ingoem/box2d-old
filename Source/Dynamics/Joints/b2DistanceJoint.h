@@ -37,6 +37,11 @@ struct b2DistanceJointDef : public b2JointDef
 		length = 1.0f;
 	}
 
+	/// Initialize the bodies, anchors, and length using the world
+	/// anchors.
+	void Initialize(b2Body* body1, b2Body* body2,
+					const b2Vec2& anchor1, const b2Vec2& anchor2);
+
 	/// The local anchor point relative to body1's origin.
 	b2Vec2 localAnchor1;
 

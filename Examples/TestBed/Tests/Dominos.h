@@ -105,10 +105,7 @@ public:
 		b2Vec2 anchor;
 
 		anchor.Set(-2.0f, 1.0f);
-		jd.body1 = b1;
-		jd.body2 = b3;
-		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
-		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
+		jd.Initialize(b1, b3, anchor);
 		jd.collideConnected = true;
 		m_world->CreateJoint(&jd);
 
@@ -127,11 +124,7 @@ public:
 		}
 
 		anchor.Set(-7.0f, 15.0f);
-		jd.body1 = b2;
-		jd.body2 = b4;
-		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
-		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
-		jd.referenceAngle = jd.body2->GetAngle() - jd.body1->GetAngle();
+		jd.Initialize(b2, b4, anchor);
 		m_world->CreateJoint(&jd);
 
 		b2Body* b5;
@@ -158,10 +151,7 @@ public:
 		}
 
 		anchor.Set(6.0f, 2.0f);
-		jd.body1 = b1;
-		jd.body2 = b5;
-		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
-		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
+		jd.Initialize(b1, b5, anchor);
 		m_world->CreateJoint(&jd);
 
 		b2Body* b6;
@@ -180,10 +170,7 @@ public:
 		}
 
 		anchor.Set(7.5f, 4.0f);
-		jd.body1 = b5;
-		jd.body2 = b6;
-		jd.localAnchor1 = jd.body1->GetLocalPoint(anchor);
-		jd.localAnchor2 = jd.body2->GetLocalPoint(anchor);
+		jd.Initialize(b5, b6, anchor);
 		m_world->CreateJoint(&jd);
 
 		b2Body* b7;

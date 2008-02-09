@@ -44,6 +44,10 @@ struct b2PrismaticJointDef : public b2JointDef
 		motorSpeed = 0.0f;
 	}
 
+	/// Initialize the bodies, anchors, axis, and reference angle using the world
+	/// anchor and world axis.
+	void Initialize(b2Body* body1, b2Body* body2, const b2Vec2& anchor, const b2Vec2& axis);
+
 	/// The local anchor point relative to body1's origin.
 	b2Vec2 localAnchor1;
 

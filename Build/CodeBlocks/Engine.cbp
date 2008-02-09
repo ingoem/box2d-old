@@ -36,17 +36,25 @@
 			<Add option="-Wall" />
 			<Add directory="..\..\Source" />
 		</Compiler>
+		<Unit filename="..\..\Source\Collision\Shapes\b2CircleShape.cpp" />
+		<Unit filename="..\..\Source\Collision\Shapes\b2CircleShape.h" />
+		<Unit filename="..\..\Source\Collision\Shapes\b2PolygonShape.cpp" />
+		<Unit filename="..\..\Source\Collision\Shapes\b2PolygonShape.h" />
+		<Unit filename="..\..\Source\Collision\Shapes\b2Shape.cpp" />
+		<Unit filename="..\..\Source\Collision\Shapes\b2Shape.h" />
 		<Unit filename="..\..\Source\Collision\b2BroadPhase.cpp" />
 		<Unit filename="..\..\Source\Collision\b2BroadPhase.h" />
 		<Unit filename="..\..\Source\Collision\b2CollideCircle.cpp" />
 		<Unit filename="..\..\Source\Collision\b2CollidePoly.cpp" />
+		<Unit filename="..\..\Source\Collision\b2Collision.cpp" />
 		<Unit filename="..\..\Source\Collision\b2Collision.h" />
+		<Unit filename="..\..\Source\Collision\b2Distance.cpp" />
 		<Unit filename="..\..\Source\Collision\b2PairManager.cpp" />
 		<Unit filename="..\..\Source\Collision\b2PairManager.h" />
-		<Unit filename="..\..\Source\Collision\b2Shape.cpp" />
-		<Unit filename="..\..\Source\Collision\b2Shape.h" />
+		<Unit filename="..\..\Source\Collision\b2TimeOfImpact.cpp" />
 		<Unit filename="..\..\Source\Common\b2BlockAllocator.cpp" />
 		<Unit filename="..\..\Source\Common\b2BlockAllocator.h" />
+		<Unit filename="..\..\Source\Common\b2Math.cpp" />
 		<Unit filename="..\..\Source\Common\b2Math.h" />
 		<Unit filename="..\..\Source\Common\b2Settings.cpp" />
 		<Unit filename="..\..\Source\Common\b2Settings.h" />
@@ -85,6 +93,7 @@
 		<Unit filename="..\..\Source\Dynamics\b2Island.h" />
 		<Unit filename="..\..\Source\Dynamics\b2World.cpp" />
 		<Unit filename="..\..\Source\Dynamics\b2World.h" />
+		<Unit filename="..\..\Source\Dynamics\b2WorldCallbacks.cpp" />
 		<Unit filename="..\..\Source\Dynamics\b2WorldCallbacks.h" />
 		<Extensions>
 			<code_completion />

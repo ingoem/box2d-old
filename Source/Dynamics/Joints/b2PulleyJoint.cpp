@@ -39,6 +39,28 @@
 // K = invMass + invI * cross(r, u)^2
 // 0 <= impulse
 
+void b2PulleyJointDef::Initialize(b2Body* b1, b2Body* b2,
+				const b2Vec2& ga1, const b2Vec2& ga2,
+				const b2Vec2& anchor1, const b2Vec2& anchor2,
+				float32 r)
+{
+	body1 = b1;
+	body2 = b2;
+	groundAnchor1 = ga1;
+	groundAnchor2 = ga2;
+	localAnchor1 = body1->GetLocalPoint(anchor1);
+	localAnchor2 = body2->GetLocalPoint(anchor2);
+	b2Vec2 d1 = anchor1 - ga1;
+	length1 = d1.Length();
+	b2Vec2 d2 = anchor2 - ga2;
+	length2 = d2.Length();
+	ratio = r;
+	b2Assert(ratio > FLT_EPSILON);
+	float32 C = length1 + ratio * length2;
+	maxLength1 = C - ratio * b2_minPulleyLength;
+	maxLength2 = (C - b2_minPulleyLength) / ratio;
+}
+
 b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 : b2Joint(def)
 {
@@ -51,13 +73,10 @@ b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 	b2Assert(def->ratio != 0.0f);
 	m_ratio = def->ratio;
 
-	float32 length1 = b2Max(b2_minPulleyLength, def->length1);
-	float32 length2 = b2Max(b2_minPulleyLength, def->length2);
+	m_constant = def->length1 + m_ratio * def->length2;
 
-	m_constant = length1 + m_ratio * length2;
-
-	m_maxLength1 = b2Clamp(def->maxLength1, length1, m_constant - m_ratio * b2_minPulleyLength);
-	m_maxLength2 = b2Clamp(def->maxLength2, length2, (m_constant - b2_minPulleyLength) / m_ratio);
+	m_maxLength1 = b2Min(def->maxLength1, m_constant - m_ratio * b2_minPulleyLength);
+	m_maxLength2 = b2Min(def->maxLength2, (m_constant - b2_minPulleyLength) / m_ratio);
 
 	m_force = 0.0f;
 	m_limitForce1 = 0.0f;

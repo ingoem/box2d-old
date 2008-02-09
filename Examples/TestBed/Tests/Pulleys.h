@@ -59,17 +59,11 @@ public:
 			body2->SetMassFromShapes();
 
 			b2PulleyJointDef pulleyDef;
-			pulleyDef.body1 = body1;
-			pulleyDef.body2 = body2;
-			pulleyDef.localAnchor1.Set(0.0f, b);
-			pulleyDef.localAnchor2.Set(0.0f, b);
-			pulleyDef.groundAnchor1.Set(-10.0f, y + b + L);
-			pulleyDef.groundAnchor2.Set(10.0f, y + b + L);
-			pulleyDef.ratio = 2.0f;
-			pulleyDef.length1 = L;
-			pulleyDef.length2 = L;
-			pulleyDef.maxLength1 = 28.0f;
-			pulleyDef.maxLength2 = 12.0f;
+			b2Vec2 anchor1(-10.0f, y + b);
+			b2Vec2 anchor2(10.0f, y + b);
+			b2Vec2 groundAnchor1(-10.0f, y + b + L);
+			b2Vec2 groundAnchor2(10.0f, y + b + L);
+			pulleyDef.Initialize(body1, body2, groundAnchor1, groundAnchor2, anchor1, anchor2, 2.0f);
 
 			m_joint1 = (b2PulleyJoint*)m_world->CreateJoint(&pulleyDef);
 		}

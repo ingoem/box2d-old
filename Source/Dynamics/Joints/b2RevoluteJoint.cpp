@@ -35,6 +35,15 @@
 // J = [0 0 -1 0 0 1]
 // K = invI1 + invI2
 
+void b2RevoluteJointDef::Initialize(b2Body* b1, b2Body* b2, const b2Vec2& anchor)
+{
+	body1 = b1;
+	body2 = b2;
+	localAnchor1 = body1->GetLocalPoint(anchor);
+	localAnchor2 = body2->GetLocalPoint(anchor);
+	referenceAngle = body2->GetAngle() - body1->GetAngle();
+}
+
 b2RevoluteJoint::b2RevoluteJoint(const b2RevoluteJointDef* def)
 : b2Joint(def)
 {

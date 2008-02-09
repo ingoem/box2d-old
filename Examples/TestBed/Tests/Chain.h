@@ -57,11 +57,7 @@ public:
 				body->SetMassFromShapes();
 
 				b2Vec2 anchor(float32(i), y);
-				jd.localAnchor1 = prevBody->GetLocalPoint(anchor);
-				jd.localAnchor2 = body->GetLocalPoint(anchor);
-				jd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
-				jd.body1 = prevBody;
-				jd.body2 = body;
+				jd.Initialize(prevBody, body, anchor);
 				m_world->CreateJoint(&jd);
 
 				prevBody = body;

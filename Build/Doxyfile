@@ -11,9 +11,9 @@ CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
-ABBREVIATE_BRIEF       = "The $name class    " \
-                         "The $name widget    " \
-                         "The $name file    " \
+ABBREVIATE_BRIEF       = "The $name class     " \
+                         "The $name widget     " \
+                         "The $name file     " \
                          is \
                          provides \
                          specifies \
@@ -25,7 +25,7 @@ ABBREVIATE_BRIEF       = "The $name class    " \
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = NO
-STRIP_FROM_PATH        = "C:/Documents and Settings/Erin/    "
+STRIP_FROM_PATH        = "C:/Documents and Settings/Erin/     "
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = YES
@@ -82,7 +82,7 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
-WARN_FORMAT            = "$file:$line: $text    "
+WARN_FORMAT            = "$file:$line: $text     "
 WARN_LOGFILE           = 
 #---------------------------------------------------------------------------
 # configuration options related to the input files
@@ -151,13 +151,13 @@ IGNORE_PREFIX          =
 # configuration options related to the HTML output
 #---------------------------------------------------------------------------
 GENERATE_HTML          = YES
-HTML_OUTPUT            = D:/Development/Box2D/API
-HTML_FILE_EXTENSION    = .html
+HTML_OUTPUT            = D:/Development/Box2D/Temp
+HTML_FILE_EXTENSION    = .htm
 HTML_HEADER            = 
 HTML_FOOTER            = 
 HTML_STYLESHEET        = 
 HTML_ALIGN_MEMBERS     = YES
-GENERATE_HTMLHELP      = NO
+GENERATE_HTMLHELP      = YES
 HTML_DYNAMIC_SECTIONS  = NO
 CHM_FILE               = 
 HHC_LOCATION           = 
@@ -172,15 +172,15 @@ TREEVIEW_WIDTH         = 250
 # configuration options related to the LaTeX output
 #---------------------------------------------------------------------------
 GENERATE_LATEX         = NO
-LATEX_OUTPUT           = latex
-LATEX_CMD_NAME         = latex
-MAKEINDEX_CMD_NAME     = makeindex
-COMPACT_LATEX          = NO
-PAPER_TYPE             = a4wide
+LATEX_OUTPUT           = D:/Development/Box2D/Documentation
+LATEX_CMD_NAME         = "C:/Program Files/MiKTeX 2.6/miktex/bin/pdflatex.exe"
+MAKEINDEX_CMD_NAME     = "C:/Program Files/MiKTeX 2.6/miktex/bin/makeindex.exe"
+COMPACT_LATEX          = YES
+PAPER_TYPE             = letter
 EXTRA_PACKAGES         = 
 LATEX_HEADER           = 
-PDF_HYPERLINKS         = NO
-USE_PDFLATEX           = NO
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
 LATEX_BATCHMODE        = NO
 LATEX_HIDE_INDICES     = NO
 #---------------------------------------------------------------------------
