@@ -19,30 +19,31 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 </div>
 
 <h1>Table of Contents</h1>
-<div class = "test">
+<div class = "toc">
 <ul>
-	<h2>Getting Started</h1>
-	<li class="bold"><a href="#introduction">Introduction</a></li>
+	<li><a href="#introduction">Introduction</a></li>
 	<ul>
 		<li><a href="#prerequisites">Prerequisites</a></li>
 		<li><a href="#core_concepts">Core Concepts</a></li>
 	</ul>
-	<li class="bold"><a href="#hello_box2d">Hello Box2D</a></li>
+	<li><a href="#hello_box2d">Hello Box2D</a></li>
 		<ul>
 			<li><a href="#creating_the_world">Creating the World</a></li>
 			<li><a href="#creating_ground_box">Creating a Ground Box</a></li>
 			<li><a href="#creating_dynamic_body">Creating a Dynamic Body</a></li>
 			<li><a href="#simulating_the_world">Simulating the World</a></li>
 			<li><a href="#cleanup">Cleanup</a></li>
-		</ul>	
-	<li class="bold"><a href="#api_design">API Design</a></li>	
+		</ul>
+    <li><a href="#testbed">Testbed</a></li>
+	<li><a href="#api_design">API Design</a></li>	
 	<ul>
 		<li><a href="#memory_management">Memory Management</a></li>
 		<li><a href="#factories_and_definitions">Factories and Definitions</a></li>
+        <li><a href="#implicit_destruction">Implicit Destruction</a></li>
 		<li><a href="#user_data">User Data</a></li>
 		<li><a href="#dealing_with_c++">Dealing With C++</a></li>	
 	</ul>
-	<li class="bold"><a href="#world">World</a></li>
+	<li><a href="#world">World</a></li>
 		<ul>
 			<li><a href="#creating_and_destroying_world">Creating and Destroying a World</a></li>
 			<li><a href="#using_a_world">Using a World</a></li>
@@ -50,7 +51,7 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 			<li><a href="#exploring_the_world">Exploring the World</a></li>
 			<li><a href="#aabb_queries">AABB Queries</a></li>
 		</ul>
-	<li class="bold"><a href="#shapes">Shapes</a></li>
+	<li><a href="#shapes">Shapes</a></li>
 	<ul>
 		<li><a href="#shape_definition">Shape Definition</a></li>
 		<li><a href="#local_position_and_rotation">Local Position and Rotation</a></li>
@@ -62,7 +63,7 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 		<li><a href="#polygon_definitions">Polygon Definition</a></li>		
 		<li><a href="#creating_destroying_shape">(Not) Creating and Destroying a Shape</a></li>		
 	</ul>
-	<li class="bold"><a href="#bodies">Bodies</a></li>
+	<li><a href="#bodies">Bodies</a></li>
 	<ul>
 		<li><a href="#body_definition">Body Definition</a></li>
 		<li><a href="#adding_shapes">Adding Shapes</a></li>
@@ -75,7 +76,7 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 		<li><a href="#static_and_dynamic">Static and Dynamic Bodies</a></li>
 		<li><a href="#using_a_body">Using a Body</a></li>
 	</ul>
-	<li class="bold"><a href="#joints">Joints</a></li>
+	<li><a href="#joints">Joints</a></li>
 	<ul>
 		<li><a href="#distance_joint">Distance Joint</a></li>
 		<li><a href="#revolute_joint">Revolute Joint</a></li>
@@ -84,25 +85,25 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 		<li><a href="#gear_joint">Gear Joint</a></li>
 		<li><a href="#mouse_joint">Mouse Joint</a></li>
 	</ul>
-	<li class="bold"><a href="#contacts">Contacts</a></li>
+	<li><a href="#contacts">Contacts</a></li>
 	<ul>
 	<li><a href="#introduction">Introduction</a></li>
 	<li><a href="#contact_callbacks">Contact Callbacks</a></li>
 	<li><a href="#processing_contacts">Processing Contacts</a></li>
 	</ul>
-	<li class="bold"><a href="#behind_the_scenes">Behind the Scenes</a></li>
+	<li><a href="#behind_the_scenes">Behind the Scenes</a></li>
 	<ul>
 	<li>Under Construction</li>
 	</ul>
-	<li class="bold"><a href="#settings">Settings</a></li>
+	<li><a href="#settings">Settings</a></li>
 	<ul>
 	<li>Under Construction</li>
 	</ul>
-	<li class="bold"><a href="#references">References</a></li>
+	<li><a href="#references">References</a></li>
 	<ul>
 	<li>Under Construction</li>
 	</ul>
-	<li class="bold"><a href="#open_issues">Open Issues</a></li>
+	<li><a href="#open_issues">Open Issues</a></li>
 	<ul>
 	<li>Under Construction</li>
 	</ul>
@@ -112,7 +113,7 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 <a name="introduction"></a>
 <h1>Introduction</h1>
 <div class = "text">
-<p>Box2D is a 2D rigid body simulator for games. You can use it in your game to make objects move in believable ways and make the world seem more interactive. From the game's point of view a physics engine is just a system for procedural animation. Rather than paying (or begging) an animator to move your actors around, you can let Sir Isaac Newton do the directing.</p>
+<p>Box2D is a 2D rigid body simulation library for games. Programmer's can use it in their games to make objects move in believable ways and make the world seem more interactive. From the game's point of view a physics engine is just a system for procedural animation. Rather than paying (or begging) an animator to move your actors around, you can let Sir Isaac Newton do the directing.</p>
 
 <p>Box2D is written in portable C++. Most of the types defined in the engine begin with the <b>b2</b> prefix. Hopefully this is sufficient to avoid name clashing with your game engine.</p>
 </div>
@@ -125,6 +126,8 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 <p><a href="http://wikipedia.org">Wikipedia</a> is also an excellent source of physics and mathematics knowledge. In some ways it is more useful than Google, because it has carefully crafted content.</p>
 
 <p>This is not a prerequisite, but if you are curious about the about the inner workings of Box2D, you can look at these <a href="http://www.gphysics.com/files/GDC2007_ErinCatto.zip">slides</a>.</p>
+
+<p>Since Box2D is written in C++, you are expected to be experienced in C++ programming. Box2D should not be your first C++ programming project. You should be comfortable with compiling, linking, and debugging.</p>
 </div>
 
 <a name="core_concepts"></a>
@@ -136,19 +139,19 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 <dt>rigid body</dt>
 <dd>A chunk of matter that is so strong that the distance between any two bits of matter on the chunk is completely constant. They are hard like a diamond. In the following discussion we use <em>body</em> interchangably with rigid body.</dd>
 <dt>shape</dt>
-<dd>A 2D piece of collision geometry that is fixed to a rigid body.
+<dd>A 2D piece of collision geometry that is rigidly attached to a body.
 <dt>constraint</dt>
 <dd>A constraint is a physical connection that removes degrees of freedom from bodies. In 2D a body has 3 degrees of freedom. If we take a body and pin it to the wall (like a pendulum) we have <em>constrained</em> the body to the wall. At this point the body can only rotate about the pin, so the constraint has removed 2 degrees of freedom.</dd>
 <dt>contact constraint</dt>
-<dd>A special constraint designed to prevent penetration of rigid bodies and to simulate friction. You will never create a contact constraint, they are created automatically by Box2D.</dd>
+<dd>A special constraint designed to prevent penetration of rigid bodies and to simulate friction and restitution. You will never create a contact constraint, they are created automatically by Box2D.</dd>
 <dt>joint</dt>
-<dd>This is a contraint used to hold two or more bodies together. Box2D supports these joint types: revolute, prismatic, distance, and more. Joints may support <b>limits</b> and <b>motors</b>.</dd>
+<dd>This is a contraint used to hold two or more bodies together. Box2D supports these joint types: revolute, prismatic, distance, and more. Joints may support <em>limits</em> and <em>motors</em>.</dd>
 <dt>joint limit</dt>
-<dd>A joint limit restricts the range of motion of a joint. For example, the human elbow only allow a certain range of motion.</dd>
+<dd>A joint limit restricts the range of motion of a joint. For example, the human elbow only allows a certain range of angles.</dd>
 <dt>joint motor</dt>
 <dd>A joint motor drives the motion of the connected bodies according to the joint's degrees of freedom. For example, you can use a motor to drive the rotation of an elbow.</dd>
 <dt>world</dt>
-<dd>A physics world is a collection of bodies, shapes, and constraints that interact together. Box2D supports the creation of multiple worlds, but this is usually not necessary.</dd>
+<dd>A physics world is a collection of bodies, shapes, and constraints that interact together. Box2D supports the creation of multiple worlds, but this is usually not necessary or desirable.</dd>
 </dl>
 </div>
 
@@ -158,7 +161,7 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 <p>In the distribution of Box2D is a <em>Hello World</em> project. The program creates a large ground box and a small dynamic box. This code does not contain any graphics, so prepare to be underwelmed. :)</p>
 
 <a name="creating_the_world"></a>
-<h2>Creating the World (of Box2D)</h2>
+<h2>Creating a World</h2>
 <p>Every Box2D program begins with the creation of a world object. This is the physics hub that manages memory, objects, and simulation.</p>
 <p>To create a world object, first we need to define a bounding box for the world. Box2D uses the bounding box to accelerate collision detection. The size isn't critical, but a better fit will improve performance. It is better to make the box too big than to make it too small.</p>
 <pre class="code">
@@ -166,6 +169,8 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
     worldAABB.minVertex.Set(-100.0f, -100.0f);
     worldAABB.maxVertex.Set(100.0f, 100.0f);
 </pre>
+<blockquote>The <b>world AABB</b> should always be bigger then the region where your bodies are located. It is better to make the world AABB too big than too small. If a body reaches the boundary of the world AABB it will be frozen and will stop simulating.</blockquote>
+
 <p>Next we define the gravity vector. Yes, you can make gravity go sideways (or you could just rotate your monitor). Also we tell the world to allow bodies to sleep when they come to rest. A sleeping body doesn't require any simulation.</p>
 <pre class="code">
     b2Vec2 gravity(0.0f, -10.0f);
@@ -181,51 +186,61 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 <h2>Creating a Ground Box</h2>
 <p>Bodies are built using the following steps:</p>
 <ol>
+<li>Define a body with a type, position, etc.</li>
+<li>Use the world object to create the body.</li>
 <li>Define a shape with geometry, friction, density, etc.</li>
-<li>Define a body with a shape list, position, velocity, etc.</li>
-<li>Use the world object to create a body.</li>
+<li>Create the shape on the body.
 </ol>
-<p>So now we create a ground box definition. The data in definitions are copied by Box2D, so you can create these on the stack or cook them into your game structures. This allows you to use instancing of shape data. Here is the ground box definition.</p>
-<pre class="code">
-    b2BoxDef groundBoxDef;
-    groundBoxDef.extents.Set(50.0f, 10.0f);
-    groundBoxDef.density = 0.0f;
-</pre>
-<p>The <em>extents</em> is just a vector of the box's half widths. So in this case the ground box is 100 units wide (x-axis) and 20 units tall (y-axis). Box2D is tuned for meters, kilograms, and seconds. So you can consider the extents to be in meters. However, it is possible to change unit systems, as discussed later in this document</p>
-<p>The density is specified as zero. If all the shapes attached to a body have zero density, then the body is treated as static.</p>
-<p>Now we create the ground body. For this we need a <em>body definition</em>. With the body definition we specify the initial position of the body and its shape list. In this case there is just one shape.</p>
+<p>For step 1 we create the ground body. For this we need a <em>body definition</em>. With the body definition we specify the initial position of the body and the body type. Bodies are either dynamic or static. By default, bodies are static, so we don't need to set the body type for the ground body. Static bodies don't collide with other static bodies.</p>
 <pre class="code">
     b2BodyDef groundBodyDef;
     groundBodyDef.position.Set(0.0f, -10.0f);
-    groundBodyDef.AddShape(&groundBoxDef);
 </pre>
-<p>The body definition is passed onto the world object to create the ground body.</p>
+<p>For step 2 the body definition is passed to the world object to create the ground body. The world object does not keep a reference to the body definition.</p>
 <pre class="code">
     b2Body* ground = world.CreateBody(&groundBodyDef);
 </pre>
+<p>For step 3 we create a ground polygon definition. We use the <code>SetAsBox</code> shortcut to form the ground polygon into a box shape, with the box centered on the origin of the parent body.</p>
+<pre class="code">
+	b2PolygonDef groundShapeDef;
+	groundShapeDef.SetAsBox(50.0f, 10.0f);
+</pre>
+<p> The <code>SetAsBox</code> function takes the half-width and half-height. So in this case the ground box is 100 units wide (x-axis) and 20 units tall (y-axis). Box2D is tuned for meters, kilograms, and seconds. So you can consider the extents to be in meters. However, it is possible to change unit systems, as discussed later in this document</p>
+<p>We finish the ground body in step 4 by creating the ground polygon shape on the ground body.</p>
+<pre class="code">
+	groundBody->CreateShape(&groundShapeDef);
+</pre>
 <p>Again, Box2D does not keep a reference to the shape or body definitions. It copies the data into the <code>b2Body</code> structure.</p>
-<p>Note that every shape must have a parent body, even shapes that are static. However, you can attach all static shapes to a single static body. This need for static bodies is done to make the Box2D code more uniform internal, reducing the number of potential bugs. A that's a good thing.</p>
+
+<p>Note that every shape must have a parent body, even shapes that are static. However, you can attach all static shapes to a single static body. This need for static bodies is done to make the Box2D code more uniform internally, reducing the number of potential bugs.</p>
+
 <p>You might notice a pattern here. Most Box2D types are prefixed with <code>b2</code>. This is done to reduce the chance for naming conflicts with your code.</p>
 
 <a name="creating_dynamic_body"></a>
 <h2>Creating a Dynamic Body</h2>
-<p>So now we have a ground body. We can use the same technique to create a dynamic body. The main difference, besides dimensions, is that the box shape's density is greater than zero. This makes Box2D treat the body as dynamic. Here is the code to create the dynamic box.</p>
+<p>So now we have a ground body. We can use the same technique to create a dynamic body. The main difference, besides dimensions, is that we must establish the dynamic body's mass properties.</p>
+<p>First we create the body. We must set the type to dynamic (the default is static).</p>
 <pre class="code">
-    b2BoxDef boxDef;
-    boxDef.extents.Set(1.0f, 1.0f);
-    boxDef.density = 1.0f;
-    boxDef.friction = 0.3f;
-    b2BodyDef bodyDef;
-    bodyDef.position.Set(0.0f, 4.0f);
-    bodyDef.AddShape(&boxDef);
-    b2Body* body = world.CreateBody(&bodyDef);
+	b2BodyDef bodyDef;
+	bodyDef.type = b2BodyDef::e_dynamicBody;
+	bodyDef.position.Set(0.0f, 4.0f);
+	b2Body* body = world.CreateBody(&bodyDef);
+</pre>
+<p>Next we create and attach a polygon shape. Notice that we set density to 1. The default density is zero. Also, the friction on the shape is set to 0.3. Once the shape is attached, we instruct the body to compute it's mass properties from the attached shapes using the method <code>SetMassFromShapes</code>. This gives you a hint that you can attach more than one shape per body. If the computed mass is zero, then the body becomes truly static. Bodies have a mass of zero by default, that's why we didn't need to call <code>SetMassFromShapes</code> for the ground body.</p>
+<pre class="code">
+	b2PolygonDef shapeDef;
+	shapeDef.SetAsBox(1.0f, 1.0f);
+	shapeDef.density = 1.0f;
+	shapeDef.friction = 0.3f;
+	body->CreateShape(&shapeDef);
+	body->SetMassFromShapes();
 </pre>
 <p>That's it for initialization. We are now ready to begin simulating.</p>
 
 <a name="simulating_the_world"></a>
 <h2> Simulating the World (of Box2D)</h2>
-<p>So we have initialized the ground box and a dynamic box. Now we are ready to set Newton loose to do his thing. We just have a couple more things to consider.</p>
-<p>Box2D uses a bit of numerical code called an <em>integrator</em>. Integrators simulation the physics equations at discrete points of time. This goes along with the traditional game loop where we essentially have a flip book of movement on the screen. So we need to pick a time step for Box2D. Generally physics engines for games like a time step at least as fast as 60Hz or 1/60 seconds. You can get away with larger time steps, but you will have to be more careful about setting up the definitions for your world. We also don't like the time step to change much. So don't tie the time step to your frame rate (unless you really, really have to). If you decide to do this, drop me a note in the forums because you will need to make some modifications to Box2D. Without further ado, here is the time step.</p>
+<p>So we have initialized the ground box and a dynamic box. Now we are ready to set Newton loose to do his thing. We just have a couple more issues to consider.</p>
+<p>Box2D uses a bit of numerical code called an <em>integrator</em>. Integrators simulation the physics equations at discrete points of time. This goes along with the traditional game loop where we essentially have a flip book of movement on the screen. So we need to pick a time step for Box2D. Generally physics engines for games like a time step at least as fast as 60Hz or 1/60 seconds. You can get away with larger time steps, but you will have to be more careful about setting up the definitions for your world. We also don't like the time step to change much. So don't tie the time step to your frame rate (unless you really, really have to). Without further ado, here is the time step.</p>
 <pre class="code">
     float32 timeStep = 1.0f / 60.0f;
 </pre>
@@ -239,15 +254,32 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
     for (int32 i = 0; i < 60; ++i)
     {
         world.Step(timeStep, iterations);
-        b2Vec2 position = body->GetOriginPosition();
-        float32 rotation = body->GetRotation();
-        printf("%4.2f %4.2f %4.2f\n", position.x, position.y, rotation);
+        b2Vec2 position = body->GetPosition();
+        float32 angle = body->GetAngle();
+        printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
     }
 </pre>
 
 <a name="cleanup"></a>
 <h2>Cleanup</h2>
 <p>When a world leaves scope or is deleted by calling <code>delete</code> on a pointer, all the memory reserved for bodies and joints is freed. This is done to make your life easier. However, you will need to nullify any body or joint pointers you have because they will become invalid.</p>
+</div>
+
+<a name="testbed"></a>
+<h1>The Testbed</h1>
+<div class = "text">
+<p>Once you have conquered the HelloWorld example, you should start looking at Box2D's testbed. The testbed is a unit-testing framework and demo environment. Here are some of the features:</p>
+<ul>
+<li>Camera with pan and zoom.</li>
+<li>Mouse picking of shapes attached to dynamic bodies.</li>
+<li>Extensible set of tests.</li>
+<li>GUI for selecting tests, parameter tuning, and debug drawing options.</li>
+<li>Pause and single step simulation.</li>
+<li>Text rendering.</li>
+</ul>
+<img src="images/testbed.gif" class="figure"/><br/>
+<p>The testbed has many examples of Box2D usage in the test cases and the framework itself. I encourage you to explore and tinker with the testbed as you learn Box2D.</p>
+<p><b>Note:</b> the testbed is written using <a href="http://freeglut.sourceforge.net/">freeglut</a> and <a href="http://www.cs.unc.edu/~rademach/glui/">GLUI</a>. The testbed is not part of the Box2D library. Box2D is agnostic about rendering. As shown by the HelloWorld example, you don't need a renderer to use Box2D.</p>
 </div>
 
 <a name="api_design"></a>
@@ -262,7 +294,7 @@ Box2D tends to allocate a large number of small objects (around 50-300 bytes). U
 <p>
 Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps a number of growable pools of varying sizes. When a request is made for memory, the SBA returns a block of memory that best fits the requested size. When a block is freed, it is returned to the pool. Both of these operations are fast and cause little heap traffic.
 </p>
-<p> Since Box2D uses a SBA, you should never <em>new</em> or <em>malloc</em> a body or joint. The only Box2D object that you allocate yourself is a <code>b2World</code>. The <code>b2World</code> class provides factories for you to create bodies and joints. This allows Box2D to use the SBA and hide the gory details from you. Never, ever, call <code>delete</code> or <code>free</code> on a body or joint.
+<p> Since Box2D uses a SBA, you should never <em>new</em> or <em>malloc</em> a body, shape, or joint. The only Box2D object that you allocate yourself is a <code>b2World</code>. The <code>b2World</code> class provides factories for you to create bodies, shapes, and joints. This allows Box2D to use the SBA and hide the gory details from you. Never, ever, call <code>delete</code> or <code>free</code> on a body, shape, or joint.
 </p>
 <p> While executing a time step, Box2D needs some temporary workspace memory. For this, it uses a stack allocator to avoid per-step heap allocations. You don't need to interact with the stack allocator, but it's good to know it's there.</p>
 
@@ -280,6 +312,22 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
     void b2World::DestroyJoint(b2Joint* joint)
 </pre>
 <p>When you create a body or joint, you need to provide a <em>definition</em> or <em>def</em> for short. These definitions contain all the information needed to build the body or joint. By using this approach we can prevent construction errors, keep the number of function parameters small, provide sensible defaults, and reduce the number of accessors.</p>
+
+<p>Since shapes musted be parented to a body, they are created and destroyed using a factory method on <code>b2Body</code>:</p>
+<pre class="code">
+    b2Shape* b2Body::CreateShape(const b2ShapeDef* def)
+    void b2Body::DestroyShape(b2Shape* shape)
+</pre>
+
+<p>Factories do not retain references to the definitions. So you can create definitions on the stack and keep them in temporary resources.</p>
+
+<a name="implicit_destruction"></a>
+<h2>Implicit Destruction</h2>
+<p>Box2D doesn't use reference counting. So if you destroy a body it is really gone. Accessing a pointer to a destroyed body has undefined behavior. In other words, your program will likely crash and burn. To help fix these problems, the debug build memory manager fills destroyed entities with <code>FDFDFDFD</code>. This can help find problems more easily in some cases.<p>
+<p>This <em>orphaned</em> pointer problem can be cured using reference counting. But reference counting can lead to memory leaks. Reference counting also complicates the code and API, so the decision was made to not use reference counting in Box2D.</p>
+<p>Often when using Box2D you will create and destroy many bodies, shapes, and joints. Managing these entities is somewhat automated by Box2D. If you destroy a body then all associated shapes and joints are automatically destroyed. This is called <em>implicit destruction</em>.</p>
+<p>Implicit destruction is a great convenience in many cases. It can also make your program fall apart. You may store pointers to shapes and joints somewhere in your code. These pointers become orphaned when an associated body is destroyed. The situation becomes worse when you consider that often joints are created by a part of the code unrelated to management of the associated body.</p>
+<p>Box2D provides a callback mechanism to inform your application when implicit destruction occurs. This gives your application a chance to nullify the orphaned pointers. This callback mechanism is described later in this manual.</p>
 
 <a name="user_data"></a>
 <h2>User Data</h2>
@@ -304,7 +352,7 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 
 <a name="dealing_with_c++"></a>
 <h2>Dealing with C++</h2>
-<p>C++ is great for capsulation and polymorphism, but it's not so great for API design. There are always significant trade-offs when creating a C++ library.</p>
+<p>C++ is great for encapsulation and polymorphism, but it's not so great for API design. There are always significant trade-offs when creating a C++ library.</p>
 
 <p>Should we use abstract factories or the <em>pimpl</em> idiom? These make the API look cleaner, but they ultimately get in the way of debugging and efficient development.</p>
 
@@ -312,11 +360,10 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 
 <p>Should we just wrap the C++ code with a C-API? Perhaps, but this is extra work and may lead to internal choices that are non-optimal. Also, C-APIs are harder to debug and maintain. A C-API also breaks encapsulation.</p>
 
-<p>For Box2D I have chosen the path of least resistance. For some cases a class is well contained in its design and function, so I use public functions and private data. For everything else I use structs with all public members. These choices let me develop the code rapidly, it is easy to debug, and it creates minimal internal clutter while maintaining tight encapsulation. The downside is that you don't see a clean, simple API.</p>
+<p>For Box2D I have chosen the path of least resistance. For some cases a class is well contained in its design and function, so I use public functions and private data. For everything else I use classes or structs with all public members. These choices let me develop the code rapidly, it is easy to debug, and it creates minimal internal clutter while maintaining tight encapsulation. The downside is that you don't see a clean, simple API.</p>
 
 <h2>Strawman</h2>
 <p>If you don't like this API design, that's ok! You have the source code! Seriously, if you have feedback about anything related to Box2D, please drop a note in the <a href="http://www.box2d.org/forum">forum</a>.</p>
-
 </div>
 
 <a name="world"></a>

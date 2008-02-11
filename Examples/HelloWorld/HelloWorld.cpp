@@ -47,9 +47,6 @@ int main(int argc, char** argv)
 	b2BodyDef groundBodyDef;
 	groundBodyDef.position.Set(0.0f, -10.0f);
 
-	// Set the ground body to be static. Static bodies don't collide with each other.
-	groundBodyDef.type = b2BodyDef::e_staticBody;
-
 	// Call the body factory which allocates memory for the ground body
 	// from a pool and creates the ground box shape (also from a pool).
 	// The body is also added to the world.
@@ -60,10 +57,6 @@ int main(int argc, char** argv)
 
 	// The extents are the half-widths of the box.
 	groundShapeDef.SetAsBox(50.0f, 10.0f);
-
-	// Set the density of the ground box to zero. This will
-	// make the ground body static (fixed).
-	groundShapeDef.density = 0.0f;
 
 	// Add the ground shape to the ground body.
 	groundBody->CreateShape(&groundShapeDef);
@@ -104,14 +97,14 @@ int main(int argc, char** argv)
 		// generally best to keep the time step and iterations fixed.
 		world.Step(timeStep, iterations);
 
-		// Now print the position and rotation of the body.
+		// Now print the position and angle of the body.
 		b2Vec2 position = body->GetPosition();
 		float32 angle = body->GetAngle();
 
 		printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
 	}
 
-	// When the world destructor is called, all memory is freed. This can
+	// When the world destructor is called, all bodies and joints are freed. This can
 	// create orphaned pointers, so be careful about your world management.
 
 	return 0;
