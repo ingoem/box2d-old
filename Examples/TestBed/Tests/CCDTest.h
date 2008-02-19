@@ -136,6 +136,35 @@ public:
 			body->CreateShape(&sd);
 		}
 
+#if 0
+		{
+			b2PolygonDef sd_bottom;
+			sd_bottom.SetAsBox(1.0f, 0.1f, b2Vec2(0.0f, -1.0f), 0.0f);
+			sd_bottom.density = 4.0f;
+
+			b2PolygonDef sd_top;
+			sd_top.SetAsBox(1.0f, 0.1f, b2Vec2(0.0f,  1.0f), 0.0f);
+			sd_top.density = 4.0f;
+
+			b2PolygonDef sd_left;
+			sd_left.SetAsBox(0.1f, 1.0f, b2Vec2(-1.0f, 0.0f), 0.0f);
+			sd_left.density = 4.0f;
+
+			b2PolygonDef sd_right;
+			sd_right.SetAsBox(0.1f, 1.0f, b2Vec2(1.0f, 0.0f), 0.0f);
+			sd_right.density = 4.0f;
+
+			b2BodyDef bd;
+			bd.type = b2BodyDef::e_dynamicBody;
+			bd.position.Set(0.0f, 15.0f);
+			b2Body* body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd_bottom);
+			body->CreateShape(&sd_top);
+			body->CreateShape(&sd_left);
+			body->CreateShape(&sd_right);
+			body->SetMassFromShapes();
+		}
+#elif 1
 		{
 			b2PolygonDef sd_bottom;
 			sd_bottom.SetAsBox( 1.5f, 0.15f );
@@ -158,8 +187,7 @@ public:
 			body->CreateShape(&sd_right);
 			body->SetMassFromShapes();
 		}
-
-#if 0
+#else
 		{
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
@@ -181,7 +209,7 @@ public:
 		{
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_dynamicBody;
-			bd.position.Set(5.0f, 20.0f + i);
+			bd.position.Set(0.0f, 15.0f + i);
 			bd.isBullet = true;
 			b2Body* body = m_world->CreateBody(&bd);
 			body->SetAngularVelocity(b2Random(-50.0f, 50.0f));

@@ -72,29 +72,19 @@ div.toc {
 	margin: 20px 0px 50px 10px;
 }
 
-ul ul li {
-	font-size: small;
-}
-
 ul li a:link {
 	color: Blue;
-	font-family: verdana;
-	font-size: 1.1em;
 	text-decoration: none;
 }
 
 ul li a:visited {
 	color: Blue;
-	font-family: verdana;
-	font-size: 1.1em;
 	text-decoration: none;
 }
 
 ul li a:active {
 	color: Blue;
-	font-family: verdana;
-	font-size: 1.1em;
-	text-decoration: none;
+	text-decoration: none;	
 }
 
 ul li a:hover {

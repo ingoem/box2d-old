@@ -96,7 +96,7 @@ public:
 	void DestroyJoint(b2Joint* joint);
 
 	/// The world provides a single static ground body with no collision shapes.
-	/// You can use this to simplify the creation of joints.
+	/// You can use this to simplify the creation of joints and static shapes.
 	b2Body* GetGroundBody();
 
 	/// Take a time step. This performs collision detection, integration,
@@ -114,11 +114,6 @@ public:
 	/// @return the number of shapes found in aabb.
 	int32 Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount);
 
-	/// Get the world shape list. With the returned shape, use b2Shape::GetWorldNext
-	/// to get the next shape in the world list. A NULL shape indicates the end of the list.
-	/// @return the head of the world shape list.
-	b2Shape* GetShapeList();
-
 	/// Get the world body list. With the returned body, use b2Body::GetNext to get
 	/// the next body in the world list. A NULL body indicates the end of the list.
 	/// @return the head of the world body list.
@@ -128,11 +123,6 @@ public:
 	/// the next joint in the world list. A NULL joint indicates the end of the list.
 	/// @return the head of the world joint list.
 	b2Joint* GetJointList();
-
-	/// Get the world contact list. With the returned contact, use b2Contact::GetNext
-	/// to get the next contact in the world list. A NULL contact indicates the end of the list.
-	/// @return the head of the world contact list.
-	b2Contact* GetContactList();
 
 public:
 	//--------------- Internals Below -------------------
@@ -153,12 +143,12 @@ public:
 	b2BroadPhase* m_broadPhase;
 	b2ContactManager m_contactManager;
 
-	b2Shape* m_shapeList;
 	b2Body* m_bodyList;
-	b2Contact* m_contactList;
 	b2Joint* m_jointList;
 
-	int32 m_shapeCount;
+	// Do not access
+	b2Contact* m_contactList;
+
 	int32 m_bodyCount;
 	int32 m_contactCount;
 	int32 m_jointCount;
@@ -191,11 +181,6 @@ inline b2Body* b2World::GetGroundBody()
 	return m_groundBody;
 }
 
-inline b2Shape* b2World::GetShapeList()
-{
-	return m_shapeList;
-}
-
 inline b2Body* b2World::GetBodyList()
 {
 	return m_bodyList;
@@ -204,11 +189,6 @@ inline b2Body* b2World::GetBodyList()
 inline b2Joint* b2World::GetJointList()
 {
 	return m_jointList;
-}
-
-inline b2Contact* b2World::GetContactList()
-{
-	return m_contactList;
 }
 
 #endif

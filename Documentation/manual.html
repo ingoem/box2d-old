@@ -9,9 +9,9 @@
 <body>
 
 <div class="titlearea">
-<div class="title">Box2D v1.4.3 User Manual</div>
+<div class="title">Box2D v2.0.0 User Manual</div>
 <div class="subtitle">
-Erin Catto, 2/03/07<br/>
+Erin Catto, 2/17/07<br/>
 </div>
 <div class="copyright">
 Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box2d.org</a><br/>
@@ -39,11 +39,10 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 	<ul>
 		<li><a href="#memory_management">Memory Management</a></li>
 		<li><a href="#factories_and_definitions">Factories and Definitions</a></li>
-        <li><a href="#implicit_destruction">Implicit Destruction</a></li>
 		<li><a href="#user_data">User Data</a></li>
 		<li><a href="#dealing_with_c++">Dealing With C++</a></li>	
 	</ul>
-	<li><a href="#world">World</a></li>
+	<li><a href="#world">The World</a></li>
 		<ul>
 			<li><a href="#creating_and_destroying_world">Creating and Destroying a World</a></li>
 			<li><a href="#using_a_world">Using a World</a></li>
@@ -51,46 +50,55 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 			<li><a href="#exploring_the_world">Exploring the World</a></li>
 			<li><a href="#aabb_queries">AABB Queries</a></li>
 		</ul>
-	<li><a href="#shapes">Shapes</a></li>
-	<ul>
-		<li><a href="#shape_definition">Shape Definition</a></li>
-		<li><a href="#local_position_and_rotation">Local Position and Rotation</a></li>
-		<li><a href="#friction_and_restitution">Friction and Restitution</a></li>
-		<li><a href="#density">Density</a></li>
-		<li><a href="#collision_filtering">Collision Filtering</a></li>
-		<li><a href="#circle_definitions">Circle Definitions</a></li>
-		<li><a href="#box_definitions">Box Definition</a></li>
-		<li><a href="#polygon_definitions">Polygon Definition</a></li>		
-		<li><a href="#creating_destroying_shape">(Not) Creating and Destroying a Shape</a></li>		
-	</ul>
 	<li><a href="#bodies">Bodies</a></li>
 	<ul>
 		<li><a href="#body_definition">Body Definition</a></li>
-		<li><a href="#adding_shapes">Adding Shapes</a></li>
-		<li><a href="#body_position_and_rotation">Body Position and Rotation</a></li>
-		<li><a href="#velocity">Velocity</a></li>
-		<li><a href="#damping">Damping</a></li>
-		<li><a href="#sleep_parameters">Sleep Parameters</a></li>
-		<li><a href="#continuous_collision_detection">Continuous Collision Detection</a></li>
-		<li><a href="#creating_and_destroying_body">Creating and Destroying a Body</a></li>
-		<li><a href="#static_and_dynamic">Static and Dynamic Bodies</a></li>
-		<li><a href="#using_a_body">Using a Body</a></li>
+		<ul>
+			<li><a href="#static_and_dynamic">Static and Dynamic Bodies</a></li>
+			<li><a href="#mass_properties">Mass Properties</a></li>
+			<li><a href="#position_and_angle">Body Position and Angle</a></li>
+			<li><a href="#damping">Damping</a></li>
+			<li><a href="#sleep_parameters">Sleep Parameters</a></li>
+			<li><a href="#bullets">Bullets</a></li>
+		</ul>
+		<li><a href="#body_factory">Body Factory</a></li>
+		<li><a href="#using_bodies">Using Bodies</a></li>
+	</ul>
+	<li><a href="#shapes">Shapes</a></li>
+	<ul>
+		<li><a href="#shape_definition">Shape Definition</a></li>
+		<ul>
+			<li><a href="#friction_and_restitution">Friction and Restitution</a></li>
+			<li><a href="#density">Density</a></li>
+			<li><a href="#filtering">Filtering</a></li>
+			<li><a href="#circle_definitions">Circle Definitions</a></li>
+			<li><a href="#polygon_definitions">Polygon Definition</a></li>
+		</ul>
+		<li><a href="#shape_factory">Shape Factory</a></li>		
+		<li><a href="#using_shapes">Using Shapes</a></li>
 	</ul>
 	<li><a href="#joints">Joints</a></li>
 	<ul>
+		<li><a href="joint_definition">Joint Definition</a></li>
 		<li><a href="#distance_joint">Distance Joint</a></li>
 		<li><a href="#revolute_joint">Revolute Joint</a></li>
 		<li><a href="#prismatic_joint">Prismatic Joint</a></li>
 		<li><a href="#pulley_joint">Pulley Joint</a></li>
 		<li><a href="#gear_joint">Gear Joint</a></li>
 		<li><a href="#mouse_joint">Mouse Joint</a></li>
+		<li><a href="#joint_factory">Joint Factory</a></li>
+		<li><a href="#using_joints">Using Joints</a></li>
 	</ul>
 	<li><a href="#contacts">Contacts</a></li>
 	<ul>
 	<li><a href="#introduction">Introduction</a></li>
-	<li><a href="#contact_callbacks">Contact Callbacks</a></li>
+	<li><a href="#contact_listener">Contact Listener</a></li>
 	<li><a href="#processing_contacts">Processing Contacts</a></li>
+	<li><a href="#contact_filtering">Contact Filtering</a></li>
 	</ul>
+	<li><a href="#world_boundary">World Boundary</a></li>
+	<li><a href="#implicit_destruction">Implicit Destruction</a></li>
+	<li><a href="#debug_drawing">Debug Drawing</a></li>
 	<li><a href="#behind_the_scenes">Behind the Scenes</a></li>
 	<ul>
 	<li>Under Construction</li>
@@ -321,14 +329,6 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 
 <p>Factories do not retain references to the definitions. So you can create definitions on the stack and keep them in temporary resources.</p>
 
-<a name="implicit_destruction"></a>
-<h2>Implicit Destruction</h2>
-<p>Box2D doesn't use reference counting. So if you destroy a body it is really gone. Accessing a pointer to a destroyed body has undefined behavior. In other words, your program will likely crash and burn. To help fix these problems, the debug build memory manager fills destroyed entities with <code>FDFDFDFD</code>. This can help find problems more easily in some cases.<p>
-<p>This <em>orphaned</em> pointer problem can be cured using reference counting. But reference counting can lead to memory leaks. Reference counting also complicates the code and API, so the decision was made to not use reference counting in Box2D.</p>
-<p>Often when using Box2D you will create and destroy many bodies, shapes, and joints. Managing these entities is somewhat automated by Box2D. If you destroy a body then all associated shapes and joints are automatically destroyed. This is called <em>implicit destruction</em>.</p>
-<p>Implicit destruction is a great convenience in many cases. It can also make your program fall apart. You may store pointers to shapes and joints somewhere in your code. These pointers become orphaned when an associated body is destroyed. The situation becomes worse when you consider that often joints are created by a part of the code unrelated to management of the associated body.</p>
-<p>Box2D provides a callback mechanism to inform your application when implicit destruction occurs. This gives your application a chance to nullify the orphaned pointers. This callback mechanism is described later in this manual.</p>
-
 <a name="user_data"></a>
 <h2>User Data</h2>
 <p>The <code>b2Shape</code>, <code>b2Body</code>, and <code>b2Joint</code> classes allow you to attach user data as a <code>void*</code>. This is handy when you are examining Box2D data structures and you want to determine how they relate to the data structures in your game engine.</p>
@@ -360,27 +360,31 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 
 <p>Should we just wrap the C++ code with a C-API? Perhaps, but this is extra work and may lead to internal choices that are non-optimal. Also, C-APIs are harder to debug and maintain. A C-API also breaks encapsulation.</p>
 
-<p>For Box2D I have chosen the path of least resistance. For some cases a class is well contained in its design and function, so I use public functions and private data. For everything else I use classes or structs with all public members. These choices let me develop the code rapidly, it is easy to debug, and it creates minimal internal clutter while maintaining tight encapsulation. The downside is that you don't see a clean, simple API.</p>
+<p>For Box2D I have chosen the path of least resistance. For some cases a class is well contained in its design and function, so I use public functions and private data. For everything else I use classes or structs with all public members. These choices let me develop the code rapidly, it is easy to debug, and it creates minimal internal clutter while maintaining tight encapsulation. The downside is that you don't see a clean, simple API. Of course, you have this nice manual to help you out. :)</p>
 
 <h2>Strawman</h2>
-<p>If you don't like this API design, that's ok! You have the source code! Seriously, if you have feedback about anything related to Box2D, please drop a note in the <a href="http://www.box2d.org/forum">forum</a>.</p>
+<p>If you don't like this API design, that's ok! You have the source code! Seriously, if you have feedback about anything related to Box2D, please write a note in the <a href="http://www.box2d.org/forum">forum</a>.</p>
 </div>
 
 <a name="world"></a>
-<h1>World</h1>
+<h1>The World</h1>
 <div class = "text">
 <p>The <code>b2World</code> class contains the bodies and joints. It manages all aspects of the simulation and allows for asynchronous queries (like AABB queries). Much of your interactions with Box2D will be with a <code>b2World</code> object.</p>
 
 <a name="creating_and_destroying_world"></a>
 <h2>Creating and Destroying a World</h2>
 <p>Creating a world is fairly simple. You need to provide a bounding box and a gravity vector.</p>
+
 <p>The axis-aligned bounding box should encapsulate the world. You can improve performance by making the bounding box a bit bigger than your world, say 2x just to be safe. If you have lots of bodies that fall into the abyss, your should detect this and remove the bodies. This will improve performance and prevent floating point overflow.</p>
+
 <p>To create and destory a world you need to use <code>new</code> and <code>delete</code>.</p>
 <pre class="code">
     b2World* myWorld = new b2World(aabb, gravity, doSleep);
     ... do stuff ...
     delete myWorld;
 </pre>
+
+<blockquote>Recall that the <b>world AABB</b> should always be bigger then the region where your bodies are located. If bodies leave the world AABB, then they will be frozen. This is not a bug.</blockquote>
 
 <a name="using_a_world"></a>
 <h2>Using a World</h2>
@@ -394,13 +398,16 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
     int32 iterationCount = 10;
     myWorld->Step(timeStep, iterationCount);
 </pre>
+
 <p>After the time step you can examine your bodies and joints for information. Most likely you will grab the position off the bodies so that you can update your actors and render them. You can perform the time step anywhere in your game loop, but you should be aware of the order of things. For example, you must create bodies before the time step if you want to get collision results for the new bodies in that frame.</p>
+
 <p>As I discussed above in the HelloWorld tutorial, you should use a fixed time step. By using a larger time step you can improve performance in low frame rate scenarios. But generally you should use a time step no larger than 1/30 seconds. A time step of 1/60 seconds will usually deliver a high quality simulation.</p>
+
 <p>The iteration count controls how many times the constraint solver sweeps over all the contacts and joints in the world. More iterations always yields a better simulation. But don't trade a small time step for a large iteration count. 60Hz and 10 iterations is far better than 30Hz and 20 iterations.</p>
 
 <a name="exploring_the_world"></a>
 <h3>Exploring the World</h3>
-<p>As mentioned before, the world is a container for bodies, joints, and contacts. You can grab the body, joint, contact lists off the world and iterate over them. For example, this code wakes up all the bodies in the world:</p>
+<p>As mentioned before, the world is a container for bodies and joints. You can grab the body and joint lists off the world and iterate over them. For example, this code wakes up all the bodies in the world:</p>
 <pre class="code">
     for (b2Body* b = myWorld->GetBodyList(); b; b = b->GetNext())
     {
@@ -410,14 +417,14 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 
 <a name="aabb_queries"></a>
 <h3>AABB Queries</h3>
-<p>Sometimes you want to determine all the shapes in a region. The <code>b2World</code> class has a fast log(N) method for this using the <em>broad phase</em> data structure. You provide an AABB in world coordinates and <code>b2World</code> returns an array of all the shapes that potentially intersect the AABB. This is not exact because what the function actually does is return all the shapes whose AABBs intersect the specified AABB. For example, the following code finds all the shapes that potentially intersect a specified AABB and wakes up all of the associated bodies.</p>
+<p>Sometimes you want to determine all the shapes in a region. The <code>b2World</code> class has a fast log(N) method for this using the <em>broad-phase</em> data structure. You provide an AABB in world coordinates and <code>b2World</code> returns an array of all the shapes that potentially intersect the AABB. This is not exact because what the function actually does is return all the shapes whose AABBs intersect the specified AABB. For example, the following code finds all the shapes that potentially intersect a specified AABB and wakes up all of the associated bodies.</p>
 <pre class="code">
     b2AABB aabb;
     aabb.minVertex.Set(-1.0f, -1.0f);
     aabb.maxVertex.Set(1.0f, 1.0f);
     const int32 k_bufferSize = 10;
     b2Shape *buffer[k_bufferSize];
-    int32 count = b2World->Query(aabb, buffer, k_bufferSize);
+    int32 count = myWorld->Query(aabb, buffer, k_bufferSize);
     for (int32 i = 0; i < count; ++i)
     {
         buffer[i]->GetBody()->WakeUp();
@@ -425,6 +432,183 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 </pre>
 
 </div>
+
+<!--
+		<li><a href="#sleep_parameters">Sleep Parameters</a></li>
+		<li><a href="#bullets">Bullets</a></li>
+		<li><a href="#body_factory">Body Factory</a></li>
+		<li><a href="#using_bodies">Using Bodies</a></li>
+-->
+<a name="bodies"></a>
+<h1>Bodies</h1>
+<div class = "text">
+<p>Bodies have position and velocity. You can apply forces, torques, and impulses to bodies. Bodies can be static or dynamic. Static bodies never move and don't collide with other static bodies.</p>
+<p>Bodies are the backbone for shapes. Bodies carry shapes and move them around in the world. Bodies are always <em>rigid bodies</em> in Box2D. That means that two shapes attached to the same rigid body never move relative to each other.</p>
+<p>You usually keep pointers to all the bodies you create. This way you can query the body positions to update the positions of your graphical entities. You should also keep body pointers so you can destroy them when you are done with them.</p>
+
+<a name="body_definition"></a>
+<h2>The Body Definition</h2>
+<p>Before a body is created you must create a body definition (<code>b2BodyDef</code>). You can create a body definition on the stack or build it into your game's data structures. The choice is up to you.</p>
+<p>Box2D copies the data out of the body definition, it does not keep a pointer to the body definition. This means you can recycle a body definition to create multiple bodies.</p>
+<p>Lets go over some of the key members of the body definition.</p>
+
+<a name="static_and_dynamic"></a>
+<h3>Static and Dynamic Bodies</h3>
+<p>By default bodies are static. Static bodies don't move and they don't collide with other bodies. Static bodies are often used to represent static environments in games, like the floor and walls. By convention, static bodies have zero mass.</p>
+<p>Dynamic bodies move around and have positive mass. Dynamic bodies must be specified in the body definition. If you don't specify that a body is dynamic, the body won't move.</p>
+<pre class="code">
+    bodyDef.type = b2BodyDef::e_dynamicBody;
+</pre>
+
+<a name="mass_properties"></a>
+<h3>Mass Properties</h3>
+<p>There are a few ways to establish the mass properties for a body.</p>
+<ol>
+<li>Set the mass properties explicitly in the body definition.</li>
+<li>Set the mass properties explicitly on the body.</li>
+<li>Set the mass properties based on the density of the attaced shapes.</li>
+</ol>
+<p>In many game scenarios it makes sense to compute mass based on shape densities. This helps to ensure that bodies have reasonable and consistent mass values.</p>
+<p>However, other game scenarios may require specific mass values. For example, you may have a mechanism, like a scale that needs precises mass values.</p>
+<p>You can explicitly set the mass properties in the body definition as follows:</p>
+<pre class="code">
+    bodyDef.massData.mass = 2.0f;	// the body's mass in kg
+	bodyDef.center.SetZero();		// the center of mass in local coordinates
+	bodyDef.I = 3.0f;				// the rotational inertia in kg*m^2.
+</pre>
+<p>The other methods of setting the mass properties are covered elsewhere in this document.</p>
+
+<a name="position_and_angle"></a>
+<h3>Position and Angle</h3>
+<p>The body definition gives you the chance to initialize the position of the body on creation. This has better performance than creating the body at the world origin and then moving the body.</p>
+
+<p>A body has two main points of interest. The first point is the body's <em>origin</em>. Shapes and joints are attached relative to the body's origin. The second point of interest is the <em>center of mass</em>. The center of mass is determined from mass distribution of the attached shapes or is explicitly set with <code>b2MassData</code>. Much of Box2D's internal computations use the center of mass position. For example <code>b2Body</code> stores the linear velocity for the center of mass.</p>
+
+<p>When you are building the body definition, you may not know where the center of mass is located. Therefore you specify the position of the body's origin. You may also specify the body's angle in radians, which is not affected by the position of the center of mass. If you later change the mass properties of the body, then the center of mass may move on the body, but the origin position does not change and the attached shapes and joints do not move.</p>
+
+<pre class="code">
+    bodyDef.position.Set(0.0f, 2.0f);	// the body's origin position.
+	bodyDef.angle = 0.25f * b2_pi;		// the body's angle in radians.
+</pre>
+
+<a name="damping"></a>
+<h3>Damping</h3>
+<p>Damping is used to reduce the world velocity of bodies. Damping is different than friction because friction only occurs with contact and damping is much cheaper to simulate than friction. However, damping is not a replacement for friction and the two effects should be used together.</p>
+<p>Damping parameters should be between 0 and infinity, with 0 meaning no damping, and infinity meaning full damping. Normally you will use a damping value between 0 and 0.1. I generally do not use linear damping because it makes bodies look <em>floaty</em>.</p>
+ <pre class="code">
+    bodyDef.linearDamping = 0.0f;
+    bodyDef.angularDamping = 0.01f;
+</pre>
+<p>Damping is approximated for stability and performance. At small damping values the damping effect is mostly independent of the time step. At larger damping values, the damping effect will vary with the time step. This is not an issue if you use a fixed time step (recommended).</p>
+
+<a name="sleep_parameters"></a>
+<h3>Sleep Parameters</h3>
+<p>What does sleep mean? Well it is expensive to simulate bodies, so the less we have to simulate the better. When a body comes to rest we would like to stop simulating it.</p>
+<p>When Box2D determines that a body (or group of bodies) has come to rest, the body enters a sleep state which has very little CPU overhead. If an awake body collides with a sleeping body, then the sleeping body wakes up. Bodies will also wake up if a joint or contact attached to them is destroyed. You can also wake a body manually.</p>
+<p>The body definition lets you specify whether a body can <em>sleep</em> and whether a body is created sleeping.</p>
+<pre class="code">
+    bodyDef.allowSleep = true;
+    bodyDef.isSleeping = false;
+</pre>
+
+<a name="bullets"></a>
+<h3>Bullets</h3>
+<p>Game simulation usually generates a sequence of images that are played at some frame rate. In this setting rigid bodies can move by a large amount in one time step. If a physics engine doesn't account for the large motion, you may see some objects incorrectly pass through each other. This effect is called <em>tunneling</em>.</p>
+
+<p>By default, Box2D uses continuous collision detection (CCD) to prevent dynamic bodies from tunneling through static bodies. This is done by sweeping shapes from their old position to their new positions. The engine looks for new collisions during the sweep and computes the time of impact (TOI) for these collisions. Bodies are moved to their first TOI and then simulated to the end of the original time step. This process is repeated as necessary.</p>
+
+<p>Normally CCD is not used between dynamic bodies. This is done to keep performance reasonable. In some game scenarios you need dynamic bodies to use CCD. For example, you may want to shoot a high speed bullet at a thin wall. Without CCD, the bullet my tunnel through the wall.</p>
+
+<p>Fast moving objects in Box2D are called bullets. You should decide what bodies should be bullets based on your game design. If you decide a body should be treated as a bullet, use the following setting.</p>
+<pre class="code">
+    bodyDef.isBullet = true;
+</pre>
+
+<p>CCD is expensive so you probably don't want all moving bodies to be bodies. So by default Box2D only uses CCD between moving bodies and static bodies. This is an effective approach to prevent bodies from escaping your game world. However, you may have some fast moving bodies that that require CCD all the time.</p>
+
+<a name="creating_and_destroying_body"></a>
+<h2>Creating and Destroying a Body</h2>
+<p>Bodies are created and destroyed using a body factory provided by the world class. This lets the world create the body with an efficient allocator and add the body to the world data structure.</p>
+<pre class="code">
+    b2Body* body = myWorld->CreateBody(&bodyDef);
+    ... do stuff ...
+    myWorld->DestroyBody(body);
+    body = NULL;
+</pre>
+
+<blockquote><em>Never</em> use <code>new</code> or <code>malloc</code> to create a body. The world won't know about the body and the body won't be properly initialized.</blockquote>
+
+<p>Box2D does not keep a reference to the body definition or any of the data it holds (except user data pointers). So you can create temporary body definitions and reuse the same body definitions.</p>
+
+<p>Box2D allows you to avoid destroying bodies by deleting your <code>b2World</code> object, which does all the cleanup work for you. However, you should be mindful to nullify and body pointers that you keep in your game engine.</p>
+
+<p>When you destroy a body all its attached shapes, joints, and contacts are destroyed. This is called <em>implicit destruction</em>. Any body connected to one of those joints and/or contacts is woken. There is mostly very convenient for you. However, you must be aware of one crucial issue:</p>
+
+<blockquote>
+When a body is destroyed, any joints attached to the body are automatically destroyed. You must nullify any pointers you have to those joints. Otherwise, your program will <b>die horribly</b> if you try to destroy that joint later.
+</blockquote>
+
+<p>To help you nullify your joint pointers, Box2D provides a listener class named <code>b2WorldListener</code> that you can implement and provide to your world object. Then the world object will notify you when a joint is going to be implicity destroyed.</p>
+
+<a name="static_and_dynamic"></a>
+<h2>Static and Dynamic Bodies</h2>
+<p>Bodies that move around are called <em>dynamic</em> and bodies that are fix are called <em>static</em>. Both static and dynamic bodies can have shapes. If you use the default shape density of 0, then you will get a static body, otherwise you'll get a dynamic body.</p>
+<p>In principle, you could use a single static body for your world by attaching possibly many shapes to it. This will not improve performance much, but it can save a bit of memory. The choice is yours. The maximum number of shapes per body is determined by <code>b2_maxShapesPerBody</code> which has a default value of 64.</p>
+<p>Suppose you want to connect a dynamic body to ground with a joint. You'll need to connect the joint to a static body. If you don't have a static body, you can get a shared static body from your world object.</p>
+<pre class="code">
+    b2Body* ground = myWorld->GetGroundBody();
+    ... build a joint using the ground body ...
+</pre>
+
+<a name="using_a_body"></a>
+<h2>Using a Body</h2>
+<p>Using a body is fairly straightforward. You can set and get the position and rotation of a body. You can set and get the position of the body's origin or its center of mass.  You can set and get its velocities.</p>
+<pre class="code">
+    void SetOriginPosition(const b2Vec2& position, float32 rotation);
+    b2Vec2 GetOriginPosition() const;
+
+    void SetCenterPosition(const b2Vec2& position, float32 rotation);
+    b2Vec2 GetCenterPosition() const;
+
+    float32 GetRotation() const;
+    const b2Mat22& GetRotationMatrix() const;
+
+    void SetLinearVelocity(const b2Vec2& v);
+    b2Vec2 GetLinearVelocity() const;
+
+    void SetAngularVelocity(float32 w);
+    float32 GetAngularVelocity() const;
+</pre>
+
+<p>Usually you should not set a body's velocity to constrain its motion. To constrain a body, use joints, shapes, forces, and impulses.</p>
+
+<p>You can apply forces, torques, and impulses to a body. When you apply a force or an impulse, you provide a world point where the load is applied. This often results in a torque about the center of mass.</p>
+<pre class="code">
+    void ApplyForce(const b2Vec2& force, const b2Vec2& point);
+    void ApplyTorque(float32 torque);
+    void ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point);
+</pre>
+
+<p>Keep in mind that the only body function that wakes it is <code>b2Body::WakeUp</code>. Applying forces <b>does not</b> wake a body. This is done so that bodies under static load can sleep. For example, you may wish to increase the gravity on a body by applying a steady downward force. There is no reason to prevent this body from going to sleep. If you want to apply a force to a body and ensure that it reacts, you must wake the body <em>first</em>.</p>
+
+<p>The body class has some utility functions to help you transform points and vectors between local and world space. If you don't understand these concepts, please read "Essential Mathematics for Games and Interactive Applications" by Jim Van Verth and Lars Bishop. These functions are efficient, so use them with impunity.</p>
+<pre class="code">
+    b2Vec2 GetWorldPoint(const b2Vec2& localPoint);
+    b2Vec2 GetWorldVector(const b2Vec2& localVector);
+    b2Vec2 GetLocalPoint(const b2Vec2& worldPoint);
+    b2Vec2 GetLocalVector(const b2Vec2& worldVector);
+</pre>
+
+<p>You can iterate over a body's shapes. This is useful if you want to draw collision geometry in a debug mode.</p>
+<pre class="code">
+    for (b2Shape* s = body->GetShapeList(); s; s = s->GetNext())
+    {
+        GameDrawShape(s);
+    }
+</pre>
+
+</div>
+
 
 <a name="shapes"></a>
 <h1>Shapes</h1>
@@ -539,160 +723,6 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 <p>There's not much to say here. You can get a shape's type, its parent body, and its world position. You can also test a point to see if it is contained within the shape. Look at <code>b2Shape.h</code> for details.</p>
 </div>
 
-<a name="bodies"></a>
-<h1>Bodies</h1>
-<div class = "text">
-<p>Bodies have position and velocity. You can apply forces, torques, and impulses to bodies.</p>
-<p>Bodies are the backbone for shapes. Bodies carry shapes and move them around in the world. Bodies are always <em>rigid bodies</em> in Box2D. That means that two shapes attached to the same rigid body never move relative to each other.</p>
-<p>Bodies hold the mass of its shapes. You usually keep pointers to all the bodies you create. This way you can query the body positions to update the positions of your graphical entities. You should also keep body pointers so you can destroy them when you are done with them.</p>
-
-<a name="body_definition"></a>
-<h2>The Body Definition</h2>
-<p>Before a body is created you must create a body definition (<code>b2BodyDef</code>). You can create a body definition on the stack or build it into your game's data structures. The choice is up to you.</p>
-<p>Box2D only copies the data out of the body definition, it does not keep a pointer to the body definition. This means you can recycle a body definition to create multiple bodies.</p>
-<p>Lets go over some of the key members of the body definition.</p>
-
-<a name="adding_shapes"></a>
-<h3>Adding Shapes</h3>
-<p>Shape definitions are added to body definitions. This way a body and its shapes are created all at once in the world's body factory. The maximum number of shapes per body is <code>b2_maxShapesPerBody</code> which currently has a value of 64. If you need to add mores shapes per body, then modify <code>b2_maxShapesPerBody</code> in <code>b2Settings.h</code>.</p>
-<p>The body definition holds a pointer to the shape definition. This means the shape definition must not go out of scope while the body definition is being used. The upside is that you can reuse the same body definition to create multiple bodies and you can modify the shape definition parameters to suit without adding them to the body definition again.</p>
-<pre class="code">
-    b2CircleDef circleDef;
-    circleDef.radius = 1.0f;
-    b2BodyDef bodyDef;
-    bodyDef.AddShape(&circleDef);
-</pre>
-
-<a name="body_position_and_rotation"></a>
-<h3>Position and Rotation</h3>
-<p>The body definition gives you the chance to initialize the position of the body on creation. This has better performance than creating the body at the world origin and then moving the body.</p>
-<p>A body has two main points of interest. The first point is the body's <em>origin</em>. The bodies origin is defined implicitly by the shapes it holds. Recall that shape definitions hold a local position. This local position is relative the body's origin. The second point of interest is the <em>center of mass</em>. The center of mass is determined from mass distribution of the attached shapes. Internally Box2D works with the center of mass position, but remembers the location of the body origin.</p>
-<p>When you are building the body definition, you may not know where the center of mass is located. Therefore you specify the position of the body's origin. You may also specify the body's rotation, which is not affected by the position of the center of mass.</p>
-<img src="images/bodyOrigin.gif" class="figure"/><br/>
-<p>Consider a body made of two boxes. The boxes are arranged in an upside-down T configuration. The first box is placed at the body origin, so its local position and rotation are zero. The second box actually has the same extents as the first box, but it has been moved up the y-axis and rotated 90 degrees. When the body is created, Box2D determines that the center of mass is halfway between the two box centers (0, 0.75). Here is code that produces this body:</p>
-<pre class="code">
-    b2BoxDef box1;
-    box1.extents.Set(2.0f, 1.0f);
-    b2BoxDef box2;
-    box2.extents.Set(2.0f, 1.0f);
-    box2.localPosition.Set(0.0f, 1.5f);
-    box2.localRotation = b2_pi / 2.0f;
-    b2BodyDef bodyDef;
-    bodyDef.AddShape(&box1);
-    bodyDef.AddShape(&box2);
-</pre>
-<p>Now would be a good time to read this section again. It's tricky stuff that you should probably understand.</p>
-
-<a name="velocity"></a>
-<h3>Velocity</h3>
-<p>You can set the initial velocity of the body in the body definition. This is purely for convenience because you can set a body's velocity any time you like.</p>
-<p>Usually you should not set a body's velocity to constrain its motion. To constraint a body, use joints, shapes, forces, and impulses.</p>
-<p>When you are building a body definition you may not know the position of the body's center of mass, therefore the initial linear velocity is applied to the body's origin.</p>
-
-<a name="damping"></a>
-<h3>Damping</h3>
-<p>Damping is used to reduce the world velocity of bodies. Damping is different than friction because damping occurs with contact and damping is much cheaper to simulate than friction. However, damping is not a replacement for friction and the two effects should be used together.</p>
-<p>Damping only works well for fixed time steps. If you need to vary the time step you will need to modify the code. Please visit the forums and ask for help.</p>
-<p>Damping parameters should be between 0 and 1, with 0 meaning no damping, and 1 meaning full damping. Normally you will use a damping value between 0 and 0.1. I generally do not use linear damping because it makes bodies look <em>floaty</em>.</p>
- <pre class="code">
-    bodyDef.linearDamping = 0.0f;
-    bodyDef.angularDamping = 0.01f;
-</pre>
-
-<a name="sleep_parameters"></a>
-<h3>Sleep Parameters</h3>
-<p>What does sleep mean? Well it is expensive to simulate bodies, so the less we have to simulate the better. When a body comes to rest we would like to stop simulating it.</p>
-<p>When Box2D determines that a body (or group of bodies) has come to rest, the body enters a sleep state which has very little CPU overhead. If an awake body collides with a sleeping body, then the sleeping body wakes up. Bodies will also wake up if a joint or contact attached to them is destroyed. You can also wakeup a body manually.</p>
-<p>The body definition lets you specify whether a body can <em>sleep</em> and whether a body is created sleeping.</p>
-<pre class="code">
-    bodyDef.allowSleep = true;
-    bodyDef.isSleeping = false;
-</pre>
-
-<a name="continuous_collision_detection"></a>
-<h3>Continuous Collision Detection</h3>
-<p>Continuous collision detection (CCD) is used to prevent bodies from tunneling through other bodies. This is done by sweeping shapes from their old position to their new positions. The engine looks for new collisions during the sweep and computes the time of impact (TOI) for these collisions. Bodies are moved to their first TOI and fixed there for the remainder of the time step. This is done iteratively so that chain reactions are propagated correctly.</p>
-<p>Since bodies are frozen at their TOI for the remainder of the time step, some interactions between multiple bodies may appear delayed. This approach is done for performance and code complexity reasons.</p>
-<p>CCD is expensive so you probably don't want all moving bodies to compute TOIs with all other moving bodies. So by default Box2D only uses CCD between moving bodies and static bodies. This is an effective to prevent bodies from escaping your game world. However, you may have some fast moving bodies that that require CCD all the time.</p>
-<p>Fast moving objects in Box2D are called bullets. You should decide based on your game design if something should be a bullet or not. If you decide a body should be treated as a bullet, use the following setting.</p>
-<pre class="code">
-    bodyDef.isBullet = true;
-</pre>
-
-<a name="creating_and_destroying_body"></a>
-<h2>Creating and Destroying a Body</h2>
-<p>Bodies are created and destroyed using a body factory provided by the world class. This lets the world create the body with an efficient allocator and embed the body in its data structures.</p>
-<pre class="code">
-    b2Body* body = myWorld->CreateBody(&bodyDef);
-    ... do stuff ...
-    myWorld->DestroyBody(body);
-    body = NULL;
-</pre>
-<p><em>Never</em> use <code>new</code> or <code>malloc</code> to create a body. The world won't know about the body and the body won't be properly initialized.</p>
-<p>Box2D does not keep a reference to the body definition or any of the data it holds (except user data pointers).</p>
-<p>Box2D allows you to avoid destroying bodies by deleting your <code>b2World</code> object, which does all the cleanup work for you. However, you should be mindful to nullify and body pointers that you keep in your game engine.</p>
-<p>When you destroy a body all its attached shapes, joints, and contacts are destroyed. This is called <em>implicit destruction</em>. Any body connected to one of those joints and/or contacts is woken. There is mostly very convenient for you. However, you must be aware of one crucial issue:</p>
-<blockquote>
-When a body is destroyed, any joints attached to the body are automatically destroyed. You must nullify any pointers you have to those joints. Otherwise, your program will <b>die horribly</b> if you try to destroy that joint later.
-</blockquote>
-<p>To help you nullify your joint pointers, Box2D provides a listener class named <code>b2WorldListener</code> that you can implement and provide to your world object. Then the world object will notify you when a joint is going to be implicity destroyed.</p>
-
-<a name="static_and_dynamic"></a>
-<h2>Static and Dynamic Bodies</h2>
-<p>Bodies that move around are called <em>dynamic</em> and bodies that are fix are called <em>static</em>. Both static and dynamic bodies can have shapes. If you use the default shape density of 0, then you will get a static body, otherwise you'll get a dynamic body.</p>
-<p>In principle, you could use a single static body for your world by attaching possibly many shapes to it. This will not improve performance much, but it can save a bit of memory. The choice is yours. The maximum number of shapes per body is determined by <code>b2_maxShapesPerBody</code> which has a default value of 64.</p>
-<p>Suppose you want to connect a dynamic body to ground with a joint. You'll need to connect the joint to a static body. If you don't have a static body, you can get a shared static body from your world object.</p>
-<pre class="code">
-    b2Body* ground = myWorld->GetGroundBody();
-    ... build a joint using the ground body ...
-</pre>
-
-<a name="using_a_body"></a>
-<h2>Using a Body</h2>
-<p>Using a body is fairly straightforward. You can set and get the position and rotation of a body. You can set and get the position of the body's origin or its center of mass.  You can set and get its velocities.</p>
-<pre class="code">
-    void SetOriginPosition(const b2Vec2& position, float32 rotation);
-    b2Vec2 GetOriginPosition() const;
-
-    void SetCenterPosition(const b2Vec2& position, float32 rotation);
-    b2Vec2 GetCenterPosition() const;
-
-    float32 GetRotation() const;
-    const b2Mat22& GetRotationMatrix() const;
-
-    void SetLinearVelocity(const b2Vec2& v);
-    b2Vec2 GetLinearVelocity() const;
-
-    void SetAngularVelocity(float32 w);
-    float32 GetAngularVelocity() const;
-</pre>
-
-<p>You can apply forces, torques, and impulses to a body. When you apply a force or an impulse, you provide a world point where the load is applied. This often results in a torque about the center of mass.</p>
-<pre class="code">
-    void ApplyForce(const b2Vec2& force, const b2Vec2& point);
-    void ApplyTorque(float32 torque);
-    void ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point);
-</pre>
-
-<p>Keep in mind that the only body function that wakes it is <code>b2Body::WakeUp</code>. Applying forces <b>does not</b> wake a body. This is done so that bodies under static load can sleep. For example, you may wish to increase the gravity on a body by applying a steady downward force. There is no reason to prevent this body from going to sleep. If you want to apply a force to a body and ensure that it reacts, you must wake the body <em>first</em>.</p>
-
-<p>The body class has some utility functions to help you transform points and vectors between local and world space. If you don't understand these concepts, please read "Essential Mathematics for Games and Interactive Applications" by Jim Van Verth and Lars Bishop. These functions are efficient, so use them with impunity.</p>
-<pre class="code">
-    b2Vec2 GetWorldPoint(const b2Vec2& localPoint);
-    b2Vec2 GetWorldVector(const b2Vec2& localVector);
-    b2Vec2 GetLocalPoint(const b2Vec2& worldPoint);
-    b2Vec2 GetLocalVector(const b2Vec2& worldVector);
-</pre>
-
-<p>You can iterate over a body's shapes. This is useful if you want to draw collision geometry in a debug mode.</p>
-<pre class="code">
-    for (b2Shape* s = body->GetShapeList(); s; s = s->GetNext())
-    {
-        GameDrawShape(s);
-    }
-</pre>
-
-</div>
 
 <a name="joints"></a>
 <h1>Joints</h1>
@@ -947,8 +977,8 @@ Always delete gear joints before the revolute/prismatic joints on the gears. Oth
 
 <p>So you might gather that there may be contacts created for shapes that are not touching (just their AABBs). Well, this is correct. It's a "chick or egg" problem. We don't know if we need a contact object until one is created to analyze the collision. We could delete the contact right away if the shapes are not touching, or we can just wait until the AABBS stop overlapping. Box2D takes the latter approach.</p>
 
-<a name="contact_callbacks"></a>
-<h2>Contact Callbacks</h2>
+<a name="contact_listener"></a>
+<h2>Contact Listener</h2>
 <p>Box2D has a simple approach to contact callbacks: it doesn't have any. Why is this? Well, Box2D stores all the contact points across time steps, so you can access the data any time you like. Normally, you will look at contact points after a time step.</p>
 
 <p>As you traverse the contact objects, you might decide to destroy a body. For example, when a vehicle hits a wall, you might want to destroy the wall. Normally, this creates a buggy situation because the contact object you are processing needs to be destroyed when you destroy one of the bodies involved. Box2D has a solution for this problem.</p>
@@ -986,7 +1016,70 @@ for (b2Contact* c = m_world->GetContactList(); c; c = c->GetNext())
     }
 }
 </pre>
+
+<a name="contact_filtering"></a>
+<h2>Contact Filtering</h2>
+<p>Often in a game you don't want all objects to collide. For example, you may want to create a door that only certain characters can pass through. This is called contact filtering, because some interactions are <em>filtered out</em>.</p>
+
+<p>Box2D allows you to achieve custom contact filtering by implementing a <code>b2ContactFilter</code> class. This class requires you to implement a <code>ShouldCollide</code> function that receives two <code>b2Shape</code> pointers. Your function returns true if the shapes should collide.</p>
+
+<p>The default implementation of <code>ShouldCollide</code> uses category, mask, and group information defined in the <a href="#shapes">shapes section</a>.</p>
 </div>
+
+
+<a name="world_boundary"></a>
+<h1>World Boundary</h1>
+<div class = "text">
+<p>You can implement a <code>b2BoundaryListener</code> that allows <code>b2World</code> to inform you when a body has gone outside the world AABB. When you get the callback, you shouldn't try to delete the body, instead you should mark the parent actor for deletion or error handling. After the physics time step, you should handle the event.</p>
+<pre class="code">
+	class MyBoundaryListener : public b2BoundaryListener
+	{
+		void Violation(b2Body* body)
+		{
+			MyActor* myActor = (MyActor*)body->GetUserData();
+			myActor->MarkForErrorHandling();
+		}
+	};
+</pre>
+
+<p>You can then register an instance of your boundary listener with your world object. You should do this during world initialization.</p>
+
+<pre class="code">
+	myWorld->SetListener(myBoundaryListener);
+</pre>
+</div>
+
+<a name="implicit_destruction"></a>
+<h1>Implicit Destruction</h1>
+<div class = "text">
+<p>Box2D doesn't use reference counting. So if you destroy a body it is really gone. Accessing a pointer to a destroyed body has undefined behavior. In other words, your program will likely crash and burn. To help fix these problems, the debug build memory manager fills destroyed entities with <code>FDFDFDFD</code>. This can help find problems more easily in some cases.<p>
+
+<p>If you destroy a Box2D entity, it is up to you to make sure you remove all references to the destroyed object. This is easy if you only have a single reference to the entity. If you have multiple references, you might consider implementing a <em>handle</em> class to wrap the raw pointer.</p>
+
+<p>Often when using Box2D you will create and destroy many bodies, shapes, and joints. Managing these entities is somewhat automated by Box2D. If you destroy a body then all associated shapes and joints are automatically destroyed. This is called <em>implicit destruction</em>.</p>
+
+<p>Implicit destruction is a great convenience in many cases. It can also make your program fall apart. You may store pointers to shapes and joints somewhere in your code. These pointers become orphaned when an associated body is destroyed. The situation becomes worse when you consider that  joints are often created by a part of the code unrelated to management of the associated body. For example, the testbed creates a <code>b2MouseJoint</code> for interactive manipulation of bodies on the screen.</p>
+
+<p>Box2D provides a callback mechanism to inform your application when implicit destruction occurs. This gives your application a chance to nullify the orphaned pointers. This callback mechanism is described later in this manual.</p>
+
+<p>You can implement a <code>b2DestructionListener</code> that allows <code>b2World</code> to inform you when a shape or joint is implicitly destroyed because an associated body was destroyed. This will help prevent your code from accessing orphaned pointers.</p>
+<pre class="code">
+	class MyDestructionListener : public b2DestructionListener
+	{
+		void SayGoodbye(b2Joint* joint)
+		{
+			// remove all references to joint.
+		}
+	};
+</pre>
+
+<p>You can then register an instance of your destruction listener with your world object. You should do this during world initialization.</p>
+
+<pre class="code">
+	myWorld->SetListener(myDestructionListener);
+</pre>
+</div>
+
 
 <a name="behind_the_scenes"></a>
 <h1>Behind the Scenes</h1>

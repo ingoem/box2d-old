@@ -120,11 +120,7 @@ public:
 
 	/// Get the next shape in the parent body's shape list.
 	/// @return the next shape.
-	b2Shape* GetBodyNext();
-
-	/// Get the next shape in the parent world's shape list.
-	/// @return the next shape.
-	b2Shape* GetWorldNext();
+	b2Shape* GetNext();
 
 	/// Get the user data that was assigned in the shape definition. Use this to
 	/// store your application specific data.
@@ -187,10 +183,7 @@ public:
 
 	b2ShapeType m_type;
 
-	b2Shape* m_bodyNext;
-
-	b2Shape* m_worldPrev;
-	b2Shape* m_worldNext;
+	b2Shape* m_next;
 
 	b2Body* m_body;
 
@@ -231,14 +224,9 @@ inline b2Body* b2Shape::GetBody()
 	return m_body;
 }
 
-inline b2Shape* b2Shape::GetWorldNext()
+inline b2Shape* b2Shape::GetNext()
 {
-	return m_worldNext;
-}
-
-inline b2Shape* b2Shape::GetBodyNext()
-{
-	return m_bodyNext;
+	return m_next;
 }
 
 inline float32 b2Shape::GetSweepRadius() const

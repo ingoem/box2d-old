@@ -75,9 +75,7 @@ b2Shape::b2Shape(const b2ShapeDef* def)
 	m_body = NULL;
 	m_sweepRadius = 0.0f;
 
-	m_bodyNext = NULL;
-	m_worldPrev = NULL;
-	m_worldNext = NULL;
+	m_next = NULL;
 
 	m_proxyId = b2_nullProxy;
 

@@ -72,21 +72,29 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_angularVelocity = 0.0f;
 
 	m_sleepTime = 0.0f;
-	m_mass = bd->massData.mass;
-	m_I = bd->massData.I;
+
+	m_mass = 0.0f;
 	m_invMass = 0.0f;
+	m_I = 0.0f;
 	m_invI = 0.0f;
+
+	if (m_flags & b2BodyDef::e_dynamicBody)
+	{
+		m_mass = bd->massData.mass;
+	}
 
 	if (m_mass > 0.0f)
 	{
 		m_invMass = 1.0f / m_mass;
 	}
 
-	if (m_flags & b2Body::e_fixedRotationFlag)
+	if ((m_flags & b2Body::e_fixedRotationFlag) == 0 &&
+		(m_flags & b2BodyDef::e_dynamicBody) != 0)
 	{
-		m_I = 0.0f;
+		m_I = bd->massData.I;
 	}
-	else if (m_I > 0.0f)
+	
+	if (m_I > 0.0f)
 	{
 		m_invI = 1.0f / m_I;
 	}
@@ -113,20 +121,7 @@ b2Shape* b2Body::CreateShape(b2ShapeDef* def)
 
 	b2Shape* s = b2Shape::Create(def, &m_world->m_blockAllocator);
 
-	// Connect to doubly linked shape list.
-	s->m_worldPrev = NULL;
-	s->m_worldNext = m_world->m_shapeList;
-
-	if (m_world->m_shapeList)
-	{
-		m_world->m_shapeList->m_worldPrev = s;
-	}
-
-	m_world->m_shapeList = s;
-
-	++m_world->m_shapeCount;
-
-	s->m_bodyNext = m_shapeList;
+	s->m_next = m_shapeList;
 	m_shapeList = s;
 	++m_shapeCount;
 
@@ -159,40 +154,21 @@ void b2Body::DestroyShape(b2Shape* s)
 	{
 		if (*node == s)
 		{
-			*node = s->m_bodyNext;
+			*node = s->m_next;
 			found = true;
 			break;
 		}
 
-		node = &(*node)->m_bodyNext;
+		node = &(*node)->m_next;
 	}
 
 	// You tried to remove a shape that is not attached to this body.
 	b2Assert(found);
 
 	s->m_body = NULL;
-	s->m_bodyNext = NULL;
+	s->m_next = NULL;
 
 	--m_shapeCount;
-
-	// Remove from doubly linked list.
-	if (s->m_worldPrev)
-	{
-		s->m_worldPrev->m_worldNext = s->m_worldNext;
-	}
-
-	if (s->m_worldNext)
-	{
-		s->m_worldNext->m_worldPrev = s->m_worldPrev;
-	}
-
-	if (s == m_world->m_shapeList)
-	{
-		m_world->m_shapeList = s->m_worldNext;
-	}
-
-	b2Assert(m_world->m_shapeCount > 0);
-	--m_world->m_shapeCount;
 
 	b2Shape::Destroy(s, &m_world->m_blockAllocator);
 }
@@ -206,26 +182,31 @@ void b2Body::SetMass(const b2MassData* massData)
 		return;
 	}
 
-	m_mass = massData->mass;
-	m_I = massData->I;
+	if (m_flags & b2BodyDef::e_staticBody)
+	{
+		return;
+	}
+
+	m_mass = 0.0f;
+	m_invMass = 0.0f;
+	m_I = 0.0f;
+	m_invI = 0.0f;
+
+	m_mass = massData.mass;
 
 	if (m_mass > 0.0f)
 	{
 		m_invMass = 1.0f / m_mass;
 	}
-	else
+
+	if ((m_flags & b2Body::e_fixedRotationFlag) == 0)
 	{
-		m_invMass = 0.0f;
+		m_I = massData.I;
 	}
 
-	if (m_I > 0.0f && (m_flags & e_fixedRotationFlag) == 0)
+	if (m_I > 0.0f)
 	{
 		m_invI = 1.0f / m_I;
-	}
-	else
-	{
-		m_I = 0.0f;
-		m_invI = 0.0f;
 	}
 
 	// Move center of mass.
@@ -233,7 +214,7 @@ void b2Body::SetMass(const b2MassData* massData)
 	m_sweep.c0 = m_sweep.c = b2Mul(m_xf, m_sweep.localCenter);
 
 	// Update the sweep radii of all child shapes.
-	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		s->UpdateSweepRadius(m_sweep.localCenter);
 	}
@@ -248,11 +229,19 @@ void b2Body::SetMassFromShapes()
 		return;
 	}
 
+	if (m_flags & b2BodyDef::e_staticBody)
+	{
+		return;
+	}
+
 	// Compute mass data from shapes. Each shape has its own density.
 	m_mass = 0.0f;
+	m_invMass = 0.0f;
 	m_I = 0.0f;
+	m_invI = 0.0f;
+
 	b2Vec2 center = b2Vec2_zero;
-	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		b2MassData massData;
 		s->ComputeMass(&massData);
@@ -291,7 +280,7 @@ void b2Body::SetMassFromShapes()
 	m_sweep.c0 = m_sweep.c = b2Mul(m_xf, m_sweep.localCenter);
 
 	// Update the sweep radii of all child shapes.
-	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		s->UpdateSweepRadius(m_sweep.localCenter);
 	}
@@ -317,7 +306,7 @@ bool b2Body::SetXForm(const b2Vec2& position, float angle)
 	m_sweep.a0 = m_sweep.a = angle;
 
 	bool freeze = false;
-	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		bool inRange = s->Synchronize(m_world->m_broadPhase, m_xf, m_xf);
 
@@ -333,7 +322,7 @@ bool b2Body::SetXForm(const b2Vec2& position, float angle)
 		m_flags |= e_frozenFlag;
 		m_linearVelocity.SetZero();
 		m_angularVelocity = 0.0f;
-		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+		for (b2Shape* s = m_shapeList; s; s = s->m_next)
 		{
 			s->DestroyProxy(m_world->m_broadPhase);
 		}
@@ -354,7 +343,7 @@ bool b2Body::SynchronizeShapes()
 	xf1.position = m_sweep.c0 - b2Mul(xf1.R, m_sweep.localCenter);
 
 	bool inRange = true;
-	for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
 	{
 		inRange = s->Synchronize(m_world->m_broadPhase, xf1, m_xf);
 		if (inRange == false)
@@ -368,7 +357,7 @@ bool b2Body::SynchronizeShapes()
 		m_flags |= e_frozenFlag;
 		m_linearVelocity.SetZero();
 		m_angularVelocity = 0.0f;
-		for (b2Shape* s = m_shapeList; s; s = s->m_bodyNext)
+		for (b2Shape* s = m_shapeList; s; s = s->m_next)
 		{
 			s->DestroyProxy(m_world->m_broadPhase);
 		}

@@ -39,12 +39,10 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_contactListener = NULL;
 	m_debugDraw = NULL;
 
-	m_shapeList = NULL;
 	m_bodyList = NULL;
 	m_contactList = NULL;
 	m_jointList = NULL;
 
-	m_shapeCount = 0;
 	m_bodyCount = 0;
 	m_contactCount = 0;
 	m_jointCount = 0;
@@ -148,31 +146,12 @@ void b2World::DestroyBody(b2Body* b)
 	while (s)
 	{
 		b2Shape* s0 = s;
-		s = s->m_bodyNext;
+		s = s->m_next;
 
 		if (m_destructionListener)
 		{
 			m_destructionListener->SayGoodbye(s0);
 		}
-
-		// Remove from doubly linked list.
-		if (s0->m_worldPrev)
-		{
-			s0->m_worldPrev->m_worldNext = s0->m_worldNext;
-		}
-
-		if (s0->m_worldNext)
-		{
-			s0->m_worldNext->m_worldPrev = s0->m_worldPrev;
-		}
-
-		if (s0 == m_shapeList)
-		{
-			m_shapeList = s0->m_worldNext;
-		}
-
-		b2Assert(m_shapeCount > 0);
-		--m_shapeCount;
 
 		s0->DestroyProxy(m_broadPhase);
 		b2Shape::Destroy(s0, &m_blockAllocator);
@@ -235,7 +214,7 @@ b2Joint* b2World::CreateJoint(const b2JointDef* def)
 	{
 		// Reset the proxies on the body with the minimum number of shapes.
 		b2Body* b = def->body1->m_shapeCount < def->body2->m_shapeCount ? def->body1 : def->body2;
-		for (b2Shape* s = b->m_shapeList; s; s = s->m_bodyNext)
+		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
 		{
 			s->ResetProxy(m_broadPhase, b->m_xf);
 		}
@@ -322,7 +301,7 @@ void b2World::DestroyJoint(b2Joint* j)
 	{
 		// Reset the proxies on the body with the minimum number of shapes.
 		b2Body* b = body1->m_shapeCount < body2->m_shapeCount ? body1 : body2;
-		for (b2Shape* s = b->m_shapeList; s; s = s->m_bodyNext)
+		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
 		{
 			s->ResetProxy(m_broadPhase, b->m_xf);
 		}
@@ -892,7 +871,7 @@ void b2World::DrawDebugData()
 		for (b2Body* b = m_bodyList; b; b = b->GetNext())
 		{
 			const b2XForm& xf = b->GetXForm();
-			for (b2Shape* s = b->GetShapeList(); s; s = s->GetBodyNext())
+			for (b2Shape* s = b->GetShapeList(); s; s = s->GetNext())
 			{
 				if (b->IsStatic())
 				{
@@ -1004,7 +983,7 @@ void b2World::DrawDebugData()
 		for (b2Body* b = m_bodyList; b; b = b->GetNext())
 		{
 			const b2XForm& xf = b->GetXForm();
-			for (b2Shape* s = b->GetShapeList(); s; s = s->GetBodyNext())
+			for (b2Shape* s = b->GetShapeList(); s; s = s->GetNext())
 			{
 				if (s->GetType() != e_polygonShape)
 				{
