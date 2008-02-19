@@ -192,7 +192,7 @@ void b2Body::SetMass(const b2MassData* massData)
 	m_I = 0.0f;
 	m_invI = 0.0f;
 
-	m_mass = massData.mass;
+	m_mass = massData->mass;
 
 	if (m_mass > 0.0f)
 	{
@@ -201,7 +201,7 @@ void b2Body::SetMass(const b2MassData* massData)
 
 	if ((m_flags & b2Body::e_fixedRotationFlag) == 0)
 	{
-		m_I = massData.I;
+		m_I = massData->I;
 	}
 
 	if (m_I > 0.0f)
