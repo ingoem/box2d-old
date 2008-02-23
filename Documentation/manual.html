@@ -465,7 +465,7 @@ Box2D's solution is to use a <em>small block</em> allocator (SBA). The SBA keeps
 <p>There are a few ways to establish the mass properties for a body.</p>
 <ol>
 <li>Set the mass properties explicitly in the body definition.</li>
-<li>Set the mass properties explicitly on the body.</li>
+<li>Set the mass properties explicitly on the body (after it has been created).</li>
 <li>Set the mass properties based on the density of the attaced shapes.</li>
 </ol>
 <p>In many game scenarios it makes sense to compute mass based on shape densities. This helps to ensure that bodies have reasonable and consistent mass values.</p>
