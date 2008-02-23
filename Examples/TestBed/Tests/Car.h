@@ -25,6 +25,7 @@ class Car : public Test
 public:
 	Car()
 	{
+#if 1
 		{	// car body
 			b2PolygonDef poly1, poly2;
 			b2BodyDef bd;
@@ -63,18 +64,6 @@ public:
 			m_vehicle->SetMassFromShapes();
 		}
 
-		{	// ground
-			b2PolygonDef box;
-			box.SetAsBox(19.5f, 0.5f);
-			box.friction = 0.62f;
-
-			b2BodyDef bd;
-			bd.position.Set(-25.0f, 1.0f);
-
-			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateShape(&box);
-		}
-
 		{	// vehicle wheels
 			b2CircleDef	circ;
 			circ.density = 40.0f;
@@ -100,26 +89,79 @@ public:
 		{	// join wheels to chassis
 			b2Vec2 anchor;
 			b2RevoluteJointDef jd;
-			jd.body1 = m_vehicle;
-			jd.body2 = m_leftWheel;
+			jd.Initialize(m_vehicle, m_leftWheel, m_leftWheel->GetWorldCenter());
 			jd.collideConnected = false;
-			anchor = m_leftWheel->GetWorldCenter();
-			jd.localAnchor1 = m_vehicle->GetLocalPoint(anchor);
-			jd.localAnchor2 = m_leftWheel->GetLocalPoint(anchor);
-			jd.referenceAngle = m_leftWheel->GetAngle() - m_vehicle->GetAngle();
 			jd.enableMotor = true;
 			jd.maxMotorTorque = 10.0f;
 			jd.motorSpeed = 0.0f;
 			m_leftJoint = (b2RevoluteJoint*)m_world->CreateJoint(&jd);
 
-			jd.body1 = m_vehicle;
-			jd.body2 = m_rightWheel;
+			jd.Initialize(m_vehicle, m_rightWheel, m_rightWheel->GetWorldCenter());
 			jd.collideConnected = false;
-			anchor = m_rightWheel->GetWorldCenter();
-			jd.localAnchor1 = m_vehicle->GetLocalPoint(anchor);
-			jd.localAnchor2 = m_rightWheel->GetLocalPoint(anchor);
-			jd.referenceAngle = m_rightWheel->GetAngle() - m_vehicle->GetAngle();
 			m_rightJoint = (b2RevoluteJoint*)m_world->CreateJoint(&jd);
+		}
+#else
+{
+	b2PolygonDef sd;
+	b2BodyDef bd;
+	bd.type = b2BodyDef::e_dynamicBody;
+	sd.SetAsBox(2.0f, 1.0f);
+	sd.density = 0.5f;
+	bd.position.Set(-2.5f, 5.0f);
+	m_vehicle = m_world->CreateBody(&bd);
+	m_vehicle->CreateShape(&sd);
+	m_vehicle->SetMassFromShapes();
+}
+
+{
+	b2CircleDef sd;
+	b2BodyDef bd;
+	bd.type = b2BodyDef::e_dynamicBody;
+	sd.radius=0.7f;
+	sd.density = 0.5f;
+	sd.friction = 1.0f;
+	bd.position.Set(-4.0f, 4.0f);
+	m_leftWheel = m_world->CreateBody(&bd);
+	m_leftWheel->CreateShape(&sd);
+	m_leftWheel->SetMassFromShapes();
+
+	b2RevoluteJointDef jd;
+	jd.Initialize(m_vehicle, m_leftWheel, bd.position);
+	m_leftJoint = (b2RevoluteJoint*)m_world->CreateJoint(&jd);
+}
+
+{
+	b2CircleDef sd;
+	b2BodyDef bd;
+	bd.type = b2BodyDef::e_dynamicBody;
+	sd.radius=0.7f;
+	sd.density = 0.5f;
+	sd.friction = 1.0f;
+	bd.position.Set(-1.0f, 4.0f);
+	m_rightWheel = m_world->CreateBody(&bd);
+	m_rightWheel->CreateShape(&sd);
+	m_rightWheel->SetMassFromShapes();
+
+	b2RevoluteJointDef jd;
+	jd.Initialize(m_vehicle, m_rightWheel, bd.position);
+	m_rightJoint = (b2RevoluteJoint*)m_world->CreateJoint(&jd);
+	m_rightJoint->EnableMotor(true);
+	m_rightJoint->SetMotorSpeed(1.0f);
+	m_rightJoint->SetMaxMotorTorque(1000.0f);
+}
+
+#endif
+
+		{	// ground
+			b2PolygonDef box;
+			box.SetAsBox(19.5f, 0.5f);
+			box.friction = 0.62f;
+
+			b2BodyDef bd;
+			bd.position.Set(-25.0f, 1.0f);
+
+			b2Body* ground = m_world->CreateBody(&bd);
+			ground->CreateShape(&box);
 		}
 
 		{	// more ground
@@ -212,8 +254,8 @@ public:
 	b2Body* m_leftWheel;
 	b2Body* m_rightWheel;
 	b2Body* m_vehicle;
-	b2RevoluteJoint* m_rightJoint;
 	b2RevoluteJoint* m_leftJoint;
+	b2RevoluteJoint* m_rightJoint;
 };
 
 #endif

@@ -28,12 +28,13 @@
 /// not a NaN or infinity.
 inline bool b2IsValid(float x)
 {
-#ifdef WIN32
+#if defined( WIN32 ) || defined (_WIN32_WCE)
 	return _finite(x) != 0;
 #else
 	return finite(x) != 0;
 #endif
 }
+
 
 /// This is a approximate yet fast inverse square-root.
 inline float32 b2InvSqrt(float32 x)

@@ -127,12 +127,12 @@ public:
 	void* GetUserData();
 
 	/// Test a point for containment in this shape. This only works for convex shapes.
-	/// @param transform the shape world transform.
+	/// @param xf the shape world transform.
 	/// @param p a point in world coordinates.
 	virtual bool TestPoint(const b2XForm& xf, const b2Vec2& p) const = 0;
 
 	/// Perform a ray cast against this shape.
-	/// @param transform the shape world transform.
+	/// @param xf the shape world transform.
 	/// @param lambda returns the hit fraction. You can use this to compute the contact point
 	/// p = (1 - lambda) * segment.p1 + lambda * segment.p2.
 	/// @param normal returns the normal at the contact point. If there is no intersection, the normal
@@ -148,13 +148,13 @@ public:
 
 	/// Given a transform, compute the associated axis aligned bounding box for this shape.
 	/// @param aabb returns the axis aligned box.
-	/// @param transform the world transform of the shape.
+	/// @param xf the world transform of the shape.
 	virtual void ComputeAABB(b2AABB* aabb, const b2XForm& xf) const = 0;
 
 	/// Given two transforms, compute the associated swept axis aligned bounding box for this shape.
 	/// @param aabb returns the axis aligned box.
-	/// @param transform1 the starting shape world transform.
-	/// @param transform2 the ending shape world transform.
+	/// @param xf1 the starting shape world transform.
+	/// @param xf2 the ending shape world transform.
 	virtual void ComputeSweptAABB(	b2AABB* aabb,
 									const b2XForm& xf1,
 									const b2XForm& xf2) const = 0;
