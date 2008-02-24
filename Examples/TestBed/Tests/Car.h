@@ -25,7 +25,6 @@ class Car : public Test
 public:
 	Car()
 	{
-#if 1
 		{	// car body
 			b2PolygonDef poly1, poly2;
 			b2BodyDef bd;
@@ -100,57 +99,6 @@ public:
 			jd.collideConnected = false;
 			m_rightJoint = (b2RevoluteJoint*)m_world->CreateJoint(&jd);
 		}
-#else
-{
-	b2PolygonDef sd;
-	b2BodyDef bd;
-	bd.type = b2BodyDef::e_dynamicBody;
-	sd.SetAsBox(2.0f, 1.0f);
-	sd.density = 0.5f;
-	bd.position.Set(-2.5f, 5.0f);
-	m_vehicle = m_world->CreateBody(&bd);
-	m_vehicle->CreateShape(&sd);
-	m_vehicle->SetMassFromShapes();
-}
-
-{
-	b2CircleDef sd;
-	b2BodyDef bd;
-	bd.type = b2BodyDef::e_dynamicBody;
-	sd.radius=0.7f;
-	sd.density = 0.5f;
-	sd.friction = 1.0f;
-	bd.position.Set(-4.0f, 4.0f);
-	m_leftWheel = m_world->CreateBody(&bd);
-	m_leftWheel->CreateShape(&sd);
-	m_leftWheel->SetMassFromShapes();
-
-	b2RevoluteJointDef jd;
-	jd.Initialize(m_vehicle, m_leftWheel, bd.position);
-	m_leftJoint = (b2RevoluteJoint*)m_world->CreateJoint(&jd);
-}
-
-{
-	b2CircleDef sd;
-	b2BodyDef bd;
-	bd.type = b2BodyDef::e_dynamicBody;
-	sd.radius=0.7f;
-	sd.density = 0.5f;
-	sd.friction = 1.0f;
-	bd.position.Set(-1.0f, 4.0f);
-	m_rightWheel = m_world->CreateBody(&bd);
-	m_rightWheel->CreateShape(&sd);
-	m_rightWheel->SetMassFromShapes();
-
-	b2RevoluteJointDef jd;
-	jd.Initialize(m_vehicle, m_rightWheel, bd.position);
-	m_rightJoint = (b2RevoluteJoint*)m_world->CreateJoint(&jd);
-	m_rightJoint->EnableMotor(true);
-	m_rightJoint->SetMotorSpeed(1.0f);
-	m_rightJoint->SetMaxMotorTorque(1000.0f);
-}
-
-#endif
 
 		{	// ground
 			b2PolygonDef box;
