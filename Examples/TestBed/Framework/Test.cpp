@@ -205,11 +205,10 @@ void Test::LaunchBomb()
 	}
 
 	b2BodyDef bd;
-	bd.type = b2BodyDef::e_dynamicBody;
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
 	bd.isBullet = true;
-	m_bomb = m_world->CreateBody(&bd);
+	m_bomb = m_world->CreateDynamicBody(&bd);
 	m_bomb->SetLinearVelocity(-5.0f * bd.position);
 
 	b2CircleDef sd;

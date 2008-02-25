@@ -35,17 +35,9 @@ struct b2ContactEdge;
 /// You can safely re-use body definitions.
 struct b2BodyDef
 {
-	/// The type of body.
-	enum Type
-	{
-		e_staticBody,	///< A static body should not move and has infinite mass.
-		e_dynamicBody,	///< A regular moving body.
-	};
-
 	/// This constructor sets the body definition default values.
 	b2BodyDef()
 	{
-		type = e_staticBody;
 		massData.center.SetZero();
 		massData.mass = 0.0f;
 		massData.I = 0.0f;
@@ -59,11 +51,6 @@ struct b2BodyDef
 		fixedRotation = false;
 		isBullet = false;
 	}
-
-	/// We need the body type to setup collision filtering correctly, so
-	/// that static bodies don't collide with each other. You can't change
-	/// this once a body is created.
-	Type type;
 
 	/// You can use this to initialized the mass properties of the body.
 	/// If you prefer, you can set the mass properties after the shapes
@@ -234,6 +221,9 @@ public:
 	/// Is this body static (immovable)?
 	bool IsStatic() const;
 
+	/// Is this body dynamic (movable)?
+	bool IsDynamic() const;
+
 	/// Is this body frozen?
 	bool IsFrozen() const;
 
@@ -266,7 +256,6 @@ public:
 	// m_flags
 	enum
 	{
-		e_staticFlag		= 0x0001,
 		e_frozenFlag		= 0x0002,
 		e_islandFlag		= 0x0004,
 		e_sleepFlag			= 0x0008,
@@ -275,7 +264,15 @@ public:
 		e_fixedRotationFlag	= 0x0040,
 	};
 
-	b2Body(const b2BodyDef* bd, b2World* world);
+	// m_type
+	enum
+	{
+		e_staticType,
+		e_dynamicType,
+		e_maxTypes,
+	};
+
+	b2Body(const b2BodyDef* bd, uint16 type, b2World* world);
 	~b2Body();
 
 	void ComputeMass();
@@ -290,7 +287,8 @@ public:
 
 	void Advance(float32 t);
 
-	uint32 m_flags;
+	uint16 m_flags;
+	uint16 m_type;
 
 	b2XForm m_xf;		// the body origin transform
 
@@ -417,7 +415,12 @@ inline void b2Body::SetBullet(bool flag)
 
 inline bool b2Body::IsStatic() const
 {
-	return (m_flags & e_staticFlag) == e_staticFlag;
+	return m_type == e_staticType;
+}
+
+inline bool b2Body::IsDynamic() const
+{
+	return m_type == e_dynamicType;
 }
 
 inline bool b2Body::IsFrozen() const

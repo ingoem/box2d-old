@@ -32,14 +32,13 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
 		b2BodyDef bodydef;
-		bodydef.type = b2BodyDef::e_dynamicBody;
 		bodydef.position.Set(0.0f, 10.0f);
-		m_body = m_world->CreateBody(&bodydef);
+		m_body = m_world->CreateDynamicBody(&bodydef);
 
 		b2PolygonDef sd;
 		sd.SetAsBox(4.0f, 4.0f, b2Vec2(0.0f, 0.0f), 0.0f);

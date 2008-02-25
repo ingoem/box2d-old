@@ -27,9 +27,8 @@ public:
 		b2Body* ground = NULL;
 		{
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->CreateStaticBody(&bd);
 
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
@@ -50,9 +49,8 @@ public:
 			box.density = 5.0f;
 
 			b2BodyDef bd1;
-			bd1.type = b2BodyDef::e_dynamicBody;
 			bd1.position.Set(-3.0f, 12.0f);
-			b2Body* body1 = m_world->CreateBody(&bd1);
+			b2Body* body1 = m_world->CreateDynamicBody(&bd1);
 			body1->CreateShape(&circle1);
 			body1->SetMassFromShapes();
 
@@ -65,34 +63,23 @@ public:
 			m_joint1 = (b2RevoluteJoint*)m_world->CreateJoint(&jd1);
 
 			b2BodyDef bd2;
-			bd2.type = b2BodyDef::e_dynamicBody;
 			bd2.position.Set(0.0f, 12.0f);
-			b2Body* body2 = m_world->CreateBody(&bd2);
+			b2Body* body2 = m_world->CreateDynamicBody(&bd2);
 			body2->CreateShape(&circle2);
 			body2->SetMassFromShapes();
 
 			b2RevoluteJointDef jd2;
-			jd2.body1 = ground;
-			jd2.body2 = body2;
-			jd2.localAnchor1 = ground->GetLocalPoint(bd2.position);
-			jd2.localAnchor2 = body2->GetLocalPoint(bd2.position);
-			jd2.referenceAngle = body2->GetAngle() - body1->GetAngle();
+			jd2.Initialize(ground, body2, bd2.position);
 			m_joint2 = (b2RevoluteJoint*)m_world->CreateJoint(&jd2);
 
 			b2BodyDef bd3;
-			bd3.type = b2BodyDef::e_dynamicBody;
 			bd3.position.Set(2.5f, 12.0f);
-			b2Body* body3 = m_world->CreateBody(&bd3);
+			b2Body* body3 = m_world->CreateDynamicBody(&bd3);
 			body3->CreateShape(&box);
 			body3->SetMassFromShapes();
 
 			b2PrismaticJointDef jd3;
-			jd3.body1 = ground;
-			jd3.body2 = body3;
-			jd3.localAnchor1 = ground->GetLocalPoint(bd3.position);
-			jd3.localAnchor2 = body3->GetLocalPoint(bd3.position);
-			jd3.referenceAngle = body3->GetAngle() - ground->GetAngle();
-			jd3.localAxis1 = ground->GetLocalVector(b2Vec2(0.0f, 1.0f));
+			jd3.Initialize(ground, body3, bd3.position, b2Vec2(0.0f, 1.0f));
 			jd3.lowerTranslation = -5.0f;
 			jd3.upperTranslation = 5.0f;
 			jd3.enableLimit = true;

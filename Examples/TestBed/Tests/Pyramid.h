@@ -29,9 +29,8 @@ public:
 			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, -10.0f);
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -53,9 +52,8 @@ public:
 				for (int32 j = i; j < 25; ++j)
 				{
 					b2BodyDef bd;
-					bd.type = b2BodyDef::e_dynamicBody;
 					bd.position = y;
-					b2Body* body = m_world->CreateBody(&bd);
+					b2Body* body = m_world->CreateDynamicBody(&bd);
 					body->CreateShape(&sd);
 					body->SetMassFromShapes();
 

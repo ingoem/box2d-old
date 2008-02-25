@@ -31,7 +31,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -41,8 +41,6 @@ public:
 			sd.density = 20.0f;
 			sd.friction = 0.2f;
 
-			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 
 			b2RevoluteJointDef jd;
 			const int32 numPlanks = 30;
@@ -50,8 +48,9 @@ public:
 			b2Body* prevBody = ground;
 			for (int i = 0; i < numPlanks; ++i)
 			{
+				b2BodyDef bd;
 				bd.position.Set(-14.5f + 1.0f * i, 5.0f);
-				b2Body* body = m_world->CreateBody(&bd);
+				b2Body* body = m_world->CreateDynamicBody(&bd);
 				body->CreateShape(&sd);
 				body->SetMassFromShapes();
 

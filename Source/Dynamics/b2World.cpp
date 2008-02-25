@@ -57,7 +57,7 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_broadPhase = new (mem) b2BroadPhase(worldAABB, &m_contactManager);
 
 	b2BodyDef bd;
-	m_groundBody = CreateBody(&bd);
+	m_groundBody = CreateStaticBody(&bd);
 }
 
 b2World::~b2World()
@@ -92,7 +92,7 @@ void b2World::SetDebugDraw(b2DebugDraw* debugDraw)
 	m_debugDraw = debugDraw;
 }
 
-b2Body* b2World::CreateBody(const b2BodyDef* def)
+b2Body* b2World::CreateStaticBody(const b2BodyDef* def)
 {
 	b2Assert(m_lock == false);
 	if (m_lock == true)
@@ -101,7 +101,31 @@ b2Body* b2World::CreateBody(const b2BodyDef* def)
 	}
 
 	void* mem = m_blockAllocator.Allocate(sizeof(b2Body));
-	b2Body* b = new (mem) b2Body(def, this);
+	b2Body* b = new (mem) b2Body(def, b2Body::e_staticType, this);
+
+	// Add to world doubly linked list.
+	b->m_prev = NULL;
+	b->m_next = m_bodyList;
+	if (m_bodyList)
+	{
+		m_bodyList->m_prev = b;
+	}
+	m_bodyList = b;
+	++m_bodyCount;
+
+	return b;
+}
+
+b2Body* b2World::CreateDynamicBody(const b2BodyDef* def)
+{
+	b2Assert(m_lock == false);
+	if (m_lock == true)
+	{
+		return NULL;
+	}
+
+	void* mem = m_blockAllocator.Allocate(sizeof(b2Body));
+	b2Body* b = new (mem) b2Body(def, b2Body::e_dynamicType, this);
 
 	// Add to world doubly linked list.
 	b->m_prev = NULL;
@@ -335,7 +359,12 @@ void b2World::Solve(const b2TimeStep& step)
 	b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
 	for (b2Body* seed = m_bodyList; seed; seed = seed->m_next)
 	{
-		if (seed->m_flags & (b2Body::e_staticFlag | b2Body::e_islandFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag))
+		if (seed->m_flags & (b2Body::e_islandFlag | b2Body::e_sleepFlag | b2Body::e_frozenFlag))
+		{
+			continue;
+		}
+
+		if (seed->IsStatic())
 		{
 			continue;
 		}
@@ -437,8 +466,12 @@ void b2World::Solve(const b2TimeStep& step)
 	// Synchronize shapes, check for out of range bodies.
 	for (b2Body* b = m_bodyList; b; b = b->GetNext())
 	{
-		uint32 skipFlags = b2Body::e_sleepFlag | b2Body::e_staticFlag | b2Body::e_frozenFlag;
-		if (b->m_flags & skipFlags)
+		if (b->m_flags & (b2Body::e_sleepFlag | b2Body::e_frozenFlag))
+		{
+			continue;
+		}
+
+		if (b->IsStatic())
 		{
 			continue;
 		}
@@ -669,8 +702,12 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			b2Body* b = island.m_bodies[i];
 			b->m_flags &= ~b2Body::e_islandFlag;
 
-			uint32 skipFlags = b2Body::e_sleepFlag | b2Body::e_staticFlag | b2Body::e_frozenFlag;
-			if (b->m_flags & skipFlags)
+			if (b->m_flags & (b2Body::e_sleepFlag | b2Body::e_frozenFlag))
+			{
+				continue;
+			}
+
+			if (b->IsStatic())
 			{
 				continue;
 			}

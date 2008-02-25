@@ -31,7 +31,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -46,15 +46,14 @@ public:
 			sd.density = 5.0f;
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 
 			bd.position.Set(-10.0f, y);
-			b2Body* body1 = m_world->CreateBody(&bd);
+			b2Body* body1 = m_world->CreateDynamicBody(&bd);
 			body1->CreateShape(&sd);
 			body1->SetMassFromShapes();
 
 			bd.position.Set(10.0f, y);
-			b2Body* body2 = m_world->CreateBody(&bd);
+			b2Body* body2 = m_world->CreateDynamicBody(&bd);
 			body2->CreateShape(&sd);
 			body2->SetMassFromShapes();
 

@@ -6,24 +6,6 @@ const float32 k_scale = 3.0f;
 
 BipedDef::BipedDef()
 {
-	LFootDef.type				= b2BodyDef::e_dynamicBody;
-	RFootDef.type				= b2BodyDef::e_dynamicBody;
-	LCalfDef.type				= b2BodyDef::e_dynamicBody;
-	RCalfDef.type				= b2BodyDef::e_dynamicBody;
-	LThighDef.type				= b2BodyDef::e_dynamicBody;
-	RThighDef.type				= b2BodyDef::e_dynamicBody;
-	PelvisDef.type				= b2BodyDef::e_dynamicBody;
-	StomachDef.type				= b2BodyDef::e_dynamicBody;
-	ChestDef.type				= b2BodyDef::e_dynamicBody;
-	NeckDef.type				= b2BodyDef::e_dynamicBody;
-	HeadDef.type				= b2BodyDef::e_dynamicBody;
-	LUpperArmDef.type			= b2BodyDef::e_dynamicBody;
-	RUpperArmDef.type			= b2BodyDef::e_dynamicBody;
-	LForearmDef.type			= b2BodyDef::e_dynamicBody;
-	RForearmDef.type			= b2BodyDef::e_dynamicBody;
-	LHandDef.type				= b2BodyDef::e_dynamicBody;
-	RHandDef.type				= b2BodyDef::e_dynamicBody;
-
 	SetMotorTorque(2.0f);
 	SetMotorSpeed(0.0f);
 	SetDensity(20.0f);

@@ -44,7 +44,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			m_body1 = m_world->CreateBody(&bd);
+			m_body1 = m_world->CreateStaticBody(&bd);
 			m_shape1 = m_body1->CreateShape(&sd);
 		}
 #endif
@@ -68,14 +68,13 @@ public:
 			sd.density = 1.0f;
 #endif
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 #if 0
 			bd.position.Set(-48.377853f, 0.49244255f);
 			bd.rotation = 90.475891f;
 #else
 			bd.position.Set(0.0f, 10.0f);
 #endif
-			m_body2 = m_world->CreateBody(&bd);
+			m_body2 = m_world->CreateDynamicBody(&bd);
 			m_shape2 = m_body2->CreateShape(&sd);
 			m_body2->SetMassFromShapes();
 		}

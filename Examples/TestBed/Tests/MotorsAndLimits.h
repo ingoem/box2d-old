@@ -31,7 +31,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -42,26 +42,19 @@ public:
 			sd.friction = 0.05f;
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 
 			b2RevoluteJointDef rjd;
-			b2Vec2 anchor, axis;
 
 			b2Body* body = NULL;
 			b2Body* prevBody = ground;
 			const float32 y = 8.0f;
 
 			bd.position.Set(3.0f, y);
-			body = m_world->CreateBody(&bd);
+			body = m_world->CreateDynamicBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
-			rjd.body1 = prevBody;
-			rjd.body2 = body;
-			anchor.Set(0.0f, y);
-			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
-			rjd.localAnchor2 = body->GetLocalPoint(anchor);
-			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
+			rjd.Initialize(prevBody, body, b2Vec2(0.0f, y));
 			rjd.motorSpeed = 1.0f * b2_pi;
 			rjd.maxMotorTorque = 10000.0f;
 			rjd.enableMotor = true;
@@ -71,16 +64,11 @@ public:
 			prevBody = body;
 
 			bd.position.Set(9.0f, y);
-			body = m_world->CreateBody(&bd);
+			body = m_world->CreateDynamicBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
-			anchor.Set(6.0f, y);
-			rjd.body1 = prevBody;
-			rjd.body2 = body;
-			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
-			rjd.localAnchor2 = body->GetLocalPoint(anchor);
-			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
+			rjd.Initialize(prevBody, body, b2Vec2(6.0f, y));
 			rjd.motorSpeed = 0.5f * b2_pi;
 			rjd.maxMotorTorque = 2000.0f;
 			rjd.enableMotor = true;
@@ -92,21 +80,12 @@ public:
 
 			bd.position.Set(-10.0f, 10.0f);
 			bd.angle = 0.5f * b2_pi;
-			body = m_world->CreateBody(&bd);
+			body = m_world->CreateDynamicBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
 			b2PrismaticJointDef pjd;
-			pjd.body1 = ground;
-			pjd.body2 = body;
-
-			anchor.Set(-10.0f, 10.0f);
-			pjd.localAnchor1 = ground->GetLocalPoint(anchor);
-			pjd.localAnchor2 = body->GetLocalPoint(anchor);
-			pjd.referenceAngle = body->GetAngle() - ground->GetAngle();
-
-			axis.Set(1.0f, 0.0f);
-			pjd.localAxis1 = ground->GetLocalVector(axis);
+			pjd.Initialize(ground, body, b2Vec2(-10.0f, 10.0f), b2Vec2(1.0f, 0.0f));
 			pjd.motorSpeed = 10.0f;
 			pjd.maxMotorForce = 1000.0f;
 			pjd.enableMotor = true;

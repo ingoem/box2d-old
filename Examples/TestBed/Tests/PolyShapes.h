@@ -37,7 +37,7 @@ public:
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -99,7 +99,6 @@ public:
 		}
 
 		b2BodyDef bd;
-		bd.type = b2BodyDef::e_dynamicBody;
 
 		float32 x = b2Random(-2.0f, 2.0f);
 		bd.position.Set(x, 10.0f);
@@ -110,7 +109,7 @@ public:
 			bd.angularDamping = 0.02f;
 		}
 
-		bodies[bodyIndex] = m_world->CreateBody(&bd);
+		bodies[bodyIndex] = m_world->CreateDynamicBody(&bd);
 
 		if (index < 4)
 		{

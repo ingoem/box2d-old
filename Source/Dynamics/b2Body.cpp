@@ -21,15 +21,13 @@
 #include "Joints/b2Joint.h"
 #include "../Collision/Shapes/b2Shape.h"
 
-b2Body::b2Body(const b2BodyDef* bd, b2World* world)
+b2Body::b2Body(const b2BodyDef* bd, uint16 type, b2World* world)
 {
 	b2Assert(world->m_lock == false);
+	b2Assert(type < e_maxTypes);
 
 	m_flags = 0;
-	if (bd->type == b2BodyDef::e_staticBody)
-	{
-		m_flags |= e_staticFlag;
-	}
+
 	if (bd->isBullet)
 	{
 		m_flags |= e_bulletFlag;
@@ -46,6 +44,8 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	{
 		m_flags |= e_sleepFlag;
 	}
+
+	m_type = type;
 
 	m_world = world;
 
@@ -78,7 +78,7 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	m_I = 0.0f;
 	m_invI = 0.0f;
 
-	if (m_flags & b2BodyDef::e_dynamicBody)
+	if (m_type == e_dynamicType)
 	{
 		m_mass = bd->massData.mass;
 	}
@@ -89,7 +89,7 @@ b2Body::b2Body(const b2BodyDef* bd, b2World* world)
 	}
 
 	if ((m_flags & b2Body::e_fixedRotationFlag) == 0 &&
-		(m_flags & b2BodyDef::e_dynamicBody) != 0)
+		m_type == e_dynamicType)
 	{
 		m_I = bd->massData.I;
 	}
@@ -182,7 +182,7 @@ void b2Body::SetMass(const b2MassData* massData)
 		return;
 	}
 
-	if (m_flags & b2BodyDef::e_staticBody)
+	if (m_type == e_staticType)
 	{
 		return;
 	}
@@ -229,7 +229,7 @@ void b2Body::SetMassFromShapes()
 		return;
 	}
 
-	if (m_flags & b2BodyDef::e_staticBody)
+	if (m_type == e_staticType)
 	{
 		return;
 	}

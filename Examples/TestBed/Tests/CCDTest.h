@@ -34,9 +34,8 @@ public:
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
-			b2Body* body = m_world->CreateBody(&bd);
+			b2Body* body = m_world->CreateStaticBody(&bd);
 			body->CreateShape(&sd);
 		}
 
@@ -65,7 +64,7 @@ public:
 			sd.density = 0.0f;
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_staticBody;
+			bd.type = b2BodyDef::e_static;
 			bd.position.Set(0.0f, -0.2f);
 			b2Body* ground = m_world->CreateBody(&bd);
 			ground->CreateShape(&sd);
@@ -78,7 +77,7 @@ public:
 			sd.restitution = 0.0f;
 
 			b2BodyDef bd1;
-			bd1.type = b2BodyDef::e_dynamicBody;
+			bd1.type = b2BodyDef::e_dynamic;
 			bd1.isBullet = true;
 			bd1.allowSleep = false;
 			bd1.position.Set(0.0f, 20.0f);
@@ -89,7 +88,7 @@ public:
 
 			sd.SetAsBox(1.0f, 0.1f);
 			b2BodyDef bd2;
-			bd2.type = b2BodyDef::e_dynamicBody;
+			bd2.type = b2BodyDef::e_dynamic;
 			bd2.isBullet = true;
 			bd2.allowSleep = false;
 			bd2.position.Set(0.0f, 20.2f);
@@ -101,7 +100,7 @@ public:
 			sd.SetAsBox(0.25f, 0.25f);
 			sd.density = 10.0f;
 			b2BodyDef bd3;
-			bd3.type = b2BodyDef::e_dynamicBody;
+			bd3.type = b2BodyDef::e_dynamic;
 			bd3.isBullet = true;
 			bd3.allowSleep = false;
 			bd3.position.Set(0.0f, 100.0f);
@@ -115,9 +114,8 @@ public:
 
 		{
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
-			b2Body* body = m_world->CreateBody(&bd);
+			b2Body* body = m_world->CreateStaticBody(&bd);
 
 			b2PolygonDef sd;
 			sd.density = 0.0f;
@@ -179,9 +177,8 @@ public:
 			sd_right.density = 4.0f;
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set( 0.0f, 15.0f );
-			b2Body* body = m_world->CreateBody(&bd);
+			b2Body* body = m_world->CreateDynamicBody(&bd);
 			body->CreateShape(&sd_bottom);
 			body->CreateShape(&sd_left);
 			body->CreateShape(&sd_right);
@@ -190,7 +187,7 @@ public:
 #else
 		{
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
+			bd.type = b2BodyDef::e_dynamic;
 			bd.position.Set(-5.0f, 20.0f);
 			bd.isBullet = true;
 			b2Body* body = m_world->CreateBody(&bd);
@@ -208,10 +205,9 @@ public:
 		for (int32 i = 0; i < 0; ++i)
 		{
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(0.0f, 15.0f + i);
 			bd.isBullet = true;
-			b2Body* body = m_world->CreateBody(&bd);
+			b2Body* body = m_world->CreateDynamicBody(&bd);
 			body->SetAngularVelocity(b2Random(-50.0f, 50.0f));
 
 			b2CircleDef sd;

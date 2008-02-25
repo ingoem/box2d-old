@@ -37,7 +37,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
 			
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -53,10 +53,9 @@ public:
 		triangleShapeDef.density = 1.0f;
 
 		b2BodyDef triangleBodyDef;
-		triangleBodyDef.type = b2BodyDef::e_dynamicBody;
 		triangleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
-		b2Body* body1 = m_world->CreateBody(&triangleBodyDef);
+		b2Body* body1 = m_world->CreateDynamicBody(&triangleBodyDef);
 		body1->CreateShape(&triangleShapeDef);
 		body1->SetMassFromShapes();
 
@@ -66,7 +65,7 @@ public:
 		triangleShapeDef.vertices[2] *= 2.0f;
 		triangleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
-		b2Body* body2 = m_world->CreateBody(&triangleBodyDef);
+		b2Body* body2 = m_world->CreateDynamicBody(&triangleBodyDef);
 		body2->CreateShape(&triangleShapeDef);
 		body2->SetMassFromShapes();
 		
@@ -76,10 +75,9 @@ public:
 		boxShapeDef.density = 1.0f;
 
 		b2BodyDef boxBodyDef;
-		boxBodyDef.type = b2BodyDef::e_dynamicBody;
 		boxBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
-		b2Body* body3 = m_world->CreateBody(&boxBodyDef);
+		b2Body* body3 = m_world->CreateDynamicBody(&boxBodyDef);
 		body3->CreateShape(&boxShapeDef);
 		body3->SetMassFromShapes();
 
@@ -87,7 +85,7 @@ public:
 		boxShapeDef.SetAsBox(2.0f, 1.0f);
 		boxBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 		
-		b2Body* body4 = m_world->CreateBody(&boxBodyDef);
+		b2Body* body4 = m_world->CreateDynamicBody(&boxBodyDef);
 		body4->CreateShape(&boxShapeDef);
 		body4->SetMassFromShapes();
 
@@ -97,10 +95,9 @@ public:
 		circleShapeDef.density = 1.0f;
 
 		b2BodyDef circleBodyDef;
-		circleBodyDef.type = b2BodyDef::e_dynamicBody;
 		circleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
-		b2Body* body5 = m_world->CreateBody(&circleBodyDef);
+		b2Body* body5 = m_world->CreateDynamicBody(&circleBodyDef);
 		body5->CreateShape(&circleShapeDef);
 		body5->SetMassFromShapes();
 
@@ -108,7 +105,7 @@ public:
 		circleShapeDef.radius *= 2.0f;
 		circleBodyDef.position.Set(b2Random(xLo, xHi), b2Random(yLo, yHi));
 
-		b2Body* body6 = m_world->CreateBody(&circleBodyDef);
+		b2Body* body6 = m_world->CreateDynamicBody(&circleBodyDef);
 		body6->CreateShape(&circleShapeDef);
 		body6->SetMassFromShapes();
 	}

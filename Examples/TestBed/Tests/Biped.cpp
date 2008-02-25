@@ -11,103 +11,103 @@ Biped::Biped(b2World* w, const b2Vec2& position)
 	// create body parts
 	bd = def.LFootDef;
 	bd.position += position;
-	LFoot = w->CreateBody(&bd);
+	LFoot = w->CreateDynamicBody(&bd);
 	LFoot->CreateShape(&def.LFootPoly);
 	LFoot->SetMassFromShapes();
 
 	bd = def.RFootDef;
 	bd.position += position;
-	RFoot = w->CreateBody(&bd);
+	RFoot = w->CreateDynamicBody(&bd);
 	RFoot->CreateShape(&def.RFootPoly);
 	RFoot->SetMassFromShapes();
 
 	bd = def.LCalfDef;
 	bd.position += position;
-	LCalf = w->CreateBody(&bd);
+	LCalf = w->CreateDynamicBody(&bd);
 	LCalf->CreateShape(&def.LCalfPoly);
 	LCalf->SetMassFromShapes();
 
 	bd = def.RCalfDef;
 	bd.position += position;
-	RCalf = w->CreateBody(&bd);
+	RCalf = w->CreateDynamicBody(&bd);
 	RCalf->CreateShape(&def.RCalfPoly);
 	RCalf->SetMassFromShapes();
 
 	bd = def.LThighDef;
 	bd.position += position;
-	LThigh = w->CreateBody(&bd);
+	LThigh = w->CreateDynamicBody(&bd);
 	LThigh->CreateShape(&def.LThighPoly);
 	LThigh->SetMassFromShapes();
 
 	bd = def.RThighDef;
 	bd.position += position;
-	RThigh = w->CreateBody(&bd);
+	RThigh = w->CreateDynamicBody(&bd);
 	RThigh->CreateShape(&def.RThighPoly);
 	RThigh->SetMassFromShapes();
 
 	bd = def.PelvisDef;
 	bd.position += position;
-	Pelvis = w->CreateBody(&bd);
+	Pelvis = w->CreateDynamicBody(&bd);
 	Pelvis->CreateShape(&def.PelvisPoly);
 	Pelvis->SetMassFromShapes();
 
 	bd = def.PelvisDef;
 	bd.position += position;
-	Stomach = w->CreateBody(&bd);
+	Stomach = w->CreateDynamicBody(&bd);
 	Stomach->CreateShape(&def.StomachPoly);
 	Stomach->SetMassFromShapes();
 
 	bd = def.ChestDef;
 	bd.position += position;
-	Chest = w->CreateBody(&bd);
+	Chest = w->CreateDynamicBody(&bd);
 	Chest->CreateShape(&def.ChestPoly);
 	Chest->SetMassFromShapes();
 
 	bd = def.NeckDef;
 	bd.position += position;
-	Neck = w->CreateBody(&bd);
+	Neck = w->CreateDynamicBody(&bd);
 	Neck->CreateShape(&def.NeckPoly);
 	Neck->SetMassFromShapes();
 
 	bd = def.HeadDef;
 	bd.position += position;
-	Head = w->CreateBody(&bd);
+	Head = w->CreateDynamicBody(&bd);
 	Head->CreateShape(&def.HeadCirc);
 	Head->SetMassFromShapes();
 
 	bd = def.LUpperArmDef;
 	bd.position += position;
-	LUpperArm = w->CreateBody(&bd);
+	LUpperArm = w->CreateDynamicBody(&bd);
 	LUpperArm->CreateShape(&def.LUpperArmPoly);
 	LUpperArm->SetMassFromShapes();
 
 	bd = def.RUpperArmDef;
 	bd.position += position;
-	RUpperArm = w->CreateBody(&bd);
+	RUpperArm = w->CreateDynamicBody(&bd);
 	RUpperArm->CreateShape(&def.RUpperArmPoly);
 	RUpperArm->SetMassFromShapes();
 
 	bd = def.LForearmDef;
 	bd.position += position;
-	LForearm = w->CreateBody(&bd);
+	LForearm = w->CreateDynamicBody(&bd);
 	LForearm->CreateShape(&def.LForearmPoly);
 	LForearm->SetMassFromShapes();
 
 	bd = def.RForearmDef;
 	bd.position += position;
-	RForearm = w->CreateBody(&bd);
+	RForearm = w->CreateDynamicBody(&bd);
 	RForearm->CreateShape(&def.RForearmPoly);
 	RForearm->SetMassFromShapes();
 
 	bd = def.LHandDef;
 	bd.position += position;
-	LHand = w->CreateBody(&bd);
+	LHand = w->CreateDynamicBody(&bd);
 	LHand->CreateShape(&def.LHandPoly);
 	LHand->SetMassFromShapes();
 
 	bd = def.RHandDef;
 	bd.position += position;
-	RHand = w->CreateBody(&bd);
+	RHand = w->CreateDynamicBody(&bd);
 	RHand->CreateShape(&def.RHandPoly);
 	RHand->SetMassFromShapes();
 	

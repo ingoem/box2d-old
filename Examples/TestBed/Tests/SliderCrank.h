@@ -33,7 +33,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->CreateBody(&bd);
+			ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -48,19 +48,12 @@ public:
 			b2Body* prevBody = ground;
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 			bd.position.Set(0.0f, 7.0f);
-			b2Body* body = m_world->CreateBody(&bd);
+			b2Body* body = m_world->CreateDynamicBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
-			b2Vec2 anchor;
-			anchor.Set(0.0f, 5.0f);
-			rjd.body1 = prevBody;
-			rjd.body2 = body;
-			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
-			rjd.localAnchor2 = body->GetLocalPoint(anchor);
-			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
+			rjd.Initialize(prevBody, body, b2Vec2(0.0f, 5.0f));
 			rjd.motorSpeed = 1.0f * b2_pi;
 			rjd.maxMotorTorque = 10000.0f;
 			rjd.enableMotor = true;
@@ -71,16 +64,11 @@ public:
 			// Define follower.
 			sd.SetAsBox(0.5f, 4.0f);
 			bd.position.Set(0.0f, 13.0f);
-			body = m_world->CreateBody(&bd);
+			body = m_world->CreateDynamicBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
-			anchor.Set(0.0f, 9.0f);
-			rjd.body1 = prevBody;
-			rjd.body2 = body;
-			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
-			rjd.localAnchor2 = body->GetLocalPoint(anchor);
-			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
+			rjd.Initialize(prevBody, body, b2Vec2(0.0f, 9.0f));
 			rjd.enableMotor = false;
 			m_world->CreateJoint(&rjd);
 
@@ -89,30 +77,16 @@ public:
 			// Define piston
 			sd.SetAsBox(1.5f, 1.5f);
 			bd.position.Set(0.0f, 17.0f);
-			body = m_world->CreateBody(&bd);
+			body = m_world->CreateDynamicBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
-			anchor.Set(0.0f, 17.0f);
-			rjd.body1 = prevBody;
-			rjd.body2 = body;
-			rjd.localAnchor1 = prevBody->GetLocalPoint(anchor);
-			rjd.localAnchor2 = body->GetLocalPoint(anchor);
-			rjd.referenceAngle = body->GetAngle() - prevBody->GetAngle();
+			rjd.Initialize(prevBody, body, b2Vec2(0.0f, 17.0f));
 			m_world->CreateJoint(&rjd);
 
 			b2PrismaticJointDef pjd;
-			anchor.Set(0.0f, 17.0f);
-			pjd.body1 = ground;
-			pjd.body2 = body;
-			pjd.localAnchor1 = ground->GetLocalPoint(anchor);
-			pjd.localAnchor2 = body->GetLocalPoint(anchor);
-			pjd.referenceAngle = body->GetAngle() - ground->GetAngle();
+			pjd.Initialize(ground, body, b2Vec2(0.0f, 17.0f), b2Vec2(0.0f, 1.0f));
 
-			b2Vec2 axis;
-			axis.Set(0.0f, 1.0f);
-			pjd.localAxis1 = ground->GetLocalVector(axis);
-			pjd.motorSpeed = 0.0f;		// joint friction
 			pjd.maxMotorForce = 1000.0f;
 			pjd.enableMotor = true;
 
@@ -121,7 +95,7 @@ public:
 			// Create a payload
 			sd.density = 2.0f;
 			bd.position.Set(0.0f, 23.0f);
-			body = m_world->CreateBody(&bd);
+			body = m_world->CreateDynamicBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 		}

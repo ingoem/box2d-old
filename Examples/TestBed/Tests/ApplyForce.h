@@ -30,25 +30,24 @@ public:
 
 		{
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_staticBody;
 			bd.position.Set(0.0f, 20.0f);
-			b2Body* body = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 
 			b2PolygonDef sd;
 			sd.density = 0.0f;
 			sd.restitution = k_restitution;
 
 			sd.SetAsBox(0.2f, 20.0f, b2Vec2(-20.0f, 0.0f), 0.0f);
-			body->CreateShape(&sd);
+			ground->CreateShape(&sd);
 
 			sd.SetAsBox(0.2f, 20.0f, b2Vec2(20.0f, 0.0f), 0.0f);
-			body->CreateShape(&sd);
+			ground->CreateShape(&sd);
 
 			sd.SetAsBox(0.2f, 20.0f, b2Vec2(0.0f, -20.0f), 0.5f * b2_pi);
-			body->CreateShape(&sd);
+			ground->CreateShape(&sd);
 
 			sd.SetAsBox(0.2f, 20.0f, b2Vec2(0.0f, 20.0f), -0.5f * b2_pi);
-			body->CreateShape(&sd);
+			ground->CreateShape(&sd);
 		}
 
 		{
@@ -75,13 +74,12 @@ public:
 			sd2.density = 2.0f;
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 			bd.angularDamping = 2.0f;
 			bd.linearDamping = 0.1f;
 
 			bd.position.Set(0.0f, 1.05f);
 			bd.angle = b2_pi;
-			m_body = m_world->CreateBody(&bd);
+			m_body = m_world->CreateDynamicBody(&bd);
 			m_body->CreateShape(&sd1);
 			m_body->CreateShape(&sd2);
 			m_body->SetMassFromShapes();

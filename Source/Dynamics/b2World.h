@@ -75,10 +75,15 @@ public:
 	/// consume draw commands when you call Step().
 	void SetDebugDraw(b2DebugDraw* debugDraw);
 
-	/// Create a rigid body given a definition. No reference to the definition
+	/// Create a static rigid body given a definition. No reference to the definition
 	/// is retained.
 	/// @warning This function is locked during callbacks.
-	b2Body* CreateBody(const b2BodyDef* def);
+	b2Body* CreateStaticBody(const b2BodyDef* def);
+
+	/// Create a dynamic rigid body given a definition. No reference to the definition
+	/// is retained.
+	/// @warning This function is locked during callbacks.
+	b2Body* CreateDynamicBody(const b2BodyDef* def);
 
 	/// Destroy a rigid body given a definition. No reference to the definition
 	/// is retained. This function is locked during callbacks.

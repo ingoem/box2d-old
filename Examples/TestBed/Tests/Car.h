@@ -27,7 +27,6 @@ public:
 	{
 		{	// car body
 			b2PolygonDef poly1, poly2;
-			b2BodyDef bd;
 
 			// bottom half
 			poly1.vertexCount = 5;
@@ -54,10 +53,10 @@ public:
 			poly2.friction		= 0.68f;
 			poly2.groupIndex	= -1;
 
-			bd.type = b2BodyDef::e_dynamicBody;
+			b2BodyDef bd;
 			bd.position.Set(-35.0f, 2.8f);
 
-			m_vehicle = m_world->CreateBody(&bd);
+			m_vehicle = m_world->CreateDynamicBody(&bd);
 			m_vehicle->CreateShape(&poly1);
 			m_vehicle->CreateShape(&poly2);
 			m_vehicle->SetMassFromShapes();
@@ -71,16 +70,15 @@ public:
 			circ.groupIndex = -1;
 
 			b2BodyDef bd;
-			bd.type = b2BodyDef::e_dynamicBody;
 			bd.allowSleep = false;
 			bd.position.Set(-33.8f, 2.0f);
 
-			m_rightWheel = m_world->CreateBody(&bd);
+			m_rightWheel = m_world->CreateDynamicBody(&bd);
 			m_rightWheel->CreateShape(&circ);
 			m_rightWheel->SetMassFromShapes();
 
 			bd.position.Set(-36.2f, 2.0f);
-			m_leftWheel = m_world->CreateBody(&bd);
+			m_leftWheel = m_world->CreateDynamicBody(&bd);
 			m_leftWheel->CreateShape(&circ);
 			m_leftWheel->SetMassFromShapes();
 		}
@@ -108,7 +106,7 @@ public:
 			b2BodyDef bd;
 			bd.position.Set(-25.0f, 1.0f);
 
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&box);
 		}
 
@@ -120,7 +118,7 @@ public:
 			box.friction = 0.62f;
 			bd.position.Set(27.0f - 30.0f, 3.1f);
 
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&box);
 		}
 
@@ -132,7 +130,7 @@ public:
 			box.friction = 0.62f;
 			bd.position.Set(55.0f - 30.0f, 3.1f);
 
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&box);
 		}
 
@@ -144,7 +142,7 @@ public:
 			box.friction = 0.62f;
 			bd.position.Set(41.0f, 2.0f);
 
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&box);
 		}
 
@@ -156,7 +154,7 @@ public:
 			box.friction = 0.62f;
 			bd.position.Set(50.0f, 4.0f);
 
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&box);
 		}
 
@@ -168,7 +166,7 @@ public:
 			box.friction = 0.62f;
 			bd.position.Set(85.0f, 2.0f);
 
-			b2Body* ground = m_world->CreateBody(&bd);
+			b2Body* ground = m_world->CreateStaticBody(&bd);
 			ground->CreateShape(&box);
 		}
 	}
