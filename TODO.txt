@@ -132,6 +132,7 @@ Version 2.4.0
 
 Version 2.5.0
 - Convex decomposition.
+- Kinematic bodies.
 
 Version 2.6.0
 - Ropes and particles.

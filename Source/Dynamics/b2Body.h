@@ -490,20 +490,29 @@ inline bool b2Body::IsConnected(const b2Body* other) const
 
 inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point)
 {
-	WakeUp();
+	if (IsSleeping())
+	{
+		WakeUp();
+	}
 	m_force += force;
 	m_torque += b2Cross(point - m_sweep.c, force);
 }
 
 inline void b2Body::ApplyTorque(float32 torque)
 {
-	WakeUp();
+	if (IsSleeping())
+	{
+		WakeUp();
+	}
 	m_torque += torque;
 }
 
 inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
 {
-	WakeUp();
+	if (IsSleeping())
+	{
+		WakeUp();
+	}
 	m_linearVelocity += m_invMass * impulse;
 	m_angularVelocity += m_invI * b2Cross(point - m_sweep.c, impulse);
 }
