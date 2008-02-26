@@ -596,7 +596,7 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 	float32 GetAngle() const;
 </pre>
 
-<p>You can access the center of mass position in world coordinates. Much of the internal simulation in Box2D uses the center of mass. However, you should normally not need to access it.</p>
+<p>You can access the center of mass position in world coordinates. Much of the internal simulation in Box2D uses the center of mass. However, you should normally not need to access it. Instead you will usually work with the body transform.</p>
 <pre class="code">
 	const b2Vec2& GetWorldCenter() const;
 </pre>
