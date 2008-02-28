@@ -70,8 +70,9 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 			<li><a href="#friction_and_restitution">Friction and Restitution</a></li>
 			<li><a href="#density">Density</a></li>
 			<li><a href="#filtering">Filtering</a></li>
+            <li><a href="#sensors">Sensors</a></li>
 			<li><a href="#circle_definitions">Circle Definitions</a></li>
-			<li><a href="#polygon_definitions">Polygon Definition</a></li>
+			<li><a href="#polygon_definitions">Polygon Definitions</a></li>
 		</ul>
 		<li><a href="#shape_factory">Shape Factory</a></li>		
 		<li><a href="#using_shapes">Using Shapes</a></li>
@@ -79,12 +80,13 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 	<li><a href="#joints">Joints</a></li>
 	<ul>
 		<li><a href="joint_definition">Joint Definition</a></li>
-		<li><a href="#distance_joint">Distance Joint</a></li>
-		<li><a href="#revolute_joint">Revolute Joint</a></li>
-		<li><a href="#prismatic_joint">Prismatic Joint</a></li>
-		<li><a href="#pulley_joint">Pulley Joint</a></li>
-		<li><a href="#gear_joint">Gear Joint</a></li>
-		<li><a href="#mouse_joint">Mouse Joint</a></li>
+        <ul>
+    		<li><a href="#distance_joint">Distance Joint</a></li>
+    		<li><a href="#revolute_joint">Revolute Joint</a></li>
+    		<li><a href="#prismatic_joint">Prismatic Joint</a></li>
+    		<li><a href="#pulley_joint">Pulley Joint</a></li>
+    		<li><a href="#gear_joint">Gear Joint</a></li>
+        </ul>
 		<li><a href="#joint_factory">Joint Factory</a></li>
 		<li><a href="#using_joints">Using Joints</a></li>
 	</ul>
@@ -544,7 +546,7 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 
 <p>When you destroy a body, the attached shapes and joints are automatically destroyed. This has important implications for how you manage shape and joint pointers. See the section on <a href="#implicit_destruction">implicit destruction</a> for details.</p>
 
-<p>Suppose you want to connect a dynamic body to ground with a joint. You'll need to connect the joint to a static body. If you don't have a static body, you can get a shared static body from your world object.</p>
+<p>Suppose you want to connect a dynamic body to ground with a joint. You'll need to connect the joint to a static body. If you don't have a static body, you can get a shared ground body from your world object. You can also attach static shapes to the ground body.</p>
 <pre class="code">
     b2Body* ground = myWorld->GetGroundBody();
     ... build a joint using the ground body ...
@@ -651,28 +653,14 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 <h1>Shapes</h1>
 <div class = "text">
 <p>Shapes are the collision geometry attached to bodies. Shapes are also used to define the mass of a body. This lets you specify the density and let Box2D do the work of computing the mass properties.</p>
-<p>Shapes have properties of friction and restitution. Shapes carry collision filtering information to let you prevent collisions between some of your game objects.</p>
-<p>Shapes are always owned by a body. You can attach multiple shapes to a single body. Shapes are abstract classes so that many types of shapes can be implemented in Box2D. If you are brave, you can implement your own shape type (and collision algorithms). So how are shapes defined?</p>
+
+<p>Shapes have properties of friction and restitution. Shapes carry collision filtering information to let you prevent collisions between certain game objects.</p>
+
+<p>Shapes are always owned by a body. You can attach multiple shapes to a single body. Shapes are abstract classes so that many types of shapes can be implemented in Box2D. If you are brave, you can implement your own shape type (and collision algorithms).</p>
 
 <a name="shape_definition"></a>
 <h2>The Shape Definition</h2>
-<p>Shapes do not exist on their own and you cannot create a shape directly. Instead you specify a <em>shape definition</em> that contains all the construction data for a shape. Then you attached the shape definition to a body definition, which in turn is used to create a body. When the body is created the body definition is examined for shape definitions and the corresponding shapes are created and attached to the new body. This may seem a bit convoluted, but it really makes life easier, for me and you.</p>
-<p>Box2D supports three types of shape definitions: circles, boxes, and convex polygons. Internally, Box2D creates a convex polygon for boxes. This simplifies the collision code. I encourage you to look at <code>b2Shape.h</code> for all the shape definition parameters. But don't worry, I will cover most of them here.</p>
-<p>Once the associated body is constructed, Box2D does not keep a pointer to your shape definitions. Instead Box2D copies all the data out of the shape definition. So you can create shape definitions on the stack and you can use a single shape definition to spawn multiple shape instances. A caveat is that the user data on the shape definition would be shared by multiple shapes, which is often not desirable.</p>
-
-<a name="local_position_and_rotation"></a>
-<h3>Local Position and Rotation</h3>
-<p>Every shape is attached to a body and you are free to attach a shape with any position and rotation. In the shape definition you specify the local position and local rotation that will be used to attach the shape to the body. This really comes in handy when you have have <em>compound shapes</em>.</p>
-<p>Compounds shapes are multiple shapes that share the same body. An example is a dumbbell with a circle on each end. The following code snippet shows how to setup shape definitions for a dumbbell.</p>
-<pre class="code">
-    b2CircleDef circle1, circle2;
-    circle1.localPosition.Set(-1.0f, 0.0f);
-    circle2.localPosition.Set(1.0f, 0.0f);
-    b2BodyDef bodyDef;
-    bodyDef.AddShape(&circle1);
-    bodyDef.AddShape(&circle2);
-</pre>
-<p>You don't need to worry about compound shapes colliding with each other. Box2D automatically ignores collisions between shapes on the same body.</p>
+<p>Shape definitions are used to create shapes. There is common shape data held by <code>b2ShapeDef</code> and specific shape data held by derived classes.</p>
 
 <a name="friction_and_restitution"></a>
 <h3>Friction and Restitution</h3>
@@ -692,11 +680,12 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 
 <a name="density"></a>
 <h3>Density</h3>
-<p>Box2D computes the mass and rotational inertia of bodies using the mass distribution implied by the attached shapes. Specifying mass values directly can often lead to poorly tuned simulations. Therefore, the mass density per unit area is specified in the shape definition. You can override mass values in <code>b2Body</code>, but there is currently no API for this.</p>
+<p>Box2D optionally computes the mass and rotational inertia of bodies using the mass distribution implied by the attached shapes. Specifying mass directly can often lead to poorly tuned simulations. Therefore, the recommended way of specifying body mass is by setting the shape densities and calling <code>b2Body::SetMassFromShape</code> once all the shapes are attached to the body.</p>
 
-<a name="collision_filtering"></a>
-<h3>Collision Filtering</h3>
+<a name="filtering"></a>
+<h3>Filtering</h3>
 <p>Collision filtering is a system for preventing collision between shapes. For example, say you make a character that rides a bicycle. You want the bicycle to collide with the terrain and the character to collide with the terrain, but you don't want the character to collide with the bicycle (because they must overlap). Box2D supports such collision filtering using categories and groups.</p>
+
 <p>Box2D supports 16 collision categories. For each shape you can specify which category it belongs to. You also specify what other categories this shape can collide with. For example, you could specify in a multiplayer game that all players don't collide with each other and monsters don't collide with each other, but players and monsters should collide. This is done with <em>masking bits</em>. For example:</p>
 <pre class="code">
     playerShapeDef.categoryBits = 0x0002;
@@ -716,121 +705,174 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 
 <p>Note that additional collision filtering occurs in Box2D. Here is a list:</p>
 <ul>
-<li>shapes on static bodies never collide</li>
-<li>shapes on the same body never collide</li>
-<li>your can optionally enable/disable collision between bodies connected by a joint</li>
+<li>A shape on a static body never collides with a shape on another static body.</li>
+<li>Shapes on the same body never collide with each other.</li>
+<li>You can optionally enable/disable collision between shapes on bodies connected by a joint.</li>
 </ul>
+
+<a name="sensors"></a>
+<h3>Sensors</h3>
+<p>Some times game logic needs to know when two shapes overlap yet there should be no collision response. This is done by using sensors. A sensor is a shape that detects collision but does not produce a response.</p>
+
+<p>You can flag any shape as being a sensor. Sensors may be static or dynamic. Remember that you may have multiple shapes per body and you can have any mix of sensors and solid shapes.</p>
+
+<pre class="code">
+    myShapeDef.isSensor = true;
+</pre>
 
 <a name="circle_definitions"></a>
 <h3>Circle Definitions</h3>
-<p><code>b2CircleDef</code> extends <code>b2ShapeDef</code> and adds a radius. The origin of a circle is its center.</p>
-
-<a name="box_definitions"></a>
-<h3>Box Definitions</h3>
-<p><code>b2BoxDef</code> extends <code>b2ShapeDef</code> and adds an extents vector. Assuming the y-axis is up in your game, the extents vector is defined this way:</p>
+<p><code>b2CircleDef</code> extends <code>b2ShapeDef</code> and adds a radius and a local position.</p>
 <pre class="code">
-    b2BoxDef boxDef;
-    boxDef.extents.x = width / 2.0f;
-    boxDef.extents.y = height / 2.0f;
+    b2CircleDef def;
+    def.radius = 1.5f;
+    def.localPosition.Set(1.0f, 0.0f);
 </pre>
-<p>The origin of a box is its center.</p>
-<p>Internally, Box2D does not implement a box shape. Instead, a box definition is used to create a convex polygon.</p>
 
 <a name="polygon_definitions"></a>
 <h3>Polygon Definitions</h3>
 <p><code>b2PolyDef</code> is used to implement convex polygons. They are a bit tricky to use correctly, so please read closely. The maximum vertex count is defined by <code>b2_maxPolyVertices</code> which is currently 8. If you need to use more vertices, you must modify <code>b2_maxPolyVertices</code> in <code>b2Settings.h</code>.</p>
-<p>When you build a polygon definition you must specify the number of vertices you will use. The vertices must be specified in <b>counter-clockwise</b> (CCW) order. Also, the polygon must be <b>convex</b>. In other words, each vertex must point outwards to some degree. Finally, you must not overlap any vertices. Box2D will automatically close the loop.</p>
-<p>A future version of Box2D will provide a tool to automatically create a convex polygon from a set of points, so you won't have to be so careful.</p>
+
+<p>When you build a polygon definition you must specify the number of vertices you will use. The vertices must be specified in <b>counter-clockwise</b> (CCW) order about the z-axis of a right-handed coordinate system. This might turn out to be clockwise on your screen, depending on your coordinate system conventions.</p>
+
+<p>Polygons must be <b>convex</b>. In other words, each vertex must point outwards to some degree. Finally, you must not overlap any vertices. Box2D will automatically close the loop.</p>
+
+<img src="images/convex_concave.gif" class="figure"/><br/>
+
 <p>Here is an example of a polygon definition of a triangle:</p>
 <pre class="code">
-    b2PolyDef triangleDef;
+    b2PolygonDef triangleDef;
     triangleDef.vertexCount = 3;
     triangleDef.vertices[0].Set(-1.0f, 0.0f);
     triangleDef.vertices[1].Set(1.0f, 0.0f);
     triangleDef.vertices[2].Set(0.0f, 2.0f);
 </pre>
-<p>The polygon vertices should generally be centered around the origin, but this is not necessary. The origin of the polygon shape is defined implicitly by its vertices.</p>
+<p>The vertices are defined in the coordinate system of the parent body. If you need to offset a polygon within the parent body, then just offset all the vertices.</p>
 
-<a name="creating_destroying_shape"></a>
-<h2>(Not) Creating and Destroying a Shape</h2>
-<p>We don't need to discuss shape creation or destruction because this is handled automatically by Box2D. You should never try to create or destory a shape. You should never hold onto a shape pointer, because the body may be removed somewhere else in your game code.</p>
-<p>You can let shape definitions go out of scope because Box2D copies the data. Box2D does not hold a reference to your shape definitions. This lets you recycle shape definitions as you create bodies.</p>
+<p>For convenience, there are functions to initialize polygons as boxes. You can have either an axis-aligned box centered at the body origin or an oriented box offset from the body origin.</p>
+<pre class="code">
+    b2PolygonDef alignedBoxDef;
+    float32 hx = 1.0f; // half-width
+    float32 hy = 2.0f; // half-height
+    alignedBodyDef.SetAsBox(hx, hy);
+    
+    b2PolygonDef orientedBoxDef;
+    b2Vec2 center(-1.5f, 0.0f);
+    float32 angle = 0.5f * b2_pi;
+    orientedBoxDef.SetAsBox(hx, hy, center, angle);
+</pre>
+
+<a name="shape_factory"></a>
+<h2>Shape Factory</h2>
+<p>Shapes are created by initializing a shape definition and then passing the definition to the parent body.</p>
+<pre class="code">
+    b2CircleDef circleDef;
+    circleDef.radius = 3.0f;
+    circleDef.density = 2.5f;
+    b2Shape* myShape = myBody->CreateShape(&circleDef);
+    [optionally store shape pointer somewhere]
+</pre>
+<p>This creates the shape and attaches it to the body. You do not need to store the shape pointer since the shape will automatically be destroyed when the parent body is destroyed (see <a href="#implicit_destruction">implicit destruction</a>).</p>
+
+<p>After you finish adding shapes to a body, you may want to recompute the mass properties of the body based on the child shapes.</p>
+<pre class="code">
+    myBody->SetMassFromShapes();
+</pre>
+<p>This function is expensive, so you should only call it when necessary.</p>
+
+<p>You can destroy a shape on the parent body easily. You may do this to model a breakable object. Otherwise you can just leave the shape alone and let the body destruction take care of destroying the attached shapes.</p>
+<pre class="code">
+    myBody->DestroyShape(myShape);
+</pre>
+<p>After removing shapes from a body, you may want to call <code>SetMassFromShapes</code> again.</p>
 
 <h2>Using a Shape</h2>
-<p>There's not much to say here. You can get a shape's type, its parent body, and its world position. You can also test a point to see if it is contained within the shape. Look at <code>b2Shape.h</code> for details.</p>
+<p>There's not much to say here. You can get a shape's type and its parent body. You can also test a point to see if it is contained within the shape. Look at <code>b2Shape.h</code> for details.</p>
 </div>
-
 
 <a name="joints"></a>
 <h1>Joints</h1>
 <div class = "text">
 <p>Joints are used to constrain bodies to the world or to each other. Typical examples in games include ragdolls, teeters, and pulleys. Joints can be combined in many different ways to create interesting motions.</p>
+
 <p>Some joints provide limits so you can control the range of motion. Some joint provide motors which can be used to drive the joint at a prescribed speed until a prescribed force/torque is exceeded.</p>
+
 <p>Joint motors can be used in many ways. You can use motors to control position by specifying a joint velocity that is proportional to the difference between the actual and desired position. You can also use motors to simulate joint friction: set the joint velocity to zero and provide a small, but significant maximum motor force/torque. Then the motor will attempt to keep the joint from moving until the load becomes too strong.</p>
 
 <h2>The Joint Definition</h2>
 <p>Each joint type has a definition that derives from <code>b2JointDef</code>. All joints are connected between two different bodies. One body may static. If you want to waste memory, then create a joint between two static bodies. :)</p>
+
 <p>You can specify user data for any joint type and you can provide a flag to prevent the attached bodies from colliding with each other. This is actually the default behavior and you must set the <code>collideConnected</code> Boolean to allow collision between to connected bodies.</p>
+
+<p>Many joint definitions require that you provide some geometric data. Often a joint will be defined by <em>anchor points</em>. These are points fixed in the attached bodies. Box2D requires these points to be specified in local coordinates. This way the joint can be specified even when the current body transforms violate the joint constraint --- a common ocurrence when a game is saved and reloaded. Additionally, some joint definitions need to know the default relative angle between the bodies. This is necessary to constraint rotation correctly via joint limits or a fixed relative angle.</p>
+
+<p>Initializing the geometric data can be tedious, so many joints have initialization functions that use the current body transforms to remove much of the work. However, these initialization functions should usually only be used for prototyping. Production code should define the geometry directly. This will make joint behavior more robust.</p>
+
 <p>The rest of the joint definition data depends on the joint type. We cover these now.</p>
 
 <a name="distance_joint"></a>
 <h3>Distance Joint</h3>
 <p>One of the simplest joint is a distance joint which says that the distance between two points on two bodies must be constant. When you specify a distance joint the two bodies should already be in place. Then you specify the two <em>anchor</em> points in world coordinates. The first anchor point is connected to body 1, and the second anchor point is connected to body 2. These points imply the length of the distance constraint.</p>
+
 <img src="images/distanceJoint.gif" class="figure"/><br/>
-<p>Here is an example of a distance joint definition. In this case we decide to allow the bodies to collide and we place the anchor points at the respective center of mass positions.</p>
+<p>Here is an example of a distance joint definition. In this case we decide to allow the bodies to collide.</p>
 <pre class="code">
     b2DistanceJointDef jointDef;
-    jointDef.body1 = myBody1;
-    jointDef.body2 = myBody2;
+    jointDef.Initialize(myBody1, myBody2, worldAnchorOnBody1, worldAnchorOnBody2);
     jointDef.collideConnected = true;
-    jointDef.anchorPoint1 = myBody1->GetCenterPosition();
-    jointDef.anchorPoint2 = myBody2->GetCenterPosition();
 </pre>
 
 <a name="revolute_joint"></a>
 <h3>Revolute Joint</h3>
 <p>A revolute joint forces two bodies to share a common anchor point, often called a <em>hinge point</em>. The revolute joint has a single degree of freedom: the relative rotation of the two bodies. This is called the <em>joint angle</em>.</p>
+
 <img src="images/revoluteJoint.gif" class="figure"/><br/>
-<p>To specify a revolute you need to provide two bodies and a single anchor point in world space. Box2D assumes that the bodies are already in the correct position.</p>
+
+<p>To specify a revolute you need to provide two bodies and a single anchor point in world space. The initialization function assumes that the bodies are already in the correct position.</p>
+
 <p>In this example, two bodies are connected by a revolute joint at the first body's center of mass.</p>
 <pre class="code">
     b2RevoluteJointDef jointDef;
-    jointDef.body1 = myBody1;
-    jointDef.body2 = myBody2;
-    jointDef.anchorPoint = myBody1->GetCenterPosition();
+    jointDef.Initialize(myBody1, myBody2, myBody1->GetWorldCenter());
 </pre>
-<p>The revolute joint angle is positive when body2 rotates CCW about the anchor point. Like all angles in Box2D, the revolute angle is measured in radians. By convention the revolute joint angle is zero when the joint is created, regardless of the current rotation of the two bodies.</p>
+
+<p>The revolute joint angle is positive when body2 rotates CCW about the angle point. Like all angles in Box2D, the revolute angle is measured in radians. By convention the revolute joint angle is zero when the joint is created using <code>Initialize()</code>, regardless of the current rotation of the two bodies.</p>
+
 <p>In some cases you might wish to control the joint angle. For this, the revolute joint can optionally simulate a joint limit and/or a motor.</p>
+
 <p>A joint limit forces the joint angle to remain between an lower and upper bound. The limit will apply as much torque as needed to make this happen. The limit range should include zero, otherwise the joint will lurch when the simulation begins.</p>
+
 <p>A joint motor allows you to specify the joint speed (the time derivative of the angle). The speed can be negative or positive. A motor can have infinite force, but this is usually not desirable. Have you ever heard the expression:</p>
+
 <blockquote>"What happens when an irresistible force meets an immovable object?"</blockquote>
+
 <p>I can tell you it's not pretty. So you can provide a maximum torque for the joint motor. The joint motor will maintain the specified speed unless the required torque exceeds the specified maximum. When the maximum torque is exceeded, the joint will slow down and can even reverse.</p>
+
 <p>You can use a joint motor to simulate joint friction. Just set the joint speed to zero, and set the maximum torque to some small, but significant value. The motor will try to prevent the joint from rotating, but will yield to a significant load.</p>
+
 <p>Here's a revision of the revolute joint definition above; this time the joint has a limit and a motor enabled. The motor is setup to simulate joint friction.</p>
 <pre class="code">
     b2RevoluteJointDef jointDef;
-    jointDef.body1 = myBody1;
-    jointDef.body2 = myBody2;
-    jointDef.anchorPoint = myBody1->GetCenterPosition();
+    jointDef.Initialize(body1, body2, myBody1->GetWorldCenter());
     jointDef.lowerAngle = -0.5f * b2_pi; // -90 degrees
     jointDef.upperAngle = 0.25f * b2_pi; // 45 degrees
     jointDef.enableLimit = true;
-    jointDef.motorTorque = 10.0f;
+    jointDef.maxMotorTorque = 10.0f;
     jointDef.motorSpeed = 0.0f;
     jointDef.enableMotor = true;
 </pre>
 
 <a name="prismatic_joint"></a>
 <h3>Prismatic Joint</h3>
-<p>A prismatic joint allows for relative translation of two bodies along a specified local axis. A prismatic joint prevents relative rotation. Therefore, a prismatic joint has a single degree of freedom.</p>
+<p>A prismatic joint allows for relative translation of two bodies along a specified axis. A prismatic joint prevents relative rotation. Therefore, a prismatic joint has a single degree of freedom.</p>
+
 <img src="images/prismaticJoint.gif" class="figure"/><br/>
+
 <p>The prismatic joint definition is similar to the revolute joint description; just substitute translation for angle and force for torque. Using this analogy provides an example prismatic joint definition with a joint limit and a friction motor:</p>
 <pre class="code">
     b2PrismaticJointDef jointDef;
-    jointDef.body1 = myBody1;
-    jointDef.body2 = myBody2;
-    jointDef.anchorPoint = myBody1->GetCenterPosition();
-    jointDef.axis.Set(1.0f, 0.0f);
+    b2Vec2 worldAxis(1.0f, 0.0f);
+    jointDef.Initialize(myBody1, myBody2, myBody1->GetWorldCenter(), worldAxis);
     jointDef.lowerTranslation = -5.0f;
     jointDef.upperTranslation = 2.5f;
     jointDef.enableLimit = true;
@@ -838,8 +880,10 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
     jointDef.motorSpeed = 0.0f;
     jointDef.enableMotor = true;
 </pre>
+
 <p>The revolute joint has an implicit axis coming out of the screen. The prismatic joint needs an explicit axis parallel to the screen. This axis is fixed in the two bodies and follows their motion.</p>
-<p>Like the revolute joint, the prismatic joint translation is zero when the joint is created. So be sure zero is between your lower and upper translation limits.</p>
+
+<p>Like the revolute joint, the prismatic joint translation is zero when the joint is created using <code>Initialize()</code>. So be sure zero is between your lower and upper translation limits.</p>
 
 <a name="pulley_joint"></a>
 <h3>Pulley Joint</h3>
@@ -848,24 +892,26 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
     length1 + length2 == constant
 </blockquote>
 <img src="images/pulleyJoint.gif" class="figure"/><br/>
+
 <p>You can supply a ratio that simulates a <em>block and tackle</em>. This causes one side of the pulley to extend faster than the other. At the same time the constraint force is smaller on one side than the other. You can use this to create mechanical leverage.</p>
+
 <blockquote>
     length1 + ratio * length2 == constant
 </blockquote>
+
 <p>For example, if the ratio is 2, then length1 will vary at twice the rate of length2. Also the force in the rope attached to body1 will have half the constraint force as the rope attached to body2.</p>
+
 <p>Pulleys can be troublesome when one side is fully extended. The rope on the other side will have zero length. At this point the constraint equations become singular (bad). Therefore the pulley joint constrains the maximum length that either side can attain. Also, you may want to control the maximum lengths for gameplay reasons. So the maximum lengths improve stability and give you more control.</p>
+
 <p>Here is an example pulley definition:</p>
 <pre class="code">
-    b2Vec2 p1 = myBody1->GetCenterPosition();
-    b2Vec2 p2 = myBody2->GetCenterPosition();
+    b2Vec2 anchor1 = myBody1->GetWorldCenter();
+    b2Vec2 anchor2 = myBody2->GetWorldCenter();
+    b2Vec2 groundAnchor1(p1.x, p1.y + 10.0f);
+    b2Vec2 groundAnchor2(p2.x, p2.y + 12.0f);
+    float32 ratio = 1.0f;
     b2PulleyJointDef jointDef;
-    jointDef.body1 = myBody1;
-    jointDef.body2 = myBody2;
-    jointDef.anchorPoint1 = p1;
-    jointDef.anchorPoint2 = p2;
-    jointDef.groundPoint1.Set(p1.x, p1.y + 10.0f);
-    jointDef.groundPoint2.Set(p2.x, p2.y + 12.0f);
-    jointDef.ratio = 1.0f;
+    jointDef.Initialize(myBody1, myBody2, groundAnchor1, groundAnchor2, anchor1, anchor2, ratio);
     jointDef.maxLength1 = 18.0f;
     jointDef.maxLength2 = 20.0f;
 </pre>
@@ -873,8 +919,11 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 <a name="gear_joint"></a>
 <h3>Gear Joint</h3>
 <p>If you want to create a sophisticated mechanical contraption you might want to use a gears. In priciple you can create gears in Box2D by using compound shapes to model gear teeth. This is not very efficient and might be tedious to author. You also have to be careful to line up the gears so the teeth mesh smoothly. Box2D has a simpler method of creating gears: the <em>gear joint</em>.</p>
+
 <img src="images/gearJoint.gif" class="figure"/><br/>
+
 <p>The gear joint requires the you have two bodies connected to ground by a revolute or prismatic joint. You can use any combination of those joint types. Also, Box2D requires that the revolute and prismatic joints were created with the ground as body1.</p>
+
 <p>Like the pulley ratio, you can specify a gear ratio. However, in this case the gear ratio can be negative. Also keep in mind that when one joint is a revolute joint (angular) and the other joint is prismatic (translation), then the gear ratio with have units of length or one over length.</p>
 <blockquote>
     coordinate1 + ratio * coordinate2 == constant
@@ -893,13 +942,12 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 Always delete gear joints before the revolute/prismatic joints on the gears. Otherwise your code will crash in a bad way due to the orphaned joint pointers in the gear joint. You should also delete the gear joint before you delete any of the bodies involved.
 </blockquote>
 
-<a name="mouse_joint"></a>
-<h3>Mouse Joint</h3>
-<p>The mouse joint is used to drag bodies around in the test-bed. It will probably be revised in the future, so I will not go into details about this joint yet.</p>
+<a name="joint_factory"></a>
+<h2>Joint Factory</h2>
+<p>Joints are created and destroyed using the world factory methods. This brings up an old issue:</p>
 
-<h2>Creating and Destroying a Joint</h2>
-<p>Joints are created and destroyed using the world factor methods. This brings up an old issue:</p>
 <blockquote>Don't try to create a body or joint on the stack or on the heap using <code>new</code> or <code>malloc</code>. You must create and destroy bodies and joints using the create and destroy methods of the <code>b2World</code> class.</blockquote>
+
 <p>Here's an example of the lifetime of a revolute joint:</p>
 <pre class="code">
     b2RevoluteJointDef jointDef;
@@ -913,12 +961,12 @@ Always delete gear joints before the revolute/prismatic joints on the gears. Oth
 </pre>
 <p>It is always good to nullify your pointer after they are destroyed. This will make the program crash in a controlled manner if you try to reuse the pointer.</p>
 
-<h2>Orphaned Joints</h2>
 <p>The lifetime of a joint is not simple. Heed this warning well:</p>
-<blockquote>Joints are destroyed when an attached body is destroyed. You should implement a <code>b2WorldListener</code> class so that you can nullify your joint pointers when they are implicitly destroyed.</blockquote>
-<p>This precaution is not always necessary. You may organize your game engine so that joints are always destroyed before the attached bodies. In this case you don't need to implement the listener class.</p>
+<blockquote>Joints are destroyed when an attached body is destroyed.</blockquote>
+<p>This precaution is not always necessary. You may organize your game engine so that joints are always destroyed before the attached bodies. In this case you don't need to implement the listener class. See <a href="#implicit_destruction">implicit destruction</a> for details.</p>
 
-<h2>Using a Joint</h2>
+<a name="using_joints"></a>
+<h2>Using Joints</h2>
 <p>Many simulations create the joints and don't access them again until they are detroyed. However, there is a lot of useful data contained in joints that you can use to create a rich simulation.</p>
 <p>First of all, you can get the bodies, anchor points, and user data from a joint.</p>
 <pre class="code">
@@ -928,26 +976,26 @@ Always delete gear joints before the revolute/prismatic joints on the gears. Oth
     b2Vec2 GetAnchor2();
     void* GetUserData();
 </pre>
-<p>All joints have a reaction force and torque. This the reaction force applied to body 2 at the anchor point. You can use reaction forces to break joints or trigger other game events. You must provide the inverse time step to get the reaction forces because Box2D stores the reaction impulses. These functions may do some computations, so don't call them if you don't need the result.</p>
+<p>All joints have a reaction force and torque. This the reaction force applied to body 2 at the anchor point. You can use reaction forces to break joints or trigger other game events. These functions may do some computations, so don't call them if you don't need the result.</p>
 <pre class="code">
-    b2Vec2 GetReactionForce(float32 invTimeStep);
-    float32 GetReactionTorque(float32 invTimeStep);
+    b2Vec2 GetReactionForce();
+    float32 GetReactionTorque();
 </pre>
 
-<h3>Using a Distance Joint</h3>
-<p>Distance joints don't have motors, so there are no extra runtime methods for distance joints.</p>
+<h3>Using Distance Joints</h3>
+<p>Distance joints don't have motors or limits, so there are no extra runtime methods for distance joints.</p>
 
-<h3>Using a Revolute Joint</h3>
+<h3>Using Revolute Joints</h3>
 <p>You can access a revolute joint's angle, speed, and motor torque.</p>
 <pre class="code">
     float32 GetJointAngle() const;
     float32 GetJointSpeed() const;
-    float32 GetMotorTorque(float32 invTimeStep) const;
+    float32 GetMotorTorque() const;
 </pre>
 <p>You also update the motor parameters each step.</p>
 <pre class="code">
     void SetMotorSpeed(float32 speed);
-    void SetMotorTorque(float32 torque);
+    void SetMaxMotorTorque(float32 torque);
 </pre>
 <p>Joint motors have some interesting abilities. You can update the joint speed every time step so you can make the joint move back-and-forth like a sine-wave or according to whatever function you want.</p>
 <pre class="code">
@@ -965,12 +1013,12 @@ Always delete gear joints before the revolute/prismatic joints on the gears. Oth
 </pre>
 <p>Generally your gain parameter should not be too large. Otherwise your joint may become unstable.</p>
 
-<h3>Using a Prismatic Joint</h3>
+<h3>Using Prismatic Joints</h3>
 <p>Using a prismatic joint is similar to using a revolute joint. Here are the relevant member functions:</p>
 <pre class="code">
     float32 GetJointTranslation() const;
     float32 GetJointSpeed() const;
-    float32 GetMotorForce(float32 invTimeStep) const;
+    float32 GetMotorForce() const;
     void SetMotorSpeed(float32 speed);
     void SetMotorForce(float32 force);
 </pre>
