@@ -20,40 +20,40 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 
 <h1>Table of Contents</h1>
 <div class = "toc">
-<ul>
+<ul class = "level1">
 	<li><a href="#introduction">Introduction</a></li>
-	<ul>
-		<li><a href="#prerequisites">Prerequisites</a></li>
-		<li><a href="#core_concepts">Core Concepts</a></li>
-	</ul>
-	<li><a href="#hello_box2d">Hello Box2D</a></li>
-		<ul>
-			<li><a href="#creating_the_world">Creating the World</a></li>
-			<li><a href="#creating_ground_box">Creating a Ground Box</a></li>
-			<li><a href="#creating_dynamic_body">Creating a Dynamic Body</a></li>
-			<li><a href="#simulating_the_world">Simulating the World</a></li>
-			<li><a href="#cleanup">Cleanup</a></li>
-		</ul>
+    <ul class = "level2">
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#core_concepts">Core Concepts</a></li>
+    </ul>
+ 	<li><a href="#hello_box2d">Hello Box2D</a></li>
+    <ul class = "level2">
+        <li><a href="#creating_the_world">Creating the World</a></li>
+        <li><a href="#creating_ground_box">Creating a Ground Box</a></li>
+        <li><a href="#creating_dynamic_body">Creating a Dynamic Body</a></li>
+        <li><a href="#simulating_the_world">Simulating the World</a></li>
+        <li><a href="#cleanup">Cleanup</a></li>
+    </ul>
     <li><a href="#testbed">Testbed</a></li>
 	<li><a href="#api_design">API Design</a></li>	
-	<ul>
+	<ul class = "level2">
 		<li><a href="#memory_management">Memory Management</a></li>
 		<li><a href="#factories_and_definitions">Factories and Definitions</a></li>
 		<li><a href="#user_data">User Data</a></li>
 		<li><a href="#dealing_with_c++">Dealing With C++</a></li>	
 	</ul>
 	<li><a href="#world">The World</a></li>
-		<ul>
-			<li><a href="#creating_and_destroying_world">Creating and Destroying a World</a></li>
-			<li><a href="#using_a_world">Using a World</a></li>
-			<li><a href="#simulation">Simulation</a></li>
-			<li><a href="#exploring_the_world">Exploring the World</a></li>
-			<li><a href="#aabb_queries">AABB Queries</a></li>
-		</ul>
+    <ul class = "level2">
+        <li><a href="#creating_and_destroying_world">Creating and Destroying a World</a></li>
+        <li><a href="#using_a_world">Using a World</a></li>
+        <li><a href="#simulation">Simulation</a></li>
+        <li><a href="#exploring_the_world">Exploring the World</a></li>
+        <li><a href="#aabb_queries">AABB Queries</a></li>
+    </ul>
 	<li><a href="#bodies">Bodies</a></li>
-	<ul>
+	<ul class = "level2">
 		<li><a href="#body_definition">Body Definition</a></li>
-		<ul>
+		<ul class = "level3">
 			<li><a href="#mass_properties">Mass Properties</a></li>
 			<li><a href="#position_and_angle">Body Position and Angle</a></li>
 			<li><a href="#damping">Damping</a></li>
@@ -64,9 +64,9 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 		<li><a href="#using_bodies">Using Bodies</a></li>
 	</ul>
 	<li><a href="#shapes">Shapes</a></li>
-	<ul>
+	<ul class = "level2">
 		<li><a href="#shape_definition">Shape Definition</a></li>
-		<ul>
+		<ul class = "level3">
 			<li><a href="#friction_and_restitution">Friction and Restitution</a></li>
 			<li><a href="#density">Density</a></li>
 			<li><a href="#filtering">Filtering</a></li>
@@ -78,9 +78,9 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 		<li><a href="#using_shapes">Using Shapes</a></li>
 	</ul>
 	<li><a href="#joints">Joints</a></li>
-	<ul>
+	<ul class = "level2">
 		<li><a href="joint_definition">Joint Definition</a></li>
-        <ul>
+        <ul class = "level3">
     		<li><a href="#distance_joint">Distance Joint</a></li>
     		<li><a href="#revolute_joint">Revolute Joint</a></li>
     		<li><a href="#prismatic_joint">Prismatic Joint</a></li>
@@ -91,30 +91,30 @@ Copyright (c) 2007-2008 Erin Catto <a href="http://www.box2d.org">http://www.box
 		<li><a href="#using_joints">Using Joints</a></li>
 	</ul>
 	<li><a href="#contacts">Contacts</a></li>
-	<ul>
-	<li><a href="#introduction">Introduction</a></li>
-	<li><a href="#contact_listener">Contact Listener</a></li>
-	<li><a href="#processing_contacts">Processing Contacts</a></li>
-	<li><a href="#contact_filtering">Contact Filtering</a></li>
+	<ul class = "level2">
+    	<li><a href="#introduction">Introduction</a></li>
+    	<li><a href="#contact_listener">Contact Listener</a></li>
+    	<li><a href="#processing_contacts">Processing Contacts</a></li>
+    	<li><a href="#contact_filtering">Contact Filtering</a></li>
 	</ul>
 	<li><a href="#world_boundary">World Boundary</a></li>
 	<li><a href="#implicit_destruction">Implicit Destruction</a></li>
 	<li><a href="#debug_drawing">Debug Drawing</a></li>
 	<li><a href="#behind_the_scenes">Behind the Scenes</a></li>
-	<ul>
-	<li>Under Construction</li>
+	<ul class = "level2">
+    	<li>Under Construction</li>
 	</ul>
 	<li><a href="#settings">Settings</a></li>
-	<ul>
-	<li>Under Construction</li>
+	<ul class = "level2">
+    	<li>Under Construction</li>
 	</ul>
 	<li><a href="#references">References</a></li>
-	<ul>
-	<li>Under Construction</li>
+	<ul class = "level2">
+    	<li>Under Construction</li>
 	</ul>
 	<li><a href="#open_issues">Open Issues</a></li>
-	<ul>
-	<li>Under Construction</li>
+	<ul class = "level2">
+    	<li>Under Construction</li>
 	</ul>
 </ul>
 </div>

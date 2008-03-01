@@ -72,6 +72,24 @@ div.toc {
 	margin: 20px 0px 50px 10px;
 }
 
+ul.level1
+{
+	font-size: medium;
+	font-weight: bold;
+}
+
+ul.level2
+{
+	font-size: medium;
+	font-weight: normal;
+}
+
+ul.level3
+{
+	font-size: small;
+	font-weight: normal;
+}
+
 ul li a:link {
 	color: Blue;
 	text-decoration: none;
