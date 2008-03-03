@@ -1,112 +1,77 @@
-div.titlearea {
-	width: 650px;
+pre.programlisting {
+	padding: 6px;
+	background-color: #F8F8FF;
+	border: 1px dotted Black;
+	font-family: monospace;
 }
 
-div.title {
+div.book div.titlepage h1.title {
 	font-weight: bold;
 	font-size: xx-large;
 	text-align: center;
 	padding: 10px 0px 10px 0px;
 }
 
-div.subtitle {
+div.book div.titlepage h3.author {
 	font-size: large;
 	text-align: center;
 	padding: 10px 0px 10px 0px;
 }
 
-div.copyright {
+div.book div.titlepage p.copyright {
 	font-size: small;
 	text-align: center;
 	padding: 0px 0px 50px 0px;
 }
 
-h1 {
-	width: 650px;
+div.chapter div.titlepage h2.title {
 	color: White;
 	background-color: #2FAFBF;
+	margin: 55px 0px 0px 0px;
 	padding: 5px 0px 5px 5px;
 	font: bold x-large sans-serif;
 }
 
-h2 {
-	padding: 15px 0px 0px 0px;
+div.chapter div.sect1 div.titlepage h2.title {
+	color: Black;
+	background-color: transparent;
+	padding: 5px 0px 0px 0px;
 	font: bold large sans-serif;
 }
 
-h3 {
+div.chapter div.sect1 div.sect2 div.titlepage h3.title {
+	color: Black;
+	background-color: transparent;
 	padding: 5px 0px 0px 0px;
 	font: bold medium serif;
 }
 
-div.text {
-	width: 600px;
-	font-size: medium;
-	margin: 20px 0px 50px 50px;
+div.glosslist dt
+{
+	font-weight: bold
 }
 
-dt {
+div.toc span.part {
+	font-family: Tahoma, Ariel, Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 20;
+	margin-top: 1in;
+}
+div.toc span.glossary {
+	font-weight: bold;
+}
+div.toc span.index {
+	font-weight: bold;
+}
+div.toc span.preface {
+	font-weight: bold;
+}
+div.toc span.appendix {
+	font-weight: bold;
+}
+div.toc span.chapter {
 	font-weight: bold;
 }
 
-pre.code {
-	background-color: #F8F8FF;
-	margin: 4px 10px 4px 10px;
-	padding: 8px 0px 8px 0px;
-	border: 1px dotted Black;
-	font-family: monospace;
-}
-
-img.figure {
-	margin: 0 0 0.2em 50px;
-	padding: 5px;
-}
-
-blockquote {
-	padding: 10px 10px 10px 10px;
-	border: thin dotted Silver;
-	background: InfoBackground;
-}
-
-div.toc {
-	margin: 20px 0px 50px 10px;
-}
-
-ul.level1
-{
-	font-size: medium;
-	font-weight: bold;
-}
-
-ul.level2
-{
-	font-size: medium;
-	font-weight: normal;
-}
-
-ul.level3
-{
-	font-size: small;
-	font-weight: normal;
-}
-
-ul li a:link {
-	color: Blue;
-	text-decoration: none;
-}
-
-ul li a:visited {
-	color: Blue;
-	text-decoration: none;
-}
-
-ul li a:active {
-	color: Blue;
-	text-decoration: none;	
-}
-
-ul li a:hover {
-	color: Red;
-}
 
 
