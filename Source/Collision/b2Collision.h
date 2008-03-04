@@ -22,6 +22,10 @@
 #include "../Common/b2Math.h"
 #include <climits>
 
+/// @file
+/// Structures and functions used for computing contact points, distance
+/// queries, and TOI queries.
+
 class b2Shape;
 class b2CircleShape;
 class b2PolygonShape;
@@ -33,14 +37,15 @@ const uint8 b2_oldPoint = 0x04;
 /// Contact ids to facilitate warm starting.
 union b2ContactID
 {
+	/// The features that intersect to form the contact point
 	struct Features
 	{
-		uint8 referenceFace;
-		uint8 incidentEdge;
-		uint8 incidentVertex;
-		uint8 flip;
+		uint8 referenceFace;	///< The edge that defines the contact normal
+		uint8 incidentEdge;		///< The edge most anti-parallel to the reference face
+		uint8 incidentVertex;	///< The vertex (0 or 1) on the incident edge that was clipped
+		uint8 flip;				///< Indicates that the contact normal should be flipped
 	} features;
-	uint32 key;
+	uint32 key;					///< Used to quickly compare contact ids.
 };
 
 /// A manifold point is a contact point belonging to a contact
@@ -50,20 +55,20 @@ union b2ContactID
 /// requires sub-stepping in which the separation is stale.
 struct b2ManifoldPoint
 {
-	b2Vec2 localPoint1;
-	b2Vec2 localPoint2;
-	float32 separation;
-	float32 normalForce;
-	float32 tangentForce;
-	b2ContactID id;
+	b2Vec2 localPoint1;		///< local position of the contact point in body1
+	b2Vec2 localPoint2;		///< local position of the contact point in body2
+	float32 separation;		///< the separation of the shapes along the normal vector
+	float32 normalForce;	///< the non-penetration force
+	float32 tangentForce;	///< the friction force
+	b2ContactID id;			///< uniquely identifies a contact point between two shapes
 };
 
 /// A manifold for two touching convex shapes.
 struct b2Manifold
 {
-	b2ManifoldPoint points[b2_maxManifoldPoints];
-	b2Vec2 normal;
-	int32 pointCount;
+	b2ManifoldPoint points[b2_maxManifoldPoints];	///< the points of contact
+	b2Vec2 normal;	///< the shared unit normal vector
+	int32 pointCount;	///< the number of manifold points
 };
 
 /// A line segment.
@@ -72,7 +77,8 @@ struct b2Segment
 	/// Ray cast against this segment with another segment.
 	bool TestSegment(float32* lambda, b2Vec2* normal, const b2Segment& segment, float32 maxLambda) const;
 
-	b2Vec2 p1, p2;
+	b2Vec2 p1;	///< the starting point
+	b2Vec2 p2;	///< the ending point
 };
 
 /// An axis aligned bounding box.
@@ -81,16 +87,16 @@ struct b2AABB
 	/// Verify that the bounds are sorted.
 	bool IsValid() const;
 
-	b2Vec2 lowerBound;
-	b2Vec2 upperBound;
+	b2Vec2 lowerBound;	///< the lower vertex
+	b2Vec2 upperBound;	///< the upper vertex
 };
 
 /// An oriented bounding box.
 struct b2OBB
 {
-	b2Mat22 R;
-	b2Vec2 center;
-	b2Vec2 extents;
+	b2Mat22 R;			///< the rotation matrix
+	b2Vec2 center;		///< the local centroid
+	b2Vec2 extents;		///< the half-widths
 };
 
 /// Compute the collision manifold between two circles.

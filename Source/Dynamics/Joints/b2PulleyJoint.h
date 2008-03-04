@@ -21,7 +21,7 @@
 
 #include "b2Joint.h"
 
-const float32 b2_minPulleyLength = 2.0f * b2_lengthUnitsPerMeter;
+const float32 b2_minPulleyLength = 2.0f;
 
 /// Pulley joint definition. This requires two ground anchors,
 /// two dynamic body anchor points, max lengths for each side,

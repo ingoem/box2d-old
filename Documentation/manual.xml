@@ -108,6 +108,7 @@ b2World world(worldAABB, gravity, doSleep);
 </programlisting>
       <para>So now we have our physics world, let&apos;s start adding some stuff to it.</para>
     </sect1>
+    
     <sect1>
       <title>Creating a Ground Box</title>
       <para>Bodies are built using the following steps:</para>
@@ -171,6 +172,7 @@ body-&gt;SetMassFromShapes();
 </programlisting>
       <para>That&apos;s it for initialization. We are now ready to begin simulating.</para>
     </sect1>
+    
     <sect1>
       <title>Simulating the World (of Box2D)</title>
       <para>So we have initialized the ground box and a dynamic box. Now we are ready to set Newton loose to do his thing. We just have a couple more issues to consider.</para>
@@ -193,9 +195,8 @@ for (int32 i = 0; i &lt; 60; ++i)
     printf(&quot;%4.2f %4.2f %4.2f\n&quot;, position.x, position.y, angle);
 }
 </programlisting>
-
-
     </sect1>
+    
     <sect1>
       <title>Cleanup</title>
       <para>When a world leaves scope or is deleted by calling <literal>delete</literal> on a pointer, all the memory reserved for bodies and joints is freed. This is done to make your life easier. However, you will need to nullify any body or joint pointers you have because they will become invalid.</para>
@@ -247,6 +248,7 @@ for (int32 i = 0; i &lt; 60; ++i)
       <para>Since Box2D uses a SOA, you should never <emphasis>new</emphasis> or <emphasis>malloc</emphasis> a body, shape, or joint. The only Box2D object that you allocate yourself is a <classname>b2World</classname>. The <classname>b2World</classname> class provides factories for you to create bodies, shapes, and joints. This allows Box2D to use the SOA and hide the gory details from you. Never, ever, call <literal>delete</literal> or <literal>free</literal> on a body, shape, or joint.</para>
       <para>While executing a time step, Box2D needs some temporary workspace memory. For this, it uses a stack allocator to avoid per-step heap allocations. You don&apos;t need to interact with the stack allocator, but it&apos;s good to know it&apos;s there.</para>
     </sect1>
+    
     <sect1>
       <title>Factories and Definitions</title>
       <para>As mentioned above, memory management plays a central role in the design of the Box2D API. So when you create a <classname>b2Body</classname> or a <classname>b2Joint</classname>, you need to call the factory functions on <classname>b2World</classname>.</para>
@@ -269,6 +271,15 @@ void b2Body::DestroyShape(b2Shape* shape)
 </programlisting>
       <para>Factories do not retain references to the definitions. So you can create definitions on the stack and keep them in temporary resources.</para>
     </sect1>
+    
+    <sect1 id="units">
+        <title>Units</title>
+        <para>Box2D works with floating point numbers, so some tolerances have to be used to make Box2D perform well. These tolerance have been tuned to work well with meters-kilogram-second (MKS) units. In particular, Box2D has been tuned to work well with moving objects between 0.1 and 10 meters. So this means objects between soup cans and buses in size should work well.</para>
+        <para>Being a 2D physics engine it is tempting to use pixels as your units. Unfortunately this will lead to a poor simulation and possibly weird behavior. An object of length 200 pixels would be seen by Box2D as the size of a 45 story building. Imagine trying to simulate the movement of a high-rise building with an engine that is tuned to simulate ragdolls and barrels. It isn't pretty.</para>
+        <caution>Box2D is tuned for MKS units. Keep the size of moving objects roughly between 0.1 and 10 meters.</caution>
+        <para>You'll need to use some scaling system when you render your environment and actors. The Box2D examples do this by using an OpenGL viewport transform.</para>
+    </sect1>
+    
     <sect1>
       <title>User Data</title>
       <para>The <classname>b2Shape</classname>, <classname>b2Body</classname>, and <classname>b2Joint</classname> classes allow you to attach user data as a <literal>void</literal> pointer. This is handy when you are examining Box2D data structures and you want to determine how they relate to the data structures in your game engine.</para>
@@ -293,6 +304,7 @@ actor-&gt;body = box2Dworld-&gt;CreateDynamicBody(&amp;bodyDef);
       </itemizedlist>
       <para>Keep in mind that user data is optional and you can put anything in it. However, you should be consistent. For example, if you want to store an actor pointer on one body, you should keep an actor pointer on all bodies. Don&apos;t store an actor pointer on one body, and a foo pointer on another body. This will likely lead to a crash if you try to cast an actor pointer into a foo pointer.</para>
     </sect1>
+    
     <sect1>
       <title>Dealing with C++</title>
       <para>C++ is great for encapsulation and polymorphism, but it&apos;s not so great for API design. There are always significant trade-offs when creating a C++ library.</para>
@@ -352,6 +364,52 @@ for (b2Body* b = myWorld-&gt;GetBodyList(); b; b = b-&gt;GetNext())
     b-&gt;WakeUp();
 }
 </programlisting>
+        <para>Unfortunately life can be more complicated. For example, the following code is broken:</para>
+        <programlisting>
+for (b2Body* b = myWorld-&gt;GetBodyList(); b; b = b-&gt;GetNext())
+{
+    GameActor* myActor = (GameActor*)b-&gt;GetUserData();
+    if (myActor->IsDead())
+    {
+        myWorld-&gt;DestroyBody(b); // ERROR: now GetNext returns garbage.
+    }
+}
+</programlisting>
+        <para>Everything goes ok until a body is destroyed. Once a body is destroyed, its next pointer becomes invalid. So the call to <methodname>b2Body::GetNext()</methodname> will return garbage. The solution to this is to copy the next pointer before destroying the body.</para>
+        <programlisting>
+b2Body* node = myWorld-&gt;GetBodyList();
+while (node)
+{
+    b2Body* b = node;
+    node = node->GetNext();
+    
+    GameActor* myActor = (GameActor*)b-&gt;GetUserData();
+    if (myActor->IsDead())
+    {
+        myWorld-&gt;DestroyBody(b);
+    }
+}
+</programlisting>
+        <para>This safely destroys the current body. However, you may want to call a game function that may destroy multiple bodies. In this case you need to be very careful. The solution is application specific, but for convenience I'll show one method of solving the problem.</para>
+        <programlisting>
+b2Body* node = myWorld-&gt;GetBodyList();
+while (node)
+{
+    b2Body* b = node;
+    node = node->GetNext();
+    
+    GameActor* myActor = (GameActor*)b-&gt;GetUserData();
+    if (myActor->IsDead())
+    {
+        bool otherBodiesDestroyed = GameCrazyBodyDestroyer(b);
+        if (otherBodiesDestroyed)
+        {
+            node = myWorld-&gt;GetBodyList();
+        }
+    }
+}
+</programlisting>
+        <para>Obviously to make this work, <function>GameCrazyBodyDestroyer</function> must be honest about what it has destroyed.</para>
       </sect2>
       <sect2>
         <title>AABB Queries</title>
@@ -477,7 +535,7 @@ staticBody = NULL;
       <para>Static bodies do not move under the influence of other bodies. You may manually move static bodies, but you should be careful so that you don&apos;t squash dynamic bodies between two or more static bodies. Friction will not work correctly if you move a static body. Static bodies never simulate on their own and they never collide with other static bodies. It is faster to attach several shapes to a static body than to create several static bodies with a single shape on each one. Interally, Box2D sets the mass and inverse mass of static bodies to zero. This makes the math work out so that most algorithms don&apos;t need to treat static bodies as a special case.</para>
       <para>Box2D does not keep a reference to the body definition or any of the data it holds (except user data pointers). So you can create temporary body definitions and reuse the same body definitions.</para>
       <para>Box2D allows you to avoid destroying bodies by deleting your <classname>b2World</classname> object, which does all the cleanup work for you. However, you should be mindful to nullify any body pointers that you keep in your game engine.</para>
-      <para>When you destroy a body, the attached shapes and joints are automatically destroyed. This has important implications for how you manage shape and joint pointers. See the section on <xref linkend="implicit_destruction"/> for details.</para>
+      <para>When you destroy a body, the attached shapes and joints are automatically destroyed. This has important implications for how you manage shape and joint pointers. See <xref linkend="implicit_destruction"/> for details.</para>
       <para>Suppose you want to connect a dynamic body to ground with a joint. You&apos;ll need to connect the joint to a static body. If you don&apos;t have a static body, you can get a shared ground body from your world object. You can also attach static shapes to the ground body.</para>
       <programlisting>
 b2Body* ground = myWorld-&gt;GetGroundBody();
@@ -1182,8 +1240,7 @@ myWorld-&gt;SetListener(myDestructionListener);</programlisting>
     </sect1>
     <sect1>
       <title>Units</title>
-      <para>
-      </para>
+      <para>There are many tolerances settings that depend on using MKS units. See <xref linkend="units"/> for a deeper explanation of the unit system. See the doxygen docs for explanation of the individual tolerances.</para>
     </sect1>
     <sect1>
       <title>Collision settings</title>
