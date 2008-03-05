@@ -578,7 +578,7 @@ bool IsSleeping() const;
 void AllowSleeping(bool flag);
 void WakeUp();
 </programlisting>
-        <para>The bullet state is described in the <xref linkend="bullets"/> section. The frozen state is described in the <xref linkend="world_boundary"/> section.</para>
+        <para>The bullet state is described in <xref linkend="bullets"/>. The frozen state is described in <xref linkend="world_boundary"/>.</para>
       </sect2>
       <sect2>
         <title>Position and Velocity</title>
@@ -786,7 +786,7 @@ myBody-&gt;DestroyShape(myShape);
 <chapter>
     <title>Joints</title>
     <sect1>
-        <title>Abount</title>
+        <title>About</title>
         <para>Joints are used to constrain bodies to the world or to each other. Typical examples in games include ragdolls, teeters, and pulleys. Joints can be combined in many different ways to create interesting motions.</para>
         <para>Some joints provide limits so you can control the range of motion. Some joint provide motors which can be used to drive the joint at a prescribed speed until a prescribed force/torque is exceeded.</para>
         <para>Joint motors can be used in many ways. You can use motors to control position by specifying a joint velocity that is proportional to the difference between the actual and desired position. You can also use motors to simulate joint friction: set the joint velocity to zero and provide a small, but significant maximum motor force/torque. Then the motor will attempt to keep the joint from moving until the load becomes too strong.</para>
@@ -938,7 +938,12 @@ jointDef.ratio = 2.0f * b2_pi / myLength;
           <para>Always delete gear joints before the revolute/prismatic joints on the gears. Otherwise your code will crash in a bad way due to the orphaned joint pointers in the gear joint. You should also delete the gear joint before you delete any of the bodies involved.</para>
         </caution>
       </sect2>
+      <sect2>
+      <title>Mouse Joint</title>
+      <para>The mouse joint is used in the testbed to manipulate bodies with the mouse. Please see the testbed and b2MouseJoint.h for details.</para>
+      </sect2>
     </sect1>
+    
     <sect1>
       <title>Joint Factory</title>
       <para>Joints are created and destroyed using the world factory methods. This brings up an old issue:</para>
@@ -1034,6 +1039,10 @@ float32 GetLength2() const;
       <sect2>
         <title>Using Gear Joints</title>
         <para>Gear joints don&apos;t provide any information beyond the functions defined in <classname>b2Joint</classname>.</para>
+      </sect2>
+      <sect2>
+        <title>Using Mouse Joints</title>
+        <para>The mouse joint is able to manipulate the attached body by updating the target point each time step.</para>
       </sect2>
     </sect1>
 </chapter>
@@ -1169,7 +1178,7 @@ while (i < nukeCount)
       <title>Contact Filtering</title>
       <para>Often in a game you don&apos;t want all objects to collide. For example, you may want to create a door that only certain characters can pass through. This is called contact filtering, because some interactions are <emphasis>filtered out</emphasis>.</para>
       <para>Box2D allows you to achieve custom contact filtering by implementing a <classname>b2ContactFilter</classname> class. This class requires you to implement a <methodname>ShouldCollide</methodname> function that receives two <classname>b2Shape</classname> pointers. Your function returns true if the shapes should collide.</para>
-      <para>The default implementation of <methodname>ShouldCollide</methodname> uses category, mask, and group information defined in the <xref linkend="shapes"/>.</para>
+      <para>The default implementation of <methodname>ShouldCollide</methodname> uses category, mask, and group information defined in <xref linkend="shapes"/>.</para>
         <programlisting><![CDATA[
 bool b2ContactFilter::ShouldCollide(b2Shape* shape1, b2Shape* shape2)
 {
