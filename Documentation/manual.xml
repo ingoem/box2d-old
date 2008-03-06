@@ -38,7 +38,8 @@
       <glossentry>
         <glossterm>shape</glossterm>
         <glossdef>
-          <para>A 2D piece of collision geometry that is rigidly attached to a body.</para>
+          <para>A 2D piece of collision geometry that is rigidly attached to a body. Shapes have
+          material properties of friction and restitution.</para>
         </glossdef>
       </glossentry>
       <glossentry>
@@ -176,7 +177,7 @@ body-&gt;SetMassFromShapes();
     <sect1>
       <title>Simulating the World (of Box2D)</title>
       <para>So we have initialized the ground box and a dynamic box. Now we are ready to set Newton loose to do his thing. We just have a couple more issues to consider.</para>
-      <para>Box2D uses a bit of numerical code called an <emphasis>integrator</emphasis>. Integrators simulation the physics equations at discrete points of time. This goes along with the traditional game loop where we essentially have a flip book of movement on the screen. So we need to pick a time step for Box2D. Generally physics engines for games like a time step at least as fast as 60Hz or 1/60 seconds. You can get away with larger time steps, but you will have to be more careful about setting up the definitions for your world. We also don&apos;t like the time step to change much. So don&apos;t tie the time step to your frame rate (unless you really, really have to). Without further ado, here is the time step.</para>
+      <para>Box2D uses a bit of numerical code called an <emphasis>integrator</emphasis>. Integrators simulate the physics equations at discrete points of time. This goes along with the traditional game loop where we essentially have a flip book of movement on the screen. So we need to pick a time step for Box2D. Generally physics engines for games like a time step at least as fast as 60Hz or 1/60 seconds. You can get away with larger time steps, but you will have to be more careful about setting up the definitions for your world. We also don&apos;t like the time step to change much. So don&apos;t tie the time step to your frame rate (unless you really, really have to). Without further ado, here is the time step.</para>
       <programlisting>
 float32 timeStep = 1.0f / 60.0f;
 </programlisting>
@@ -184,6 +185,7 @@ float32 timeStep = 1.0f / 60.0f;
       <programlisting>
 int32 iterations = 10;
 </programlisting>
+        <para>Note that the time step and the iteration count are completely unrelated. An iteration is not a sub-step. One iteration is a single pass over all the constraints withing a time step. You can have multiple passes over the constraints within a single time step.</para>
       <para>We are now ready to begin the simulation loop. In your game the simulation loop can be merged with your game loop. In each pass through your game loop you call <literal>b2World::Step</literal>. Just one call is usually enough, depending on your frame rate and your physics time step.</para>
       <para>The Hello World program was designed to be dead simple, so it has no graphical output. Rather that being utterly boring by producing no output, the code prints out the position and rotation of the dynamic body. Yay! Here is the simulation loop that simulates 60 time steps for a total of 1 second of simulated time.</para>
       <programlisting>
@@ -199,7 +201,7 @@ for (int32 i = 0; i &lt; 60; ++i)
     
     <sect1>
       <title>Cleanup</title>
-      <para>When a world leaves scope or is deleted by calling <literal>delete</literal> on a pointer, all the memory reserved for bodies and joints is freed. This is done to make your life easier. However, you will need to nullify any body or joint pointers you have because they will become invalid.</para>
+      <para>When a world leaves scope or is deleted by calling <literal>delete</literal> on a pointer, all the memory reserved for bodies and joints is freed. This is done to make your life easier. However, you will need to nullify any body, shape, or joint pointers you have because they will become invalid.</para>
     </sect1>
 
     <sect1>
@@ -245,7 +247,7 @@ for (int32 i = 0; i &lt; 60; ++i)
       <para>A large number of the decisions about the design of Box2D were based on the need for quick and efficient use of memory. In this section I will discuss how and why Box2D allocates memory.</para>
       <para>Box2D tends to allocate a large number of small objects (around 50-300 bytes). Using the system heap through <literal>malloc</literal> or <literal>new</literal> for small objects is inefficient and can cause fragmentation. Many of these small objects may have a short life span, such as contacts, but can persist for several time steps. So we need an allocator that can efficiently provide heap memory for these objects.</para>
       <para>Box2D&apos;s solution is to use a <emphasis>small object</emphasis> allocator (SOA). The SOA keeps a number of growable pools of varying sizes. When a request is made for memory, the SOA returns a block of memory that best fits the requested size. When a block is freed, it is returned to the pool. Both of these operations are fast and cause little heap traffic.</para>
-      <para>Since Box2D uses a SOA, you should never <emphasis>new</emphasis> or <emphasis>malloc</emphasis> a body, shape, or joint. The only Box2D object that you allocate yourself is a <classname>b2World</classname>. The <classname>b2World</classname> class provides factories for you to create bodies, shapes, and joints. This allows Box2D to use the SOA and hide the gory details from you. Never, ever, call <literal>delete</literal> or <literal>free</literal> on a body, shape, or joint.</para>
+      <para>Since Box2D uses a SOA, you should never <emphasis>new</emphasis> or <emphasis>malloc</emphasis> a body, shape, or joint. You do have to allocate a <classname>b2World</classname>. The <classname>b2World</classname> class provides factories for you to create bodies, shapes, and joints. This allows Box2D to use the SOA and hide the gory details from you. Never, ever, call <literal>delete</literal> or <literal>free</literal> on a body, shape, or joint.</para>
       <para>While executing a time step, Box2D needs some temporary workspace memory. For this, it uses a stack allocator to avoid per-step heap allocations. You don&apos;t need to interact with the stack allocator, but it&apos;s good to know it&apos;s there.</para>
     </sect1>
     
@@ -1261,12 +1263,6 @@ myWorld-&gt;SetListener(myDestructionListener);</programlisting>
       </itemizedlist>
       <para>Feel free to redirect the allocation by modifying <filename>b2Settings.cpp</filename>.</para>
     </sect1>
-</chapter>
-  
-<chapter>
-    <title>References</title>
-    <para>Box2D grew out of a GDC tutorial, so naturally much of the algorithms used in Box2D are discussed in those tutorials. You can find those articles at the <ulink url="http://www.gphysics.com/downloads">gPhysics website</ulink>.</para>
-    <para>If you want to learn more about physics algorithms in general, I recommend reading the articles of Chris Hecker and David Baraff. Some of their articles are outdated, but they are still instructional. You can use Google to find the links.</para>
 </chapter>
 
 </book>
