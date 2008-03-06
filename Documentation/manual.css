@@ -1,7 +1,13 @@
+div.caution p {
+	border: 1px solid Gray;
+	background-color: InfoBackground;
+	padding: 6px;
+}
+
 pre.programlisting {
 	padding: 6px;
-	background-color: #F8F8FF;
-	border: 1px dotted Black;
+	background-color: #E8E8E8;
+	border: 1pt solid Gray;
 	font-family: monospace;
 }
 
@@ -25,18 +31,19 @@ div.book div.titlepage p.copyright {
 }
 
 div.chapter div.titlepage h2.title {
-	color: White;
-	background-color: #2FAFBF;
+	color: Navy;
 	margin: 55px 0px 0px 0px;
 	padding: 5px 0px 5px 5px;
 	font: bold x-large sans-serif;
+	border-bottom: 3px double #D3D3D3;
 }
 
 div.chapter div.sect1 div.titlepage h2.title {
-	color: Black;
+	color: Navy;
 	background-color: transparent;
 	padding: 5px 0px 0px 0px;
 	font: bold large sans-serif;
+	border-bottom: 1px solid #D3D3D3;
 }
 
 div.chapter div.sect1 div.sect2 div.titlepage h3.title {
@@ -48,7 +55,7 @@ div.chapter div.sect1 div.sect2 div.titlepage h3.title {
 
 div.glosslist dt
 {
-	font-weight: bold
+	font-weight: bold;
 }
 
 div.toc span.part {
@@ -57,21 +64,12 @@ div.toc span.part {
 	font-size: 20;
 	margin-top: 1in;
 }
-div.toc span.glossary {
-	font-weight: bold;
-}
-div.toc span.index {
-	font-weight: bold;
-}
-div.toc span.preface {
-	font-weight: bold;
-}
-div.toc span.appendix {
-	font-weight: bold;
-}
+
 div.toc span.chapter {
+	color: Navy;
 	font-weight: bold;
 }
 
-
-
+div.informalfigure {
+	margin: 20px 0px 10px 60px;
+}

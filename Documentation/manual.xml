@@ -276,9 +276,10 @@ void b2Body::DestroyShape(b2Shape* shape)
         <title>Units</title>
         <para>Box2D works with floating point numbers, so some tolerances have to be used to make Box2D perform well. These tolerance have been tuned to work well with meters-kilogram-second (MKS) units. In particular, Box2D has been tuned to work well with moving objects between 0.1 and 10 meters. So this means objects between soup cans and buses in size should work well.</para>
         <para>Being a 2D physics engine it is tempting to use pixels as your units. Unfortunately this will lead to a poor simulation and possibly weird behavior. An object of length 200 pixels would be seen by Box2D as the size of a 45 story building. Imagine trying to simulate the movement of a high-rise building with an engine that is tuned to simulate ragdolls and barrels. It isn't pretty.</para>
-        <caution>Box2D is tuned for MKS units. Keep the size of moving objects roughly between 0.1 and 10 meters.</caution>
-        <para>You'll need to use some scaling system when you render your environment and actors. The Box2D examples do this by using an OpenGL viewport transform.</para>
-    </sect1>
+        <caution>
+            <para>Box2D is tuned for MKS units. Keep the size of moving objects roughly between 0.1 and 10 meters. You'll need to use some scaling system when you render your environment and actors. The Box2D examples do this by using an OpenGL viewport transform.</para>
+        </caution>
+</sect1>
     
     <sect1>
       <title>User Data</title>
@@ -1248,24 +1249,24 @@ myWorld-&gt;SetListener(myDestructionListener);</programlisting>
         <para>Box2D works with floating point numbers, so some tolerances have to be used to make Box2D perform well.</para>
     </sect1>
     <sect1>
-      <title>Units</title>
+      <title>Tolerances</title>
       <para>There are many tolerances settings that depend on using MKS units. See <xref linkend="units"/> for a deeper explanation of the unit system. See the doxygen docs for explanation of the individual tolerances.</para>
     </sect1>
     <sect1>
-      <title>Collision settings</title>
-      <para>
-      </para>
-    </sect1>
-    <sect1>
-      <title>Dynamics settings</title>
-      <para>
-      </para>
+      <title>Memory Allocation</title>
+      <para>All of Box2D's memory allocations are funnelled through <function>b2Alloc</function> and <function>b2Free</function> except in the following cases.</para>
+      <itemizedlist>
+        <listitem><para><classname>b2World</classname> can be built on the stack or with whatever allocator you like.</para></listitem>
+        <listitem><para>Any other Box2D class that you create without using a factory method. This includes things like callbacks classes and contact point buffers.</para></listitem>
+      </itemizedlist>
+      <para>Feel free to redirect the allocation by modifying <filename>b2Settings.cpp</filename>.</para>
     </sect1>
 </chapter>
   
 <chapter>
     <title>References</title>
     <para>Box2D grew out of a GDC tutorial, so naturally much of the algorithms used in Box2D are discussed in those tutorials. You can find those articles at the <ulink url="http://www.gphysics.com/downloads">gPhysics website</ulink>.</para>
+    <para>If you want to learn more about physics algorithms in general, I recommend reading the articles of Chris Hecker and David Baraff. Some of their articles are outdated, but they are still instructional. You can use Google to find the links.</para>
 </chapter>
 
 </book>
