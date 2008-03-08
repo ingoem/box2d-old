@@ -152,6 +152,10 @@
 		3638A4350D8095EE00E28AD1 /* b2Shape.h in Headers */ = {isa = PBXBuildFile; fileRef = 3638A42F0D8095EE00E28AD1 /* b2Shape.h */; };
 		3638A43A0D80964800E28AD1 /* b2Collision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3638A4390D80964800E28AD1 /* b2Collision.cpp */; };
 		3638A43D0D8096BF00E28AD1 /* b2Math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3638A43C0D8096BF00E28AD1 /* b2Math.cpp */; };
+		D8965C630D83188D00D09555 /* Biped.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8965C570D83188D00D09555 /* Biped.cpp */; };
+		D8965C640D83188D00D09555 /* BipedDef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8965C590D83188D00D09555 /* BipedDef.cpp */; };
+		D8965C650D83188D00D09555 /* Biped.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8965C570D83188D00D09555 /* Biped.cpp */; };
+		D8965C660D83188D00D09555 /* BipedDef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8965C590D83188D00D09555 /* BipedDef.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -255,7 +259,6 @@
 		276AE1750CF02509003B103D /* CollisionFiltering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollisionFiltering.h; sourceTree = "<group>"; };
 		276AE1760CF02509003B103D /* CollisionProcessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollisionProcessing.h; sourceTree = "<group>"; };
 		276AE1770CF02509003B103D /* CompoundShapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompoundShapes.h; sourceTree = "<group>"; };
-		276AE1780CF02509003B103D /* Cradle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cradle.h; sourceTree = "<group>"; };
 		276AE1790CF02509003B103D /* Gears.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gears.h; sourceTree = "<group>"; };
 		276AE17A0CF02509003B103D /* MotorsAndLimits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MotorsAndLimits.h; sourceTree = "<group>"; };
 		276AE17B0CF02509003B103D /* PolyCollision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PolyCollision.h; sourceTree = "<group>"; };
@@ -330,6 +333,19 @@
 		5073E0C609E734A800EC74B6 /* Box2DProj.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = Box2DProj.xcconfig; sourceTree = "<group>"; };
 		5073E0C709E734A800EC74B6 /* Box2DTarget.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = Box2DTarget.xcconfig; sourceTree = "<group>"; };
 		D2AAC09D05546B4700DB518D /* libBox2D.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libBox2D.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		D8965C560D83188D00D09555 /* ApplyForce.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplyForce.h; sourceTree = "<group>"; };
+		D8965C570D83188D00D09555 /* Biped.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Biped.cpp; sourceTree = "<group>"; };
+		D8965C580D83188D00D09555 /* Biped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Biped.h; sourceTree = "<group>"; };
+		D8965C590D83188D00D09555 /* BipedDef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BipedDef.cpp; sourceTree = "<group>"; };
+		D8965C5A0D83188D00D09555 /* BipedDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BipedDef.h; sourceTree = "<group>"; };
+		D8965C5B0D83188D00D09555 /* BipedTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BipedTest.h; sourceTree = "<group>"; };
+		D8965C5C0D83188D00D09555 /* Car.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Car.h; sourceTree = "<group>"; };
+		D8965C5D0D83188D00D09555 /* CCDTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCDTest.h; sourceTree = "<group>"; };
+		D8965C5E0D83188D00D09555 /* DistanceTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DistanceTest.h; sourceTree = "<group>"; };
+		D8965C5F0D83188D00D09555 /* Dominos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dominos.h; sourceTree = "<group>"; };
+		D8965C600D83188D00D09555 /* SensorTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SensorTest.h; sourceTree = "<group>"; };
+		D8965C610D83188D00D09555 /* ShapeEditing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShapeEditing.h; sourceTree = "<group>"; };
+		D8965C620D83188D00D09555 /* TimeOfImpact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TimeOfImpact.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -562,6 +578,19 @@
 		276AE1700CF02509003B103D /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				D8965C560D83188D00D09555 /* ApplyForce.h */,
+				D8965C570D83188D00D09555 /* Biped.cpp */,
+				D8965C580D83188D00D09555 /* Biped.h */,
+				D8965C590D83188D00D09555 /* BipedDef.cpp */,
+				D8965C5A0D83188D00D09555 /* BipedDef.h */,
+				D8965C5B0D83188D00D09555 /* BipedTest.h */,
+				D8965C5C0D83188D00D09555 /* Car.h */,
+				D8965C5D0D83188D00D09555 /* CCDTest.h */,
+				D8965C5E0D83188D00D09555 /* DistanceTest.h */,
+				D8965C5F0D83188D00D09555 /* Dominos.h */,
+				D8965C600D83188D00D09555 /* SensorTest.h */,
+				D8965C610D83188D00D09555 /* ShapeEditing.h */,
+				D8965C620D83188D00D09555 /* TimeOfImpact.h */,
 				276AE1710CF02509003B103D /* Bridge.h */,
 				276AE1720CF02509003B103D /* BroadPhaseTest.cpp */,
 				276AE1730CF02509003B103D /* BroadPhaseTest.h */,
@@ -569,7 +598,6 @@
 				276AE1750CF02509003B103D /* CollisionFiltering.h */,
 				276AE1760CF02509003B103D /* CollisionProcessing.h */,
 				276AE1770CF02509003B103D /* CompoundShapes.h */,
-				276AE1780CF02509003B103D /* Cradle.h */,
 				276AE1790CF02509003B103D /* Gears.h */,
 				276AE17A0CF02509003B103D /* MotorsAndLimits.h */,
 				276AE17B0CF02509003B103D /* PolyCollision.h */,
@@ -860,6 +888,8 @@
 				276AE2650CF0A2A9003B103D /* glui_treepanel.cpp in Sources */,
 				276AE2660CF0A2A9003B103D /* glui_window.cpp in Sources */,
 				276AE2670CF0A2A9003B103D /* quaternion.cpp in Sources */,
+				D8965C630D83188D00D09555 /* Biped.cpp in Sources */,
+				D8965C640D83188D00D09555 /* BipedDef.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -904,6 +934,8 @@
 				276AE3DE0CF0F129003B103D /* Render.cpp in Sources */,
 				276AE3DF0CF0F12F003B103D /* Test.cpp in Sources */,
 				276AE3E00CF0F131003B103D /* TestEntries.cpp in Sources */,
+				D8965C650D83188D00D09555 /* Biped.cpp in Sources */,
+				D8965C660D83188D00D09555 /* BipedDef.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1097,7 +1129,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_PREFIX_HEADER = Box2D_Prefix.pch;
 				INFOPLIST_FILE = "TestBed App-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (

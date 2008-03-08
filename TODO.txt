@@ -149,5 +149,4 @@ Version 3+
 - Static point-grids.
 - Revolute 3x3 effective mass.
 - Use velocity lambda to control NGS clamping.
-- Sensors.
 - No globals or statics.

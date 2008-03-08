@@ -288,7 +288,9 @@ int main(int argc, char** argv)
 	GLUI_Master.set_glutKeyboardFunc(Keyboard);
 	GLUI_Master.set_glutSpecialFunc(KeyboardSpecial);
 	GLUI_Master.set_glutMouseFunc(Mouse);
+#ifdef FREEGLUT
 	glutMouseWheelFunc(MouseWheel);
+#endif
 	glutMotionFunc(MouseMotion);
 
 	glui = GLUI_Master.create_glui_subwindow( mainWindow, 
