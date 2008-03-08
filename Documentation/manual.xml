@@ -1265,4 +1265,27 @@ myWorld-&gt;SetListener(myDestructionListener);</programlisting>
     </sect1>
 </chapter>
 
+<chapter>
+    <title>Debug Drawing</title>
+        <para>You can implement the <classname>b2DebugDraw</classname> class to get detailed drawing of the physics world.
+    Here are the available entities:</para>
+        <itemizedlist>
+            <listitem><para>shape outlines</para></listitem>
+            <listitem><para>joint connectivity</para></listitem>
+            <listitem><para>core shapes (for continuous collision)</para></listitem>
+            <listitem><para>broad-phase axis-aligned bounding boxes (AABBs), including the world AABB</para></listitem>
+            <listitem><para>polygon oriented bounding boxes (OBBs)</para></listitem>
+            <listitem><para>broad-phase pairs (potential contacts)</para></listitem>
+            <listitem><para>center of mass</para></listitem>
+        </itemizedlist>
+        <para>This the preferred method of drawing these physics entities, rather than accessing the data directly. The reason is that much of the necessary data is internal and subject to change.</para>
+        <para>The testbed draws physics entities using the debug draw facility and the contact listener, so it serves as the primary example of how to implement debug drawing as well as how to draw contact points.</para>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/debugDraw.gif" format="GIF"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+</chapter>
 </book>
