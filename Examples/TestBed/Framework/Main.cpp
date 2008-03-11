@@ -18,7 +18,7 @@
 
 #include <cstdio>
 
-#include "glui/gl/glui.h"
+#include "glui/GL/glui.h"
 
 #include "Render.h"
 #include "Test.h"

@@ -94,12 +94,14 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 
 				float32 kNormal = b1->m_invMass + b2->m_invMass;
 				kNormal += b1->m_invI * (r1Sqr - rn1 * rn1) + b2->m_invI * (r2Sqr - rn2 * rn2);
-				b2Assert(kNormal > FLT_EPSILON);
+
+				b2Assert(kNormal > FLOAT32_EPSILON);
 				ccp->normalMass = 1.0f / kNormal;
 
 				float32 kEqualized = b1->m_mass * b1->m_invMass + b2->m_mass * b2->m_invMass;
 				kEqualized += b1->m_mass * b1->m_invI * (r1Sqr - rn1 * rn1) + b2->m_mass * b2->m_invI * (r2Sqr - rn2 * rn2);
-				b2Assert(kEqualized > FLT_EPSILON);
+
+				b2Assert(kEqualized > FLOAT32_EPSILON);
 				ccp->equalizedMass = 1.0f / kEqualized;
 
 				b2Vec2 tangent = b2Cross(normal, 1.0f);
@@ -108,7 +110,8 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 				float32 rt2 = b2Dot(r2, tangent);
 				float32 kTangent = b1->m_invMass + b2->m_invMass;
 				kTangent += b1->m_invI * (r1Sqr - rt1 * rt1) + b2->m_invI * (r2Sqr - rt2 * rt2);
-				b2Assert(kTangent > FLT_EPSILON);
+
+				b2Assert(kTangent > FLOAT32_EPSILON);
 				ccp->tangentMass = 1.0f /  kTangent;
 
 				// Setup a velocity bias for restitution.
@@ -204,6 +207,33 @@ void b2ContactSolver::SolveVelocityConstraints()
 			// Relative velocity at contact
 			b2Vec2 dv = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
 
+
+#ifdef TARGET_FLOAT32_IS_FIXED
+			// Compute normal force
+			float32 vn = b2Dot(dv, normal);
+			float32 lambda = - ccp->normalMass * (vn - ccp->velocityBias);
+			// b2Clamp the accumulated force
+			float32 newForce = b2Max(m_step.dt * ccp->normalForce + lambda, 0.0f);
+			lambda = newForce - m_step.dt * ccp->normalForce;
+
+			// Apply contact impulse
+			b2Vec2 P = lambda * normal;
+
+			b1->m_linearVelocity -= invMass1 * P;
+			b1->m_angularVelocity -= invI1 * b2Cross(r1, P);
+
+			b2->m_linearVelocity += invMass2 * P;
+			b2->m_angularVelocity += invI2 * b2Cross(r2, P);
+
+			if(newForce > 20000.0 * m_step.dt) {
+				ccp->normalForce = 20000.0;
+			} else if(newForce < -20000.0 * m_step.dt) {
+				ccp->normalForce = -20000.0;
+			} else {
+				ccp->normalForce = m_step.inv_dt * newForce;
+			}
+#else 
+
 			// Compute normal force
 			float32 vn = b2Dot(dv, normal);
 			float32 lambda = - m_step.inv_dt * ccp->normalMass * (vn - ccp->velocityBias);
@@ -222,6 +252,7 @@ void b2ContactSolver::SolveVelocityConstraints()
 			b2->m_angularVelocity += invI2 * b2Cross(r2, P);
 
 			ccp->normalForce = newForce;
+#endif
 		}
 
 		// Solve tangent constraints

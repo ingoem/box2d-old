@@ -108,7 +108,18 @@ void b2MouseJoint::SolveVelocityConstraints(const b2TimeStep& step)
 
 	// Cdot = v + cross(w, r)
 	b2Vec2 Cdot = b->m_linearVelocity + b2Cross(b->m_angularVelocity, r);
+
+#ifdef TARGET_FLOAT32_IS_FIXED
+	b2Vec2 force = -b2Mul(m_mass, Cdot + (m_beta * step.inv_dt) * m_C + m_gamma * step.dt * m_force);
+	float32 forceLength = force.Length();
+	if(forceLength > 200.0) {
+		force *= 200.0/forceLength;
+	}
+	force *= step.inv_dt;
+
+#else
 	b2Vec2 force = -step.inv_dt * b2Mul(m_mass, Cdot + (m_beta * step.inv_dt) * m_C + m_gamma * step.dt * m_force);
+#endif
 
 	b2Vec2 oldForce = m_force;
 	m_force += force;

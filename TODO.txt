@@ -103,7 +103,7 @@ Version 2.0.0
 - Constraint graph and shapes support changes in center of mass. DONE
 - Sensors with overlap report. DONE
 - Doxygen. DONE
-- Update manual.
+- Update manual. DONE
 
 Version 2.1.0
 - Meshes (segment soup).
@@ -119,6 +119,7 @@ Version 2.2.0
 - Friction/motor joint for top down games.
 - Rolling resistance for circles.
 - Re-filter function.
+- Add comments to examples and testbed.
 
 Version 2.3.0
 - Convex hull tool.
