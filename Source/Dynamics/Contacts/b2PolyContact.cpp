@@ -76,6 +76,7 @@ void b2PolygonContact::Evaluate(b2ContactListener* listener)
 
 				b2ManifoldPoint* cp0 = m0.points + j;
 				b2ContactID id0 = cp0->id;
+				id0.features.flip &= ~b2_newPoint;
 
 				if (id0.key == id.key)
 				{

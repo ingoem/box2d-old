@@ -195,7 +195,13 @@ void b2ContactSolver::SolveVelocityConstraints()
 		float32 invI2 = b2->m_invI;
 		b2Vec2 normal = c->normal;
 		b2Vec2 tangent = b2Cross(normal, 1.0f);
-
+#define DEFERRED_UPDATE
+#ifdef DEFERRED_UPDATE
+		b2Vec2 b1_linearVelocity = b1->m_linearVelocity;
+		float32 b1_angularVelocity = b1->m_angularVelocity;
+		b2Vec2 b2_linearVelocity = b2->m_linearVelocity;
+		float32 b2_angularVelocity = b2->m_angularVelocity;
+#endif
 		// Solve normal constraints
 		for (int32 j = 0; j < c->pointCount; ++j)
 		{
@@ -244,17 +250,29 @@ void b2ContactSolver::SolveVelocityConstraints()
 
 			// Apply contact impulse
 			b2Vec2 P = m_step.dt * lambda * normal;
+#ifdef DEFERRED_UPDATE
+			b1_linearVelocity -= invMass1 * P;
+			b1_angularVelocity -= invI1 * b2Cross(r1, P);
 
+			b2_linearVelocity += invMass2 * P;
+			b2_angularVelocity += invI2 * b2Cross(r2, P);
+#else
 			b1->m_linearVelocity -= invMass1 * P;
 			b1->m_angularVelocity -= invI1 * b2Cross(r1, P);
 
 			b2->m_linearVelocity += invMass2 * P;
 			b2->m_angularVelocity += invI2 * b2Cross(r2, P);
-
+#endif
 			ccp->normalForce = newForce;
 #endif
 		}
 
+#ifdef DEFERRED_UPDATE
+		b1->m_linearVelocity = b1_linearVelocity;
+		b1->m_angularVelocity = b1_angularVelocity;
+		b2->m_linearVelocity = b2_linearVelocity;
+		b2->m_angularVelocity = b2_angularVelocity;
+#endif
 		// Solve tangent constraints
 		for (int32 j = 0; j < c->pointCount; ++j)
 		{

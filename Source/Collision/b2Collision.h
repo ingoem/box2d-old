@@ -40,10 +40,10 @@ union b2ContactID
 	/// The features that intersect to form the contact point
 	struct Features
 	{
-		uint8 referenceFace;	///< The edge that defines the contact normal
-		uint8 incidentEdge;		///< The edge most anti-parallel to the reference face
-		uint8 incidentVertex;	///< The vertex (0 or 1) on the incident edge that was clipped
-		uint8 flip;				///< Indicates that the contact normal should be flipped
+		uint8 referenceEdge;	///< The edge that defines the outward contact normal.
+		uint8 incidentEdge;		///< The edge most anti-parallel to the reference edge.
+		uint8 incidentVertex;	///< The vertex (0 or 1) on the incident edge that was clipped.
+		uint8 flip;				///< A value of 1 indicates that the reference edge is on shape2.
 	} features;
 	uint32 key;					///< Used to quickly compare contact ids.
 };

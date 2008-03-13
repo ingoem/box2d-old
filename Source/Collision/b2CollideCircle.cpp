@@ -105,7 +105,7 @@ void b2CollidePolygonAndCircle(
 		manifold->normal = b2Mul(xf1.R, polygon->m_normals[normalIndex]);
 		manifold->points[0].id.features.incidentEdge = (uint8)normalIndex;
 		manifold->points[0].id.features.incidentVertex = b2_nullFeature;
-		manifold->points[0].id.features.referenceFace = b2_nullFeature;
+		manifold->points[0].id.features.referenceEdge = b2_nullFeature;
 		manifold->points[0].id.features.flip = 0;
 		b2Vec2 position = c - radius * manifold->normal;
 		manifold->points[0].localPoint1 = b2MulT(xf1, position);
@@ -135,7 +135,7 @@ void b2CollidePolygonAndCircle(
 		manifold->normal = b2Mul(xf1.R, d);
 		manifold->points[0].id.features.incidentEdge = b2_nullFeature;
 		manifold->points[0].id.features.incidentVertex = (uint8)vertIndex1;
-		manifold->points[0].id.features.referenceFace = b2_nullFeature;
+		manifold->points[0].id.features.referenceEdge = b2_nullFeature;
 		manifold->points[0].id.features.flip = 0;
 		b2Vec2 position = c - radius * manifold->normal;
 		manifold->points[0].localPoint1 = b2MulT(xf1, position);
@@ -148,7 +148,7 @@ void b2CollidePolygonAndCircle(
 	float32 u = b2Dot(cLocal - polygon->m_vertices[vertIndex1], e);
 	manifold->points[0].id.features.incidentEdge = b2_nullFeature;
 	manifold->points[0].id.features.incidentVertex = b2_nullFeature;
-	manifold->points[0].id.features.referenceFace = b2_nullFeature;
+	manifold->points[0].id.features.referenceEdge = b2_nullFeature;
 	manifold->points[0].id.features.flip = 0;
 	b2Vec2 p;
 	if (u <= 0.0f)

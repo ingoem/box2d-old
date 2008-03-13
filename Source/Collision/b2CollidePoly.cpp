@@ -213,12 +213,12 @@ static void FindIncidentEdge(ClipVertex c[2],
 	int32 i2 = i1 + 1 < poly2->m_vertexCount ? i1 + 1 : 0;
 
 	c[0].v = b2Mul(xf2, poly2->m_vertices[i1]);
-	c[0].id.features.referenceFace = (uint8)edge1;
+	c[0].id.features.referenceEdge = (uint8)edge1;
 	c[0].id.features.incidentEdge = (uint8)i1;
 	c[0].id.features.incidentVertex = 0;
 
 	c[1].v = b2Mul(xf2, poly2->m_vertices[i2]);
-	c[1].id.features.referenceFace = (uint8)edge1;
+	c[1].id.features.referenceEdge = (uint8)edge1;
 	c[1].id.features.incidentEdge = (uint8)i2;
 	c[1].id.features.incidentVertex = 1;
 }
