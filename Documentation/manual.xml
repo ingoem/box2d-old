@@ -92,8 +92,8 @@
       <para>To create a world object, first we need to define a bounding box for the world. Box2D uses the bounding box to accelerate collision detection. The size isn&apos;t critical, but a better fit will improve performance. It is better to make the box too big than to make it too small.</para>
       <programlisting>
 b2AABB worldAABB;
-worldAABB.minVertex.Set(-100.0f, -100.0f);
-worldAABB.maxVertex.Set(100.0f, 100.0f);
+worldAABB.lowerBound.Set(-100.0f, -100.0f);
+worldAABB.upperBound.Set(100.0f, 100.0f);
 </programlisting>
       <caution>
         <para>The <emphasis>world AABB</emphasis> should always be bigger then the region where your bodies are located. It is better to make the world AABB too big than too small. If a body reaches the boundary of the world AABB it will be frozen and will stop simulating.</para>

@@ -146,10 +146,12 @@ bool b2Shape::Synchronize(b2BroadPhase* broadPhase, const b2XForm& transform1, c
 
 void b2Shape::ResetProxy(b2BroadPhase* broadPhase, const b2XForm& transform)
 {
-	if (m_proxyId != b2_nullProxy)
+	if (m_proxyId == b2_nullProxy)
 	{	
-		broadPhase->DestroyProxy(m_proxyId);
+		return;
 	}
+
+	broadPhase->DestroyProxy(m_proxyId);
 
 	b2AABB aabb;
 	ComputeAABB(&aabb, transform);

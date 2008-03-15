@@ -44,6 +44,7 @@
 				AdditionalIncludeDirectories="$(ProjectDir)/../../Contrib;$(ProjectDir)/../../Include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;FREEGLUT_STATIC"
 				MinimalRebuild="true"
+				ExceptionHandling="1"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="false"
@@ -121,7 +122,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(ProjectDir)/../../Contrib;$(ProjectDir)/../../Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;FREEGLUT_STATIC"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;FREEGLUT_STATIC;_HAS_EXCEPTIONS=0"
+				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
@@ -143,7 +145,9 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib glu32.lib"
 				GenerateManifest="false"
+				GenerateDebugInformation="true"
 				SubSystem="1"
+				Profile="true"
 			/>
 			<Tool
 				Name="VCALinkTool"

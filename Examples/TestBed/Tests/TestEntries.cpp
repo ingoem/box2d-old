@@ -54,10 +54,10 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Pyramid", Pyramid::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
-	{"Pyramid", Pyramid::Create},
 	{"Bridge", Bridge::Create},
 	{"Dominos", Dominos::Create},
 	{"CCD Test", CCDTest::Create},

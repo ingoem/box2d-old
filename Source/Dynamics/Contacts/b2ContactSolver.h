@@ -32,6 +32,8 @@ struct b2ContactConstraintPoint
 {
 	b2Vec2 localAnchor1;
 	b2Vec2 localAnchor2;
+	b2Vec2 r1;
+	b2Vec2 r2;
 	float32 normalForce;
 	float32 tangentForce;
 	float32 positionImpulse;
