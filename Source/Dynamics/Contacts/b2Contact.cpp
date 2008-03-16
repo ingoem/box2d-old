@@ -145,10 +145,20 @@ b2Contact::b2Contact(b2Shape* s1, b2Shape* s2)
 
 void b2Contact::Update(b2ContactListener* listener)
 {
+	int32 oldCount = GetManifoldCount();
+
 	Evaluate(listener);
+
+	int32 newCount = GetManifoldCount();
 
 	b2Body* body1 = m_shape1->GetBody();
 	b2Body* body2 = m_shape2->GetBody();
+
+	if (newCount == 0 && oldCount > 0)
+	{
+		body1->WakeUp();
+		body2->WakeUp();
+	}
 
 	// Slow contacts don't generate TOI events.
 	if (body1->IsStatic() || body1->IsBullet() || body2->IsStatic() || body2->IsBullet())
