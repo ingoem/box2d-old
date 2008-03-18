@@ -137,11 +137,11 @@ void b2RevoluteJoint::InitVelocityConstraints(const b2TimeStep& step)
 
 	if (b2World::s_enableWarmStarting)
 	{
-		b1->m_linearVelocity -= step.dt * invMass1 * m_pivotForce;
-		b1->m_angularVelocity -= step.dt * invI1 * (b2Cross(r1, m_pivotForce) + m_motorForce + m_limitForce);
+		b1->m_linearVelocity -= B2FORCE_SCALE(step.dt) * invMass1 * m_pivotForce;
+		b1->m_angularVelocity -= B2FORCE_SCALE(step.dt) * invI1 * (b2Cross(r1, m_pivotForce) + B2FORCE_INV_SCALE(m_motorForce + m_limitForce));
 
-		b2->m_linearVelocity += step.dt * invMass2 * m_pivotForce;
-		b2->m_angularVelocity += step.dt * invI2 * (b2Cross(r2, m_pivotForce) + m_motorForce + m_limitForce);
+		b2->m_linearVelocity += B2FORCE_SCALE(step.dt) * invMass2 * m_pivotForce;
+		b2->m_angularVelocity += B2FORCE_SCALE(step.dt) * invI2 * (b2Cross(r2, m_pivotForce) + B2FORCE_INV_SCALE(m_motorForce + m_limitForce));
 	}
 	else
 	{
@@ -163,10 +163,10 @@ void b2RevoluteJoint::SolveVelocityConstraints(const b2TimeStep& step)
 
 	// Solve point-to-point constraint
 	b2Vec2 pivotCdot = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
-	b2Vec2 pivotForce = -step.inv_dt * b2Mul(m_pivotMass, pivotCdot);
+	b2Vec2 pivotForce = -B2FORCE_INV_SCALE(step.inv_dt) * b2Mul(m_pivotMass, pivotCdot);
 	m_pivotForce += pivotForce;
 
-	b2Vec2 P = step.dt * pivotForce;
+	b2Vec2 P = B2FORCE_SCALE(step.dt) * pivotForce;
 	b1->m_linearVelocity -= b1->m_invMass * P;
 	b1->m_angularVelocity -= b1->m_invI * b2Cross(r1, P);
 
@@ -324,7 +324,7 @@ b2Vec2 b2RevoluteJoint::GetAnchor2() const
 
 b2Vec2 b2RevoluteJoint::GetReactionForce() const
 {
-	return m_pivotForce;
+	return B2FORCE_SCALE(float32(1.0))*m_pivotForce;
 }
 
 float32 b2RevoluteJoint::GetReactionTorque() const

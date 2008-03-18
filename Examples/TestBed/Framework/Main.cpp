@@ -34,6 +34,7 @@ namespace
 	int32 height = 480;
 	int32 framePeriod = 16;
 	int32 mainWindow;
+	float settingsHz = 60.0;
 	GLUI *glui;
 	float32 viewZoom = 1.0f;
 	b2Vec2 viewCenter(0.0f, 20.0f);
@@ -99,6 +100,7 @@ void SimulationLoop()
 	glLoadIdentity();
 
 	test->SetTextLine(30);
+	settings.hz = settingsHz;
 	test->Step(&settings);
 
 	DrawString(5, 15, entry->name);
@@ -307,7 +309,8 @@ int main(int argc, char** argv)
 	iterationSpinner->set_int_limits(1, 100);
 
 	GLUI_Spinner* hertzSpinner =
-		glui->add_spinner("Hertz", GLUI_SPINNER_FLOAT, &settings.hz);
+		glui->add_spinner("Hertz", GLUI_SPINNER_FLOAT, &settingsHz);
+
 	hertzSpinner->set_float_limits(5.0f, 200.0f);
 
 	glui->add_checkbox("Position Correction", &settings.enablePositionCorrection);

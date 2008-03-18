@@ -173,8 +173,8 @@ void b2PulleyJoint::InitVelocityConstraints(const b2TimeStep& step)
 	if (b2World::s_enableWarmStarting)
 	{
 		// Warm starting.
-		b2Vec2 P1 = step.dt * (-m_force - m_limitForce1) * m_u1;
-		b2Vec2 P2 = step.dt * (-m_ratio * m_force - m_limitForce2) * m_u2;
+		b2Vec2 P1 = B2FORCE_SCALE(step.dt) * (-m_force - m_limitForce1) * m_u1;
+		b2Vec2 P2 = B2FORCE_SCALE(step.dt) * (-m_ratio * m_force - m_limitForce2) * m_u2;
 		b1->m_linearVelocity += b1->m_invMass * P1;
 		b1->m_angularVelocity += b1->m_invI * b2Cross(r1, P1);
 		b2->m_linearVelocity += b2->m_invMass * P2;
@@ -202,13 +202,13 @@ void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep& step)
 		b2Vec2 v2 = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2);
 
 		float32 Cdot = -b2Dot(m_u1, v1) - m_ratio * b2Dot(m_u2, v2);
-		float32 force = -step.inv_dt * m_pulleyMass * Cdot;
+		float32 force = -B2FORCE_INV_SCALE(step.inv_dt) * m_pulleyMass * Cdot;
 		float32 oldForce = m_force;
 		m_force = b2Max(0.0f, m_force + force);
 		force = m_force - oldForce;
 
-		b2Vec2 P1 = -step.dt * force * m_u1;
-		b2Vec2 P2 = -step.dt * m_ratio * force * m_u2;
+		b2Vec2 P1 = -B2FORCE_SCALE(step.dt) * force * m_u1;
+		b2Vec2 P2 = -B2FORCE_SCALE(step.dt) * m_ratio * force * m_u2;
 		b1->m_linearVelocity += b1->m_invMass * P1;
 		b1->m_angularVelocity += b1->m_invI * b2Cross(r1, P1);
 		b2->m_linearVelocity += b2->m_invMass * P2;
@@ -220,12 +220,12 @@ void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep& step)
 		b2Vec2 v1 = b1->m_linearVelocity + b2Cross(b1->m_angularVelocity, r1);
 
 		float32 Cdot = -b2Dot(m_u1, v1);
-		float32 force = -step.inv_dt * m_limitMass1 * Cdot;
+		float32 force = -B2FORCE_INV_SCALE(step.inv_dt) * m_limitMass1 * Cdot;
 		float32 oldForce = m_limitForce1;
 		m_limitForce1 = b2Max(0.0f, m_limitForce1 + force);
 		force = m_limitForce1 - oldForce;
 
-		b2Vec2 P1 = -step.dt * force * m_u1;
+		b2Vec2 P1 = -B2FORCE_SCALE(step.dt) * force * m_u1;
 		b1->m_linearVelocity += b1->m_invMass * P1;
 		b1->m_angularVelocity += b1->m_invI * b2Cross(r1, P1);
 	}
@@ -235,12 +235,12 @@ void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep& step)
 		b2Vec2 v2 = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2);
 
 		float32 Cdot = -b2Dot(m_u2, v2);
-		float32 force = -step.inv_dt * m_limitMass2 * Cdot;
+		float32 force = -B2FORCE_INV_SCALE(step.inv_dt) * m_limitMass2 * Cdot;
 		float32 oldForce = m_limitForce2;
 		m_limitForce2 = b2Max(0.0f, m_limitForce2 + force);
 		force = m_limitForce2 - oldForce;
 
-		b2Vec2 P2 = -step.dt * force * m_u2;
+		b2Vec2 P2 = -B2FORCE_SCALE(step.dt) * force * m_u2;
 		b2->m_linearVelocity += b2->m_invMass * P2;
 		b2->m_angularVelocity += b2->m_invI * b2Cross(r2, P2);
 	}
@@ -389,7 +389,7 @@ b2Vec2 b2PulleyJoint::GetAnchor2() const
 
 b2Vec2 b2PulleyJoint::GetReactionForce() const
 {
-	b2Vec2 F = m_force * m_u2;
+	b2Vec2 F = B2FORCE_SCALE(m_force) * m_u2;
 	return F;
 }
 

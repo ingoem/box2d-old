@@ -173,7 +173,12 @@ void Test::MouseDown(const b2Vec2& p)
 		md.body1 = m_world->m_groundBody;
 		md.body2 = body;
 		md.target = p;
+#ifdef TARGET_FLOAT32_IS_FIXED
+		md.maxForce = (body->m_mass < 16.0)? 
+			(1000.0f * body->m_mass) : float32(16000.0);
+#else
 		md.maxForce = 1000.0f * body->m_mass;
+#endif
 		m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
 		body->WakeUp();
 	}

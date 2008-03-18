@@ -277,8 +277,10 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 	{
 		float32 minSleepTime = FLOAT32_MAX;
 
+#ifndef TARGET_FLOAT32_IS_FIXED
 		const float32 linTolSqr = b2_linearSleepTolerance * b2_linearSleepTolerance;
 		const float32 angTolSqr = b2_angularSleepTolerance * b2_angularSleepTolerance;
+#endif
 
 		for (int32 i = 0; i < m_bodyCount; ++i)
 		{
@@ -295,8 +297,14 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 			}
 
 			if ((b->m_flags & b2Body::e_allowSleepFlag) == 0 ||
+#ifdef TARGET_FLOAT32_IS_FIXED
+				b2Abs(b->m_angularVelocity) > b2_angularSleepTolerance ||
+				b2Abs(b->m_linearVelocity.x) > b2_linearSleepTolerance ||
+				b2Abs(b->m_linearVelocity.y) > b2_linearSleepTolerance)
+#else
 				b->m_angularVelocity * b->m_angularVelocity > angTolSqr ||
 				b2Dot(b->m_linearVelocity, b->m_linearVelocity) > linTolSqr)
+#endif
 			{
 				b->m_sleepTime = 0.0f;
 				minSleepTime = 0.0f;

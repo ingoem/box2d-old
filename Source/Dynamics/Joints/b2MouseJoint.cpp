@@ -34,7 +34,7 @@ b2MouseJoint::b2MouseJoint(const b2MouseJointDef* def)
 	m_target = def->target;
 	m_localAnchor = b2MulT(m_body2->m_xf, m_target);
 
-	m_maxForce = def->maxForce;
+	m_maxForce = B2FORCE_INV_SCALE(def->maxForce);
 	m_force.SetZero();
 
 	float32 mass = m_body2->m_mass;
@@ -46,11 +46,11 @@ b2MouseJoint::b2MouseJoint(const b2MouseJointDef* def)
 	float32 d = 2.0f * mass * def->dampingRatio * omega;
 
 	// Spring stiffness
-	float32 k = mass * omega * omega;
+	float32 k = (def->timeStep * mass) * (omega * omega);
 
 	// magic formulas
-	m_gamma = 1.0f / (d + def->timeStep * k);
-	m_beta = def->timeStep * k / (d + def->timeStep * k);
+	m_gamma = 1.0f / (d + k);
+	m_beta = k / (d + k);
 }
 
 void b2MouseJoint::SetTarget(const b2Vec2& target)
@@ -95,7 +95,7 @@ void b2MouseJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b->m_angularVelocity *= 0.98f;
 
 	// Warm starting.
-	b2Vec2 P = step.dt * m_force;
+	b2Vec2 P = B2FORCE_SCALE(step.dt) * m_force;
 	b->m_linearVelocity += invMass * P;
 	b->m_angularVelocity += invI * b2Cross(r, P);
 }
@@ -108,18 +108,7 @@ void b2MouseJoint::SolveVelocityConstraints(const b2TimeStep& step)
 
 	// Cdot = v + cross(w, r)
 	b2Vec2 Cdot = b->m_linearVelocity + b2Cross(b->m_angularVelocity, r);
-
-#ifdef TARGET_FLOAT32_IS_FIXED
-	b2Vec2 force = -b2Mul(m_mass, Cdot + (m_beta * step.inv_dt) * m_C + m_gamma * step.dt * m_force);
-	float32 forceLength = force.Length();
-	if(forceLength > 200.0) {
-		force *= 200.0/forceLength;
-	}
-	force *= step.inv_dt;
-
-#else
-	b2Vec2 force = -step.inv_dt * b2Mul(m_mass, Cdot + (m_beta * step.inv_dt) * m_C + m_gamma * step.dt * m_force);
-#endif
+	b2Vec2 force = -B2FORCE_INV_SCALE(step.inv_dt) * b2Mul(m_mass, Cdot + (m_beta * step.inv_dt) * m_C + B2FORCE_SCALE(step.dt) * (m_gamma * m_force));
 
 	b2Vec2 oldForce = m_force;
 	m_force += force;
@@ -130,7 +119,7 @@ void b2MouseJoint::SolveVelocityConstraints(const b2TimeStep& step)
 	}
 	force = m_force - oldForce;
 
-	b2Vec2 P = step.dt * force;
+	b2Vec2 P = B2FORCE_SCALE(step.dt) * force;
 	b->m_linearVelocity += b->m_invMass * P;
 	b->m_angularVelocity += b->m_invI * b2Cross(r, P);
 }
@@ -147,7 +136,7 @@ b2Vec2 b2MouseJoint::GetAnchor2() const
 
 b2Vec2 b2MouseJoint::GetReactionForce() const
 {
-	return m_force;
+	return B2FORCE_SCALE(float32(1.0))*m_force;
 }
 
 float32 b2MouseJoint::GetReactionTorque() const

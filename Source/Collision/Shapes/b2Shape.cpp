@@ -158,9 +158,6 @@ void b2Shape::ResetProxy(b2BroadPhase* broadPhase, const b2XForm& transform)
 
 	bool inRange = broadPhase->InRange(aabb);
 
-	// You are affecting a shape outside the world box.
-	b2Assert(inRange);
-
 	if (inRange)
 	{
 		m_proxyId = broadPhase->CreateProxy(aabb, this);

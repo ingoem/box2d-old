@@ -77,7 +77,7 @@ void b2DistanceJoint::InitVelocityConstraints(const b2TimeStep& step)
 
 	if (b2World::s_enableWarmStarting)
 	{
-		b2Vec2 P = step.dt * m_force * m_u;
+		b2Vec2 P = B2FORCE_SCALE(step.dt) * m_force * m_u;
 		b1->m_linearVelocity -= b1->m_invMass * P;
 		b1->m_angularVelocity -= b1->m_invI * b2Cross(r1, P);
 		b2->m_linearVelocity += b2->m_invMass * P;
@@ -101,10 +101,10 @@ void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep& step)
 	b2Vec2 v1 = b1->m_linearVelocity + b2Cross(b1->m_angularVelocity, r1);
 	b2Vec2 v2 = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2);
 	float32 Cdot = b2Dot(m_u, v2 - v1);
-	float32 force = -step.inv_dt * m_mass * Cdot;
+	float32 force = -B2FORCE_INV_SCALE(step.inv_dt) * m_mass * Cdot;
 	m_force += force;
 
-	b2Vec2 P = step.dt * force * m_u;
+	b2Vec2 P = B2FORCE_SCALE(step.dt) * force * m_u;
 	b1->m_linearVelocity -= b1->m_invMass * P;
 	b1->m_angularVelocity -= b1->m_invI * b2Cross(r1, P);
 	b2->m_linearVelocity += b2->m_invMass * P;
@@ -152,7 +152,7 @@ b2Vec2 b2DistanceJoint::GetAnchor2() const
 
 b2Vec2 b2DistanceJoint::GetReactionForce() const
 {
-	b2Vec2 F = m_force * m_u;
+	b2Vec2 F = B2FORCE_SCALE(m_force) * m_u;
 	return F;
 }
 

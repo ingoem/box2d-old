@@ -145,7 +145,7 @@ void b2GearJoint::InitVelocityConstraints(const b2TimeStep& step)
 	if (b2World::s_enableWarmStarting)
 	{
 		// Warm starting.
-		float32 P = step.dt * m_force;
+		float32 P = B2FORCE_SCALE(step.dt) * m_force;
 		b1->m_linearVelocity += b1->m_invMass * P * m_J.linear1;
 		b1->m_angularVelocity += b1->m_invI * P * m_J.angular1;
 		b2->m_linearVelocity += b2->m_invMass * P * m_J.linear2;
@@ -165,10 +165,10 @@ void b2GearJoint::SolveVelocityConstraints(const b2TimeStep& step)
 	float32 Cdot = m_J.Compute(	b1->m_linearVelocity, b1->m_angularVelocity,
 								b2->m_linearVelocity, b2->m_angularVelocity);
 
-	float32 force = -step.inv_dt * m_mass * Cdot;
+	float32 force = -B2FORCE_INV_SCALE(step.inv_dt) * m_mass * Cdot;
 	m_force += force;
 
-	float32 P = step.dt * force;
+	float32 P = B2FORCE_SCALE(step.dt) * force;
 	b1->m_linearVelocity += b1->m_invMass * P * m_J.linear1;
 	b1->m_angularVelocity += b1->m_invI * P * m_J.angular1;
 	b2->m_linearVelocity += b2->m_invMass * P * m_J.linear2;
@@ -229,7 +229,7 @@ b2Vec2 b2GearJoint::GetAnchor2() const
 b2Vec2 b2GearJoint::GetReactionForce() const
 {
 	// TODO_ERIN not tested
-	b2Vec2 F = m_force * m_J.linear2;
+	b2Vec2 F = B2FORCE_SCALE(m_force) * m_J.linear2;
 	return F;
 }
 
@@ -238,7 +238,7 @@ float32 b2GearJoint::GetReactionTorque() const
 	// TODO_ERIN not tested
 	b2Vec2 r = b2Mul(m_body2->m_xf.R, m_localAnchor2 - m_body2->GetLocalCenter());
 	b2Vec2 F = m_force * m_J.linear2;
-	float32 T = m_force * m_J.angular2 - b2Cross(r, F);
+	float32 T = B2FORCE_SCALE(m_force * m_J.angular2 - b2Cross(r, F));
 	return T;
 }
 
@@ -246,4 +246,5 @@ float32 b2GearJoint::GetRatio() const
 {
 	return m_ratio;
 }
+
 

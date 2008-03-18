@@ -125,10 +125,10 @@ public:
 	/// Get the motor speed, usually in meters per second.
 	float32 GetMotorSpeed() const;
 
-	/// Set the maximum motor torque, usually in N.
-	void SetMaxMotorForce(float32 torque);
+	/// Set the maximum motor force, usually in N.
+	void SetMaxMotorForce(float32 force);
 
-	/// Get the current motor torque, usually in N.
+	/// Get the current motor force, usually in N.
 	float32 GetMotorForce() const;
 
 	//--------------- Internals Below -------------------

@@ -131,11 +131,17 @@ static int32 ProcessThree(b2Vec2* x1, b2Vec2* x2, b2Vec2* p1s, b2Vec2* p2s, b2Ve
 	float32 denom = va + vb + vc;
 	b2Assert(denom > 0.0f);
 	denom = 1.0f / denom;
+
+#ifdef TARGET_FLOAT32_IS_FIXED
+	*x1 = denom * (va * p1s[0] + vb * p1s[1] + vc * p1s[2]);
+	*x2 = denom * (va * p2s[0] + vb * p2s[1] + vc * p2s[2]);
+#else
 	float32 u = va * denom;
 	float32 v = vb * denom;
 	float32 w = 1.0f - u - v;
 	*x1 = u * p1s[0] + v * p1s[1] + w * p1s[2];
 	*x2 = u * p2s[0] + v * p2s[1] + w * p2s[2];
+#endif
 	return 3;
 }
 

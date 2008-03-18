@@ -22,6 +22,15 @@
 #include "../b2World.h"
 #include "../../Common/b2StackAllocator.h"
 
+#ifdef TARGET_FLOAT32_IS_FIXED
+#define	B2FORCE_SCALE2(x)	((x)<<7)
+#define	B2FORCE_INV_SCALE2(x)	((x)>>7)
+#else
+#define	B2FORCE_SCALE2(x)	(x)
+#define	B2FORCE_INV_SCALE2(x)	(x)
+#endif
+
+
 b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, int32 contactCount, b2StackAllocator* allocator)
 {
 	m_step = step;
@@ -160,7 +169,7 @@ void b2ContactSolver::InitVelocityConstraints()
 			for (int32 j = 0; j < c->pointCount; ++j)
 			{
 				b2ContactConstraintPoint* ccp = c->points + j;
-				b2Vec2 P = m_step.dt * (ccp->normalForce * normal + ccp->tangentForce * tangent);
+				b2Vec2 P = B2FORCE_SCALE2(m_step.dt) * (ccp->normalForce * normal + ccp->tangentForce * tangent);
 				b1->m_angularVelocity -= invI1 * b2Cross(ccp->r1, P);
 				b1->m_linearVelocity -= invMass1 * P;
 				b2->m_angularVelocity += invI2 * b2Cross(ccp->r2, P);
@@ -212,42 +221,17 @@ void b2ContactSolver::SolveVelocityConstraints()
 			// Relative velocity at contact
 			b2Vec2 dv = v2 + b2Cross(w2, ccp->r2) - v1 - b2Cross(w1, ccp->r1);
 
-#ifdef TARGET_FLOAT32_IS_FIXED
 			// Compute normal force
 			float32 vn = b2Dot(dv, normal);
-			float32 lambda = - ccp->normalMass * (vn - ccp->velocityBias);
-			// b2Clamp the accumulated force
-			float32 newForce = b2Max(m_step.dt * ccp->normalForce + lambda, 0.0f);
-			lambda = newForce - m_step.dt * ccp->normalForce;
 
-			// Apply contact impulse
-			b2Vec2 P = lambda * normal;
-
-			b1->m_linearVelocity -= invMass1 * P;
-			b1->m_angularVelocity -= invI1 * b2Cross(r1, P);
-
-			b2->m_linearVelocity += invMass2 * P;
-			b2->m_angularVelocity += invI2 * b2Cross(r2, P);
-
-			if(newForce > 20000.0 * m_step.dt) {
-				ccp->normalForce = 20000.0;
-			} else if(newForce < -20000.0 * m_step.dt) {
-				ccp->normalForce = -20000.0;
-			} else {
-				ccp->normalForce = m_step.inv_dt * newForce;
-			}
-#else 
-
-			// Compute normal force
-			float32 vn = b2Dot(dv, normal);
-			float32 lambda = - m_step.inv_dt * ccp->normalMass * (vn - ccp->velocityBias);
+			float32 lambda = -B2FORCE_INV_SCALE2(m_step.inv_dt) * ccp->normalMass * (vn - ccp->velocityBias);
 
 			// b2Clamp the accumulated force
 			float32 newForce = b2Max(ccp->normalForce + lambda, 0.0f);
 			lambda = newForce - ccp->normalForce;
 
 			// Apply contact impulse
-			b2Vec2 P = m_step.dt * lambda * normal;
+			b2Vec2 P = B2FORCE_SCALE2(m_step.dt) * lambda * normal;
 #ifdef DEFERRED_UPDATE
 			b1_linearVelocity -= invMass1 * P;
 			b1_angularVelocity -= invI1 * b2Cross(r1, P);
@@ -262,7 +246,6 @@ void b2ContactSolver::SolveVelocityConstraints()
 			w2 += invI2 * b2Cross(ccp->r2, P);
 #endif
 			ccp->normalForce = newForce;
-#endif
 		}
 
 #ifdef DEFERRED_UPDATE
@@ -281,7 +264,7 @@ void b2ContactSolver::SolveVelocityConstraints()
 
 			// Compute tangent force
 			float32 vt = b2Dot(dv, tangent);
-			float32 lambda = m_step.inv_dt * ccp->tangentMass * (-vt);
+			float32 lambda = B2FORCE_INV_SCALE2(m_step.inv_dt) * ccp->tangentMass * (-vt);
 
 			// b2Clamp the accumulated force
 			float32 maxFriction = friction * ccp->normalForce;
@@ -289,7 +272,7 @@ void b2ContactSolver::SolveVelocityConstraints()
 			lambda = newForce - ccp->tangentForce;
 
 			// Apply contact impulse
-			b2Vec2 P = m_step.dt * lambda * tangent;
+			b2Vec2 P = B2FORCE_SCALE2(m_step.dt) * lambda * tangent;
 
 			v1 -= invMass1 * P;
 			w1 -= invI1 * b2Cross(ccp->r1, P);

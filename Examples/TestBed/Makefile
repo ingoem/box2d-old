@@ -1,7 +1,4 @@
-all:	Gen/float/testbed Gen/fixed/testbed
-
-clean:
-	rm -rf Gen
+TARGETS=	Gen/float/testbed Gen/fixed/testbed
 
 PROJECT=	../..
 
@@ -17,14 +14,36 @@ SOURCES=	Framework/Main.cpp \
 		Tests/BipedDef.cpp \
 		Tests/TestEntries.cpp 
 
+ifneq ($(INCLUDE_DEPENDENCIES),yes)
+
+all:	
+	@make --no-print-directory INCLUDE_DEPENDENCIES=yes $(TARGETS)
+
+.PHONY:	clean
+clean:
+	rm -rf Gen
+
+else
+
+-include $(addprefix Gen/float/,$(SOURCES:.cpp=.d))
+-include $(addprefix Gen/fixed/,$(SOURCES:.cpp=.d))
+
+endif
+
+
 FLOAT_OBJECTS= $(addprefix Gen/float/,$(SOURCES:.cpp=.o))
 
 Gen/float/%.o:		%.cpp
 	mkdir -p $(dir $@)
 	c++ $(CXXFLAGS) -c -o $@ $<
 
-Gen/float/testbed:	$(FLOAT_OBJECTS)
+Gen/float/testbed:	$(FLOAT_OBJECTS) $(PROJECT)/Source/Gen/float/libbox2d.a
 	g++ -o $@ $^ $(LDFLAGS) -L$(PROJECT)/Source/Gen/float -lbox2d -lglui -lglut -lGLU -lGL
+
+Gen/float/%.d:		%.cpp
+	@mkdir -p $(dir $@)
+	c++ -M -MT $(@:.d=.o) $(CXXFLAGS) -o $@ $<
+
 
 
 FIXED_OBJECTS= $(addprefix Gen/fixed/,$(SOURCES:.cpp=.o))
@@ -33,5 +52,10 @@ Gen/fixed/%.o:		%.cpp
 	mkdir -p $(dir $@)
 	c++ $(CXXFLAGS) -DTARGET_FLOAT32_IS_FIXED -c -o $@ $<
 
-Gen/fixed/testbed:	$(FIXED_OBJECTS)
-	g++ -o $@ $^ $(LDFLAGS) -L$(PROJECT)/Source/Gen/fixed -lbox2d -lglui -lglut -lGLU -lGL
+Gen/fixed/testbed:	$(FIXED_OBJECTS) $(PROJECT)/Source/Gen/fixed/libbox2d.a
+	g++ -rdynamic -o $@ $^ $(LDFLAGS) -L$(PROJECT)/Source/Gen/fixed -lbox2d -lglui -lglut -lGLU -lGL
+
+Gen/fixed/%.d:		%.cpp
+	@mkdir -p $(dir $@)
+	c++ -M -MT $(@:.d=.o) $(CXXFLAGS) -o $@ $<
+
