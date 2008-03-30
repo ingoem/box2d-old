@@ -52,7 +52,7 @@ void b2PolygonContact::Evaluate(b2ContactListener* listener)
 	b2Manifold m0;
 	memcpy(&m0, &m_manifold, sizeof(b2Manifold));
 
-	b2CollidePolygons(&m_manifold, (b2PolygonShape*)m_shape1, b1->m_xf, (b2PolygonShape*)m_shape2, b2->m_xf);
+	b2CollidePolygons(&m_manifold, (b2PolygonShape*)m_shape1, b1->GetXForm(), (b2PolygonShape*)m_shape2, b2->GetXForm());
 
 	bool match[b2_maxManifoldPoints] = {false, false};
 
@@ -118,7 +118,7 @@ void b2PolygonContact::Evaluate(b2ContactListener* listener)
 			}
 
 			b2ManifoldPoint* mp0 = m0.points + i;
-			cp.position = b2Mul(b1->m_xf, mp0->localPoint1);
+			cp.position = b2Mul(b1->GetXForm(), mp0->localPoint1);
 			cp.separation = mp0->separation;
 			cp.normalForce = mp0->normalForce;
 			cp.tangentForce = mp0->tangentForce;

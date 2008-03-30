@@ -92,8 +92,8 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 
 				ccp->localAnchor1 = cp->localPoint1;
 				ccp->localAnchor2 = cp->localPoint2;
-				ccp->r1 = b2Mul(b1->m_xf.R, cp->localPoint1 - b1->GetLocalCenter());
-				ccp->r2 = b2Mul(b2->m_xf.R, cp->localPoint2 - b2->GetLocalCenter());
+				ccp->r1 = b2Mul(b1->GetXForm().R, cp->localPoint1 - b1->GetLocalCenter());
+				ccp->r2 = b2Mul(b2->GetXForm().R, cp->localPoint2 - b2->GetLocalCenter());
 
 				float32 r1Sqr = b2Dot(ccp->r1, ccp->r1);
 				float32 r2Sqr = b2Dot(ccp->r2, ccp->r2);
@@ -148,7 +148,7 @@ b2ContactSolver::~b2ContactSolver()
 	m_allocator->Free(m_constraints);
 }
 
-void b2ContactSolver::InitVelocityConstraints()
+void b2ContactSolver::InitVelocityConstraints(const b2TimeStep& step)
 {
 	// Warm start.
 	for (int32 i = 0; i < m_constraintCount; ++i)
@@ -164,7 +164,7 @@ void b2ContactSolver::InitVelocityConstraints()
 		b2Vec2 normal = c->normal;
 		b2Vec2 tangent = b2Cross(normal, 1.0f);
 
-		if (b2World::s_enableWarmStarting)
+		if (step.warmStarting)
 		{
 			for (int32 j = 0; j < c->pointCount; ++j)
 			{
@@ -327,8 +327,8 @@ bool b2ContactSolver::SolvePositionConstraints(float32 baumgarte)
 		{
 			b2ContactConstraintPoint* ccp = c->points + j;
 
-			b2Vec2 r1 = b2Mul(b1->m_xf.R, ccp->localAnchor1 - b1->GetLocalCenter());
-			b2Vec2 r2 = b2Mul(b2->m_xf.R, ccp->localAnchor2 - b2->GetLocalCenter());
+			b2Vec2 r1 = b2Mul(b1->GetXForm().R, ccp->localAnchor1 - b1->GetLocalCenter());
+			b2Vec2 r2 = b2Mul(b2->GetXForm().R, ccp->localAnchor2 - b2->GetLocalCenter());
 
 			b2Vec2 p1 = b1->m_sweep.c + r1;
 			b2Vec2 p2 = b2->m_sweep.c + r2;

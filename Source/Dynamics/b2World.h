@@ -39,7 +39,10 @@ struct b2TimeStep
 {
 	float32 dt;			// time step
 	float32 inv_dt;		// inverse time step (0 if dt == 0).
+	float32 dtRatio;	// dt * inv_dt0
 	int32 maxIterations;
+	bool warmStarting;
+	bool positionCorrection;
 };
 
 /// The world class manages all physics entities, dynamic simulation,
@@ -129,11 +132,38 @@ public:
 	/// @return the head of the world joint list.
 	b2Joint* GetJointList();
 
-	void SetGravity(b2Vec2 g) { m_gravity = g; }
+	void SetWarmStarting(bool flag) { m_warmStarting = flag; }
 
-public:
+	void SetPositionCorrection(bool flag) { m_positionCorrection = flag; }
+
+	void SetContinuousPhysics(bool flag) { m_continuousPhysics = flag; }
+
+	void Validate();
+
+	int32 GetProxyCount() const;
+
+	int32 GetPairCount() const;
+
+	int32 GetBodyCount() const;
+
+	int32 GetJointCount() const;
+
+	int32 GetContactCount() const;
+
+	void SetGravity(const b2Vec2& gravity);
+
 	//--------------- Internals Below -------------------
-	// Internal yet public to make life easier.
+private:
+
+	friend class b2Body;
+	friend class b2ContactManager;
+	friend class b2ContactSolver;
+	friend class b2DistanceJoint;
+	friend class b2GearJoint;
+	friend class b2MouseJoint;
+	friend class b2PrismaticJoint;
+	friend class b2PulleyJoint;
+	friend class b2RevoluteJoint;
 
 	void Solve(const b2TimeStep& step);
 	void SolveTOI(const b2TimeStep& step);
@@ -171,16 +201,18 @@ public:
 	b2ContactListener* m_contactListener;
 	b2DebugDraw* m_debugDraw;
 
+	float32 m_inv_dt0;
+
 	int32 m_positionIterationCount;
 
 	// This is for debugging the solver.
-	static int32 s_enablePositionCorrection;
+	bool m_positionCorrection;
 
 	// This is for debugging the solver.
-	static int32 s_enableWarmStarting;
+	bool m_warmStarting;
 
 	// This is for debugging the solver.
-	static int32 s_enableTOI;
+	bool m_continuousPhysics;
 };
 
 inline b2Body* b2World::GetGroundBody()
@@ -196,6 +228,26 @@ inline b2Body* b2World::GetBodyList()
 inline b2Joint* b2World::GetJointList()
 {
 	return m_jointList;
+}
+
+inline int32 b2World::GetBodyCount() const
+{
+	return m_bodyCount;
+}
+
+inline int32 b2World::GetJointCount() const
+{
+	return m_jointCount;
+}
+
+inline int32 b2World::GetContactCount() const
+{
+	return m_contactCount;
+}
+
+inline void b2World::SetGravity(const b2Vec2& gravity)
+{
+	m_gravity = gravity;
 }
 
 #endif

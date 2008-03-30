@@ -51,13 +51,13 @@ public:
 			m_body2->SetMassFromShapes();
 		}
 
-		m_world->m_gravity.Set(0.0f, 0.0f);
-		b2World::s_enablePositionCorrection = false;
+		m_world->SetGravity(b2Vec2_zero);
+		m_world->SetPositionCorrection(false);
 	}
 
 	~PolyCollision()
 	{
-		b2World::s_enablePositionCorrection = true;
+		m_world->SetPositionCorrection(true);
 	}
 
 	static Test* Create()
@@ -71,6 +71,7 @@ public:
 		Test::Step(settings);
 		settings->pause = 0;
 
+		/*
 		const b2XForm& xf1 = m_body1->GetXForm();
 		for (b2Contact* c = m_world->m_contactList; c; c = c->m_next)
 		{
@@ -101,6 +102,7 @@ public:
 				glEnd();
 			}
 		}
+		*/
 	}
 
 	void Keyboard(unsigned char key)

@@ -65,8 +65,8 @@ public:
 	{
 		Test::Step(settings);
 
-		// Traverse the contact results. Destroy bodies that
-		// are touching heavier bodies.
+		// Traverse the contact results. Apply a force on shapes
+		// that overlap the sensor.
 		for (int32 i = 0; i < m_pointCount; ++i)
 		{
 			ContactPoint* point = m_points + i;

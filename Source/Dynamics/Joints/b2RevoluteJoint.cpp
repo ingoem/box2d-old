@@ -70,8 +70,8 @@ void b2RevoluteJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Body* b2 = m_body2;
 
 	// Compute the effective mass matrix.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 	// K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
 	//      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r1.y*r1.y -r1.x*r1.y]
@@ -135,7 +135,7 @@ void b2RevoluteJoint::InitVelocityConstraints(const b2TimeStep& step)
 		m_limitForce = 0.0f;
 	}
 
-	if (b2World::s_enableWarmStarting)
+	if (step.warmStarting)
 	{
 		b1->m_linearVelocity -= B2FORCE_SCALE(step.dt) * invMass1 * m_pivotForce;
 		b1->m_angularVelocity -= B2FORCE_SCALE(step.dt) * invI1 * (b2Cross(r1, m_pivotForce) + B2FORCE_INV_SCALE(m_motorForce + m_limitForce));
@@ -158,8 +158,8 @@ void b2RevoluteJoint::SolveVelocityConstraints(const b2TimeStep& step)
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 	// Solve point-to-point constraint
 	b2Vec2 pivotCdot = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2) - b1->m_linearVelocity - b2Cross(b1->m_angularVelocity, r1);
@@ -222,8 +222,8 @@ bool b2RevoluteJoint::SolvePositionConstraints()
 	float32 positionError = 0.0f;
 
 	// Solve point-to-point position error.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 	b2Vec2 p1 = b1->m_sweep.c + r1;
 	b2Vec2 p2 = b2->m_sweep.c + r2;

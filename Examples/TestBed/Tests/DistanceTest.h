@@ -79,13 +79,13 @@ public:
 			m_body2->SetMassFromShapes();
 		}
 
-		m_world->m_gravity.Set(0.0f, 0.0f);
-		b2World::s_enablePositionCorrection = false;
+		m_world->SetGravity(b2Vec2(0.0f, 0.0f));
+		m_world->SetPositionCorrection(false);
 	}
 
 	~DistanceTest()
 	{
-		b2World::s_enablePositionCorrection = true;
+		m_world->SetPositionCorrection(true);
 	}
 
 	static Test* Create()

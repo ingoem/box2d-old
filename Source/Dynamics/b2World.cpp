@@ -27,10 +27,6 @@
 #include "../Collision/Shapes/b2PolygonShape.h"
 #include <new>
 
-int32 b2World::s_enablePositionCorrection = 1;
-int32 b2World::s_enableWarmStarting = 1;
-int32 b2World::s_enableTOI = 1;
-
 b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 {
 	m_destructionListener = NULL;
@@ -47,10 +43,16 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_contactCount = 0;
 	m_jointCount = 0;
 
+	m_positionCorrection = true;
+	m_warmStarting = true;
+	m_continuousPhysics = true;
+
 	m_allowSleep = doSleep;
 	m_gravity = gravity;
 
 	m_lock = false;
+
+	m_inv_dt0 = 0.0f;
 
 	m_contactManager.m_world = this;
 	void* mem = b2Alloc(sizeof(b2BroadPhase));
@@ -240,7 +242,7 @@ b2Joint* b2World::CreateJoint(const b2JointDef* def)
 		b2Body* b = def->body1->m_shapeCount < def->body2->m_shapeCount ? def->body1 : def->body2;
 		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
 		{
-			s->ResetProxy(m_broadPhase, b->m_xf);
+			s->ResetProxy(m_broadPhase, b->GetXForm());
 		}
 	}
 
@@ -327,7 +329,7 @@ void b2World::DestroyJoint(b2Joint* j)
 		b2Body* b = body1->m_shapeCount < body2->m_shapeCount ? body1 : body2;
 		for (b2Shape* s = b->m_shapeList; s; s = s->m_next)
 		{
-			s->ResetProxy(m_broadPhase, b->m_xf);
+			s->ResetProxy(m_broadPhase, b->GetXForm());
 		}
 	}
 }
@@ -446,7 +448,7 @@ void b2World::Solve(const b2TimeStep& step)
 			}
 		}
 
-		island.Solve(step, m_gravity, s_enablePositionCorrection > 0, m_allowSleep);
+		island.Solve(step, m_gravity, m_positionCorrection, m_allowSleep);
 		m_positionIterationCount = b2Max(m_positionIterationCount, island.m_positionIterationCount);
 
 		// Post solve cleanup.
@@ -762,6 +764,11 @@ void b2World::Step(float32 dt, int32 iterations)
 	{
 		step.inv_dt = 0.0f;
 	}
+
+	step.dtRatio = m_inv_dt0 * dt;
+
+	step.positionCorrection = m_positionCorrection;
+	step.warmStarting = m_warmStarting;
 	
 	// Update contacts.
 	m_contactManager.Collide();
@@ -773,7 +780,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	}
 
 	// Handle TOI events.
-	if (s_enableTOI && step.dt > 0.0f)
+	if (m_continuousPhysics && step.dt > 0.0f)
 	{
 		SolveTOI(step);
 	}
@@ -781,6 +788,7 @@ void b2World::Step(float32 dt, int32 iterations)
 	// Draw debug information.
 	DrawDebugData();
 
+	m_inv_dt0 = step.inv_dt;
 	m_lock = false;
 }
 
@@ -1057,4 +1065,19 @@ void b2World::DrawDebugData()
 			m_debugDraw->DrawXForm(xf);
 		}
 	}
+}
+
+void b2World::Validate()
+{
+	m_broadPhase->Validate();
+}
+
+int32 b2World::GetProxyCount() const
+{
+	return m_broadPhase->m_proxyCount;
+}
+
+int32 b2World::GetPairCount() const
+{
+	return m_broadPhase->m_pairManager.m_pairCount;
 }

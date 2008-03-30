@@ -67,6 +67,9 @@ public:
 			b2DistanceJointDef jd;
 			b2Vec2 p1, p2, d;
 
+			jd.frequencyHz = 4.0f;
+			jd.dampingRatio = 0.5f;
+
 			jd.body1 = ground;
 			jd.body2 = m_bodies[0];
 			jd.localAnchor1.Set(-10.0f, 10.0f);

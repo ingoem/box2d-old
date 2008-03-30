@@ -20,6 +20,14 @@
 #include "../b2Body.h"
 #include "../b2World.h"
 
+// 1-D constrained system
+// m (v2 - v1) = lambda
+// v2 + (beta/h) * x1 + gamma * lambda = 0, gamma has units of inverse mass.
+// x2 = x1 + h * v2
+
+// 1-D mass-damper-spring system
+// m (v2 - v1) + h * d * v2 + h * k * 
+
 // C = norm(p2 - p1) - L
 // u = (p2 - p1) / norm(p2 - p1)
 // Cdot = dot(u, v2 + cross(w2, r2) - v1 - cross(w1, r1))
@@ -45,17 +53,24 @@ b2DistanceJoint::b2DistanceJoint(const b2DistanceJointDef* def)
 	m_localAnchor1 = def->localAnchor1;
 	m_localAnchor2 = def->localAnchor2;
 	m_length = def->length;
-	m_force = 0.0f;
+	m_frequencyHz = def->frequencyHz;
+	m_dampingRatio = def->dampingRatio;
+	m_impulse = 0.0f;
+	m_gamma = 0.0f;
+	m_bias = 0.0f;
+	m_inv_dt = 0.0f;
 }
 
 void b2DistanceJoint::InitVelocityConstraints(const b2TimeStep& step)
 {
+	m_inv_dt = step.inv_dt;
+
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
 	// Compute the effective mass matrix.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 	m_u = b2->m_sweep.c + r2 - b1->m_sweep.c - r1;
 
 	// Handle singularity.
@@ -71,13 +86,34 @@ void b2DistanceJoint::InitVelocityConstraints(const b2TimeStep& step)
 
 	float32 cr1u = b2Cross(r1, m_u);
 	float32 cr2u = b2Cross(r2, m_u);
-	m_mass = b1->m_invMass + b1->m_invI * cr1u * cr1u + b2->m_invMass + b2->m_invI * cr2u * cr2u;
-	b2Assert(m_mass > FLOAT32_EPSILON);
-	m_mass = 1.0f / m_mass;
+	float32 invMass = b1->m_invMass + b1->m_invI * cr1u * cr1u + b2->m_invMass + b2->m_invI * cr2u * cr2u;
+	b2Assert(invMass > FLOAT32_EPSILON);
+	m_mass = 1.0f / invMass;
 
-	if (b2World::s_enableWarmStarting)
+	if (m_frequencyHz > 0.0f)
 	{
-		b2Vec2 P = B2FORCE_SCALE(step.dt) * m_force * m_u;
+		float32 C = length - m_length;
+
+		// Frequency
+		float32 omega = 2.0f * b2_pi * m_frequencyHz;
+
+		// Damping coefficient
+		float32 d = 2.0f * m_mass * m_dampingRatio * omega;
+
+		// Spring stiffness
+		float32 k = m_mass * omega * omega;
+
+		// magic formulas
+		m_gamma = 1.0f / (step.dt * (d + step.dt * k));
+		m_bias = C * step.dt * k * m_gamma;
+
+		m_mass = 1.0f / (invMass + m_gamma);
+	}
+
+	if (step.warmStarting)
+	{
+		m_impulse *= step.dtRatio;
+		b2Vec2 P = m_impulse * m_u;
 		b1->m_linearVelocity -= b1->m_invMass * P;
 		b1->m_angularVelocity -= b1->m_invI * b2Cross(r1, P);
 		b2->m_linearVelocity += b2->m_invMass * P;
@@ -85,26 +121,29 @@ void b2DistanceJoint::InitVelocityConstraints(const b2TimeStep& step)
 	}
 	else
 	{
-		m_force = 0.0f;
+		m_impulse = 0.0f;
 	}
 }
 
 void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
+	B2_NOT_USED(step);
+
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 	// Cdot = dot(u, v + cross(w, r))
 	b2Vec2 v1 = b1->m_linearVelocity + b2Cross(b1->m_angularVelocity, r1);
 	b2Vec2 v2 = b2->m_linearVelocity + b2Cross(b2->m_angularVelocity, r2);
 	float32 Cdot = b2Dot(m_u, v2 - v1);
-	float32 force = -B2FORCE_INV_SCALE(step.inv_dt) * m_mass * Cdot;
-	m_force += force;
 
-	b2Vec2 P = B2FORCE_SCALE(step.dt) * force * m_u;
+	float32 impulse = -m_mass * (Cdot + m_bias + m_gamma * m_impulse);
+	m_impulse += impulse;
+
+	b2Vec2 P = impulse * m_u;
 	b1->m_linearVelocity -= b1->m_invMass * P;
 	b1->m_angularVelocity -= b1->m_invI * b2Cross(r1, P);
 	b2->m_linearVelocity += b2->m_invMass * P;
@@ -113,11 +152,16 @@ void b2DistanceJoint::SolveVelocityConstraints(const b2TimeStep& step)
 
 bool b2DistanceJoint::SolvePositionConstraints()
 {
+	if (m_frequencyHz > 0.0f)
+	{
+		return true;
+	}
+
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 	b2Vec2 d = b2->m_sweep.c + r2 - b1->m_sweep.c - r1;
 
@@ -152,7 +196,7 @@ b2Vec2 b2DistanceJoint::GetAnchor2() const
 
 b2Vec2 b2DistanceJoint::GetReactionForce() const
 {
-	b2Vec2 F = B2FORCE_SCALE(m_force) * m_u;
+	b2Vec2 F = (m_inv_dt * m_impulse) * m_u;
 	return F;
 }
 

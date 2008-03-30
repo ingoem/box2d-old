@@ -37,6 +37,7 @@
 #include "CompoundShapes.h"
 #include "DistanceTest.h"
 #include "Dominos.h"
+#include "ElasticBody.h"
 #include "Gears.h"
 #include "MotorsAndLimits.h"
 #include "PolyCollision.h"
@@ -54,6 +55,8 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Web", Web::Create},
+	{"Elastic Body", ElasticBody::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Varying Friction", VaryingFriction::Create},
@@ -71,7 +74,6 @@ TestEntry g_testEntries[] =
 	{"Collision Processing", CollisionProcessing::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
 	{"Motors and Limits", MotorsAndLimits::Create},
-	{"Web", Web::Create},
 	{"Apply Force", ApplyForce::Create},
 	{"Pulleys", Pulleys::Create},
 	{"Shape Editing", ShapeEditing::Create},

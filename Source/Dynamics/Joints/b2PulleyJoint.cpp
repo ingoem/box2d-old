@@ -65,8 +65,8 @@ b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 : b2Joint(def)
 {
 	m_ground = m_body1->m_world->m_groundBody;
-	m_groundAnchor1 = def->groundAnchor1 - m_ground->m_xf.position;
-	m_groundAnchor2 = def->groundAnchor2 - m_ground->m_xf.position;
+	m_groundAnchor1 = def->groundAnchor1 - m_ground->GetXForm().position;
+	m_groundAnchor2 = def->groundAnchor2 - m_ground->GetXForm().position;
 	m_localAnchor1 = def->localAnchor1;
 	m_localAnchor2 = def->localAnchor2;
 
@@ -88,14 +88,14 @@ void b2PulleyJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 	b2Vec2 p1 = b1->m_sweep.c + r1;
 	b2Vec2 p2 = b2->m_sweep.c + r2;
 
-	b2Vec2 s1 = m_ground->m_xf.position + m_groundAnchor1;
-	b2Vec2 s2 = m_ground->m_xf.position + m_groundAnchor2;
+	b2Vec2 s1 = m_ground->GetXForm().position + m_groundAnchor1;
+	b2Vec2 s2 = m_ground->GetXForm().position + m_groundAnchor2;
 
 	// Get the pulley axes.
 	m_u1 = p1 - s1;
@@ -170,7 +170,7 @@ void b2PulleyJoint::InitVelocityConstraints(const b2TimeStep& step)
 	m_limitMass2 = 1.0f / m_limitMass2;
 	m_pulleyMass = 1.0f / m_pulleyMass;
 
-	if (b2World::s_enableWarmStarting)
+	if (step.warmStarting)
 	{
 		// Warm starting.
 		b2Vec2 P1 = B2FORCE_SCALE(step.dt) * (-m_force - m_limitForce1) * m_u1;
@@ -193,8 +193,8 @@ void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep& step)
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 	if (m_state == e_atUpperLimit)
 	{
@@ -251,15 +251,15 @@ bool b2PulleyJoint::SolvePositionConstraints()
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 s1 = m_ground->m_xf.position + m_groundAnchor1;
-	b2Vec2 s2 = m_ground->m_xf.position + m_groundAnchor2;
+	b2Vec2 s1 = m_ground->GetXForm().position + m_groundAnchor1;
+	b2Vec2 s2 = m_ground->GetXForm().position + m_groundAnchor2;
 
 	float32 linearError = 0.0f;
 
 	if (m_state == e_atUpperLimit)
 	{
-		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+		b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+		b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 		b2Vec2 p1 = b1->m_sweep.c + r1;
 		b2Vec2 p2 = b2->m_sweep.c + r2;
@@ -312,7 +312,7 @@ bool b2PulleyJoint::SolvePositionConstraints()
 
 	if (m_limitState1 == e_atUpperLimit)
 	{
-		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+		b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
 		b2Vec2 p1 = b1->m_sweep.c + r1;
 
 		m_u1 = p1 - s1;
@@ -344,7 +344,7 @@ bool b2PulleyJoint::SolvePositionConstraints()
 
 	if (m_limitState2 == e_atUpperLimit)
 	{
-		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+		b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 		b2Vec2 p2 = b2->m_sweep.c + r2;
 
 		m_u2 = p2 - s2;
@@ -400,18 +400,18 @@ float32 b2PulleyJoint::GetReactionTorque() const
 
 b2Vec2 b2PulleyJoint::GetGroundAnchor1() const
 {
-	return m_ground->m_xf.position + m_groundAnchor1;
+	return m_ground->GetXForm().position + m_groundAnchor1;
 }
 
 b2Vec2 b2PulleyJoint::GetGroundAnchor2() const
 {
-	return m_ground->m_xf.position + m_groundAnchor2;
+	return m_ground->GetXForm().position + m_groundAnchor2;
 }
 
 float32 b2PulleyJoint::GetLength1() const
 {
 	b2Vec2 p = m_body1->GetWorldPoint(m_localAnchor1);
-	b2Vec2 s = m_ground->m_xf.position + m_groundAnchor1;
+	b2Vec2 s = m_ground->GetXForm().position + m_groundAnchor1;
 	b2Vec2 d = p - s;
 	return d.Length();
 }
@@ -419,7 +419,7 @@ float32 b2PulleyJoint::GetLength1() const
 float32 b2PulleyJoint::GetLength2() const
 {
 	b2Vec2 p = m_body2->GetWorldPoint(m_localAnchor2);
-	b2Vec2 s = m_ground->m_xf.position + m_groundAnchor2;
+	b2Vec2 s = m_ground->GetXForm().position + m_groundAnchor2;
 	b2Vec2 d = p - s;
 	return d.Length();
 }

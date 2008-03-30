@@ -154,6 +154,8 @@ public:
 	b2Body* m_body1;
 	b2Body* m_body2;
 
+	float32 m_inv_dt;
+
 	bool m_islandFlag;
 	bool m_collideConnected;
 

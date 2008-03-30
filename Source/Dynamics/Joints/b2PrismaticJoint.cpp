@@ -83,15 +83,15 @@ void b2PrismaticJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Body* b2 = m_body2;
 
 	// Compute the effective masses.
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 
 	float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
 	float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
 
 	// Compute point to line constraint effective mass.
 	// J = [-ay1 -cross(d+r1,ay1) ay1 cross(r2,ay1)]
-	b2Vec2 ay1 = b2Mul(b1->m_xf.R, m_localYAxis1);
+	b2Vec2 ay1 = b2Mul(b1->GetXForm().R, m_localYAxis1);
 	b2Vec2 e = b2->m_sweep.c + r2 - b1->m_sweep.c;	// e = d + r1
 
 	m_linearJacobian.Set(-ay1, -b2Cross(e, ay1), ay1, b2Cross(r2, ay1));
@@ -111,7 +111,7 @@ void b2PrismaticJoint::InitVelocityConstraints(const b2TimeStep& step)
 	if (m_enableLimit || m_enableMotor)
 	{
 		// The motor and limit share a Jacobian and effective mass.
-		b2Vec2 ax1 = b2Mul(b1->m_xf.R, m_localXAxis1);
+		b2Vec2 ax1 = b2Mul(b1->GetXForm().R, m_localXAxis1);
 		m_motorJacobian.Set(-ax1, -b2Cross(e, ax1), ax1, b2Cross(r2, ax1));
 		m_motorMass =	invMass1 + invI1 * m_motorJacobian.angular1 * m_motorJacobian.angular1 +
 						invMass2 + invI2 * m_motorJacobian.angular2 * m_motorJacobian.angular2;
@@ -160,7 +160,7 @@ void b2PrismaticJoint::InitVelocityConstraints(const b2TimeStep& step)
 		m_limitForce = 0.0f;
 	}
 
-	if (b2World::s_enableWarmStarting)
+	if (step.warmStarting)
 	{
 		b2Vec2 P1 = B2FORCE_SCALE(step.dt) * (m_force * m_linearJacobian.linear1 + (m_motorForce + m_limitForce) * m_motorJacobian.linear1);
 		b2Vec2 P2 = B2FORCE_SCALE(step.dt) * (m_force * m_linearJacobian.linear2 + (m_motorForce + m_limitForce) * m_motorJacobian.linear2);
@@ -271,12 +271,12 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 	float32 invMass1 = b1->m_invMass, invMass2 = b2->m_invMass;
 	float32 invI1 = b1->m_invI, invI2 = b2->m_invI;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 	b2Vec2 p1 = b1->m_sweep.c + r1;
 	b2Vec2 p2 = b2->m_sweep.c + r2;
 	b2Vec2 d = p2 - p1;
-	b2Vec2 ay1 = b2Mul(b1->m_xf.R, m_localYAxis1);
+	b2Vec2 ay1 = b2Mul(b1->GetXForm().R, m_localYAxis1);
 
 	// Solve linear (point-to-line) constraint.
 	float32 linearC = b2Dot(ay1, d);
@@ -310,12 +310,12 @@ bool b2PrismaticJoint::SolvePositionConstraints()
 	// Solve linear limit constraint.
 	if (m_enableLimit && m_limitState != e_inactiveLimit)
 	{
-		b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-		b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+		b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+		b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 		b2Vec2 p1 = b1->m_sweep.c + r1;
 		b2Vec2 p2 = b2->m_sweep.c + r2;
 		b2Vec2 d = p2 - p1;
-		b2Vec2 ax1 = b2Mul(b1->m_xf.R, m_localXAxis1);
+		b2Vec2 ax1 = b2Mul(b1->GetXForm().R, m_localXAxis1);
 
 		float32 translation = b2Dot(ax1, d);
 		float32 limitImpulse = 0.0f;
@@ -376,8 +376,8 @@ b2Vec2 b2PrismaticJoint::GetAnchor2() const
 
 b2Vec2 b2PrismaticJoint::GetReactionForce() const
 {
-	b2Vec2 ax1 = b2Mul(m_body1->m_xf.R, m_localXAxis1);
-	b2Vec2 ay1 = b2Mul(m_body1->m_xf.R, m_localYAxis1);
+	b2Vec2 ax1 = b2Mul(m_body1->GetXForm().R, m_localXAxis1);
+	b2Vec2 ay1 = b2Mul(m_body1->GetXForm().R, m_localYAxis1);
 
 	return B2FORCE_SCALE(float32(1.0))*(m_limitForce * ax1 + m_force * ay1);
 }
@@ -406,8 +406,8 @@ float32 b2PrismaticJoint::GetJointSpeed() const
 	b2Body* b1 = m_body1;
 	b2Body* b2 = m_body2;
 
-	b2Vec2 r1 = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
-	b2Vec2 r2 = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
+	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 	b2Vec2 p1 = b1->m_sweep.c + r1;
 	b2Vec2 p2 = b2->m_sweep.c + r2;
 	b2Vec2 d = p2 - p1;

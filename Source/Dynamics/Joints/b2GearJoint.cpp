@@ -115,8 +115,8 @@ void b2GearJoint::InitVelocityConstraints(const b2TimeStep& step)
 	}
 	else
 	{
-		b2Vec2 ug = b2Mul(g1->m_xf.R, m_prismatic1->m_localXAxis1);
-		b2Vec2 r = b2Mul(b1->m_xf.R, m_localAnchor1 - b1->GetLocalCenter());
+		b2Vec2 ug = b2Mul(g1->GetXForm().R, m_prismatic1->m_localXAxis1);
+		b2Vec2 r = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
 		float32 crug = b2Cross(r, ug);
 		m_J.linear1 = -ug;
 		m_J.angular1 = -crug;
@@ -130,8 +130,8 @@ void b2GearJoint::InitVelocityConstraints(const b2TimeStep& step)
 	}
 	else
 	{
-		b2Vec2 ug = b2Mul(g2->m_xf.R, m_prismatic2->m_localXAxis1);
-		b2Vec2 r = b2Mul(b2->m_xf.R, m_localAnchor2 - b2->GetLocalCenter());
+		b2Vec2 ug = b2Mul(g2->GetXForm().R, m_prismatic2->m_localXAxis1);
+		b2Vec2 r = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
 		float32 crug = b2Cross(r, ug);
 		m_J.linear2 = -m_ratio * ug;
 		m_J.angular2 = -m_ratio * crug;
@@ -142,7 +142,7 @@ void b2GearJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Assert(K > 0.0f);
 	m_mass = 1.0f / K;
 
-	if (b2World::s_enableWarmStarting)
+	if (step.warmStarting)
 	{
 		// Warm starting.
 		float32 P = B2FORCE_SCALE(step.dt) * m_force;
@@ -236,7 +236,7 @@ b2Vec2 b2GearJoint::GetReactionForce() const
 float32 b2GearJoint::GetReactionTorque() const
 {
 	// TODO_ERIN not tested
-	b2Vec2 r = b2Mul(m_body2->m_xf.R, m_localAnchor2 - m_body2->GetLocalCenter());
+	b2Vec2 r = b2Mul(m_body2->GetXForm().R, m_localAnchor2 - m_body2->GetLocalCenter());
 	b2Vec2 F = m_force * m_J.linear2;
 	float32 T = B2FORCE_SCALE(m_force * m_J.angular2 - b2Cross(r, F));
 	return T;

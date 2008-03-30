@@ -58,7 +58,7 @@ void b2PolyAndCircleContact::Evaluate(b2ContactListener* listener)
 	b2Manifold m0;
 	memcpy(&m0, &m_manifold, sizeof(b2Manifold));
 
-	b2CollidePolygonAndCircle(&m_manifold, (b2PolygonShape*)m_shape1, b1->m_xf, (b2CircleShape*)m_shape2, b2->m_xf);
+	b2CollidePolygonAndCircle(&m_manifold, (b2PolygonShape*)m_shape1, b1->GetXForm(), (b2CircleShape*)m_shape2, b2->GetXForm());
 
 	if (m_manifold.pointCount > 0)
 	{
@@ -81,7 +81,7 @@ void b2PolyAndCircleContact::Evaluate(b2ContactListener* listener)
 			cp.shape1 = m_shape1;
 			cp.shape2 = m_shape2;
 			cp.normal = m0.normal;
-			cp.position = b2Mul(b1->m_xf, m0.points[0].localPoint1);
+			cp.position = b2Mul(b1->GetXForm(), m0.points[0].localPoint1);
 			cp.separation = m0.points[0].separation;
 			cp.normalForce = m0.points[0].normalForce;
 			cp.tangentForce = m0.points[0].tangentForce;

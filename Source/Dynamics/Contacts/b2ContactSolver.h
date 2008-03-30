@@ -62,7 +62,7 @@ public:
 	b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, int32 contactCount, b2StackAllocator* allocator);
 	~b2ContactSolver();
 
-	void InitVelocityConstraints();
+	void InitVelocityConstraints(const b2TimeStep& step);
 	void SolveVelocityConstraints();
 	void FinalizeVelocityConstraints();
 

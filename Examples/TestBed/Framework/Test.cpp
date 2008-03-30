@@ -170,14 +170,14 @@ void Test::MouseDown(const b2Vec2& p)
 	if (body)
 	{
 		b2MouseJointDef md;
-		md.body1 = m_world->m_groundBody;
+		md.body1 = m_world->GetGroundBody();
 		md.body2 = body;
 		md.target = p;
 #ifdef TARGET_FLOAT32_IS_FIXED
 		md.maxForce = (body->m_mass < 16.0)? 
 			(1000.0f * body->m_mass) : float32(16000.0);
 #else
-		md.maxForce = 1000.0f * body->m_mass;
+		md.maxForce = 1000.0f * body->GetMass();
 #endif
 		m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
 		body->WakeUp();
@@ -254,15 +254,15 @@ void Test::Step(Settings* settings)
 	flags += settings->drawCOMs				* b2DebugDraw::e_centerOfMassBit;
 	m_debugDraw.SetFlags(flags);
 
-	b2World::s_enableWarmStarting = settings->enableWarmStarting;
-	b2World::s_enablePositionCorrection = settings->enablePositionCorrection;
-	b2World::s_enableTOI = settings->enableTOI;
+	m_world->SetWarmStarting(settings->enableWarmStarting > 0);
+	m_world->SetPositionCorrection(settings->enablePositionCorrection > 0);
+	m_world->SetContinuousPhysics(settings->enableTOI > 0);
 
 	m_pointCount = 0;
 
 	m_world->Step(timeStep, settings->iterationCount);
 
-	m_world->m_broadPhase->Validate();
+	m_world->Validate();
 
 	if (m_bomb != NULL && m_bomb->IsFrozen())
 	{
@@ -273,16 +273,16 @@ void Test::Step(Settings* settings)
 	if (settings->drawStats)
 	{
 		DrawString(5, m_textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)",
-			m_world->m_broadPhase->m_proxyCount, b2_maxProxies,
-			m_world->m_broadPhase->m_pairManager.m_pairCount, b2_maxPairs);
+			m_world->GetProxyCount(), b2_maxProxies,
+			m_world->GetPairCount(), b2_maxPairs);
 		m_textLine += 15;
 
 		DrawString(5, m_textLine, "bodies/contacts/joints = %d/%d/%d",
-			m_world->m_bodyCount, m_world->m_contactCount, m_world->m_jointCount);
+			m_world->GetBodyCount(), m_world->GetContactCount(), m_world->GetJointCount());
 		m_textLine += 15;
 
-		DrawString(5, m_textLine, "position iterations = %d", m_world->m_positionIterationCount);
-		m_textLine += 15;
+		//DrawString(5, m_textLine, "position iterations = %d", m_world->m_positionIterationCount);
+		//m_textLine += 15;
 
 		DrawString(5, m_textLine, "heap bytes = %d", b2_byteCount);
 		m_textLine += 15;

@@ -90,7 +90,7 @@ public:
 
 	b2Vec2 m_localAnchor;
 	b2Vec2 m_target;
-	b2Vec2 m_force;
+	b2Vec2 m_impulse;
 
 	b2Mat22 m_mass;		// effective mass for point-to-point constraint.
 	b2Vec2 m_C;				// position error

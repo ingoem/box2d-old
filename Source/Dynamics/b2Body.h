@@ -236,14 +236,15 @@ public:
 	/// Wake up this body so it will begin simulating.
 	void WakeUp();
 
+	/// Put this body to sleep so it will stop simulating.
+	/// This also sets the velocity to zero.
+	void PutToSleep();
+
 	/// Get the list of all shapes attached to this body.
 	b2Shape* GetShapeList();
 
 	/// Get the list of all joints attached to this body.
 	b2JointEdge* GetJointList();
-
-	/// Get the list of all contacts attached to this body.
-	b2ContactEdge* GetContactList();
 
 	/// Get the next body in the world's body list.
 	b2Body* GetNext();
@@ -252,6 +253,21 @@ public:
 	void* GetUserData();
 
 	//--------------- Internals Below -------------------
+private:
+
+	friend class b2World;
+	friend class b2Island;
+	friend class b2ContactManager;
+	friend class b2ContactSolver;
+	
+	friend class b2PolyAndCircleContact;
+
+	friend class b2DistanceJoint;
+	friend class b2GearJoint;
+	friend class b2MouseJoint;
+	friend class b2PrismaticJoint;
+	friend class b2PulleyJoint;
+	friend class b2RevoluteJoint;
 
 	// m_flags
 	enum
@@ -274,8 +290,6 @@ public:
 
 	b2Body(const b2BodyDef* bd, uint16 type, b2World* world);
 	~b2Body();
-
-	void ComputeMass();
 
 	bool SynchronizeShapes();
 
@@ -452,14 +466,19 @@ inline void b2Body::WakeUp()
 	m_sleepTime = 0.0f;
 }
 
+inline void b2Body::PutToSleep()
+{
+	m_flags |= e_sleepFlag;
+	m_sleepTime = 0.0f;
+	m_linearVelocity.SetZero();
+	m_angularVelocity = 0.0f;
+	m_force.SetZero();
+	m_torque = 0.0f;
+}
+
 inline b2Shape* b2Body::GetShapeList()
 {
 	return m_shapeList;
-}
-
-inline b2ContactEdge* b2Body::GetContactList()
-{
-	return m_contactList;
 }
 
 inline b2JointEdge* b2Body::GetJointList()

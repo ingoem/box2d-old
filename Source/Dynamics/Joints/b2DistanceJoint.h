@@ -35,6 +35,8 @@ struct b2DistanceJointDef : public b2JointDef
 		localAnchor1.Set(0.0f, 0.0f);
 		localAnchor2.Set(0.0f, 0.0f);
 		length = 1.0f;
+		frequencyHz = 0.0f;
+		dampingRatio = 0.0f;
 	}
 
 	/// Initialize the bodies, anchors, and length using the world
@@ -50,6 +52,12 @@ struct b2DistanceJointDef : public b2JointDef
 
 	/// The equilibrium length between the anchor points.
 	float32 length;
+
+	/// The response speed.
+	float32 frequencyHz;
+
+	/// The damping ratio. 0 = no damping, 1 = critical damping.
+	float32 dampingRatio;
 };
 
 /// A distance joint constrains two points on two bodies
@@ -76,7 +84,11 @@ public:
 	b2Vec2 m_localAnchor1;
 	b2Vec2 m_localAnchor2;
 	b2Vec2 m_u;
-	float32 m_force;
+	float32 m_frequencyHz;
+	float32 m_dampingRatio;
+	float32 m_gamma;
+	float32 m_bias;
+	float32 m_impulse;
 	float32 m_mass;		// effective mass for the constraint.
 	float32 m_length;
 };

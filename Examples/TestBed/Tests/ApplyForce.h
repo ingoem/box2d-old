@@ -24,7 +24,7 @@ class ApplyForce : public Test
 public:
 	ApplyForce()
 	{
-		m_world->m_gravity.Set(0.0f, 0.0f);
+		m_world->SetGravity(b2Vec2(0.0f, 0.0f));
 
 		const float32 k_restitution = 0.4f;
 
