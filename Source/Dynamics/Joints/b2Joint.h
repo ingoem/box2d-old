@@ -132,6 +132,10 @@ public:
 	void* GetUserData();
 
 	//--------------- Internals Below -------------------
+protected:
+	friend class b2World;
+	friend class b2Body;
+	friend class b2Island;
 
 	static b2Joint* Create(const b2JointDef* def, b2BlockAllocator* allocator);
 	static void Destroy(b2Joint* joint, b2BlockAllocator* allocator);

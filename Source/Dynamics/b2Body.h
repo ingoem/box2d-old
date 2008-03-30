@@ -252,6 +252,8 @@ public:
 	/// Get the user data pointer that was provided in the body definition.
 	void* GetUserData();
 
+	b2World* GetWorld();
+
 	//--------------- Internals Below -------------------
 private:
 
@@ -260,8 +262,6 @@ private:
 	friend class b2ContactManager;
 	friend class b2ContactSolver;
 	
-	friend class b2PolyAndCircleContact;
-
 	friend class b2DistanceJoint;
 	friend class b2GearJoint;
 	friend class b2MouseJoint;
@@ -549,6 +549,11 @@ inline void b2Body::Advance(float32 t)
 	m_sweep.c = m_sweep.c0;
 	m_sweep.a = m_sweep.a0;
 	SynchronizeTransform();
+}
+
+inline b2World* b2Body::GetWorld()
+{
+	return m_world;
 }
 
 #endif

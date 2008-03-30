@@ -290,7 +290,7 @@ void Test::Step(Settings* settings)
 
 	if (m_mouseJoint)
 	{
-		b2Body* body = m_mouseJoint->m_body2;
+		b2Body* body = m_mouseJoint->GetBody2();
 		b2Vec2 p1 = body->GetWorldPoint(m_mouseJoint->m_localAnchor);
 		b2Vec2 p2 = m_mouseJoint->m_target;
 

@@ -157,13 +157,6 @@ private:
 
 	friend class b2Body;
 	friend class b2ContactManager;
-	friend class b2ContactSolver;
-	friend class b2DistanceJoint;
-	friend class b2GearJoint;
-	friend class b2MouseJoint;
-	friend class b2PrismaticJoint;
-	friend class b2PulleyJoint;
-	friend class b2RevoluteJoint;
 
 	void Solve(const b2TimeStep& step);
 	void SolveTOI(const b2TimeStep& step);

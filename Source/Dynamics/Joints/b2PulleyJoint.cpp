@@ -64,7 +64,7 @@ void b2PulleyJointDef::Initialize(b2Body* b1, b2Body* b2,
 b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 : b2Joint(def)
 {
-	m_ground = m_body1->m_world->m_groundBody;
+	m_ground = m_body1->GetWorld()->GetGroundBody();
 	m_groundAnchor1 = def->groundAnchor1 - m_ground->GetXForm().position;
 	m_groundAnchor2 = def->groundAnchor2 - m_ground->GetXForm().position;
 	m_localAnchor1 = def->localAnchor1;
