@@ -55,6 +55,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"PolyCollision", PolyCollision::Create},
 	{"Web", Web::Create},
 	{"Elastic Body", ElasticBody::Create},
 	{"Pyramid", Pyramid::Create},
@@ -80,7 +81,6 @@ TestEntry g_testEntries[] =
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Time of Impact", TimeOfImpact::Create},
 	{"Distance Test", DistanceTest::Create},
-	{"PolyCollision", PolyCollision::Create},
 	{"Broad Phase", BroadPhaseTest::Create},
 	{NULL, NULL}
 };

@@ -111,6 +111,13 @@ public:
 	Test* test;
 };
 
+enum ContactState
+{
+	e_contactAdded,
+	e_contactPersisted,
+	e_contactRemoved,
+};
+
 struct ContactPoint
 {
 	b2Shape* shape1;
@@ -119,7 +126,8 @@ struct ContactPoint
 	b2Vec2 position;
 	float32 normalForce;
 	float32 tangentForce;
-	int state; // 0-add, 1-persist, 2-remove
+	b2ContactID id;
+	ContactState state;
 };
 
 class Test

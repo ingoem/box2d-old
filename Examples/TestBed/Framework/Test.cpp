@@ -62,7 +62,8 @@ void ContactListener::Add(b2ContactPoint* point)
 	cp->normal = point->normal;
 	cp->normalForce = point->normalForce;
 	cp->tangentForce = point->tangentForce;
-	cp->state = 0;
+	cp->id = point->id;
+	cp->state = e_contactAdded;
 
 	++test->m_pointCount;
 }
@@ -81,7 +82,8 @@ void ContactListener::Persist(b2ContactPoint* point)
 	cp->normal = point->normal;
 	cp->normalForce = point->normalForce;
 	cp->tangentForce = point->tangentForce;
-	cp->state = 1;
+	cp->id = point->id;
+	cp->state = e_contactPersisted;
 
 	++test->m_pointCount;
 }
@@ -100,7 +102,8 @@ void ContactListener::Remove(b2ContactPoint* point)
 	cp->normal = point->normal;
 	cp->normalForce = point->normalForce;
 	cp->tangentForce = point->tangentForce;
-	cp->state = 2;
+	cp->id = point->id;
+	cp->state = e_contactRemoved;
 
 	++test->m_pointCount;
 }
