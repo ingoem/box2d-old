@@ -60,8 +60,6 @@ void ContactListener::Add(b2ContactPoint* point)
 	cp->shape2 = point->shape2;
 	cp->position = point->position;
 	cp->normal = point->normal;
-	cp->normalForce = point->normalForce;
-	cp->tangentForce = point->tangentForce;
 	cp->id = point->id;
 	cp->state = e_contactAdded;
 
@@ -80,8 +78,6 @@ void ContactListener::Persist(b2ContactPoint* point)
 	cp->shape2 = point->shape2;
 	cp->position = point->position;
 	cp->normal = point->normal;
-	cp->normalForce = point->normalForce;
-	cp->tangentForce = point->tangentForce;
 	cp->id = point->id;
 	cp->state = e_contactPersisted;
 
@@ -100,8 +96,6 @@ void ContactListener::Remove(b2ContactPoint* point)
 	cp->shape2 = point->shape2;
 	cp->position = point->position;
 	cp->normal = point->normal;
-	cp->normalForce = point->normalForce;
-	cp->tangentForce = point->tangentForce;
 	cp->id = point->id;
 	cp->state = e_contactRemoved;
 
@@ -284,9 +278,6 @@ void Test::Step(Settings* settings)
 			m_world->GetBodyCount(), m_world->GetContactCount(), m_world->GetJointCount());
 		m_textLine += 15;
 
-		//DrawString(5, m_textLine, "position iterations = %d", m_world->m_positionIterationCount);
-		//m_textLine += 15;
-
 		DrawString(5, m_textLine, "heap bytes = %d", b2_byteCount);
 		m_textLine += 15;
 	}
@@ -314,7 +305,7 @@ void Test::Step(Settings* settings)
 
 	if (settings->drawContactPoints)
 	{
-		const float32 k_forceScale = 0.01f;
+		//const float32 k_impulseScale = 0.1f;
 		const float32 k_axisScale = 0.3f;
 
 		for (int32 i = 0; i < m_pointCount; ++i)
@@ -345,17 +336,17 @@ void Test::Step(Settings* settings)
 			}
 			else if (settings->drawContactForces == 1)
 			{
-				b2Vec2 p1 = point->position;
-				b2Vec2 p2 = p1 + k_forceScale * point->normalForce * point->normal;
-				DrawSegment(p1, p2, b2Color(0.9f, 0.9f, 0.3f));
+				//b2Vec2 p1 = point->position;
+				//b2Vec2 p2 = p1 + k_forceScale * point->normalForce * point->normal;
+				//DrawSegment(p1, p2, b2Color(0.9f, 0.9f, 0.3f));
 			}
 
 			if (settings->drawFrictionForces == 1)
 			{
-				b2Vec2 tangent = b2Cross(point->normal, 1.0f);
-				b2Vec2 p1 = point->position;
-				b2Vec2 p2 = p1 + k_forceScale * point->tangentForce * tangent;
-				DrawSegment(p1, p2, b2Color(0.9f, 0.9f, 0.3f));
+				//b2Vec2 tangent = b2Cross(point->normal, 1.0f);
+				//b2Vec2 p1 = point->position;
+				//b2Vec2 p2 = p1 + k_forceScale * point->tangentForce * tangent;
+				//DrawSegment(p1, p2, b2Color(0.9f, 0.9f, 0.3f));
 			}
 		}
 	}

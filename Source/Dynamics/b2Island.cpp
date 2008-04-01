@@ -391,39 +391,29 @@ void b2Island::Report(b2ContactConstraint* constraints)
 	{
 		b2Contact* c = m_contacts[i];
 		b2ContactConstraint* cc = constraints + i;
-		b2ContactPoint cp;
-		cp.shape1 = c->GetShape1();
-		cp.shape2 = c->GetShape2();
-		b2Body* b1 = cp.shape1->GetBody();
+		b2ContactResult cr;
+		cr.shape1 = c->GetShape1();
+		cr.shape2 = c->GetShape2();
+		b2Body* b1 = cr.shape1->GetBody();
 		int32 manifoldCount = c->GetManifoldCount();
 		b2Manifold* manifolds = c->GetManifolds();
 		for (int32 j = 0; j < manifoldCount; ++j)
 		{
 			b2Manifold* manifold = manifolds + j;
-			cp.normal = manifold->normal;
+			cr.normal = manifold->normal;
 			for (int32 k = 0; k < manifold->pointCount; ++k)
 			{
 				b2ManifoldPoint* point = manifold->points + k;
 				b2ContactConstraintPoint* ccp = cc->points + k;
-				cp.position = b2Mul(b1->GetXForm(), point->localPoint1);
-				cp.separation = point->separation;
+				cr.position = b1->GetWorldPoint(point->localPoint1);
 
 				// TOI constraint results are not stored, so get
 				// the result from the constraint.
-				cp.normalForce = ccp->normalForce;
-				cp.tangentForce = ccp->tangentForce;
+				cr.normalImpulse = ccp->normalImpulse;
+				cr.tangentImpulse = ccp->tangentImpulse;
+				cr.id = point->id;
 
-				if (point->id.features.flip & b2_newPoint)
-				{
-					point->id.features.flip &= ~b2_newPoint;
-					cp.id = point->id;
-					m_listener->Add(&cp);
-				}
-				else
-				{
-					cp.id = point->id;
-					m_listener->Persist(&cp);
-				}
+				m_listener->Result(&cr);
 			}
 		}
 	}

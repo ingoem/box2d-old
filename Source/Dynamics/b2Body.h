@@ -195,22 +195,32 @@ public:
 	/// Get the world coordinates of a point given the local coordinates.
 	/// @param localPoint a point on the body measured relative the the body's origin.
 	/// @return the same point expressed in world coordinates.
-	b2Vec2 GetWorldPoint(const b2Vec2& localPoint);
+	b2Vec2 GetWorldPoint(const b2Vec2& localPoint) const;
 
 	/// Get the world coordinates of a vector given the local coordinates.
 	/// @param localVector a vector fixed in the body.
 	/// @return the same vector expressed in world coordinates.
-	b2Vec2 GetWorldVector(const b2Vec2& localVector);
+	b2Vec2 GetWorldVector(const b2Vec2& localVector) const;
 
 	/// Gets a local point relative to the body's origin given a world point.
 	/// @param a point in world coordinates.
 	/// @return the corresponding local point relative to the body's origin.
-	b2Vec2 GetLocalPoint(const b2Vec2& worldPoint);
+	b2Vec2 GetLocalPoint(const b2Vec2& worldPoint) const;
 
 	/// Gets a local vector given a world vector.
 	/// @param a vector in world coordinates.
 	/// @return the corresponding local vector.
-	b2Vec2 GetLocalVector(const b2Vec2& worldVector);
+	b2Vec2 GetLocalVector(const b2Vec2& worldVector) const;
+
+	/// Get the world linear velocity of a world point attached to this body.
+	/// @param a point in world coordinates.
+	/// @return the world velocity of a point.
+	b2Vec2 GetLinearVelocityFromWorldPoint(const b2Vec2& worldPoint) const;
+
+	/// Get the world velocity of a local point.
+	/// @param a point in local coordinates.
+	/// @return the world velocity of a point.
+	b2Vec2 GetLinearVelocityFromLocalPoint(const b2Vec2& localPoint) const;
 
 	/// Is this body treated like a bullet for continuous collision detection?
 	bool IsBullet() const;
@@ -390,24 +400,34 @@ inline float32 b2Body::GetInertia() const
 	return m_I;
 }
 
-inline b2Vec2 b2Body::GetWorldPoint(const b2Vec2& localPoint)
+inline b2Vec2 b2Body::GetWorldPoint(const b2Vec2& localPoint) const
 {
 	return b2Mul(m_xf, localPoint);
 }
 
-inline b2Vec2 b2Body::GetWorldVector(const b2Vec2& localVector)
+inline b2Vec2 b2Body::GetWorldVector(const b2Vec2& localVector) const
 {
 	return b2Mul(m_xf.R, localVector);
 }
 
-inline b2Vec2 b2Body::GetLocalPoint(const b2Vec2& worldPoint)
+inline b2Vec2 b2Body::GetLocalPoint(const b2Vec2& worldPoint) const
 {
 	return b2MulT(m_xf, worldPoint);
 }
 
-inline b2Vec2 b2Body::GetLocalVector(const b2Vec2& worldVector)
+inline b2Vec2 b2Body::GetLocalVector(const b2Vec2& worldVector) const
 {
 	return b2MulT(m_xf.R, worldVector);
+}
+
+inline b2Vec2 b2Body::GetLinearVelocityFromWorldPoint(const b2Vec2& worldPoint) const
+{
+	return m_linearVelocity + b2Cross(m_angularVelocity, worldPoint - m_sweep.c);
+}
+
+inline b2Vec2 b2Body::GetLinearVelocityFromLocalPoint(const b2Vec2& localPoint) const
+{
+	return GetLinearVelocityFromWorldPoint(GetWorldPoint(localPoint));
 }
 
 inline bool b2Body::IsBullet() const

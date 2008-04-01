@@ -73,61 +73,6 @@ public:
 		settings->pause = 1;
 		Test::Step(settings);
 		settings->pause = 0;
-
-		// Traverse the contact results. Destroy bodies that
-		// are touching heavier bodies.
-		for (int32 i = 0; i < m_pointCount; ++i)
-		{
-			ContactPoint* point = m_points + i;
-
-			bool found = false;
-			for (int32 j = 0; j < 2; ++j)
-			{
-				if (m_localPoints[j].state != e_contactRemoved && point->id.key == m_localPoints[j].id.key)
-				{
-					m_localPoints[j] = *point;
-					found = true;
-					break;
-				}
-			}
-
-			if (found == false)
-			{
-				for (int32 j = 0; j < 2; ++j)
-				{
-					if (m_localPoints[j].state == e_contactRemoved)
-					{
-						m_localPoints[j] = *point;
-						break;
-					}
-				}
-			}
-		}
-
-		for (int32 i = 0; i < 2; ++i)
-		{
-			ContactPoint* point = m_localPoints + i;
-
-			if (point->state == e_contactRemoved)
-			{
-				break;
-			}
-
-			glPointSize(4.0f);
-			glColor3f(1.0f, 0.0f, 0.0f);
-			glBegin(GL_POINTS);
-			glVertex2f(point->position.x, point->position.y);
-			glEnd();
-			glPointSize(1.0f);
-
-			glColor3f(1.0f, 1.0f, 0.0f);
-			glBegin(GL_LINES);
-			b2Vec2 v1 = point->position;
-			b2Vec2 v2 = v1 + 1.0f * point->normal;
-			glVertex2f(v1.x, v1.y);
-			glVertex2f(v2.x, v2.y);
-			glEnd();
-		}
 	}
 
 	void Keyboard(unsigned char key)

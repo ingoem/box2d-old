@@ -124,8 +124,7 @@ struct ContactPoint
 	b2Shape* shape2;
 	b2Vec2 normal;
 	b2Vec2 position;
-	float32 normalForce;
-	float32 tangentForce;
+	b2Vec2 velocity;
 	b2ContactID id;
 	ContactState state;
 };
