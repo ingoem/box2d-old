@@ -61,17 +61,17 @@ public:
 	~b2World();
 
 	/// Register a destruction listener.
-	void SetListener(b2DestructionListener* listener);
+	void SetDestructionListener(b2DestructionListener* listener);
 
 	/// Register a broad-phase boundary listener.
-	void SetListener(b2BoundaryListener* listener);
+	void SetBoundaryListener(b2BoundaryListener* listener);
 
 	/// Register a contact filter to provide specific control over collision.
 	/// Otherwise the default filter is used (b2_defaultFilter).
-	void SetFilter(b2ContactFilter* filter);
+	void SetContactFilter(b2ContactFilter* filter);
 
 	/// Register a contact event listener
-	void SetListener(b2ContactListener* listener);
+	void SetContactListener(b2ContactListener* listener);
 
 	/// Register a routine for debug drawing. The debug draw functions are called
 	/// inside the b2World::Step method, so make sure your renderer is ready to

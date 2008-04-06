@@ -118,9 +118,9 @@ Test::Test()
 	m_destructionListener.test = this;
 	m_boundaryListener.test = this;
 	m_contactListener.test = this;
-	m_world->SetListener(&m_destructionListener);
-	m_world->SetListener(&m_boundaryListener);
-	m_world->SetListener(&m_contactListener);
+	m_world->SetDestructionListener(&m_destructionListener);
+	m_world->SetBoundaryListener(&m_boundaryListener);
+	m_world->SetContactListener(&m_contactListener);
 	m_world->SetDebugDraw(&m_debugDraw);
 }
 

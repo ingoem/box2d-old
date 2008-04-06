@@ -69,22 +69,22 @@ b2World::~b2World()
 	b2Free(m_broadPhase);
 }
 
-void b2World::SetListener(b2DestructionListener* listener)
+void b2World::SetDestructionListener(b2DestructionListener* listener)
 {
 	m_destructionListener = listener;
 }
 
-void b2World::SetListener(b2BoundaryListener* listener)
+void b2World::SetBoundaryListener(b2BoundaryListener* listener)
 {
 	m_boundaryListener = listener;
 }
 
-void b2World::SetFilter(b2ContactFilter* filter)
+void b2World::SetContactFilter(b2ContactFilter* filter)
 {
 	m_contactFilter = filter;
 }
 
-void b2World::SetListener(b2ContactListener* listener)
+void b2World::SetContactListener(b2ContactListener* listener)
 {
 	m_contactListener = listener;
 }

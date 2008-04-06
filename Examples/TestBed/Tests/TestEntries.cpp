@@ -55,8 +55,8 @@
 
 TestEntry g_testEntries[] =
 {
-	{"Web", Web::Create},
 	{"Pyramid", Pyramid::Create},
+	{"Web", Web::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
