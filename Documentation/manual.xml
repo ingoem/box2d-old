@@ -512,7 +512,7 @@ bodyDef.isSleeping = false;
 bodyDef.isBullet = true;
 </programlisting>
         <para>The bullet flag only affects dynamic bodies.</para>
-        <para>CCD is expensive so you probably don&apos;t want all moving bodies to be bodies. So by default Box2D only uses CCD between moving bodies and static bodies. This is an effective approach to prevent bodies from escaping your game world. However, you may have some fast moving bodies that that require CCD all the time.</para>
+        <para>CCD is expensive so you probably don&apos;t want all moving bodies to be bullets. So by default Box2D only uses CCD between moving bodies and static bodies. This is an effective approach to prevent bodies from escaping your game world. However, you may have some fast moving bodies that that require CCD all the time.</para>
       </sect2>
     </sect1>
     <sect1>
@@ -1119,6 +1119,10 @@ public:
         // handle remove point
     }
 };</programlisting>
+        <caution>
+            <para>Do not keep a reference to the contact points returned to <classname>b2ContactListener</classname>.
+            Instead make a deep copy of the contact point data into your own buffer. The example below shows one way of doing this.</para>
+        </caution>
         <para>Continuous physics uses sub-stepping, so a contact point may be added and removed within the same time step. This is normally not a problem, but your code should handle this gracefully.</para>
         <para>It is tempting to implement game logic that alters the physics world inside a contact callback. For example, you may have a collision that applies <emphasis>damage</emphasis> and try to destroy the associated actor and its rigid body. However, Box2D does not allow you to alter the physics world inside a callback because you might destroy objects that Box2D is currently processing, leading to orphaned pointers. </para>
         <para>The recommended practice for processing contact points is to buffer all contact points that you care about and process them after the time step. You should always process the contact points immediately after the time step, otherwise some other client code might alter the physics world, invalidating the contact buffer. When you process the contact point buffer you can alter the physics world, but you still need to be careful that you don't orphan pointers stored in the contact point buffer. The testbed has example contact point processing that is safe from orphaned pointers.</para>
