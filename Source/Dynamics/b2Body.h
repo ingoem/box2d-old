@@ -298,7 +298,7 @@ private:
 		e_maxTypes,
 	};
 
-	b2Body(const b2BodyDef* bd, uint16 type, b2World* world);
+	b2Body(const b2BodyDef* bd, b2World* world);
 	~b2Body();
 
 	bool SynchronizeShapes();
@@ -312,7 +312,7 @@ private:
 	void Advance(float32 t);
 
 	uint16 m_flags;
-	uint16 m_type;
+	int16 m_type;
 
 	b2XForm m_xf;		// the body origin transform
 

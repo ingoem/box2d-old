@@ -25,13 +25,7 @@ b2ContactFilter b2_defaultFilter;
 // If you implement your own collision filter you may want to build from this implementation.
 bool b2ContactFilter::ShouldCollide(b2Shape* shape1, b2Shape* shape2)
 {
-	if (shape1->m_groupIndex == shape2->m_groupIndex && shape1->m_groupIndex != 0)
-	{
-		return shape1->m_groupIndex > 0;
-	}
-
-	bool collide = (shape1->m_maskBits & shape2->m_categoryBits) != 0 && (shape1->m_categoryBits & shape2->m_maskBits) != 0;
-	return collide;
+	return b2FilterData::ShouldCollide(shape1->GetFilterData(), shape2->GetFilterData());
 }
 
 b2DebugDraw::b2DebugDraw()

@@ -55,6 +55,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Polygon Shapes", PolyShapes::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Web", Web::Create},
 	{"Vertical Stack", VerticalStack::Create},
@@ -76,7 +77,6 @@ TestEntry g_testEntries[] =
 	{"Apply Force", ApplyForce::Create},
 	{"Pulleys", Pulleys::Create},
 	{"Shape Editing", ShapeEditing::Create},
-	{"Polygon Shapes", PolyShapes::Create},
 	{"Time of Impact", TimeOfImpact::Create},
 	{"Distance Test", DistanceTest::Create},
 	{"Broad Phase", BroadPhaseTest::Create},

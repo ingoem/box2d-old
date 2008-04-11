@@ -78,15 +78,10 @@ public:
 	/// consume draw commands when you call Step().
 	void SetDebugDraw(b2DebugDraw* debugDraw);
 
-	/// Create a static rigid body given a definition. No reference to the definition
+	/// Create a rigid body given a definition. No reference to the definition
 	/// is retained.
 	/// @warning This function is locked during callbacks.
-	b2Body* CreateStaticBody(const b2BodyDef* def);
-
-	/// Create a dynamic rigid body given a definition. No reference to the definition
-	/// is retained.
-	/// @warning This function is locked during callbacks.
-	b2Body* CreateDynamicBody(const b2BodyDef* def);
+	b2Body* CreateBody(const b2BodyDef* def);
 
 	/// Destroy a rigid body given a definition. No reference to the definition
 	/// is retained. This function is locked during callbacks.
@@ -132,27 +127,39 @@ public:
 	/// @return the head of the world joint list.
 	b2Joint* GetJointList();
 
+	/// Re-filter a shape. This re-runs contact filtering on a shape.
+	void Refilter(b2Shape* shape);
+
+	/// Enable/disable warm starting. For testing.
 	void SetWarmStarting(bool flag) { m_warmStarting = flag; }
 
+	/// Enable/disable position correction. For testing.
 	void SetPositionCorrection(bool flag) { m_positionCorrection = flag; }
 
+	/// Enable/disable continuous physics. For testing.
 	void SetContinuousPhysics(bool flag) { m_continuousPhysics = flag; }
 
+	/// Perform validation of internal data structures.
 	void Validate();
 
+	/// Get the number of broad-phase proxies.
 	int32 GetProxyCount() const;
 
+	/// Get the number of broad-phase pairs.
 	int32 GetPairCount() const;
 
+	/// Get the number of bodies.
 	int32 GetBodyCount() const;
 
+	/// Get the number joints.
 	int32 GetJointCount() const;
 
+	/// Get the number of contacts (each may have 0 or more contact points).
 	int32 GetContactCount() const;
 
+	/// Change the global gravity vector.
 	void SetGravity(const b2Vec2& gravity);
 
-	//--------------- Internals Below -------------------
 private:
 
 	friend class b2Body;

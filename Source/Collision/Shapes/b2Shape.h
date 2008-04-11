@@ -39,6 +39,25 @@ struct b2MassData
 	float32 I;
 };
 
+/// This holds contact filtering data.
+struct b2FilterData
+{
+	/// The collision category bits. Normally you would just set one bit.
+	uint16 categoryBits;
+
+	/// The collision mask bits. This states the categories that this
+	/// shape would accept for collision.
+	uint16 maskBits;
+
+	/// Collision groups allow a certain group of objects to never collide (negative)
+	/// or always collide (positive). Zero means no collision group. Non-zero group
+	/// filtering always wins against the mask bits.
+	int16 groupIndex;
+
+	/// Returns true if two filter owners should collide.
+	static bool ShouldCollide(const b2FilterData& filter1, const b2FilterData& filter2);
+};
+
 /// The various collision shape types supported by Box2D.
 enum b2ShapeType
 {
@@ -60,9 +79,9 @@ struct b2ShapeDef
 		friction = 0.2f;
 		restitution = 0.0f;
 		density = 0.0f;
-		categoryBits = 0x0001;
-		maskBits = 0xFFFF;
-		groupIndex = 0;
+		filter.categoryBits = 0x0001;
+		filter.maskBits = 0xFFFF;
+		filter.groupIndex = 0;
 		isSensor = false;
 	}
 
@@ -83,21 +102,12 @@ struct b2ShapeDef
 	/// The shape's density, usually in kg/m^2.
 	float32 density;
 
-	/// The collision category bits. Normally you would just set one bit.
-	uint16 categoryBits;
-
-	/// The collision mask bits. This states the categories that this
-	/// shape would accept for collision.
-	uint16 maskBits;
-
-	/// Collision groups allow a certain group of objects to never collide (negative)
-	/// or always collide (positive). Zero means no collision group. Non-zero group
-	/// filtering always wins against the mask bits.
-	int16 groupIndex;
-
 	/// A sensor shape collects contact information but never generates a collision
 	/// response.
 	bool isSensor;
+
+	/// Contact filtering data.
+	b2FilterData filter;
 };
 
 /// A shape is used for collision detection. Shapes are created in b2World.
@@ -113,6 +123,13 @@ public:
 	/// Is this shape a sensor (non-solid)?
 	/// @return the true if the shape is a sensor.
 	bool IsSensor() const;
+
+	/// Set the contact filtering data. You must call b2World::Refilter to correct
+	/// existing contacts/non-contacts.
+	void SetFilterData(const b2FilterData& filter);
+
+	/// Get the contact filtering data.
+	const b2FilterData& GetFilterData() const;
 
 	/// Get the parent body of this shape. This is NULL if the shape is not attached.
 	/// @return the parent body.
@@ -164,7 +181,19 @@ public:
 	/// @param massData returns the mass data for this shape.
 	virtual void ComputeMass(b2MassData* massData) const = 0;
 
-	//--------------- Internals Below -------------------
+	/// Get the maximum radius about the parent body's center of mass.
+	float32 GetSweepRadius() const;
+
+	/// Get the coefficient of friction.
+	float32 GetFriction() const;
+
+	/// Get the coefficient of restitution.
+	float32 GetRestitution() const;
+
+protected:
+
+	friend class b2Body;
+	friend class b2World;
 
 	static b2Shape* Create(const b2ShapeDef* def, b2BlockAllocator* allocator);
 	static void Destroy(b2Shape* shape, b2BlockAllocator* allocator);
@@ -175,16 +204,12 @@ public:
 	void CreateProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
 	void DestroyProxy(b2BroadPhase* broadPhase);
 	bool Synchronize(b2BroadPhase* broadPhase, const b2XForm& xf1, const b2XForm& xf2);
-	void ResetProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
+	void RefilterProxy(b2BroadPhase* broadPhase, const b2XForm& xf);
 
 	virtual void UpdateSweepRadius(const b2Vec2& center) = 0;
 
-	float32 GetSweepRadius() const;
-
 	b2ShapeType m_type;
-
 	b2Shape* m_next;
-
 	b2Body* m_body;
 
 	// Sweep radius relative to the parent body's center of mass.
@@ -195,9 +220,7 @@ public:
 	float32 m_restitution;
 
 	uint16 m_proxyId;
-	uint16 m_categoryBits;
-	uint16 m_maskBits;
-	int16 m_groupIndex;
+	b2FilterData m_filter;
 
 	bool m_isSensor;
 
@@ -212,6 +235,16 @@ inline b2ShapeType b2Shape::GetType() const
 inline bool b2Shape::IsSensor() const
 {
 	return m_isSensor;
+}
+
+inline void b2Shape::SetFilterData(const b2FilterData& filter)
+{
+	m_filter = filter;
+}
+
+inline const b2FilterData& b2Shape::GetFilterData() const
+{
+	return m_filter;
 }
 
 inline void* b2Shape::GetUserData()
@@ -232,6 +265,27 @@ inline b2Shape* b2Shape::GetNext()
 inline float32 b2Shape::GetSweepRadius() const
 {
 	return m_sweepRadius;
+}
+
+inline float32 b2Shape::GetFriction() const
+{
+	return m_friction;
+}
+
+inline float32 b2Shape::GetRestitution() const
+{
+	return m_restitution;
+}
+
+inline bool b2FilterData::ShouldCollide(const b2FilterData& filter1, const b2FilterData& filter2)
+{
+	if (filter1.groupIndex == filter2.groupIndex && filter1.groupIndex != 0)
+	{
+		return filter1.groupIndex > 0;
+	}
+
+	bool collide = (filter1.maskBits & filter2.categoryBits) != 0 && (filter1.categoryBits & filter2.maskBits) != 0;
+	return collide;
 }
 
 #endif

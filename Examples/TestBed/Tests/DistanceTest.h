@@ -44,7 +44,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 10.0f);
-			m_body1 = m_world->CreateStaticBody(&bd);
+			m_body1 = m_world->CreateBody(&bd);
 			m_shape1 = m_body1->CreateShape(&sd);
 		}
 #endif
@@ -74,7 +74,7 @@ public:
 #else
 			bd.position.Set(0.0f, 10.0f);
 #endif
-			m_body2 = m_world->CreateDynamicBody(&bd);
+			m_body2 = m_world->CreateBody(&bd);
 			m_shape2 = m_body2->CreateShape(&sd);
 			m_body2->SetMassFromShapes();
 		}

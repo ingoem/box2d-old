@@ -31,7 +31,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 0.0f);
-			b2Body* ground = m_world->CreateStaticBody(&bd);
+			b2Body* ground = m_world->CreateBody(&bd);
 			ground->CreateShape(&sd);
 
 			sd.SetAsBox(0.1f, 10.0f, b2Vec2(20.0f, 10.0f), 0.0f);
@@ -61,7 +61,7 @@ public:
 				//float32 x = i % 2 == 0 ? -0.025f : 0.025f;
 				bd.position.Set(xs[j], 0.752f + 1.54f * i);
 				//bd.position.Set(xs[j], 2.51f + 4.02f * i);
-				b2Body* body = m_world->CreateDynamicBody(&bd);
+				b2Body* body = m_world->CreateBody(&bd);
 
 				body->CreateShape(&sd);
 				body->SetMassFromShapes();
@@ -93,7 +93,7 @@ public:
 				bd.allowSleep = false;
 				bd.position.Set(-31.0f, 5.0f);
 
-				m_bullet = m_world->CreateDynamicBody(&bd);
+				m_bullet = m_world->CreateBody(&bd);
 				m_bullet->CreateShape(&sd);
 				m_bullet->SetMassFromShapes();
 
@@ -101,6 +101,13 @@ public:
 			}
 			break;
 		}
+	}
+
+	void Step(Settings* settings)
+	{
+		Test::Step(settings);
+		DrawString(5, m_textLine, "Press: (,) to launch a bullet.");
+		m_textLine += 15;
 	}
 
 	static Test* Create()

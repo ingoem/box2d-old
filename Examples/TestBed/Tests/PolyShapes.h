@@ -33,11 +33,11 @@ public:
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
 			sd.friction = 0.3f;
-			sd.categoryBits = 0x0001;
+			sd.filter.categoryBits = 0x0001;
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			b2Body* ground = m_world->CreateStaticBody(&bd);
+			b2Body* ground = m_world->CreateBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -45,9 +45,9 @@ public:
 		sds[0].vertices[0].Set(-0.5f, 0.0f);
 		sds[0].vertices[1].Set(0.5f, 0.0f);
 		sds[0].vertices[2].Set(0.0f, 1.5f);
-		sds[0].density = 1.0f;
+		sds[0].density = 0.0f;
 		sds[0].friction = 0.3f;
-		sds[0].categoryBits = 0x0002;
+		sds[0].filter.categoryBits = 0x0002;
 		//sds[0].maskBits = 0x0003;
 		
 		sds[1].vertexCount = 3;
@@ -56,7 +56,7 @@ public:
 		sds[1].vertices[2].Set(0.0f, 1.5f);
 		sds[1].density = 1.0f;
 		sds[1].friction = 0.3f;
-		sds[1].categoryBits = 0x0004;
+		sds[1].filter.categoryBits = 0x0004;
 
 		sds[2].vertexCount = 8;
 		float32 w = 1.0f;
@@ -72,7 +72,7 @@ public:
 		sds[2].vertices[7].Set(-0.5f * s, 0.0f);
 		sds[2].density = 1.0f;
 		sds[2].friction = 0.3f;
-		sds[2].categoryBits = 0x0004;
+		sds[2].filter.categoryBits = 0x0004;
 
 		sds[3].vertexCount = 4;
 		sds[3].vertices[0].Set(-0.5f, 0.0f);
@@ -81,7 +81,7 @@ public:
 		sds[3].vertices[3].Set(-0.5f, 1.0f);
 		sds[3].density = 1.0f;
 		sds[3].friction = 0.3f;
-		sds[3].categoryBits = 0x0004;
+		sds[3].filter.categoryBits = 0x0004;
 
 		circleDef.radius = 0.5f;
 		circleDef.density = 1.0f;
@@ -109,7 +109,7 @@ public:
 			bd.angularDamping = 0.02f;
 		}
 
-		bodies[bodyIndex] = m_world->CreateDynamicBody(&bd);
+		bodies[bodyIndex] = m_world->CreateBody(&bd);
 
 		if (index < 4)
 		{

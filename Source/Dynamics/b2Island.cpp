@@ -275,7 +275,7 @@ void b2Island::Solve(const b2TimeStep& step, const b2Vec2& gravity, bool correct
 
 	if (allowSleep)
 	{
-		float32 minSleepTime = FLOAT32_MAX;
+		float32 minSleepTime = B2_FLT_MAX;
 
 #ifndef TARGET_FLOAT32_IS_FIXED
 		const float32 linTolSqr = b2_linearSleepTolerance * b2_linearSleepTolerance;

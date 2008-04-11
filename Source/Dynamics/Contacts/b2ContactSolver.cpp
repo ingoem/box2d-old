@@ -41,8 +41,8 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 	{
 		b2Contact* contact = contacts[i];
 
-		b2Body* b1 = contact->m_shape1->m_body;
-		b2Body* b2 = contact->m_shape2->m_body;
+		b2Body* b1 = contact->m_shape1->GetBody();
+		b2Body* b2 = contact->m_shape2->GetBody();
 		int32 manifoldCount = contact->GetManifoldCount();
 		b2Manifold* manifolds = contact->GetManifolds();
 		float32 friction = contact->m_friction;
@@ -94,13 +94,13 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 				float32 kNormal = b1->m_invMass + b2->m_invMass;
 				kNormal += b1->m_invI * (r1Sqr - rn1 * rn1) + b2->m_invI * (r2Sqr - rn2 * rn2);
 
-				b2Assert(kNormal > FLOAT32_EPSILON);
+				b2Assert(kNormal > B2_FLT_EPSILON);
 				ccp->normalMass = 1.0f / kNormal;
 
 				float32 kEqualized = b1->m_mass * b1->m_invMass + b2->m_mass * b2->m_invMass;
 				kEqualized += b1->m_mass * b1->m_invI * (r1Sqr - rn1 * rn1) + b2->m_mass * b2->m_invI * (r2Sqr - rn2 * rn2);
 
-				b2Assert(kEqualized > FLOAT32_EPSILON);
+				b2Assert(kEqualized > B2_FLT_EPSILON);
 				ccp->equalizedMass = 1.0f / kEqualized;
 
 				b2Vec2 tangent = b2Cross(normal, 1.0f);
@@ -110,7 +110,7 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 				float32 kTangent = b1->m_invMass + b2->m_invMass;
 				kTangent += b1->m_invI * (r1Sqr - rt1 * rt1) + b2->m_invI * (r2Sqr - rt2 * rt2);
 
-				b2Assert(kTangent > FLOAT32_EPSILON);
+				b2Assert(kTangent > B2_FLT_EPSILON);
 				ccp->tangentMass = 1.0f /  kTangent;
 
 				// Setup a velocity bias for restitution.

@@ -153,12 +153,12 @@ void Test::MouseDown(const b2Vec2& p)
 	for (int32 i = 0; i < count; ++i)
 	{
 		b2Body* shapeBody = shapes[i]->GetBody();
-		if (shapeBody->IsStatic() == false)
+		if (shapeBody->IsStatic() == false && shapeBody->GetMass() > 0.0f)
 		{
 			bool inside = shapes[i]->TestPoint(shapeBody->GetXForm(), p);
 			if (inside)
 			{
-				body = shapes[i]->m_body;
+				body = shapes[i]->GetBody();
 				break;
 			}
 		}
@@ -210,7 +210,7 @@ void Test::LaunchBomb()
 	bd.allowSleep = true;
 	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
 	bd.isBullet = true;
-	m_bomb = m_world->CreateDynamicBody(&bd);
+	m_bomb = m_world->CreateBody(&bd);
 	m_bomb->SetLinearVelocity(-5.0f * bd.position);
 
 	b2CircleDef sd;

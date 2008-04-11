@@ -31,7 +31,7 @@ public:
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-			ground = m_world->CreateStaticBody(&bd);
+			ground = m_world->CreateBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
@@ -50,7 +50,7 @@ public:
 			const float32 y = 8.0f;
 
 			bd.position.Set(3.0f, y);
-			body = m_world->CreateDynamicBody(&bd);
+			body = m_world->CreateBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
@@ -64,7 +64,7 @@ public:
 			prevBody = body;
 
 			bd.position.Set(9.0f, y);
-			body = m_world->CreateDynamicBody(&bd);
+			body = m_world->CreateBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
@@ -80,7 +80,7 @@ public:
 
 			bd.position.Set(-10.0f, 10.0f);
 			bd.angle = 0.5f * b2_pi;
-			body = m_world->CreateDynamicBody(&bd);
+			body = m_world->CreateBody(&bd);
 			body->CreateShape(&sd);
 			body->SetMassFromShapes();
 
