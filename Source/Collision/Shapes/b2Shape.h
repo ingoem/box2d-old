@@ -140,6 +140,9 @@ public:
 	/// store your application specific data.
 	void* GetUserData();
 
+	/// Set the user data. Use this to store your application specific data.
+	void SetUserData(void* data);
+
 	/// Test a point for containment in this shape. This only works for convex shapes.
 	/// @param xf the shape world transform.
 	/// @param p a point in world coordinates.
@@ -247,6 +250,11 @@ inline const b2FilterData& b2Shape::GetFilterData() const
 inline void* b2Shape::GetUserData()
 {
 	return m_userData;
+}
+
+inline void b2Shape::SetUserData(void* data)
+{
+	m_userData = data;
 }
 
 inline b2Body* b2Shape::GetBody()

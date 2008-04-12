@@ -131,6 +131,9 @@ public:
 	/// Get the user data pointer.
 	void* GetUserData();
 
+	/// Set the user data pointer.
+	void SetUserData(void* data);
+
 	//--------------- Internals Below -------------------
 protected:
 	friend class b2World;
@@ -206,6 +209,11 @@ inline b2Joint* b2Joint::GetNext()
 inline void* b2Joint::GetUserData()
 {
 	return m_userData;
+}
+
+inline void b2Joint::SetUserData(void* data)
+{
+	m_userData = data;
 }
 
 #endif

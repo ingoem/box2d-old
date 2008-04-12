@@ -32,6 +32,7 @@
 #include "Car.h"
 #include "CCDTest.h"
 #include "Chain.h"
+#include "ContactCallbackTest.h"
 #include "CollisionFiltering.h"
 #include "CollisionProcessing.h"
 #include "CompoundShapes.h"
@@ -55,6 +56,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Contact Callback Test", ContactCB::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Web", Web::Create},

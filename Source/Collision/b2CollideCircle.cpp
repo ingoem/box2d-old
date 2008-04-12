@@ -111,7 +111,7 @@ void b2CollidePolygonAndCircle(
 		manifold->normal = b2Mul(xf1.R, normals[normalIndex]);
 		manifold->points[0].id.features.incidentEdge = (uint8)normalIndex;
 		manifold->points[0].id.features.incidentVertex = b2_nullFeature;
-		manifold->points[0].id.features.referenceEdge = b2_nullFeature;
+		manifold->points[0].id.features.referenceEdge = 0;
 		manifold->points[0].id.features.flip = 0;
 		b2Vec2 position = c - radius * manifold->normal;
 		manifold->points[0].localPoint1 = b2MulT(xf1, position);
@@ -126,51 +126,28 @@ void b2CollidePolygonAndCircle(
 	b2Vec2 e = vertices[vertIndex2] - vertices[vertIndex1];
 
 	float32 length = e.Normalize();
-
-	// If the edge length is zero ...
-	if (length < B2_FLT_EPSILON)
-	{
-		b2Vec2 d = cLocal - vertices[vertIndex1];
-		float32 dist = d.Normalize();
-		if (dist > radius)
-		{
-			return;
-		}
-
-		manifold->pointCount = 1;
-		manifold->normal = b2Mul(xf1.R, d);
-		manifold->points[0].id.features.incidentEdge = b2_nullFeature;
-		manifold->points[0].id.features.incidentVertex = (uint8)vertIndex1;
-		manifold->points[0].id.features.referenceEdge = b2_nullFeature;
-		manifold->points[0].id.features.flip = 0;
-		b2Vec2 position = c - radius * manifold->normal;
-		manifold->points[0].localPoint1 = b2MulT(xf1, position);
-		manifold->points[0].localPoint2 = b2MulT(xf2, position);
-		manifold->points[0].separation = dist - radius;
-		return;
-	}
+	b2Assert(length > B2_FLT_EPSILON);
 
 	// Project the center onto the edge.
 	float32 u = b2Dot(cLocal - vertices[vertIndex1], e);
-	manifold->points[0].id.features.incidentEdge = b2_nullFeature;
-	manifold->points[0].id.features.incidentVertex = b2_nullFeature;
-	manifold->points[0].id.features.referenceEdge = b2_nullFeature;
-	manifold->points[0].id.features.flip = 0;
 	b2Vec2 p;
 	if (u <= 0.0f)
 	{
 		p = vertices[vertIndex1];
+		manifold->points[0].id.features.incidentEdge = b2_nullFeature;
 		manifold->points[0].id.features.incidentVertex = (uint8)vertIndex1;
 	}
 	else if (u >= length)
 	{
 		p = vertices[vertIndex2];
+		manifold->points[0].id.features.incidentEdge = b2_nullFeature;
 		manifold->points[0].id.features.incidentVertex = (uint8)vertIndex2;
 	}
 	else
 	{
 		p = vertices[vertIndex1] + u * e;
-		manifold->points[0].id.features.incidentEdge = (uint8)vertIndex1;
+		manifold->points[0].id.features.incidentEdge = (uint8)normalIndex;
+		manifold->points[0].id.features.incidentVertex = 0;
 	}
 
 	b2Vec2 d = cLocal - p;
@@ -186,4 +163,6 @@ void b2CollidePolygonAndCircle(
 	manifold->points[0].localPoint1 = b2MulT(xf1, position);
 	manifold->points[0].localPoint2 = b2MulT(xf2, position);
 	manifold->points[0].separation = dist - radius;
+	manifold->points[0].id.features.referenceEdge = 0;
+	manifold->points[0].id.features.flip = 0;
 }

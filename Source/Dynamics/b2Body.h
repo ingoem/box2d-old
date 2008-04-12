@@ -262,9 +262,12 @@ public:
 	/// Get the user data pointer that was provided in the body definition.
 	void* GetUserData();
 
+	/// Set the user data. Use this to store your application specific data.
+	void SetUserData(void* data);
+
+	/// Get the parent world of this body.
 	b2World* GetWorld();
 
-	//--------------- Internals Below -------------------
 private:
 
 	friend class b2World;
@@ -514,6 +517,11 @@ inline b2Body* b2Body::GetNext()
 inline void* b2Body::GetUserData()
 {
 	return m_userData;
+}
+
+inline void b2Body::SetUserData(void* data)
+{
+	m_userData = data;
 }
 
 inline bool b2Body::IsConnected(const b2Body* other) const

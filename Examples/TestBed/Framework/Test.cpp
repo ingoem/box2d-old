@@ -171,8 +171,8 @@ void Test::MouseDown(const b2Vec2& p)
 		md.body2 = body;
 		md.target = p;
 #ifdef TARGET_FLOAT32_IS_FIXED
-		md.maxForce = (body->m_mass < 16.0)? 
-			(1000.0f * body->m_mass) : float32(16000.0);
+		md.maxForce = (body->GetMass() < 16.0)? 
+			(1000.0f * body->GetMass()) : float32(16000.0);
 #else
 		md.maxForce = 1000.0f * body->GetMass();
 #endif
