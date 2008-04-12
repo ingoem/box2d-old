@@ -48,7 +48,7 @@ void BoundaryListener::Violation(b2Body* body)
 	}
 }
 
-void ContactListener::Add(b2ContactPoint* point)
+void ContactListener::Add(const b2ContactPoint* point)
 {
 	if (test->m_pointCount == k_maxContactPoints)
 	{
@@ -66,7 +66,7 @@ void ContactListener::Add(b2ContactPoint* point)
 	++test->m_pointCount;
 }
 
-void ContactListener::Persist(b2ContactPoint* point)
+void ContactListener::Persist(const b2ContactPoint* point)
 {
 	if (test->m_pointCount == k_maxContactPoints)
 	{
@@ -84,7 +84,7 @@ void ContactListener::Persist(b2ContactPoint* point)
 	++test->m_pointCount;
 }
 
-void ContactListener::Remove(b2ContactPoint* point)
+void ContactListener::Remove(const b2ContactPoint* point)
 {
 	if (test->m_pointCount == k_maxContactPoints)
 	{

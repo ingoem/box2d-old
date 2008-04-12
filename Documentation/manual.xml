@@ -135,16 +135,16 @@ b2World world(worldAABB, gravity, doSleep);
 b2BodyDef groundBodyDef;
 groundBodyDef.position.Set(0.0f, -10.0f);
 </programlisting>
-      <para>For step 2 the body definition is passed to the world object to create the ground body. The world object does not keep a reference to the body definition. The ground body is created as a static body. Static bodies don&apos;t collide with other static bodies and are immovable.</para>
+      <para>For step 2 the body definition is passed to the world object to create the ground body. The world object does not keep a reference to the body definition. The ground body is created as a static body. Static bodies don&apos;t collide with other static bodies and are immovable. Box2D determines that a body is static when it has zero mass. Bodies have zero mass by default, therefore they are static by default.</para>
       <programlisting>
-b2Body* ground = world.CreateStaticBody(&amp;groundBodyDef);
+b2Body* ground = world.CreateBody(&amp;groundBodyDef);
 </programlisting>
       <para>For step 3 we create a ground polygon definition. We use the <literal>SetAsBox</literal> shortcut to form the ground polygon into a box shape, with the box centered on the origin of the parent body.</para>
       <programlisting>
 b2PolygonDef groundShapeDef;
 groundShapeDef.SetAsBox(50.0f, 10.0f);
 </programlisting>
-      <para>The <literal>SetAsBox</literal> function takes the half-width and half-height. So in this case the ground box is 100 units wide (x-axis) and 20 units tall (y-axis). Box2D is tuned for meters, kilograms, and seconds. So you can consider the extents to be in meters. However, it is possible to change unit systems, as discussed later in this document</para>
+      <para>The <function>SetAsBox</function> function takes the half-width and half-height. So in this case the ground box is 100 units wide (x-axis) and 20 units tall (y-axis). Box2D is tuned for meters, kilograms, and seconds. So you can consider the extents to be in meters. However, it is possible to change unit systems, as discussed later in this document</para>
       <para>We finish the ground body in step 4 by creating the ground polygon shape on the ground body.</para>
       <programlisting>
 groundBody-&gt;CreateShape(&amp;groundShapeDef);
@@ -156,13 +156,13 @@ groundBody-&gt;CreateShape(&amp;groundShapeDef);
     <sect1>
       <title>Creating a Dynamic Body</title>
       <para>So now we have a ground body. We can use the same technique to create a dynamic body. The main difference, besides dimensions, is that we must establish the dynamic body&apos;s mass properties.</para>
-      <para>First we create the body. We use <literal>CreateDynamicBody</literal> to ensure the body can move and collide with other dynamic bodies.</para>
+      <para>First we create the body using <function>CreateBody</function>.</para>
       <programlisting>
 b2BodyDef bodyDef;
 bodyDef.position.Set(0.0f, 4.0f);
-b2Body* body = world.CreateDynamicBody(&amp;bodyDef);
+b2Body* body = world.CreateBody(&amp;bodyDef);
 </programlisting>
-      <para>Next we create and attach a polygon shape. Notice that we set density to 1. The default density is zero. Also, the friction on the shape is set to 0.3. Once the shape is attached, we instruct the body to compute it&apos;s mass properties from the attached shapes using the method <literal>SetMassFromShapes</literal>. This gives you a hint that you can attach more than one shape per body. If the computed mass is zero, then the body becomes truly static. Bodies have a mass of zero by default, that&apos;s why we didn&apos;t need to call <literal>SetMassFromShapes</literal> for the ground body.</para>
+      <para>Next we create and attach a polygon shape. Notice that we set density to 1. The default density is zero. Also, the friction on the shape is set to 0.3. Once the shape is attached, we instruct the body to compute it&apos;s mass properties from the attached shapes using the method <function>SetMassFromShapes</function>. This gives you a hint that you can attach more than one shape per body. If the computed mass is zero, then the body becomes truly static. Bodies have a mass of zero by default, that&apos;s why we didn&apos;t need to call <function>SetMassFromShapes</function> for the ground body.</para>
       <programlisting>
 b2PolygonDef shapeDef;
 shapeDef.SetAsBox(1.0f, 1.0f);
@@ -256,8 +256,7 @@ for (int32 i = 0; i &lt; 60; ++i)
       <para>As mentioned above, memory management plays a central role in the design of the Box2D API. So when you create a <classname>b2Body</classname> or a <classname>b2Joint</classname>, you need to call the factory functions on <classname>b2World</classname>.</para>
       <para>There are creation functions:</para>
       <programlisting>
-b2Body* b2World::CreateDynamicBody(const b2BodyDef* def)
-b2Body* b2World::CreateStaticBody(const b2BodyDef* def)
+b2Body* b2World::CreateBody(const b2BodyDef* def)
 b2Joint* b2World::CreateJoint(const b2JointDef* def)
 </programlisting>
       <para>And there are corresponding destruction functions:</para>
@@ -291,7 +290,7 @@ void b2Body::DestroyShape(b2Shape* shape)
 GameActor* actor = GameCreateActor();
 b2BodyDef bodyDef;
 bodyDef.userData = actor;
-actor-&gt;body = box2Dworld-&gt;CreateDynamicBody(&amp;bodyDef);
+actor-&gt;body = box2Dworld-&gt;CreateBody(&amp;bodyDef);
 </programlisting>
       <para>Here are some examples of cases where you would need the user data:</para>
       <itemizedlist>
@@ -518,19 +517,12 @@ bodyDef.isBullet = true;
     <sect1>
       <title>Body Factory</title>
       <para>Bodies are created and destroyed using a body factory provided by the world class. This lets the world create the body with an efficient allocator and add the body to the world data structure.</para>
-      <para>Bodies can be dynamic or static depending on how they are created. Both body types use the same destruction method. Here&apos;s how you create and destroy a dynamic body:</para>
+      <para>Bodies can be dynamic or static depending on the mass properties. Both body types use the same creation and destruction methods.</para>
       <programlisting>
-b2Body* dynamicBody = myWorld-&gt;CreateDynamicBody(&amp;bodyDef);
+b2Body* dynamicBody = myWorld-&gt;CreateBody(&amp;bodyDef);
 ... do stuff ...
 myWorld-&gt;DestroyBody(dynamicBody);
 dynamicBody = NULL;
-</programlisting>
-      <para>And here&apos;s how you create and destroy a static body:</para>
-      <programlisting>
-b2Body* staticBody = myWorld-&gt;CreateStaticBody(&amp;bodyDef);
-... do stuff ...
-myWorld-&gt;DestroyBody(staticBody);
-staticBody = NULL;
 </programlisting>
       <caution>
         <para><emphasis>Never</emphasis> use <literal>new</literal> or <literal>malloc</literal> to create a body. The world won&apos;t know about the body and the body won&apos;t be properly initialized.</para>
@@ -679,17 +671,17 @@ restitution = b2Max(shape1-&gt;restitution, shape2-&gt;restitution);
         <para>Collision filtering is a system for preventing collision between shapes. For example, say you make a character that rides a bicycle. You want the bicycle to collide with the terrain and the character to collide with the terrain, but you don&apos;t want the character to collide with the bicycle (because they must overlap). Box2D supports such collision filtering using categories and groups.</para>
         <para>Box2D supports 16 collision categories. For each shape you can specify which category it belongs to. You also specify what other categories this shape can collide with. For example, you could specify in a multiplayer game that all players don&apos;t collide with each other and monsters don&apos;t collide with each other, but players and monsters should collide. This is done with <emphasis>masking bits</emphasis>. For example:</para>
         <programlisting>
-playerShapeDef.categoryBits = 0x0002;
-monsterShapeDef.categoryBits = 0x0004;
-playerShape.maskBits = 0x0004;
-monsterShapeDef.maskBits = 0x0002;
+playerShapeDef.filter.categoryBits = 0x0002;
+monsterShapeDef.filter.categoryBits = 0x0004;
+playerShape.filter.maskBits = 0x0004;
+monsterShapeDef.filter.maskBits = 0x0002;
 </programlisting>
         <para>Collision groups let you specify an integral group index. You can have all shapes with the same group index always collide (positive index) or never collide (negative index). Group indices are usually used for things that are somehow related, like the parts of a bicycle. In the following example, shape1 and shape2 always collide, but shape3 and shape4 never collide.</para>
         <programlisting>
-shape1Def.groupIndex = 2;
-shape2Def.groupIndex = 2;
-shape3Def.groupIndex = -8;
-shape4Def.groupIndex = -8;
+shape1Def.filter.groupIndex = 2;
+shape2Def.filter.groupIndex = 2;
+shape3Def.filter.groupIndex = -8;
+shape4Def.filter.groupIndex = -8;
 </programlisting>
         <para>Collisions between shapes of different group indices are filtered according the category and mask bits. In other words, group filtering has higher precendence than category filtering.</para>
         <para>Note that additional collision filtering occurs in Box2D. Here is a list:</para>
@@ -704,6 +696,7 @@ shape4Def.groupIndex = -8;
             <para> You can optionally enable/disable collision between shapes on bodies connected by a joint.</para>
           </listitem>
         </itemizedlist>
+        <para>Sometimes you might need to change collision filtering after a shape has already been created. You can get and set the <structname>b2FilterData</structname> structure on an existing shape using <function>b2Shape::GetFilterData</function> and <function>b2Shape::SetFilterData</function>. Box2D caches filtering results, so you must manually re-filter a shape using <function>b2World::Refilter</function>.</para>
       </sect2>
       <sect2>
         <title>Sensors</title>
@@ -1104,19 +1097,24 @@ float32 GetLength2() const;
 class MyContactListener : public b2ContactListener
 {
 public:
-	void Add(b2ContactPoint* point)
+	void Add(const b2ContactPoint* point)
     {
         // handle add point
     }
     
-	void Persist(b2ContactPoint* point)
+	void Persist(const b2ContactPoint* point)
     {
         // handle persist point
     }
     
-	void Remove(b2ContactPoint* point)
+	void Remove(const b2ContactPoint* point)
     {
         // handle remove point
+    }
+    
+    void Result(const b2ContactResult* point)
+    {
+        // handle results
     }
 };</programlisting>
         <caution>
@@ -1124,6 +1122,7 @@ public:
             Instead make a deep copy of the contact point data into your own buffer. The example below shows one way of doing this.</para>
         </caution>
         <para>Continuous physics uses sub-stepping, so a contact point may be added and removed within the same time step. This is normally not a problem, but your code should handle this gracefully.</para>
+        <para>Contact points are reported immediately when they are added, persisted, or removed. This occurs before the solver is called, so the <structname>b2ContactPoint</structname> object does not contain the computed impulse. However, the relative velocity at the contact point is provided so that you can estimated the contact impulse. If you implement the <function>Result</function> listener function, you will receive <structname>b2ContactResult</structname> objects for solid contact points after the solver has been called. These result structures contain the sub-step impulses. Again, due to continuous physics you may receive multiple results per contact point per <function>b2World::Step</function>.</para>
         <para>It is tempting to implement game logic that alters the physics world inside a contact callback. For example, you may have a collision that applies <emphasis>damage</emphasis> and try to destroy the associated actor and its rigid body. However, Box2D does not allow you to alter the physics world inside a callback because you might destroy objects that Box2D is currently processing, leading to orphaned pointers. </para>
         <para>The recommended practice for processing contact points is to buffer all contact points that you care about and process them after the time step. You should always process the contact points immediately after the time step, otherwise some other client code might alter the physics world, invalidating the contact buffer. When you process the contact point buffer you can alter the physics world, but you still need to be careful that you don't orphan pointers stored in the contact point buffer. The testbed has example contact point processing that is safe from orphaned pointers.</para>
         <para>This code from the CollisionProcessing test shows how to handle orphaned bodies when processing the contact buffer. Here is an excerpt. Be sure to read the comments in the listing. This code assumes that all contact points have been buffered in the <classname>b2ContactPoint</classname> array <varname>m_points</varname>.</para>
@@ -1185,17 +1184,20 @@ while (i < nukeCount)
       <title>Contact Filtering</title>
       <para>Often in a game you don&apos;t want all objects to collide. For example, you may want to create a door that only certain characters can pass through. This is called contact filtering, because some interactions are <emphasis>filtered out</emphasis>.</para>
       <para>Box2D allows you to achieve custom contact filtering by implementing a <classname>b2ContactFilter</classname> class. This class requires you to implement a <methodname>ShouldCollide</methodname> function that receives two <classname>b2Shape</classname> pointers. Your function returns true if the shapes should collide.</para>
-      <para>The default implementation of <methodname>ShouldCollide</methodname> uses category, mask, and group information defined in <xref linkend="shapes"/>.</para>
+      <para>The default implementation of <methodname>ShouldCollide</methodname> uses the <structname>b2FilterData</structname> defined in <xref linkend="shapes"/>.</para>
         <programlisting><![CDATA[
 bool b2ContactFilter::ShouldCollide(b2Shape* shape1, b2Shape* shape2)
 {
-    if (shape1->m_groupIndex == shape2->m_groupIndex && shape1->m_groupIndex != 0)
-    {
-        return shape1->m_groupIndex > 0;
-    }
+	const b2FilterData& filter1 = shape1->GetFilterData();
+	const b2FilterData& filter2 = shape2->GetFilterData();
 
-    bool collide = (shape1->m_maskBits & shape2->m_categoryBits) != 0 && (shape1->m_categoryBits & shape2->m_maskBits) != 0;
-    return collide;
+	if (filter1.groupIndex == filter2.groupIndex && filter1.groupIndex != 0)
+	{
+		return filter1.groupIndex > 0;
+	}
+
+	bool collide = (filter1.maskBits & filter2.categoryBits) != 0 && (filter1.categoryBits & filter2.maskBits) != 0;
+	return collide;
 }
 ]]></programlisting>
     </sect1>

@@ -45,7 +45,7 @@ public:
 		sds[0].vertices[0].Set(-0.5f, 0.0f);
 		sds[0].vertices[1].Set(0.5f, 0.0f);
 		sds[0].vertices[2].Set(0.0f, 1.5f);
-		sds[0].density = 0.0f;
+		sds[0].density = 1.0f;
 		sds[0].friction = 0.3f;
 		sds[0].filter.categoryBits = 0x0002;
 		//sds[0].maskBits = 0x0003;

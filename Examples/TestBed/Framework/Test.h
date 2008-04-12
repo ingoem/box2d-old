@@ -104,9 +104,9 @@ const int32 k_maxContactPoints = 2048;
 class ContactListener : public b2ContactListener
 {
 public:
-	void Add(b2ContactPoint* point);
-	void Persist(b2ContactPoint* point);
-	void Remove(b2ContactPoint* point);
+	void Add(const b2ContactPoint* point);
+	void Persist(const b2ContactPoint* point);
+	void Remove(const b2ContactPoint* point);
 
 	Test* test;
 };

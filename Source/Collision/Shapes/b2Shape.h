@@ -53,9 +53,6 @@ struct b2FilterData
 	/// or always collide (positive). Zero means no collision group. Non-zero group
 	/// filtering always wins against the mask bits.
 	int16 groupIndex;
-
-	/// Returns true if two filter owners should collide.
-	static bool ShouldCollide(const b2FilterData& filter1, const b2FilterData& filter2);
 };
 
 /// The various collision shape types supported by Box2D.
@@ -275,17 +272,6 @@ inline float32 b2Shape::GetFriction() const
 inline float32 b2Shape::GetRestitution() const
 {
 	return m_restitution;
-}
-
-inline bool b2FilterData::ShouldCollide(const b2FilterData& filter1, const b2FilterData& filter2)
-{
-	if (filter1.groupIndex == filter2.groupIndex && filter1.groupIndex != 0)
-	{
-		return filter1.groupIndex > 0;
-	}
-
-	bool collide = (filter1.maskBits & filter2.categoryBits) != 0 && (filter1.categoryBits & filter2.maskBits) != 0;
-	return collide;
 }
 
 #endif
