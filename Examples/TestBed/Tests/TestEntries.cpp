@@ -48,6 +48,7 @@
 #include "SensorTest.h"
 #include "ShapeEditing.h"
 #include "SliderCrank.h"
+#include "TheoJansen.h"
 #include "TimeOfImpact.h"
 #include "VaryingFriction.h"
 #include "VaryingRestitution.h"
@@ -56,6 +57,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Theo Jansen's Walker", TheoJansen::Create},
 	{"Contact Callback Test", ContactCB::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Pyramid", Pyramid::Create},
