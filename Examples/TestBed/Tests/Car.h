@@ -171,23 +171,31 @@ public:
 		}
 	}
 
+	void Step(Settings* settings)
+	{
+		DrawString(5, m_textLine, "Keys: left = a, brake = s, right = d");
+		m_textLine += 15;
+
+		Test::Step(settings);
+	}
+
 	void Keyboard(unsigned char key)
 	{
 		switch (key)
 		{
-		case ',':
+		case 'a':
 			m_leftJoint->SetMaxMotorTorque(800.0f);
 			m_leftJoint->SetMotorSpeed(12.0f);
 			break;
 
-		case '.':
-			m_leftJoint->SetMaxMotorTorque(1200.0f);
-			m_leftJoint->SetMotorSpeed(-36.0f);
-			break;
-
-		case '/':
+		case 's':
 			m_leftJoint->SetMaxMotorTorque(100.0f);
 			m_leftJoint->SetMotorSpeed(0.0f);
+			break;
+
+		case 'd':
+			m_leftJoint->SetMaxMotorTorque(1200.0f);
+			m_leftJoint->SetMotorSpeed(-36.0f);
 			break;
 		}
 	}
