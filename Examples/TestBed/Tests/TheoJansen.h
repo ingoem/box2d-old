@@ -23,13 +23,17 @@
 
 #include "../Framework/Render.h"
 
-static float32 g_x = 0.0f, g_y = 5.0f, g_o = 1.0f;
+static float32 g_x = 0.0f;	// x offset
+static float32 g_y = 5.0f;	// y offset
+static float32 g_o = 1.0f;	// for reflection
 
 struct Line
 {
-	Line(b2World * world_, float32 x1, float32 y1, float32 x2, float32 y2, float32 w = 0.1f) 
+	Line(b2World * world_, float32 x1, float32 y1, float32 x2, float32 y2) 
 		: world(world_), p1(g_x + g_o*x1, g_y + y1), p2(g_x + g_o*x2, g_y + y2)
 	{
+		const float32 w = 0.1f;
+
 		b2Vec2 center((p1.x + p2.x)/2, (p1.y + p2.y)/2);
 		float32 length = sqrt((p2.x - p1.x)*(p2.x - p1.x) + (p2.y - p1.y)*(p2.y - p1.y));
 		float32 a = atan2f(p2.y - p1.y, p2.x - p1.x);
@@ -109,11 +113,85 @@ class TheoJansen : public Test
 {
 public:
 
-	void CreateLeg(float32 x, float32 o, b2Body * body, b2Body * m_wheel)
+	void CreateLeg(float32 x, float32 s)
 	{
 		float32 tx = g_x, to = g_o;
 		g_x = x;
-		g_o = o;
+		g_o = s;
+
+#if 1
+		b2Vec2 p1(0.0f * s, 0.0f);
+		b2Vec2 p2(1.0f * s, 4.0f);
+		b2Vec2 p3(3.0f * s, 3.5f);
+		b2Vec2 p4(1.5f * s, 6.0f);
+		b2Vec2 p5(3.5f * s, 5.5f);
+		b2Vec2 p6(2.0f * s, 8.0f);
+		b2Vec2 p7(-1.0f * s, 6.5f);
+
+		b2PolygonDef sd1, sd2;
+		sd1.vertexCount = 3;
+		sd2.vertexCount = 3;
+		sd1.filter.groupIndex = -1;
+		sd2.filter.groupIndex = -1;
+		sd1.density = 1.0f;
+		sd2.density = 1.0f;
+
+		b2Vec2 offset(-g_x, g_y);
+
+		if (s > 0.0f)
+		{
+			sd1.vertices[0] = p1;
+			sd1.vertices[1] = p3;
+			sd1.vertices[2] = p2;
+
+			sd2.vertices[0] = p4;
+			sd2.vertices[1] = p5;
+			sd2.vertices[2] = p6;
+		}
+		else
+		{
+			sd1.vertices[0] = p1;
+			sd1.vertices[1] = p2;
+			sd1.vertices[2] = p3;
+
+			sd2.vertices[0] = p4;
+			sd2.vertices[1] = p6;
+			sd2.vertices[2] = p5;
+		}
+
+		b2BodyDef bd1, bd2;
+		bd1.position = offset;
+		bd2.position = offset;
+
+		b2Body* body1 = m_world->CreateBody(&bd1);
+		b2Body* body2 = m_world->CreateBody(&bd2);
+
+		body1->CreateShape(&sd1);
+		body2->CreateShape(&sd2);
+
+		body1->SetMassFromShapes();
+		body2->SetMassFromShapes();
+
+		b2DistanceJointDef djd;
+
+		djd.Initialize(body1, body2, p3 + offset, p5 + offset);
+		m_world->CreateJoint(&djd);
+
+		djd.Initialize(body1, body2, p2 + offset, p4 + offset);
+		m_world->CreateJoint(&djd);
+
+		djd.Initialize(body1, m_wheel, p2 + offset, p7 + offset);
+		m_world->CreateJoint(&djd);
+
+		djd.Initialize(body2, m_wheel, p6 + offset, p7 + offset);
+		m_world->CreateJoint(&djd);
+
+		b2RevoluteJointDef rjd;
+
+		rjd.Initialize(body2, m_chassis, p4 + offset);
+		m_world->CreateJoint(&rjd);
+
+#else
 		Line line1(m_world, 0, 0, -1, 4);
 		Line line2(m_world, -1, 4, -3, 3.5f);
 		Line line3(m_world, 0, 0, -3, 3.5f);
@@ -124,6 +202,8 @@ public:
 		Line line8(m_world, -2, 8, -3.5f, 5.5f);
 		Line line9(m_world, -1, 4, 1, 6.5f);
 		Line line10(m_world, -2, 8, 1, 6.5f);
+
+
 		CreateJoint(line1, line2);
 		CreateJoint(line1, line3);
 		CreateJoint(line1, line4);
@@ -138,9 +218,10 @@ public:
 		CreateJoint(line7, line8);
 		CreateJoint(line7, line10);
 		CreateJoint(line9, line10);
-		CreateJoint(m_world, line4.body, body, line4.p2.x, line4.p2.y);
+		CreateJoint(m_world, line4.body, m_chassis, line4.p2.x, line4.p2.y);
 		CreateJoint(m_world, line10.body, m_wheel, 0, g_y + 6.5f);
 		CreateJoint(m_world, line9.body, m_wheel, 0, g_y + 6.5f);
+#endif
 
 		g_x = tx;
 		g_o = to;
@@ -210,22 +291,22 @@ public:
 
 		if(m_stage == 0 && r == 0)
 		{
-			CreateLeg(-1, 1, m_chassis, m_wheel);
-			CreateLeg(1, -1, m_chassis, m_wheel);
+			CreateLeg(-1, 1);
+			CreateLeg(1, -1);
 			++m_stage;
 		}
 
 		if (m_stage == 10 && r == 120)
 		{
-			CreateLeg(-1, 1, m_chassis, m_wheel);
-			CreateLeg(1, -1, m_chassis, m_wheel);
+			CreateLeg(-1, 1);
+			CreateLeg(1, -1);
 			++m_stage;
 		}
 
 		if (m_stage == 20 && r == 240)
 		{
-			CreateLeg(-1, 1, m_chassis, m_wheel);
-			CreateLeg(1, -1, m_chassis, m_wheel);
+			CreateLeg(-1, 1);
+			CreateLeg(1, -1);
 			++m_stage;
 		}
 
