@@ -84,6 +84,12 @@ public:
 
 		b2DistanceJointDef djd;
 
+		// Using a soft distance constraint can reduce some jitter.
+		// It also makes the structure seem a bit more fluid by
+		// acting like a suspension system.
+		djd.dampingRatio = 0.5f;
+		djd.frequencyHz = 10.0f;
+
 		djd.Initialize(body1, body2, p2 + m_offset, p5 + m_offset);
 		m_world->CreateJoint(&djd);
 

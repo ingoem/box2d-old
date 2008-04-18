@@ -86,29 +86,30 @@ b2ContactSolver::b2ContactSolver(const b2TimeStep& step, b2Contact** contacts, i
 				ccp->r1 = b2Mul(b1->GetXForm().R, cp->localPoint1 - b1->GetLocalCenter());
 				ccp->r2 = b2Mul(b2->GetXForm().R, cp->localPoint2 - b2->GetLocalCenter());
 
-				float32 r1Sqr = b2Dot(ccp->r1, ccp->r1);
-				float32 r2Sqr = b2Dot(ccp->r2, ccp->r2);
-				float32 rn1 = b2Dot(ccp->r1, normal);
-				float32 rn2 = b2Dot(ccp->r2, normal);
+				float32 rn1 = b2Cross(ccp->r1, normal);
+				float32 rn2 = b2Cross(ccp->r2, normal);
+				rn1 *= rn1;
+				rn2 *= rn2;
 
-				float32 kNormal = b1->m_invMass + b2->m_invMass;
-				kNormal += b1->m_invI * (r1Sqr - rn1 * rn1) + b2->m_invI * (r2Sqr - rn2 * rn2);
+				float32 kNormal = b1->m_invMass + b2->m_invMass + b1->m_invI * rn1 + b2->m_invI * rn2;
 
 				b2Assert(kNormal > B2_FLT_EPSILON);
 				ccp->normalMass = 1.0f / kNormal;
 
 				float32 kEqualized = b1->m_mass * b1->m_invMass + b2->m_mass * b2->m_invMass;
-				kEqualized += b1->m_mass * b1->m_invI * (r1Sqr - rn1 * rn1) + b2->m_mass * b2->m_invI * (r2Sqr - rn2 * rn2);
+				kEqualized += b1->m_mass * b1->m_invI * rn1 + b2->m_mass * b2->m_invI * rn2;
 
 				b2Assert(kEqualized > B2_FLT_EPSILON);
 				ccp->equalizedMass = 1.0f / kEqualized;
 
 				b2Vec2 tangent = b2Cross(normal, 1.0f);
 
-				float32 rt1 = b2Dot(ccp->r1, tangent);
-				float32 rt2 = b2Dot(ccp->r2, tangent);
-				float32 kTangent = b1->m_invMass + b2->m_invMass;
-				kTangent += b1->m_invI * (r1Sqr - rt1 * rt1) + b2->m_invI * (r2Sqr - rt2 * rt2);
+				float32 rt1 = b2Cross(ccp->r1, tangent);
+				float32 rt2 = b2Cross(ccp->r2, tangent);
+				rt1 *= rt1;
+				rt2 *= rt2;
+
+				float32 kTangent = b1->m_invMass + b2->m_invMass + b1->m_invI * rt1 + b2->m_invI * rt2;
 
 				b2Assert(kTangent > B2_FLT_EPSILON);
 				ccp->tangentMass = 1.0f /  kTangent;
