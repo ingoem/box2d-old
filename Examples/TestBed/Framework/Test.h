@@ -139,10 +139,16 @@ public:
 	void SetTextLine(int32 line) { m_textLine = line; }
 	virtual void Step(Settings* settings);
 	virtual void Keyboard(unsigned char key) { B2_NOT_USED(key); }
+	void ShiftMouseDown(const b2Vec2& p);
 	void MouseDown(const b2Vec2& p);
-	void MouseUp();
+	void MouseUp(const b2Vec2& p);
 	void MouseMove(const b2Vec2& p);
 	void LaunchBomb();
+	void LaunchBomb(const b2Vec2& position, const b2Vec2& velocity);
+	
+	void SpawnBomb(const b2Vec2& worldPt);
+	void CompleteBombSpawn(const b2Vec2& p);
+
 
 	// Let derived tests know that a joint was destroyed.
 	virtual void JointDestroyed(b2Joint* joint) { B2_NOT_USED(joint); }
@@ -164,6 +170,9 @@ protected:
 	b2World* m_world;
 	b2Body* m_bomb;
 	b2MouseJoint* m_mouseJoint;
+	b2Vec2 m_bombSpawnPoint;
+	bool m_bombSpawning;
+	b2Vec2 m_mouseWorld;
 };
 
 #endif

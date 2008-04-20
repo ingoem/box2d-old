@@ -122,6 +122,8 @@ Test::Test()
 	m_world->SetBoundaryListener(&m_boundaryListener);
 	m_world->SetContactListener(&m_contactListener);
 	m_world->SetDebugDraw(&m_debugDraw);
+	
+	m_bombSpawning = false;
 }
 
 Test::~Test()
@@ -133,6 +135,8 @@ Test::~Test()
 
 void Test::MouseDown(const b2Vec2& p)
 {
+	m_mouseWorld = p;
+	
 	if (m_mouseJoint != NULL)
 	{
 		return;
@@ -181,17 +185,52 @@ void Test::MouseDown(const b2Vec2& p)
 	}
 }
 
-void Test::MouseUp()
+void Test::SpawnBomb(const b2Vec2& worldPt)
+{
+	m_bombSpawnPoint = worldPt;
+	m_bombSpawning = true;
+}
+    
+void Test::CompleteBombSpawn(const b2Vec2& p)
+{
+	if (!m_bombSpawning) return;
+	const float multiplier = 30.0f;
+	b2Vec2 vel = m_bombSpawnPoint - p;
+	vel *= multiplier;
+	LaunchBomb(m_bombSpawnPoint,vel);
+	m_bombSpawning = false;
+}
+
+void Test::ShiftMouseDown(const b2Vec2& p)
+{
+	m_mouseWorld = p;
+	
+	if (m_mouseJoint != NULL)
+	{
+		return;
+	}
+
+	SpawnBomb(p);
+}
+
+void Test::MouseUp(const b2Vec2& p)
 {
 	if (m_mouseJoint)
 	{
 		m_world->DestroyJoint(m_mouseJoint);
 		m_mouseJoint = NULL;
 	}
+	
+	if (m_bombSpawning)
+	{
+		CompleteBombSpawn(p);
+	}
 }
 
 void Test::MouseMove(const b2Vec2& p)
 {
+	m_mouseWorld = p;
+	
 	if (m_mouseJoint)
 	{
 		m_mouseJoint->SetTarget(p);
@@ -199,6 +238,13 @@ void Test::MouseMove(const b2Vec2& p)
 }
 
 void Test::LaunchBomb()
+{
+	b2Vec2 p(b2Random(-15.0f, 15.0f), 30.0f);
+	b2Vec2 v = -5.0f * p;
+	LaunchBomb(p, v);
+}
+
+void Test::LaunchBomb(const b2Vec2& position, const b2Vec2& velocity)
 {
 	if (m_bomb)
 	{
@@ -208,18 +254,31 @@ void Test::LaunchBomb()
 
 	b2BodyDef bd;
 	bd.allowSleep = true;
-	bd.position.Set(b2Random(-15.0f, 15.0f), 30.0f);
+	bd.position = position;
+	
 	bd.isBullet = true;
 	m_bomb = m_world->CreateBody(&bd);
-	m_bomb->SetLinearVelocity(-5.0f * bd.position);
-
+	m_bomb->SetLinearVelocity(velocity);
+	
 	b2CircleDef sd;
 	sd.radius = 0.3f;
 	sd.density = 20.0f;
 	sd.restitution = 0.1f;
-	m_bomb->CreateShape(&sd);
 	
-	m_bomb->SetMassFromShapes();
+	b2Vec2 minV = position - b2Vec2(0.3f,0.3f);
+	b2Vec2 maxV = position + b2Vec2(0.3f,0.3f);
+	
+	b2AABB aabb;
+	aabb.lowerBound = minV;
+	aabb.upperBound = maxV;
+	
+	bool inRange = m_world->InRange(aabb);
+
+	if (inRange)
+	{
+		m_bomb->CreateShape(&sd);
+		m_bomb->SetMassFromShapes();
+	}
 }
 
 void Test::Step(Settings* settings)
@@ -300,6 +359,21 @@ void Test::Step(Settings* settings)
 		glBegin(GL_LINES);
 		glVertex2f(p1.x, p1.y);
 		glVertex2f(p2.x, p2.y);
+		glEnd();
+	}
+	
+	if (m_bombSpawning){
+		glPointSize(4.0f);
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glBegin(GL_POINTS);
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glVertex2f(m_bombSpawnPoint.x, m_bombSpawnPoint.y);
+		glEnd();
+		
+		glColor3f(0.8f, 0.8f, 0.8f);
+		glBegin(GL_LINES);
+		glVertex2f(m_mouseWorld.x, m_mouseWorld.y);
+		glVertex2f(m_bombSpawnPoint.x, m_bombSpawnPoint.y);
 		glEnd();
 	}
 

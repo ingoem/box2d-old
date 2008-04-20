@@ -172,6 +172,7 @@ void KeyboardSpecial(int key, int x, int y)
 
 	switch (key)
 	{
+	case GLUT_ACTIVE_SHIFT:
 		// Press left to pan left.
 	case GLUT_KEY_LEFT:
 		viewCenter.x -= 0.5f;
@@ -210,15 +211,24 @@ void Mouse(int32 button, int32 state, int32 x, int32 y)
 	// Use the mouse to move things around.
 	if (button == GLUT_LEFT_BUTTON)
 	{
+		int mod = glutGetModifiers();
+		b2Vec2 p = ConvertScreenToWorld(x, y);
 		if (state == GLUT_DOWN)
 		{
 			b2Vec2 p = ConvertScreenToWorld(x, y);
-			test->MouseDown(p);
+			if (mod == GLUT_ACTIVE_SHIFT)
+			{
+				test->ShiftMouseDown(p);
+			}
+			else
+			{
+				test->MouseDown(p);
+			}
 		}
 		
 		if (state == GLUT_UP)
 		{
-			test->MouseUp();
+			test->MouseUp(p);
 		}
 	} else if (button == GLUT_RIGHT_BUTTON)
 	{
