@@ -1062,3 +1062,8 @@ int32 b2World::GetPairCount() const
 {
 	return m_broadPhase->m_pairManager.m_pairCount;
 }
+
+bool b2World::InRange(const b2AABB& aabb) const
+{
+	return m_broadPhase->InRange(aabb);
+}

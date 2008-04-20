@@ -116,6 +116,9 @@ public:
 	/// @param maxCount the capacity of the shapes array.
 	/// @return the number of shapes found in aabb.
 	int32 Query(const b2AABB& aabb, b2Shape** shapes, int32 maxCount);
+	
+	/// Check if the AABB is within the broadphase limits.
+	bool InRange(const b2AABB& aabb) const;
 
 	/// Get the world body list. With the returned body, use b2Body::GetNext to get
 	/// the next body in the world list. A NULL body indicates the end of the list.
