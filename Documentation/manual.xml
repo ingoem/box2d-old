@@ -4,7 +4,7 @@
 
 <book>
 <bookinfo>
-    <title>Box2D v2.0.1 User Manual</title>
+    <title>Box2D v2.0.2 User Manual</title>
     <author><firstname>Erin</firstname><surname>Catto</surname></author>
     <copyright><year>2007-2008</year><holder>Erin Catto</holder></copyright>
 </bookinfo>
@@ -137,7 +137,7 @@ groundBodyDef.position.Set(0.0f, -10.0f);
 </programlisting>
       <para>For step 2 the body definition is passed to the world object to create the ground body. The world object does not keep a reference to the body definition. The ground body is created as a static body. Static bodies don&apos;t collide with other static bodies and are immovable. Box2D determines that a body is static when it has zero mass. Bodies have zero mass by default, therefore they are static by default.</para>
       <programlisting>
-b2Body* ground = world.CreateBody(&amp;groundBodyDef);
+b2Body* groundBody = world.CreateBody(&amp;groundBodyDef);
 </programlisting>
       <para>For step 3 we create a ground polygon definition. We use the <literal>SetAsBox</literal> shortcut to form the ground polygon into a box shape, with the box centered on the origin of the parent body.</para>
       <programlisting>
@@ -418,8 +418,8 @@ while (node)
         <para>Sometimes you want to determine all the shapes in a region. The <classname>b2World</classname> class has a fast log(N) method for this using the <emphasis>broad-phase</emphasis> data structure. You provide an AABB in world coordinates and <classname>b2World</classname> returns an array of all the shapes that potentially intersect the AABB. This is not exact because what the function actually does is return all the shapes whose AABBs intersect the specified AABB. For example, the following code finds all the shapes that potentially intersect a specified AABB and wakes up all of the associated bodies.</para>
         <programlisting>
 b2AABB aabb;
-aabb.minVertex.Set(-1.0f, -1.0f);
-aabb.maxVertex.Set(1.0f, 1.0f);
+aabb.lowerBound.Set(-1.0f, -1.0f);
+aabb.upperBound.Set(1.0f, 1.0f);
 const int32 k_bufferSize = 10;
 b2Shape *buffer[k_bufferSize];
 int32 count = myWorld-&gt;Query(aabb, buffer, k_bufferSize);
@@ -907,7 +907,7 @@ jointDef.maxLength2 = 20.0f;
       </sect2>
       <sect2>
         <title>Gear Joint</title>
-        <para>If you want to create a sophisticated mechanical contraption you might want to use a gears. In priciple you can create gears in Box2D by using compound shapes to model gear teeth. This is not very efficient and might be tedious to author. You also have to be careful to line up the gears so the teeth mesh smoothly. Box2D has a simpler method of creating gears: the <emphasis>gear joint</emphasis>.</para>
+        <para>If you want to create a sophisticated mechanical contraption you might want to use a gears. In principle you can create gears in Box2D by using compound shapes to model gear teeth. This is not very efficient and might be tedious to author. You also have to be careful to line up the gears so the teeth mesh smoothly. Box2D has a simpler method of creating gears: the <emphasis>gear joint</emphasis>.</para>
         <informalfigure>
           <mediaobject>
             <imageobject>

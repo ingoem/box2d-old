@@ -74,11 +74,7 @@ public:
 		sds[2].friction = 0.3f;
 		sds[2].filter.categoryBits = 0x0004;
 
-		sds[3].vertexCount = 4;
-		sds[3].vertices[0].Set(-0.5f, 0.0f);
-		sds[3].vertices[1].Set(0.5f, 0.0f);
-		sds[3].vertices[2].Set(0.5f, 1.0f);
-		sds[3].vertices[3].Set(-0.5f, 1.0f);
+		sds[3].SetAsBox(15.0f, 15.0f);
 		sds[3].density = 1.0f;
 		sds[3].friction = 0.3f;
 		sds[3].filter.categoryBits = 0x0004;
