@@ -126,12 +126,12 @@ public:
 	void Step(Settings* settings)
 	{
 		Test::Step(settings);
-		DrawString(5, m_textLine, "Keys: (l) limits, (m) motors, (p) prismatic speed");
+		m_debugDraw.DrawString(5, m_textLine, "Keys: (l) limits, (m) motors, (p) prismatic speed");
 		m_textLine += 15;
 		float32 torque1 = m_joint1->GetMotorTorque();
 		float32 torque2 = m_joint2->GetMotorTorque();
 		float32 force3 = m_joint3->GetMotorForce();
-		DrawString(5, m_textLine, "Motor Torque = %4.0f, %4.0f : Motor Force = %4.0f", (float) torque1, (float) torque2, (float) force3);
+		m_debugDraw.DrawString(5, m_textLine, "Motor Torque = %4.0f, %4.0f : Motor Force = %4.0f", (float) torque1, (float) torque2, (float) force3);
 		m_textLine += 15;
 	}
 

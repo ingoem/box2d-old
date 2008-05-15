@@ -741,7 +741,7 @@ triangleDef.vertices[2].Set(0.0f, 2.0f);
 b2PolygonDef alignedBoxDef;
 float32 hx = 1.0f; // half-width
 float32 hy = 2.0f; // half-height
-alignedBodyDef.SetAsBox(hx, hy);
+alignedBoxDef.SetAsBox(hx, hy);
 
 b2PolygonDef orientedBoxDef;
 b2Vec2 center(-1.5f, 0.0f);

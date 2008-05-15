@@ -242,12 +242,12 @@ void BroadPhaseTest::Step(Settings* settings)
 			break;
 		}
 
-		DrawAABB(&actor->aabb, c);
+		m_debugDraw.DrawAABB(&actor->aabb, c);
 	}
 
 	char buffer[64];
 	sprintf(buffer, "overlaps = %d, exact = %d, diff = %d", m_overlapCount, m_overlapCountExact, m_overlapCount - m_overlapCountExact);
-	DrawString(5, 30, buffer);
+	m_debugDraw.DrawString(5, 30, buffer);
 	Validate();
 
 	++m_stepCount;

@@ -137,6 +137,7 @@ public:
 	virtual ~Test();
 
 	void SetTextLine(int32 line) { m_textLine = line; }
+    void DrawTitle(int x, int y, const char *string);
 	virtual void Step(Settings* settings);
 	virtual void Keyboard(unsigned char key) { B2_NOT_USED(key); }
 	void ShiftMouseDown(const b2Vec2& p);
@@ -154,6 +155,7 @@ public:
 	virtual void JointDestroyed(b2Joint* joint) { B2_NOT_USED(joint); }
 	virtual void BoundaryViolated(b2Body* body) { B2_NOT_USED(body); }
 
+    
 protected:
 	friend class DestructionListener;
 	friend class BoundaryListener;

@@ -133,6 +133,11 @@ Test::~Test()
 	m_world = NULL;
 }
 
+void Test::DrawTitle(int x, int y, const char *string)
+{
+    m_debugDraw.DrawString(x, y, string);
+}
+
 void Test::MouseDown(const b2Vec2& p)
 {
 	m_mouseWorld = p;
@@ -296,7 +301,7 @@ void Test::Step(Settings* settings)
 			timeStep = 0.0f;
 		}
 
-		DrawString(5, m_textLine, "****PAUSED****");
+		m_debugDraw.DrawString(5, m_textLine, "****PAUSED****");
 		m_textLine += 15;
 	}
 
@@ -328,16 +333,16 @@ void Test::Step(Settings* settings)
 
 	if (settings->drawStats)
 	{
-		DrawString(5, m_textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)",
+		m_debugDraw.DrawString(5, m_textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)",
 			m_world->GetProxyCount(), b2_maxProxies,
 			m_world->GetPairCount(), b2_maxPairs);
 		m_textLine += 15;
 
-		DrawString(5, m_textLine, "bodies/contacts/joints = %d/%d/%d",
+		m_debugDraw.DrawString(5, m_textLine, "bodies/contacts/joints = %d/%d/%d",
 			m_world->GetBodyCount(), m_world->GetContactCount(), m_world->GetJointCount());
 		m_textLine += 15;
 
-		DrawString(5, m_textLine, "heap bytes = %d", b2_byteCount);
+		m_debugDraw.DrawString(5, m_textLine, "heap bytes = %d", b2_byteCount);
 		m_textLine += 15;
 	}
 
@@ -389,24 +394,24 @@ void Test::Step(Settings* settings)
 			if (point->state == 0)
 			{
 				// Add
-				DrawPoint(point->position, 10.0f, b2Color(0.3f, 0.95f, 0.3f));
+				m_debugDraw.DrawPoint(point->position, 10.0f, b2Color(0.3f, 0.95f, 0.3f));
 			}
 			else if (point->state == 1)
 			{
 				// Persist
-				DrawPoint(point->position, 5.0f, b2Color(0.3f, 0.3f, 0.95f));
+				m_debugDraw.DrawPoint(point->position, 5.0f, b2Color(0.3f, 0.3f, 0.95f));
 			}
 			else
 			{
 				// Remove
-				DrawPoint(point->position, 10.0f, b2Color(0.95f, 0.3f, 0.3f));
+				m_debugDraw.DrawPoint(point->position, 10.0f, b2Color(0.95f, 0.3f, 0.3f));
 			}
 
 			if (settings->drawContactNormals == 1)
 			{
 				b2Vec2 p1 = point->position;
 				b2Vec2 p2 = p1 + k_axisScale * point->normal;
-				DrawSegment(p1, p2, b2Color(0.4f, 0.9f, 0.4f));
+				m_debugDraw.DrawSegment(p1, p2, b2Color(0.4f, 0.9f, 0.4f));
 			}
 			else if (settings->drawContactForces == 1)
 			{

@@ -103,7 +103,7 @@ void SimulationLoop()
 	settings.hz = settingsHz;
 	test->Step(&settings);
 
-	DrawString(5, 15, entry->name);
+	test->DrawTitle(5, 15, entry->name);
 
 	glutSwapBuffers();
 
@@ -271,6 +271,14 @@ void MouseWheel(int wheel, int direction, int x, int y)
 	Resize(width, height);
 }
 
+void Restart(int)
+{
+	delete test;
+	entry = g_testEntries + testIndex;
+	test = entry->createFcn();
+    Resize(width, height);
+}
+
 void Pause(int)
 {
 	settings.pause = !settings.pause;
@@ -354,6 +362,7 @@ int main(int argc, char** argv)
 
 	glui->add_button("Pause", 0, Pause);
 	glui->add_button("Single Step", 0, SingleStep);
+	glui->add_button("Restart", 0, Restart);
 
 	glui->add_button("Quit", 0,(GLUI_Update_CB)exit);
 	glui->set_main_gfx_window( mainWindow );

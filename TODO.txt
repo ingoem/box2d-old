@@ -106,6 +106,7 @@ Version 2.0.0
 - Update manual. DONE
 
 Version 2.1.0
+- Wake joint bodies when the motor state is modified.
 - Meshes (segment soup).
 - Ray casts.
 - Wiki. DONE
