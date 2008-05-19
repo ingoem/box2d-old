@@ -33,7 +33,6 @@ public:
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
 			sd.friction = 0.3f;
-			sd.filter.categoryBits = 0x0001;
 			
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
@@ -47,8 +46,6 @@ public:
 		sds[0].vertices[2].Set(0.0f, 1.5f);
 		sds[0].density = 1.0f;
 		sds[0].friction = 0.3f;
-		sds[0].filter.categoryBits = 0x0002;
-		//sds[0].maskBits = 0x0003;
 		
 		sds[1].vertexCount = 3;
 		sds[1].vertices[0].Set(-0.1f, 0.0f);
@@ -56,7 +53,6 @@ public:
 		sds[1].vertices[2].Set(0.0f, 1.5f);
 		sds[1].density = 1.0f;
 		sds[1].friction = 0.3f;
-		sds[1].filter.categoryBits = 0x0004;
 
 		sds[2].vertexCount = 8;
 		float32 w = 1.0f;
@@ -72,12 +68,10 @@ public:
 		sds[2].vertices[7].Set(-0.5f * s, 0.0f);
 		sds[2].density = 1.0f;
 		sds[2].friction = 0.3f;
-		sds[2].filter.categoryBits = 0x0004;
 
-		sds[3].SetAsBox(15.0f, 15.0f);
+		sds[3].SetAsBox(0.5f, 0.5f);
 		sds[3].density = 1.0f;
 		sds[3].friction = 0.3f;
-		sds[3].filter.categoryBits = 0x0004;
 
 		circleDef.radius = 0.5f;
 		circleDef.density = 1.0f;

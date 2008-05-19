@@ -106,23 +106,22 @@ Version 2.0.0
 - Update manual. DONE
 
 Version 2.1.0
-- Wake joint bodies when the motor state is modified.
-- Meshes (segment soup).
-- Ray casts.
 - Wiki. DONE
+- User refilter. DONE
+- Soft distance constraint. DONE
+- Contact block solver. DONE
+- CMake.
+- Kequalized crash.
 - Pairs and proxies use small block allocator?
 - Bounds use growable array?
 - Don't sleep until position error is low?
-- Allow non-solid polygon edges.
-- User refilter.
-- CMake.
-- Kequalized crash.
-- Soft distance constraint. DONE
-- 
+- Wake joint bodies when the motor state is modified.
+- Friction/motor joint for top down games.
+- Ray casts.
 
 Version 2.2.0
+- Meshes (segment soup).
 - Handle orphaned gear joint.
-- Friction/motor joint for top down games.
 - Rolling resistance for circles.
 - Add comments to examples and testbed.
 
@@ -134,7 +133,6 @@ Version 2.3.0
 
 Version 2.4.0
 - Spline joints.
-- Contact block solver.
 
 Version 2.5.0
 - Convex decomposition.
@@ -146,7 +144,6 @@ Version 2.6.0
 
 Version 3+
 - Performance.
-- Try position correction clamping and larger Baumgarte.
 - Characters.
 - Vehicles.
 - Tree constraints.

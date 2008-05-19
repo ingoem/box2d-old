@@ -57,12 +57,12 @@
 
 TestEntry g_testEntries[] =
 {
-	{"Polygon Shapes", PolyShapes::Create},
+	{"Vertical Stack", VerticalStack::Create},
 	{"Pyramid", Pyramid::Create},
+	{"Polygon Shapes", PolyShapes::Create},
 	{"Theo Jansen's Walker", TheoJansen::Create},
 	{"Contact Callback Test", ContactCB::Create},
 	{"Web", Web::Create},
-	{"Vertical Stack", VerticalStack::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
 	{"Bridge", Bridge::Create},
