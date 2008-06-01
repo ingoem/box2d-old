@@ -27,6 +27,7 @@
 
 #include "ApplyForce.h"
 #include "BipedTest.h"
+#include "BreakableBody.h"
 #include "Bridge.h"
 #include "BroadPhaseTest.h"
 #include "Car.h"
@@ -57,6 +58,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Breakable Body", BreakableBody::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Polygon Shapes", PolyShapes::Create},
