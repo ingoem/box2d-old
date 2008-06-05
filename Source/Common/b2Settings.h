@@ -25,6 +25,7 @@
 #define B2_NOT_USED(x) x
 #define b2Assert(A) assert(A)
 
+#define B2_TOI_JOINTS
 
 // need to include NDS jtypes.h instead of 
 // usual typedefs because NDS jtypes defines

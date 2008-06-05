@@ -58,6 +58,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Sensor Test", SensorTest::Create},
 	{"Breakable Body", BreakableBody::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Pyramid", Pyramid::Create},
@@ -71,7 +72,6 @@ TestEntry g_testEntries[] =
 	{"Dominos", Dominos::Create},
 	{"CCD Test", CCDTest::Create},
 	{"Biped Test", BipedTest::Create},
-	{"Sensor Test", SensorTest::Create},
 	{"Car", Car::Create},
 	{"Gears", Gears::Create},
 	{"Slider Crank", SliderCrank::Create},

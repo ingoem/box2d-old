@@ -118,6 +118,7 @@ Version 2.1.0
 - Wake joint bodies when the motor state is modified.
 - Friction/motor joint for top down games.
 - Ray casts.
+- Accessors for friction, density, damping.
 
 Version 2.2.0
 - Meshes (segment soup).
