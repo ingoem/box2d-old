@@ -119,6 +119,7 @@ Version 2.1.0
 - Friction/motor joint for top down games.
 - Ray casts.
 - Accessors for friction, density, damping.
+- Manual debug draw call.
 
 Version 2.2.0
 - Meshes (segment soup).
