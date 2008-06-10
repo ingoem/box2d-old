@@ -156,6 +156,26 @@ void Keyboard(unsigned char key, int x, int y)
 			test->LaunchBomb();
 		}
 		break;
+ 
+
+		// Press [ to prev test.
+	case '[':
+		testSelection--;
+		if (testSelection<0)
+		{
+			testSelection=29;
+		}
+		break;
+
+		// Press ] to next test.
+	case ']':
+		testSelection++;
+		if (testSelection>29)
+		{
+			testSelection=0;
+		}
+		break;
+		
 
 	default:
 		if (test)
