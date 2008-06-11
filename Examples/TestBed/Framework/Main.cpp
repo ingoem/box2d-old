@@ -27,6 +27,7 @@ namespace
 {
 	int32 testIndex = 0;
 	int32 testSelection = 0;
+	int32 testCount = 0;
 	TestEntry* entry;
 	Test* test;
 	Settings settings;
@@ -160,23 +161,24 @@ void Keyboard(unsigned char key, int x, int y)
 
 		// Press [ to prev test.
 	case '[':
-		testSelection--;
-		if (testSelection<0)
+		--testSelection;
+		if (testSelection < 0)
 		{
-			testSelection=29;
+			testSelection = testCount - 1;
 		}
+		glui->sync_live();
 		break;
 
 		// Press ] to next test.
 	case ']':
-		testSelection++;
-		if (testSelection>29)
+		++testSelection;
+		if (testSelection == testCount)
 		{
-			testSelection=0;
+			testSelection = 0;
 		}
+		glui->sync_live();
 		break;
 		
-
 	default:
 		if (test)
 		{
@@ -250,7 +252,8 @@ void Mouse(int32 button, int32 state, int32 x, int32 y)
 		{
 			test->MouseUp(p);
 		}
-	} else if (button == GLUT_RIGHT_BUTTON)
+	}
+	else if (button == GLUT_RIGHT_BUTTON)
 	{
 		if (state == GLUT_DOWN)
 		{	
@@ -270,7 +273,8 @@ void MouseMotion(int32 x, int32 y)
 	b2Vec2 p = ConvertScreenToWorld(x, y);
 	test->MouseMove(p);
 	
-	if (rMouseDown){
+	if (rMouseDown)
+	{
 		b2Vec2 diff = p - lastp;
 		viewCenter.x -= diff.x;
 		viewCenter.y -= diff.y;
@@ -280,12 +284,16 @@ void MouseMotion(int32 x, int32 y)
 }
 
 void MouseWheel(int wheel, int direction, int x, int y)
-{	B2_NOT_USED(wheel);
+{
+	B2_NOT_USED(wheel);
 	B2_NOT_USED(x);
 	B2_NOT_USED(y);
-	if (direction > 0) {
+	if (direction > 0)
+	{
 		viewZoom /= 1.1f;
-	} else {
+	}
+	else
+	{
 		viewZoom *= 1.1f;
 	}
 	Resize(width, height);
@@ -312,6 +320,15 @@ void SingleStep(int)
 
 int main(int argc, char** argv)
 {
+	testCount = 0;
+	while (g_testEntries[testCount].createFcn != NULL)
+	{
+		++testCount;
+	}
+
+	testIndex = b2Clamp(testIndex, 0, testCount-1);
+	testSelection = testIndex;
+
 	entry = g_testEntries + testIndex;
 	test = entry->createFcn();
 
