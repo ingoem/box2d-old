@@ -582,7 +582,7 @@ void TriangleMesh::InsertVertex(tmVertex *v)
     {
         v0 = t0->v[i];
         v1 = t0->v[(i == 2) ? 0 : i+1];
-        if ( GetVertexPosition(v0, v1, v)==0 )
+        if ( GetVertexPosition(v0, v1, v)==0.0f )
         {
             InsertVertexAt( v, t0->e[i] );
             return;
@@ -1028,4 +1028,5 @@ int32 main( int32 argc, char *argv[] )
 }
 
 #endif
+
 

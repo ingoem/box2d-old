@@ -11,7 +11,7 @@
 #include <assert.h>
 
 #ifndef TRIANGLEMESH_STANDALONE
-#include "box2d.h"
+#include "Box2D.h"
 #else
    typedef float      float32;
    typedef signed int int32;
