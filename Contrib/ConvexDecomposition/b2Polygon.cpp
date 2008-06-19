@@ -122,7 +122,8 @@ b2Polygon::~b2Polygon() {
 }
 
 float32 b2Polygon::GetArea() {
-	if (areaIsSet) return area;
+	// TODO: fix up the areaIsSet caching so that it can be used
+	//if (areaIsSet) return area;
 	area = 0.0f;
 	
 	//First do wraparound
