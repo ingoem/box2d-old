@@ -38,7 +38,7 @@ public:
 				ground->CreateShape(&sd);
 			}
 
-#if 1
+#if 0
 			{
 				b2PolygonDef sd;
 				sd.SetAsBox(10.0f, 2.0f, b2Vec2(0.0f, 20.0f), 0.0f);
@@ -61,7 +61,7 @@ public:
 			sd.radius = 1.0f;
 			sd.density = 1.0f;
 
-			for (int32 i = 0; i < 1; ++i)
+			for (int32 i = 0; i < 10; ++i)
 			{
 				b2BodyDef bd;
 				bd.position.Set(0.0f + 3.0f * i, 20.0f);

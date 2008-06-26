@@ -23,12 +23,11 @@
 #ifndef BREAKABLE_BODY_H
 #define BREAKABLE_BODY_H
 
-
-
 #include "TriangleMesh.h"
 
- /// utility macro
+/// utility macro
 #define H(x) (x)/2.0f 
+#define N_MAXVERTEX 256
 
 class BreakableBody : public Test
 {
@@ -42,6 +41,8 @@ public:
         float32  sx=-dx-H(dx), sy = 30.f;  
         /// break joint, if the reactionforce exceeds: 
         maxAllowableForce = 100.0f;
+        m_drawMode = m_staticBodies = false;
+        m_drawCount = 0;
         /// ground
         { 
          b2PolygonDef sd;
@@ -64,11 +65,11 @@ public:
          dj.collideConnected = true;
 
          ExampleData('B');
-         dj.frequencyHz      = 50.f;
+         dj.frequencyHz      = 20.f;
          pd.density          = 1.0f/70.0f;
          pd.friction         = 0.4f;
          pd.restitution      = 0.01f;
-         CreateSoftBody( b2Vec2(sx,sy), 0,  pd, dj, 
+         CreateSoftBody( b2Vec2(sx,sy), 0,  0, pd, dj, 
                          nodes,n_nodes,  segments,n_segments,  holes,n_holes) ;
 
          ExampleData('@');
@@ -76,37 +77,42 @@ public:
          pd.density          = 1.0f/36.0f;
          pd.friction         = 0.1f;
          pd.restitution      = 0.5f;
-         CreateSoftBody( b2Vec2(sx+6.f,sy), 0,  pd, dj, 
+         CreateSoftBody( b2Vec2(sx+6.f,sy), 0, 0, pd, dj, 
                          nodes,n_nodes,  segments,n_segments,  holes,n_holes) ;
          
          ExampleData('x');                        
-         dj.frequencyHz      = 50.0f;            
+         dj.frequencyHz      = 20.0f;            
          pd.density          = 1.0f/60.0f;
          pd.friction         = 0.6f;
          pd.restitution      = 0.0f;
-         CreateSoftBody( b2Vec2(sx+13.f,sy),  0,    pd, dj, 
+         CreateSoftBody( b2Vec2(sx+13.f,sy),  0, 0,   pd, dj, 
                          nodes,n_nodes,  segments,n_segments,  holes,n_holes) ;
 
          ExampleData('2');
          pd.density          = 0.01f;
          pd.friction         = 0.3f;
          pd.restitution      = 0.3f;
-         CreateSoftBody( b2Vec2(sx+20.f,sy),  0,    pd, dj, 
+         CreateSoftBody( b2Vec2(sx+20.f,sy),  0, 0,   pd, dj, 
                          nodes,n_nodes,  segments,n_segments,  holes,n_holes) ;
 
          ExampleData('D');
-         CreateSoftBody( b2Vec2(sx+28.f,sy),  0,    pd, dj, 
+         CreateSoftBody( b2Vec2(sx+28.f,sy),  0, 0,   pd, dj, 
                          nodes,n_nodes,  segments,n_segments,  holes,n_holes) ;
           
          ExampleData('b');
+         dj.frequencyHz      = 10.0f;
+         dj.dampingRatio     = 20.0f;
          pd.friction         = 0.9f;
-         CreateSoftBody( b2Vec2(-5.f,5.f*gy),  40,    pd, dj, 
+         pd.restitution      = 0.01f;
+         pd.density          = 0.01f;
+         CreateSoftBody( b2Vec2(-5.f,5.f*gy),  0, 0,   pd, dj, 
                          nodes,n_nodes,  segments,n_segments,  holes,n_holes) ;
+         
          b2CircleDef cd;
          b2BodyDef   bd;
          b2Body*     b;
          cd.radius = br;
-         cd.density= 0.005f; 
+         cd.density= 0.001f; 
          bd.position.Set(0.0f,10.0f*gy);
          for (int32 i=0; i<60; i++ )
          {
@@ -121,11 +127,11 @@ public:
     /// Create compound (soft) body using a triangle mesh
     /// If meshDensity is 0, a minimal grid is generated.
     /// Actually pd and dj define the behaviour for all triangles
-    void CreateSoftBody(b2Vec2 pos, int32 meshDensity,
+    void CreateSoftBody(b2Vec2 pos, int32 meshDensity,int32 options,
                        b2PolygonDef pd, b2DistanceJointDef dj,
                        tmVertex* nodes,int32 n_nodes,
-                       tmSegmentId *segments, int32 n_segments,
-                       tmVertex* holes, int32 n_holes)
+                       tmSegmentId *segments=NULL, int32 n_segments=0,
+                       tmVertex* holes=NULL, int32 n_holes=0)
     {
         int32   i;
         /// TriangleMesh defs
@@ -136,6 +142,7 @@ public:
         b2Body             *b; 
         /// in case of meshDensit>3 ...
         md.SetMaxVertexCount(meshDensity); 
+        if (options>0) md.SetOptions(options);
         /// triangulator main 
         md.Mesh( nodes, n_nodes,  segments,n_segments,  holes, n_holes );
         md.PrintData();        
@@ -187,29 +194,39 @@ public:
     void Step(Settings* settings)
     {
       b2Joint *jStressed=NULL; 
-      float32 F=0.0, tmp;
+      float32 F=0.0f, tmp;
+
+      Test::Step(settings);
+
       for (b2Joint* j = m_world->GetJointList(); j; j = j->GetNext())
-	  {
+	    {
           tmp = j->GetReactionForce().Length();
           if ( tmp>F ) 
           {
               F = tmp;
               jStressed = j;
           }
-	  }       
+	    }       
       if ( jStressed && (F>maxAllowableForce) ) 
       {
           m_world->DestroyJoint(jStressed);
       }
-#ifdef _WIN32_WCE
-      m_render->DrawString(1, m_textLine,"|Reactionforce|%.0f |Allowable|%.0f change:<>", F,maxAllowableForce);       
-#else
-      m_debugDraw.DrawString(1, m_textLine,"|Reactionforce|%.0f |Allowable|%.0f change:-+", F,maxAllowableForce);       
-#endif
+
+      m_debugDraw.DrawString(1, m_textLine,"max.reactionforce=%.0f allowable=%.0f  change:-+", (float)F,(float)maxAllowableForce);       
       m_textLine += 12;
-      Test::Step(settings);
+
+      m_debugDraw.DrawString(1, m_textLine,"drawmode(%s):d  mesh:m  static(%s):s", (m_drawMode)?"on":"off", (m_staticBodies)?"on":"off");       
+      m_textLine += 12;
+
+      for ( int32 i=0; i<m_drawCount-1; i++ )
+      {
+          b2Vec2 p1,p2;
+          p1.Set(m_drawVertices[i].x,m_drawVertices[i].y);
+          p2.Set(m_drawVertices[i+1].x,m_drawVertices[i+1].y);
+          m_debugDraw.DrawSegment(p1,p2,b2Color(0.6f,0.2f,0.2f));
+      }
     }
-    
+
     /// default constructor for TestEntries.cpp
     static Test* Create()
     {
@@ -220,22 +237,65 @@ public:
     {
       switch (key)
       {
-#ifdef _WIN32_WCE
-       case GLUT_KEY_LEFT:
-#else
        case '-':
-#endif
            maxAllowableForce -= 5.0f;
          break;
 
-#ifdef _WIN32_WCE
-       case GLUT_KEY_RIGHT:
-#else
        case '+':
-#endif
            maxAllowableForce += 5.0f;
          break;
+
+       case 'd':
+           m_drawMode = !m_drawMode; 
+         break;
+
+       case 's':
+           m_staticBodies = !m_staticBodies; 
+         break;
+
+       case 'm':
+           if ( m_drawCount>0 )
+           {              
+             b2PolygonDef       pd;
+             b2DistanceJointDef dj;
+             dj.collideConnected = true;
+             dj.frequencyHz      = 20.f;
+             dj.dampingRatio     = 10.0f;
+             pd.density          = (m_staticBodies) ? 0.0f : 1.0f/32.0f;
+             pd.friction         = 0.99f;
+             pd.restitution      = 0.01f;
+             CreateSoftBody( b2Vec2(0.0f,0.0f),  0, tmO_SEGMENTBOUNDARY|tmO_GRADING,   
+                             pd, dj, m_drawVertices, m_drawCount) ;
+             
+             m_drawCount = 0;
+             m_drawMode = false; 
+           }
+         break;
       }
+    }
+
+    void MouseDown(const b2Vec2& p)
+    {   
+        if ( m_drawMode && (m_drawCount<N_MAXVERTEX) )
+        {
+            m_drawVertices[m_drawCount].x = p.x; 
+            m_drawVertices[m_drawCount].y = p.y;
+            m_drawCount++;
+        }
+        else Test::MouseDown(p);
+    }
+/*
+    void MouseMove(const b2Vec2& p)
+    {
+	    m_lastPoint = p;
+		if (m_drawMode)
+        {		         
+        }
+    }
+*/
+    void MouseUp(const b2Vec2& p)
+    {
+        Test::MouseUp(p);
     }
 
     /// examples
@@ -523,6 +583,10 @@ public:
             break;
      }
     }
+    ///
+    bool        m_drawMode, m_staticBodies;
+    tmVertex    m_drawVertices[N_MAXVERTEX];
+    int32       m_drawCount;
     /// 
     float32     maxAllowableForce;
     /// temporary vars to hold the examples

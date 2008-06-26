@@ -17,6 +17,8 @@
    typedef signed int int32;
 #endif
 
+#define tmVERSION 1.002
+
 #define tmAssert(condition) assert((condition)) 
 
 // errors and warnings - TODO
@@ -24,21 +26,34 @@
 #define tmE_MEM   1
 #define tmE_HOLES 2
 
-// constants 
+// constants
+#define tmC_ZEROTOL    0.00001
 #define tmC_PI         3.14159265359f
 #define tmC_PIx2       6.28318530718f
 #define tmC_PI_3       1.04719755119f
 #define tmC_SQRT2      1.41421356237f
+// default big number to calculate a triangle covering all points (vertices[0-2])
 #define tmC_BIGNUMBER       1.0e10f
-#define tmC_MAXVERTEXCOUNT  500
-
+// defaulat max. nodes number
+#define tmC_DEFAULTMAXVERTEX 500
+// default abort-inserting angle if tmO_GRADING set
+#define tmC_DEFAULTGRADINGLOWERANGLE   30.0f
 // options
+// automatic segment all input vertices
 #define tmO_SEGMENTBOUNDARY  2
+// hull all vertices
 #define tmO_CONVEXHULL       4
-#define tmO_MINIMALGRID      8
+// abort inserting segments,if worst angle > minAngle
+#define tmO_MINIMALGRID      8  // depreciated, use next
+#define tmO_GRADING          8
+// only for testing
 #define tmO_BASICMESH       16
-// bit to mark if maxVertexCount was enough
+// internal option bit to mark, if there were enough maxVertexCount
 #define tmO_ENOUGHVERTICES 128
+// only for debug, testing
+#define tmO_NOCALC         256
+// only for debug, testing
+#define tmO_BASICMESHNODEL 512
 
 typedef struct
 {
@@ -67,8 +82,9 @@ typedef struct Triangle
  tmVertex *v[3];
  tmEdge   *e[3];
  float32 minAngle, angle;
+ float32 area;
  bool    inside;
- // hold attributes for the triangles, internally not used
+ // hold attributes for the triangles, external use only
  void    *userData;
 } tmTriangle;
 
@@ -76,49 +92,46 @@ class TriangleMesh
 {
   public:
 
-   TriangleMesh(int32 aMaxVertexCount=tmC_MAXVERTEXCOUNT,
-                float32 aMinAngle=30.0f,
-                int32 aOptions=tmO_MINIMALGRID|tmO_CONVEXHULL);
+   TriangleMesh(int32 aMaxVertexCount=tmC_DEFAULTMAXVERTEX,
+                int32 aOptions=tmO_GRADING|tmO_CONVEXHULL);
 
    int32  Mesh(tmVertex *input, int32 n_input,
-               tmSegmentId *segment, int32 n_segment,
-               tmVertex *hole, int32 n_holes);
+               tmSegmentId *segment=NULL, int32 n_segment=0,
+               tmVertex *hole=NULL, int32 n_holes=0);
 
-   void AutoSegment(int32 startNode, int32 endNode, bool doclose);
-
+   void SegmentVertices(int32 startNode, int32 endNode, bool doclose);
    void SetOptions(int32 aOptions)     { options = aOptions;  }
-
    void AddOption(int32 aOptions)      { options |= aOptions; }
-
+   void DeleteOption(int32 aOptions)   { options &= ~aOptions; }
    void SetMaxVertexCount(int32 count) {
        if ( count>3 )
        {
            maxVertexCount = count;
-           options &= ~tmO_MINIMALGRID;
+           options &= ~tmO_GRADING;
        }
    }
-   // angle in degree !
-   void SetAngle(float32 angle)     { minAngle = angle; }
+   void   SetGradingLowerAngle(float32 angle)
+   {
+       gradingLowerAngle = angle;
+       options |= tmO_GRADING;
+   }
+
 
    int32  GetVertexCount()          { return vertexCount;        }
-
    int32  GetInputVertexCount()     { return inputVertexCount;   }
-
    int32  GetEdgeCount()            { return edgeCount;          }
-
    int32  GetTriangleCount()        { return triangleCount;      }
-
+   int32  GetSegmentCount()         { return segmentCount;       }
+   int32  GetHoleCount()            { return holeCount;          }
    int32  GetInsideTriangleCount()  { return insideTriangleCount;}
-
    tmVertex*     GetVertices()  { return Vertices;  }
-
    tmEdge*       GetEdges()     { return Edges;     }
-
    tmTriangle*   GetTriangles() { return Triangles;  }
-
+   tmSegment*    GetSegments()  { return Segments; }
+   tmVertex*     GetHoles()     { return Holes;     }
    void PrintData(FILE* f = stdout);
-
    void FreeMemory();
+   int32 PrintTriangles();
 
   private:
 
@@ -135,7 +148,7 @@ class TriangleMesh
    int32       edgeCount, triangleCount, segmentCount, holeCount;
    int32       insideTriangleCount;
 
-   float32     minAngle ;
+   float32     gradingLowerAngle;
    int32       options;
 
    tmTriangle* lastTriangle;
@@ -147,14 +160,15 @@ class TriangleMesh
    void        InsertSegments();
    void        DeleteBadTriangles();
    void        DeleteTriangle(tmTriangle* t);
-
+   //void        SegmentBoundary(int32 startNode, int32 endNode, bool doclose);
    tmVertex*   AddVertex();
    tmVertex*   GetClosestVertex(float32 x, float32 y);
    tmTriangle* FindVertex(tmVertex* v);
    bool        ContainsVertex(tmVertex* v0, tmVertex* v1, tmVertex* v);
    float32     GetVertexPosition(tmVertex* a, tmVertex* b, tmVertex* c);
-   void        InsertVertexAt(tmVertex* v, tmEdge* e);
-   void        InsertVertex(tmVertex* v);
+   bool        InsertVertexAt(tmVertex* v, tmEdge* e);
+   bool        InsertVertex(tmVertex* v);
+   bool        SameVertex(tmVertex* v0, tmVertex* v1);
    tmVertex*   GetOppositeVertex(tmEdge* e, tmTriangle* t);
 
    tmEdge*     AddEdge();
@@ -169,8 +183,8 @@ class TriangleMesh
    void        SetTriangle(tmTriangle* t,
                            tmVertex* v0, tmVertex* v1, tmVertex* v2,
                            tmEdge* e0, tmEdge* e1, tmEdge* e2);
-   void        SetTriangleData(tmVertex* v0,tmVertex* v1,tmVertex* v2,
-                               float32 *minAngle, float32 *angle);
+   bool        SetTriangleData(tmVertex* v0,tmVertex* v1,tmVertex* v2,
+                               float32 *minAngle, float32 *angle, float32 *area);
 
    void        GetAdjacentEdges(tmEdge* e, tmTriangle* t,
                                 tmEdge** e0, tmEdge** e1, tmVertex** v);
@@ -178,7 +192,7 @@ class TriangleMesh
    bool        HasBoundingVertices(tmVertex* v0,tmVertex* v1,tmVertex* v2);
    void        CircumCenter(tmVertex* c, tmTriangle* t);
    void        GetSplitPosition(tmVertex* v, tmVertex* v0, tmVertex* v1);
-   void        SplitSegment(tmSegment* s);
+   bool        SplitSegment(tmSegment* s);
    void        ConvexHull();
 
    void        Reset();
@@ -188,3 +202,5 @@ class TriangleMesh
 };
 
 #endif
+
+

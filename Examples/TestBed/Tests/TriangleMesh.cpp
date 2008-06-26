@@ -1,18 +1,29 @@
- /* lite delauney triangle mesh generator
- *
+/* A lite constrained delauney triangle mesh generator,supporting holes and
+ * non convex boundaries
+ *  
+ * History
  * 2001/03 as part of a basic FEA package
  * 2008/05 some small changes for box2d
- * example: see main at the of this file
+ * 2008/06 small bugs
+ *         tmO_BASICMESH option for testing only, works sometimes ;)
+ *         some comments (see .h file)
+ *         variable names changed for better understanding, example
+ *          - tmO_MINIMALGRID renamed to tmO_GRADING, used option with
+ *            gradingLowerANgle 
+ *         bug in SegmentVertices()
+ *         things tried with zero tolerances... 
+ *
+ * Example: see main at the of this file
  *
  * See
  * 1) A Delaunay Refinement Algorithm for Quality 2-Dimensional Mesh Generation
  *    Jim Ruppert - Journal of Algorithms, 1995
  * 2) Jonathan Shewchuk
- *    http://www.cs.cmu.edu/~quake/triangle.html
- * Idea from
- * 3) François Labelle
+ *    http://www.cs.cmu.edu/~quake/triangle.html 
+ * 3) Original idea - recursive triangle eating - from
+ *    François Labelle
  *    http://www.cs.berkeley.edu/~flab/
- *    a copy of original license (mesh.c):
+ *       Copy of original license from (mesh.c):
          Original author:
          Francois Labelle <flab@cs.berkeley.edu>
          University of California - Berkeley
@@ -30,18 +41,16 @@
            Do not compile or run this code under any circumstance. Delete this
            file now.
  */
-
 #include "TriangleMesh.h"
 
 /*----------------------------------------------------------------------------*/
 TriangleMesh::TriangleMesh(int32 aMaxVertexCount,
-                           float32 aMinAngle,
                            int32 aOptions)
 {
     Reset();
-    maxVertexCount = aMaxVertexCount;
-    minAngle       = aMinAngle;
-    options        = aOptions;
+    maxVertexCount   = aMaxVertexCount;
+    options          = aOptions;
+    gradingLowerAngle= tmC_DEFAULTGRADINGLOWERANGLE;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -49,13 +58,14 @@ int32 TriangleMesh::Mesh(tmVertex *input, int32 n_input,
                          tmSegmentId *segment, int32 n_segment,
                          tmVertex *hole, int32 n_holes)
 {
-    int32 i,rtn = tmE_OK;
+    int32 i,k,rtn = tmE_OK;
     bool hasInsideTriangles=false;
 
     inputVertexCount = n_input;
     vertexCount      = n_input + 3;
 
     // max sizes
+    if (n_input>maxVertexCount) maxVertexCount = n_input;
     maxVertexCount  += 3;
     maxEdgeCount     = 3*maxVertexCount - 6;
     maxTriangleCount = 2*maxVertexCount - 5 + 1;
@@ -67,11 +77,11 @@ int32 TriangleMesh::Mesh(tmVertex *input, int32 n_input,
     Triangles = (tmTriangle*) malloc(maxTriangleCount * sizeof(tmTriangle));
     Segments  = (tmSegment *) malloc(maxSegmentCount * sizeof(tmSegment));
 
-    // first 3 points are big equilateral triangle
+    // first 3 points make a big equilateral triangle
     for ( i=0; i<3; i++ )
     {
-      Vertices[i].x = tmC_BIGNUMBER * (float32)cos((double)i*(tmC_PIx2/3.0f));
-      Vertices[i].y = tmC_BIGNUMBER * (float32)sin((double)i*(tmC_PIx2/3.0f));
+      Vertices[i].x = tmC_BIGNUMBER * (float32)cos((float32)i*(tmC_PIx2/3.0f));
+      Vertices[i].y = tmC_BIGNUMBER * (float32)sin((float32)i*(tmC_PIx2/3.0f));
     }
 
     // copy input vertices
@@ -84,31 +94,46 @@ int32 TriangleMesh::Mesh(tmVertex *input, int32 n_input,
       }
     }
 
-    // given segments (boundary restrictions)
-    if ( n_segment>0 )
-    {
-      segmentCount = n_segment;
-      for ( i=0; i<n_segment; i++ )
-      {
-        Segments[i].v[0] = &Vertices[segment[i].i1+3-1];
-        Segments[i].v[1] = &Vertices[segment[i].i2+3-1];
-      }
-    }
-
-    // add boundary and close last/first,this adds ALL input vertices
+    // add boundary and close last/first,this adds ALL input vertices but
+    // to the first input segment
     if ( (options&tmO_SEGMENTBOUNDARY) )
     {
-      AutoSegment(1, inputVertexCount, true );
+      // find outer boundary end-node, assume first segment input is start
+      // of inner boundaries (holes)
+      int32 endVertex = inputVertexCount;
+      if ( n_segment>0 )
+      {
+        if (    (segment[0].i1<inputVertexCount)
+             && (segment[0].i2==segment[0].i1+1) )
+          endVertex = segment[0].i1-1;
+      }
+      SegmentVertices(1, endVertex, true);
+    }
+
+    // given segments
+    if ( n_segment>0 )
+    {
+      for ( i=segmentCount,k=0; i<segmentCount+n_segment; i++,k++ )
+      {
+        Segments[i].v[0] = &Vertices[segment[k].i1+3-1];
+        Segments[i].v[1] = &Vertices[segment[k].i2+3-1];
+      }
+      segmentCount += n_segment;
     }
 
     // assign hole pointer (will not be freed by FreeMemory)
     holeCount = n_holes;
     Holes     = hole;
 
+    // debug - for testing purposes only !
+    if ( options&tmO_NOCALC ) return 0;
+
     Triangulate();
 
-    if ( (options&tmO_BASICMESH)==0 )
+    if ( !(options&tmO_BASICMESH) )
     {
+      inputVertexCount = vertexCount;
+
       // convex graphs
       if ( options & tmO_CONVEXHULL ) ConvexHull();
 
@@ -121,10 +146,10 @@ int32 TriangleMesh::Mesh(tmVertex *input, int32 n_input,
          for ( i=0; i<triangleCount; i++ )
          {
            if ( Triangles[i].inside )
-             {
+           {
                hasInsideTriangles = true;
                break;
-             }
+           }
          }
          tmAssert( hasInsideTriangles );
       }
@@ -142,42 +167,63 @@ int32 TriangleMesh::Mesh(tmVertex *input, int32 n_input,
       //
       DeleteBadTriangles();
     }
+    // debug - for testing purposes only !
     else
     {
-      MarkInsideTriangles(false);
+      // quick & dirty hack for a mesh with lesser angles than with the
+      // tmO_GRADING flag set with gradingLowerAngle
+      MarkInsideTriangles( !(options&tmO_BASICMESHNODEL) );
     }
-
+    // count inner triangles
     insideTriangleCount = 0;
-	 for (i = 0; i < triangleCount; i++) {
+    for ( i=0; i<triangleCount; i++) {
       if ( Triangles[i].inside )  insideTriangleCount++;
     }
     return rtn;
 }
 
 /*----------------------------------------------------------------------------*/
-void TriangleMesh::AutoSegment(int32 startNode, int32 endNode, bool doclose)
+void TriangleMesh::SegmentVertices(int32 startNode, int32 endNode, bool doclose)
 {
-    int32 i,k;
-    k = segmentCount;
+    int32 i, k=segmentCount;
+
     for ( i=startNode-1; i<endNode-1; i++,k++ )
     {
       Segments[k].v[0] = &Vertices[i+3];
       Segments[k].v[1] = &Vertices[i+3+1];
+
       segmentCount++;
     }
+
     if ( doclose )
     {
       Segments[k].v[0] = &Vertices[i+3];
       Segments[k].v[1] = &Vertices[3];
+
       segmentCount++;
     }
+}
+
+/*----------------------------------------------------------------------------*/
+int32 TriangleMesh::PrintTriangles()
+{
+    tmTriangle *t0;
+    for ( int32 i=0; i<triangleCount; i++ )
+    {
+       t0 = &Triangles[i];
+       fprintf(stdout,
+               "%04d;%6.2f;%6.2f;%6.2f;%6.2f;%6.2f;%6.2f;%d;%6.2f;%6.2f\n",i,
+               (float)t0->v[0]->x,(float)t0->v[0]->y,(float)t0->v[1]->x,(float)t0->v[1]->y,
+               (float)t0->v[2]->x,(float)t0->v[2]->y,(float)t0->inside,(float)t0->minAngle,(float)t0->angle);
+    }
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
 void TriangleMesh::PrintData(FILE *f)
 {
     fprintf(f,"Options    : %d\n",  options);
-    fprintf(f,"MinAngle   : %G\n",  minAngle);
+    fprintf(f,"MinAngle   : %G\n",  (float)gradingLowerAngle);
     fprintf(f,"Max V/E/T/S: %d %d %d %d\n",maxVertexCount,maxEdgeCount,maxTriangleCount,maxSegmentCount);
     fprintf(f,"    actual : %d %d %d %d %d\n",vertexCount,edgeCount, triangleCount, segmentCount, holeCount);
     fprintf(f,"Vertices   : %d\n",vertexCount);
@@ -196,7 +242,7 @@ void TriangleMesh::FreeMemory()
 }
 
 /*----------------------------------------------------------------------------
- * INTERNAL
+ *  INTERNAL
  */
 
 /*----------------------------------------------------------------------------*/
@@ -228,16 +274,18 @@ void TriangleMesh::Triangulate()
     SetEdge(e1, v1, v2, t0, t1);
     SetEdge(e2, v2, v0, t0, t1);
 
-    for ( int32 i=3; i<vertexCount; i++) InsertVertex( &Vertices[i]);
+    for ( int32 i=3; i<vertexCount; i++)
+       InsertVertex( &Vertices[i]);
+
 }
 
 /*----------------------------------------------------------------------------*/
-int32 TriangleMesh::MarkInsideTriangles(bool holes)
+int32 TriangleMesh::MarkInsideTriangles(bool nonconvex)
 {
     int32 i,rtn=tmE_OK;
     tmTriangle *t;
 
-    if ( holes )
+    if ( nonconvex )
     {
      DeleteTriangle( &Triangles[1]);
      for ( i=0; i<holeCount; i++ )
@@ -259,6 +307,7 @@ int32 TriangleMesh::MarkInsideTriangles(bool holes)
     }
     return(rtn);
 }
+
 
 /*----------------------------------------------------------------------------*/
 #define SetSegment(s,v0,v1)  { s->v[0] = v0; s->v[1] = v1; }
@@ -288,18 +337,16 @@ void TriangleMesh::InsertSegments()
                 t = AddSegment();
                 SetSegment(s, v0, v);
                 SetSegment(t, v, v1);
-
                 GetSplitPosition( v, v0, v1);
-                InsertVertex( v);
-
-                inserting = true;
+                inserting = InsertVertex( v);
+                //inserting = true; //NM20080618
             }
             else if (    ContainsVertex(e->v[0], e->v[1], GetOppositeVertex(e, e->t[0]) )
                       || ContainsVertex(e->v[0], e->v[1], GetOppositeVertex(e, e->t[1]) )
                     )
             {
-                SplitSegment(s);
-                inserting = true;
+                inserting = SplitSegment(s);
+                //inserting = true; //NM20080618
             }
         }
 
@@ -308,7 +355,7 @@ void TriangleMesh::InsertSegments()
           options &= ~tmO_ENOUGHVERTICES;
           return;
         }
-    } while ( inserting );
+    } while ( inserting ); 
 
     options |= tmO_ENOUGHVERTICES;
 }
@@ -360,23 +407,23 @@ void TriangleMesh::DeleteBadTriangles()
     tmTriangle *t, *tBad=NULL;
     tmVertex    vc, *v;
     bool        isInside;
-    
+
     while ( vertexCount<maxVertexCount )
     {
-        angle = tmC_BIGNUMBER; 
+        angle = tmC_BIGNUMBER;
 
         for ( i=0; i<triangleCount; i++ )
         {
             t = &Triangles[i];
-            if ( t->inside && (t->angle<angle) )
+            if ( t->inside && ( t->angle<angle )  )  
             {
                 angle  = t->angle;
                 tBad   = t;
             }
         }
 
-        if ( (options & tmO_MINIMALGRID) && (angle>=minAngle) )
-            return;
+        if ( (options & tmO_GRADING) && (angle>=gradingLowerAngle) )
+                   return;
 
         CircumCenter( &vc, tBad);
 
@@ -385,16 +432,19 @@ void TriangleMesh::DeleteBadTriangles()
         {
             if ( ContainsVertex(Segments[i].v[0], Segments[i].v[1], &vc) )
             {
-                SplitSegment( &Segments[i]);
-                isInside = true;
+                if ( SplitSegment( &Segments[i]) )
+                {
+                   isInside = true;
+                }
             }
         }
+
         if ( isInside==false )
         {
             v  = AddVertex();
             if ( v==NULL) return;
             *v = vc;
-            InsertVertex( v);
+            InsertVertex( v );
         }
     }
 }
@@ -414,9 +464,9 @@ void TriangleMesh::DeleteTriangle(tmTriangle *t)
         e = t->e[i];
         if ( GetSegment( e->v[0], e->v[1])==NULL )
         {
-            tmAssert( (e->t[0]==t) || (e->t[1]==t) )  ;
             if      ( e->t[0]==t ) DeleteTriangle( e->t[1]);
             else if ( e->t[1]==t ) DeleteTriangle( e->t[0]);
+            else    tmAssert( (e->t[0]==t) || (e->t[1]==t) )  ;
         }
     }
 }
@@ -465,12 +515,12 @@ repeat:
     {
         v0 = t->v[i];
         v1 = t->v[(i==2) ? 0 : i+1];
-        if ( GetVertexPosition( v0,v1,v )<0 )
+        if ( GetVertexPosition( v0,v1,v )<0.0f )
         {
             e = t->e[i];
-            tmAssert( (e->t[0]==t) || (e->t[1]==t) );
             if      ( e->t[0]==t )  t = e->t[1];
             else if ( e->t[1]==t )  t = e->t[0];
+            else tmAssert( 0 );
             goto repeat;
         }
     }
@@ -511,7 +561,7 @@ float32 TriangleMesh::GetVertexPosition(tmVertex *a, tmVertex *b, tmVertex *c)
     return (d1-d2);
 }
 /*----------------------------------------------------------------------------*/
-void TriangleMesh::InsertVertexAt(tmVertex *v, tmEdge *e)
+bool TriangleMesh::InsertVertexAt(tmVertex *v, tmEdge *e)
 {
     tmVertex   *v0, *v1, *v2, *v3;
     tmEdge     *e0, *e1, *e2, *e3, *f0, *f1, *f2;
@@ -527,9 +577,12 @@ void TriangleMesh::InsertVertexAt(tmVertex *v, tmEdge *e)
 
     t2 = AddTriangle();
     t3 = AddTriangle();
+    //if ( t2==NULL || t3==NULL ) return false;
+
     f0 = AddEdge();
     f1 = AddEdge();
     f2 = AddEdge();
+    //if ( f0==NULL || f1==NULL || f2==NULL ) return  false;
 
     i0     = t0->inside;
     i1     = t1->inside;
@@ -566,17 +619,20 @@ void TriangleMesh::InsertVertexAt(tmVertex *v, tmEdge *e)
         CheckEdge( e0);
         CheckEdge( e1);
     }
+
+    return(true);
 }
 
 /*----------------------------------------------------------------------------*/
-void TriangleMesh::InsertVertex(tmVertex *v)
+bool TriangleMesh::InsertVertex(tmVertex *v)
 {
     tmTriangle *t0, *t1, *t2;
     tmVertex *v0, *v1, *v2;
     tmEdge *e0, *e1, *e2, *f0, *f1, *f2;
 
     t0 = FindVertex( v);
-    tmAssert( t0 != NULL );
+    if ( t0==NULL ) return false;
+    //tmAssert( t0 != NULL );
 
     for (int32 i=0; i<3; i++ )
     {
@@ -584,17 +640,14 @@ void TriangleMesh::InsertVertex(tmVertex *v)
         v1 = t0->v[(i == 2) ? 0 : i+1];
         if ( GetVertexPosition(v0, v1, v)==0.0f )
         {
-            InsertVertexAt( v, t0->e[i] );
-            return;
+            //InsertVertexAt( v, t0->e[i] );
+            return( InsertVertexAt( v, t0->e[i] ) );
+            // return(true);
         }
     }
 
-    v0 = t0->v[0];
-    v1 = t0->v[1];
-    v2 = t0->v[2];
-    e0 = t0->e[0];
-    e1 = t0->e[1];
-    e2 = t0->e[2];
+    v0 = t0->v[0]; v1 = t0->v[1]; v2 = t0->v[2];
+    e0 = t0->e[0]; e1 = t0->e[1]; e2 = t0->e[2];
 
     t1 = AddTriangle();
     t2 = AddTriangle();
@@ -616,6 +669,8 @@ void TriangleMesh::InsertVertex(tmVertex *v)
     CheckEdge( e0);
     CheckEdge( e1);
     CheckEdge( e2);
+
+    return(true);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -624,7 +679,7 @@ tmVertex* TriangleMesh::GetOppositeVertex(tmEdge *e, tmTriangle *t)
     if ( e==t->e[0]) return(t->v[2]);
     if ( e==t->e[1]) return(t->v[0]);
     if ( e==t->e[2]) return(t->v[1]);
-    tmAssert(0);
+    // tmAssert(0);
     return(NULL);
 }
 
@@ -672,7 +727,7 @@ bool TriangleMesh::CheckEdge(tmEdge *e)
     tmTriangle *t0, *t1;
     int32   cCount,pCount;
     float32 cAngle,pAngle;
-    float32 a0, a1, q0, q1;
+    float32 a0, a1, q0, q1, s;
 
     if ( e->locked ) return(false);
     t0 = e->t[0];  t1 = e->t[1];
@@ -681,8 +736,8 @@ bool TriangleMesh::CheckEdge(tmEdge *e)
     v0 = e->v[0];  v2 = e->v[1];
     GetAdjacentEdges(e, t0, &e2, &e3, &v3);
     GetAdjacentEdges(e, t1, &e0, &e1, &v1);
-    if (    GetVertexPosition(  v1, v3, v2)>=0
-         || GetVertexPosition( v1, v3, v0)<=0 )   return(false);
+    if (    GetVertexPosition(  v1, v3, v2)>=0.0f
+         || GetVertexPosition( v1, v3, v0)<=0.0f )   return(false);
 
     cCount = 0;
     if ( HasBoundingVertices( v0, v2, v3) ) cCount++;
@@ -694,8 +749,8 @@ bool TriangleMesh::CheckEdge(tmEdge *e)
     pCount = 0;
     if ( HasBoundingVertices( v1, v3, v0) ) pCount++;
     if ( HasBoundingVertices( v3, v1, v2) ) pCount++;
-    SetTriangleData( v1, v3, v0, &a0, &q0);
-    SetTriangleData( v3, v1, v2, &a1, &q1);
+    SetTriangleData( v1, v3, v0, &a0, &q0, &s);
+    SetTriangleData( v3, v1, v2, &a1, &q1, &s);
     pAngle = (a0 < a1) ? a0 : a1;
 
     if ( (pCount<cCount) || (pAngle>cAngle) )
@@ -753,26 +808,24 @@ void TriangleMesh::SetTriangle(tmTriangle *t,
 {
     t->v[0] = v0;  t->v[1] = v1;  t->v[2] = v2;
     t->e[0] = e0;  t->e[1] = e1;  t->e[2] = e2;
-    SetTriangleData( v0, v1, v2, &t->minAngle, &t->angle);
+    SetTriangleData( v0, v1, v2, &t->minAngle, &t->angle, &t->area);
     t->inside = true;
 }
 
 /*----------------------------------------------------------------------------*/
-void TriangleMesh::SetTriangleData(tmVertex *v0,
+bool TriangleMesh::SetTriangleData(tmVertex *v0,
                                    tmVertex *v1,
                                    tmVertex *v2,
-                                   float32 *minAngle, float32 *angle)
+                                   float32 *minAngle, float32 *angle, float32 *area)
 {
     float32 d0x, d0y, d1x, d1y, d2x, d2y;
     float32 t0, t1, t2;
     float32 a0, a1, a2, amin,d;
 
-    HasBoundingVertices(v0, v1, v2);
-
     d0x = v1->x - v0->x;  d0y = v1->y - v0->y;
     d1x = v2->x - v1->x;  d1y = v2->y - v1->y;
     d2x = v0->x - v2->x;  d2y = v0->y - v2->y;
- 
+
     t0 = ArcTan2(d0y, d0x);
     t1 = ArcTan2(d1y, d1x);
     t2 = ArcTan2(d2y, d2x);
@@ -791,7 +844,7 @@ void TriangleMesh::SetTriangleData(tmVertex *v0,
     amin = (a0 < a1) ? a0 : a1;
     if ( a2<amin ) amin = a2;
 
-    if ( options & tmO_MINIMALGRID )
+    if ( options & tmO_GRADING )
     {
         *angle = amin*180.0f/tmC_PI;
     }
@@ -802,6 +855,14 @@ void TriangleMesh::SetTriangleData(tmVertex *v0,
             + sqrt( d2x*d2x + d2y*d2y );
         *angle = amin/d/d;
     }
+
+    if ( area )
+    {
+      *area =  0.5f*sin(a0)*sqrt(d2x*d2x+d2y*d2y);
+      if ( *area<0.0f ) return(false);
+    }
+
+    return(true);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -839,6 +900,7 @@ void TriangleMesh::GetSplitPosition(tmVertex *v, tmVertex *v0, tmVertex *v1)
     {
         vt = v0; v0 = v1; v1 = vt;
     }
+
     if ( (v0-Vertices) < inputVertexCount )
     {
         dx = v1->x - v0->x;
@@ -857,7 +919,15 @@ void TriangleMesh::GetSplitPosition(tmVertex *v, tmVertex *v0, tmVertex *v1)
 }
 
 /*----------------------------------------------------------------------------*/
-void TriangleMesh::SplitSegment(tmSegment *s)
+bool TriangleMesh::SameVertex(tmVertex* v0, tmVertex* v1)
+{
+  //if ( v0==NULL || v1==NULL ) return(false);
+  return (    fabs(v0->x - v1->x) < tmC_ZEROTOL
+           && fabs(v0->y - v1->y) < tmC_ZEROTOL ) ;
+}
+
+/*----------------------------------------------------------------------------*/
+bool TriangleMesh::SplitSegment(tmSegment *s)
 {
     tmEdge *e;
     tmVertex *v0, *v1, *v;
@@ -866,8 +936,11 @@ void TriangleMesh::SplitSegment(tmSegment *s)
     tmAssert(e!=NULL);
 
     v0 = s->v[0];   v1 = s->v[1];
+
+    if ( SameVertex(v0,v1) )  return(false);
+
     v = AddVertex();
-    if ( v==NULL ) return;
+    if ( v==NULL ) return false;
 
     t = AddSegment();
     SetSegment(s, v0, v);
@@ -875,6 +948,8 @@ void TriangleMesh::SplitSegment(tmSegment *s)
 
     GetSplitPosition( v, v0, v1);
     InsertVertexAt( v, e);
+
+    return(true);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -950,9 +1025,13 @@ void TriangleMesh::CheckNumber(float32 x)
 /*----------------------------------------------------------------------------*/
 float32 TriangleMesh::ArcTan2(float32 x, float32 y)
 {
+    float32 a;
     CheckNumber(x);
     CheckNumber(y);
-    return( (float32)atan2( (double)x, (double)y) ) ;
+    a = (float32)atan2( (double)x, (double)y);
+//    if ( fabs(a)<tmC_ZEROTOL )
+//      fprintf( stderr, "angle: %G\n",a );
+    return( a ) ;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -968,6 +1047,8 @@ float32 TriangleMesh::GetAngle(float32 a1, float32 a0)
 
 /*----------------------------------------------------------------------------*/
 #if defined( TRIANGLEMESH_TEST )
+
+#include <time.h>
 /*
  * a test main program
  */
@@ -978,28 +1059,28 @@ int32 main( int32 argc, char *argv[] )
   */
   // node points
   tmVertex nodes[] = {
-              { 5.00f,	 0.00f}, //  1 outer boundary
-              { 3.54f,	 3.54f}, //  2
-              { 0.00f,	 5.00f}, //  3
-              {-3.54f,	 3.54f}, //  4
-              {-5.00f,	 0.00f}, //  5
-              {-3.54f,	-3.54f}, //  6
-              { 0.00f,	-5.00f}, //  7
-              { 3.54f,	-3.54f}, //  8
-              { 2.00f,	 0.00f}, //  9 inner boundary
-              { 1.41f,	 1.41f}, // 10
-              { 0.00f,	 2.00f}, // 11
-              {-1.41f,	 1.41f}, // 12
-              {-2.00f,	 0.00f}, // 13
-              {-1.41f,	-1.41f}, // 14
-              { 0.00f,	-2.00f}, // 15
-              { 1.41f,	-1.41f}  // 16
+              { 5.00f,    0.00f}, //  1 outer boundary
+              { 3.54f,    3.54f}, //  2
+              { 0.00f,    5.00f}, //  3
+              {-3.54f,    3.54f}, //  4
+              {-5.00f,    0.00f}, //  5
+              {-3.54f,   -3.54f}, //  6
+              { 0.00f,   -5.00f}, //  7
+              { 3.54f,   -3.54f}, //  8
+              { 2.00f,    0.00f}, //  9 inner boundary
+              { 1.41f,    1.41f}, // 10
+              { 0.00f,    2.00f}, // 11
+              {-1.41f,    1.41f}, // 12
+              {-2.00f,    0.00f}, // 13
+              {-1.41f,   -1.41f}, // 14
+              { 0.00f,   -2.00f}, // 15
+              { 1.41f,   -1.41f}  // 16
   };
   // center hole point
   tmVertex holes[] = {
               { 0.0f, 0.0f }
   };
-  // center hole boundary segments
+  // center hole boundary
   tmSegmentId segs[] = {
               { 9 , 10 },
               { 10, 11 },
@@ -1028,5 +1109,4 @@ int32 main( int32 argc, char *argv[] )
 }
 
 #endif
-
 
