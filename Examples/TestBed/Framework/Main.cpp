@@ -359,16 +359,19 @@ int main(int argc, char** argv)
 
 	glui->add_separator();
 
-	GLUI_Spinner* iterationSpinner =
-		glui->add_spinner("Iterations", GLUI_SPINNER_INT, &settings.iterationCount);
-	iterationSpinner->set_int_limits(1, 100);
+	GLUI_Spinner* velocityIterationSpinner =
+		glui->add_spinner("Vel Iters", GLUI_SPINNER_INT, &settings.velocityIterations);
+	velocityIterationSpinner->set_int_limits(1, 500);
+
+	GLUI_Spinner* positionIterationSpinner =
+		glui->add_spinner("Pos Iters", GLUI_SPINNER_INT, &settings.positionIterations);
+	positionIterationSpinner->set_int_limits(0, 100);
 
 	GLUI_Spinner* hertzSpinner =
 		glui->add_spinner("Hertz", GLUI_SPINNER_FLOAT, &settingsHz);
 
 	hertzSpinner->set_float_limits(5.0f, 200.0f);
 
-	glui->add_checkbox("Position Correction", &settings.enablePositionCorrection);
 	glui->add_checkbox("Warm Starting", &settings.enableWarmStarting);
 	glui->add_checkbox("Time of Impact", &settings.enableTOI);
 

@@ -31,7 +31,8 @@ struct Settings
 {
 	Settings() :
 		hz(60.0f),
-		iterationCount(10),
+		velocityIterations(10),
+		positionIterations(8),
 		drawStats(0),
 		drawShapes(1),
 		drawJoints(1),
@@ -45,14 +46,14 @@ struct Settings
 		drawFrictionForces(0),
 		drawCOMs(0),
 		enableWarmStarting(1),
-		enablePositionCorrection(1),
 		enableTOI(1),
 		pause(0),
 		singleStep(0)
 		{}
 
 	float32 hz;
-	int32 iterationCount;
+	int32 velocityIterations;
+	int32 positionIterations;
 	int32 drawShapes;
 	int32 drawJoints;
 	int32 drawCoreShapes;
@@ -66,7 +67,6 @@ struct Settings
 	int32 drawCOMs;
 	int32 drawStats;
 	int32 enableWarmStarting;
-	int32 enablePositionCorrection;
 	int32 enableTOI;
 	int32 pause;
 	int32 singleStep;

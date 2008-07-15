@@ -61,10 +61,10 @@ public:
 			sd.radius = 1.0f;
 			sd.density = 1.0f;
 
-			for (int32 i = 0; i < 10; ++i)
+			for (int32 i = 0; i < 7; ++i)
 			{
 				b2BodyDef bd;
-				bd.position.Set(0.0f + 3.0f * i, 20.0f);
+				bd.position.Set(-10.0f + 3.0f * i, 20.0f);
 
 				b2Body* body = m_world->CreateBody(&bd);
 

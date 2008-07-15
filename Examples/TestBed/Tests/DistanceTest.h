@@ -80,12 +80,10 @@ public:
 		}
 
 		m_world->SetGravity(b2Vec2(0.0f, 0.0f));
-		m_world->SetPositionCorrection(false);
 	}
 
 	~DistanceTest()
 	{
-		m_world->SetPositionCorrection(true);
 	}
 
 	static Test* Create()
@@ -95,8 +93,11 @@ public:
 
 	void Step(Settings* settings)
 	{
+		int32 positionIterations = settings->positionIterations;
+		settings->positionIterations = 0;
 		settings->pause = 1;
 		Test::Step(settings);
+		settings->positionIterations = positionIterations;
 		settings->pause = 0;
 
 		b2Vec2 x1, x2;

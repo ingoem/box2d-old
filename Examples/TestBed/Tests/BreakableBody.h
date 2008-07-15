@@ -200,7 +200,7 @@ public:
 
       for (b2Joint* j = m_world->GetJointList(); j; j = j->GetNext())
 	    {
-          tmp = j->GetReactionForce().Length();
+          tmp = j->GetReactionForce(settings->hz).Length();
           if ( tmp>F ) 
           {
               F = tmp;

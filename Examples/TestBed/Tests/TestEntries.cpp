@@ -41,14 +41,16 @@
 #include "Dominos.h"
 #include "ElasticBody.h"
 #include "Gears.h"
-#include "MotorsAndLimits.h"
 #include "PolyCollision.h"
 #include "PolyShapes.h"
+#include "Prismatic.h"
 #include "Pulleys.h"
 #include "Pyramid.h"
+#include "Revolute.h"
 #include "SensorTest.h"
 #include "ShapeEditing.h"
 #include "SliderCrank.h"
+#include "SphereStack.h"
 #include "TheoJansen.h"
 #include "TimeOfImpact.h"
 #include "VaryingFriction.h"
@@ -59,17 +61,20 @@
 
 TestEntry g_testEntries[] =
 {
+	{"SphereStack", SphereStack::Create},
+	{"Pyramid", Pyramid::Create},
+	{"Prismatic", Prismatic::Create},
+	{"Revolute", Revolute::Create},
+	{"Bridge", Bridge::Create},
 	{"Sensor Test", SensorTest::Create},
 	{"Breakable Body", BreakableBody::Create},
 	{"Vertical Stack", VerticalStack::Create},
-	{"Pyramid", Pyramid::Create},
 	{"Polygon Shapes", PolyShapes::Create},
 	{"Theo Jansen's Walker", TheoJansen::Create},
 	{"Contact Callback Test", ContactCB::Create},
 	{"Web", Web::Create},
 	{"Varying Friction", VaryingFriction::Create},
 	{"Varying Restitution", VaryingRestitution::Create},
-	{"Bridge", Bridge::Create},
 	{"Dominos", Dominos::Create},
 	{"CCD Test", CCDTest::Create},
 	{"Biped Test", BipedTest::Create},
@@ -80,7 +85,6 @@ TestEntry g_testEntries[] =
 	{"Chain", Chain::Create},
 	{"Collision Processing", CollisionProcessing::Create},
 	{"Collision Filtering", CollisionFiltering::Create},
-	{"Motors and Limits", MotorsAndLimits::Create},
 	{"Apply Force", ApplyForce::Create},
 	{"Pulleys", Pulleys::Create},
 	{"Shape Editing", ShapeEditing::Create},

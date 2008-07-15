@@ -316,12 +316,11 @@ void Test::Step(Settings* settings)
 	m_debugDraw.SetFlags(flags);
 
 	m_world->SetWarmStarting(settings->enableWarmStarting > 0);
-	m_world->SetPositionCorrection(settings->enablePositionCorrection > 0);
 	m_world->SetContinuousPhysics(settings->enableTOI > 0);
 
 	m_pointCount = 0;
 
-	m_world->Step(timeStep, settings->iterationCount);
+	m_world->Step(timeStep, settings->velocityIterations, settings->positionIterations);
 
 	m_world->Validate();
 
