@@ -311,6 +311,8 @@ void b2World::DestroyJoint(b2Joint* j)
 
 void b2World::Refilter(b2Shape* shape)
 {
+	b2Assert(m_lock == false);
+
 	shape->RefilterProxy(m_broadPhase, shape->GetBody()->GetXForm());
 }
 

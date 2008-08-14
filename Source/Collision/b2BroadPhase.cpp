@@ -141,8 +141,8 @@ bool b2BroadPhase::TestOverlap(const b2BoundValues& b, b2Proxy* p)
 
 void b2BroadPhase::ComputeBounds(uint16* lowerValues, uint16* upperValues, const b2AABB& aabb)
 {
-	b2Assert(aabb.upperBound.x > aabb.lowerBound.x);
-	b2Assert(aabb.upperBound.y > aabb.lowerBound.y);
+	b2Assert(aabb.upperBound.x >= aabb.lowerBound.x);
+	b2Assert(aabb.upperBound.y >= aabb.lowerBound.y);
 
 	b2Vec2 minVertex = b2Clamp(aabb.lowerBound, m_worldAABB.lowerBound, m_worldAABB.upperBound);
 	b2Vec2 maxVertex = b2Clamp(aabb.upperBound, m_worldAABB.lowerBound, m_worldAABB.upperBound);
