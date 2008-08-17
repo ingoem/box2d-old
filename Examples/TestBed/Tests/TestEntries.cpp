@@ -46,6 +46,7 @@
 #include "Prismatic.h"
 #include "Pulleys.h"
 #include "Pyramid.h"
+#include "RaycastTest.h"
 #include "Revolute.h"
 #include "SensorTest.h"
 #include "ShapeEditing.h"
@@ -93,5 +94,6 @@ TestEntry g_testEntries[] =
 	{"Broad Phase", BroadPhaseTest::Create},
 	{"PolyCollision", PolyCollision::Create},
 	{"Elastic Body", ElasticBody::Create},
+	{"Raycast Test", RaycastTest::Create},
 	{NULL, NULL}
 };

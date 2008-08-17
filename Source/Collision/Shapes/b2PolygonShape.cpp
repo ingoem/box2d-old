@@ -258,7 +258,7 @@ bool b2PolygonShape::TestPoint(const b2XForm& xf, const b2Vec2& p) const
 	return true;
 }
 
-bool b2PolygonShape::TestSegment(
+b2SegmentCollide b2PolygonShape::TestSegment(
 	const b2XForm& xf,
 	float32* lambda,
 	b2Vec2* normal,
@@ -284,7 +284,7 @@ bool b2PolygonShape::TestSegment(
 		{	
 			if (numerator < 0.0f)
 			{
-				return false;
+				return e_missCollide;
 			}
 		}
 		else
@@ -310,7 +310,7 @@ bool b2PolygonShape::TestSegment(
 
 		if (upper < lower)
 		{
-			return false;
+			return e_missCollide;
 		}
 	}
 
@@ -320,10 +320,11 @@ bool b2PolygonShape::TestSegment(
 	{
 		*lambda = lower;
 		*normal = b2Mul(xf.R, m_normals[index]);
-		return true;
+		return e_hitCollide;
 	}
 
-	return false;
+	*lambda = 0;
+	return e_startsInsideCollide;
 }
 
 void b2PolygonShape::ComputeAABB(b2AABB* aabb, const b2XForm& xf) const
