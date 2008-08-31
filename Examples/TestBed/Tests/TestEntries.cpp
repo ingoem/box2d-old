@@ -41,6 +41,7 @@
 #include "Dominos.h"
 #include "ElasticBody.h"
 #include "Gears.h"
+#include "LineJoint.h"
 #include "PolyCollision.h"
 #include "PolyShapes.h"
 #include "Prismatic.h"
@@ -62,6 +63,7 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Line Joint", LineJoint::Create},
 	{"SphereStack", SphereStack::Create},
 	{"Pyramid", Pyramid::Create},
 	{"Prismatic", Prismatic::Create},

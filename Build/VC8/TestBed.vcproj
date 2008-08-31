@@ -330,6 +330,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\SphereStack.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\TestEntries.cpp"
 				>
 			</File>
@@ -366,6 +370,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\Examples\TestBed\Tests\LineJoint.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

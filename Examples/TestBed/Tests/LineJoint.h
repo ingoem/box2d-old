@@ -16,72 +16,56 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef SPHERE_STACK_H
-#define SPHERE_STACK_H
+#ifndef LINE_JOINT_H
+#define LINE_JOINT_H
 
-class SphereStack : public Test
+// A line joint with a limit and friction.
+class LineJoint : public Test
 {
 public:
-
-	enum
+	LineJoint()
 	{
-		e_count = 10
-	};
-
-	SphereStack()
-	{
+		b2Body* ground = NULL;
 		{
 			b2PolygonDef sd;
 			sd.SetAsBox(50.0f, 10.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -10.0f);
-
-			b2Body* ground = m_world->CreateBody(&bd);
+			ground = m_world->CreateBody(&bd);
 			ground->CreateShape(&sd);
 		}
 
 		{
-			b2CircleDef sd;
-			sd.radius = 1.0f;
+			b2PolygonDef sd;
+			sd.SetAsBox(0.5f, 2.0f);
 			sd.density = 1.0f;
 
-			for (int32 i = 0; i < e_count; ++i)
-			{
-				b2BodyDef bd;
-				bd.position.Set(0.0, 2.0f + 3.0f * i);
 
-				m_bodies[i] = m_world->CreateBody(&bd);
+			b2BodyDef bd;
+			bd.position.Set(0.0f, 7.0f);
+			b2Body* body = m_world->CreateBody(&bd);
+			body->CreateShape(&sd);
+			body->SetMassFromShapes();
 
-				m_bodies[i]->CreateShape(&sd);
-				m_bodies[i]->SetMassFromShapes();
-			}
+			b2LineJointDef jd;
+			b2Vec2 axis(2.0f, 1.0f);
+			axis.Normalize();
+			jd.Initialize(ground, body, b2Vec2(0.0f, 8.5f), axis);
+			jd.motorSpeed = 0.0f;
+			jd.maxMotorForce = 100.0f;
+			jd.enableMotor = true;
+			jd.lowerTranslation = -4.0f;
+			jd.upperTranslation = 4.0f;
+			jd.enableLimit = true;
+			m_world->CreateJoint(&jd);
 		}
-	}
-
-	void Step(Settings* settings)
-	{
-		Test::Step(settings);
-
-		//for (int32 i = 0; i < e_count; ++i)
-		//{
-		//	printf("%g ", m_bodies[i]->GetWorldCenter().y);
-		//}
-
-		//for (int32 i = 0; i < e_count; ++i)
-		//{
-		//	printf("%g ", m_bodies[i]->GetLinearVelocity().y);
-		//}
-
-		//printf("\n");
 	}
 
 	static Test* Create()
 	{
-		return new SphereStack;
+		return new LineJoint;
 	}
-
-	b2Body* m_bodies[e_count];
 };
 
 #endif
