@@ -493,6 +493,8 @@ bool b2LineJoint::IsLimitEnabled() const
 
 void b2LineJoint::EnableLimit(bool flag)
 {
+	m_body1->WakeUp();
+	m_body2->WakeUp();
 	m_enableLimit = flag;
 }
 
@@ -509,6 +511,8 @@ float32 b2LineJoint::GetUpperLimit() const
 void b2LineJoint::SetLimits(float32 lower, float32 upper)
 {
 	b2Assert(lower <= upper);
+	m_body1->WakeUp();
+	m_body2->WakeUp();
 	m_lowerTranslation = lower;
 	m_upperTranslation = upper;
 }
@@ -520,16 +524,22 @@ bool b2LineJoint::IsMotorEnabled() const
 
 void b2LineJoint::EnableMotor(bool flag)
 {
+	m_body1->WakeUp();
+	m_body2->WakeUp();
 	m_enableMotor = flag;
 }
 
 void b2LineJoint::SetMotorSpeed(float32 speed)
 {
+	m_body1->WakeUp();
+	m_body2->WakeUp();
 	m_motorSpeed = speed;
 }
 
 void b2LineJoint::SetMaxMotorForce(float32 force)
 {
+	m_body1->WakeUp();
+	m_body2->WakeUp();
 	m_maxMotorForce = B2FORCE_SCALE(float32(1.0))*force;
 }
 
