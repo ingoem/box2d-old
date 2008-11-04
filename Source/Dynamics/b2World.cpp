@@ -564,8 +564,10 @@ void b2World::SolveTOI(const b2TimeStep& step)
 
 				b2Assert(0.0f <= toi && toi <= 1.0f);
 
-				if (toi > 0.0f && toi < 1.0f)
+				// If the TOI is in range ...
+				if (0.0f < toi && toi < 1.0f)
 				{
+					// Interpolate on the actual range.
 					toi = b2Min((1.0f - toi) * t0 + toi, 1.0f);
 				}
 
@@ -617,8 +619,8 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		// Reset island and queue.
 		island.Clear();
 		
-		int32 queueStart = 0; //starting index for queue
-		int32 queueSize = 0;  //elements in queue
+		int32 queueStart = 0; // starting index for queue
+		int32 queueSize = 0;  // elements in queue
 		queue[queueStart + queueSize++] = seed;
 		seed->m_flags |= b2Body::e_islandFlag;
 
@@ -642,7 +644,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 			}
 
 			// Search all contacts connected to this body.
-			for (b2ContactEdge* cn = b->m_contactList; cn; cn = cn->next)
+			for (b2ContactEdge* cEdge = b->m_contactList; cEdge; cEdge = cEdge->next)
 			{
 				// Does the TOI island still have space for contacts?
 				if (island.m_contactCount == island.m_contactCapacity)
@@ -651,22 +653,22 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				}
 
 				// Has this contact already been added to an island? Skip slow or non-solid contacts.
-				if (cn->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_slowFlag | b2Contact::e_nonSolidFlag))
+				if (cEdge->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_slowFlag | b2Contact::e_nonSolidFlag))
 				{
 					continue;
 				}
 
 				// Is this contact touching? For performance we are not updating this contact.
-				if (cn->contact->GetManifoldCount() == 0)
+				if (cEdge->contact->GetManifoldCount() == 0)
 				{
 					continue;
 				}
 
-				island.Add(cn->contact);
-				cn->contact->m_flags |= b2Contact::e_islandFlag;
+				island.Add(cEdge->contact);
+				cEdge->contact->m_flags |= b2Contact::e_islandFlag;
 
 				// Update other body.
-				b2Body* other = cn->other;
+				b2Body* other = cEdge->other;
 
 				// Was the other body already added to this island?
 				if (other->m_flags & b2Body::e_islandFlag)
@@ -682,27 +684,28 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				}
 
 				b2Assert(queueStart + queueSize < queueCapacity);
-				queue[queueStart + queueSize++] = other;
+				queue[queueStart + queueSize] = other;
+				++queueSize;
 				other->m_flags |= b2Body::e_islandFlag;
 			}
 			
-			for (b2JointEdge* jn = b->m_jointList; jn; jn = jn->next)
+			for (b2JointEdge* jEdge = b->m_jointList; jEdge; jEdge = jEdge->next)
 			{
 				if (island.m_jointCount == island.m_jointCapacity)
 				{
 					continue;
 				}
 				
-				if (jn->joint->m_islandFlag == true)
+				if (jEdge->joint->m_islandFlag == true)
 				{
 					continue;
 				}
 				
-				island.Add(jn->joint);
+				island.Add(jEdge->joint);
 				
-				jn->joint->m_islandFlag = true;
+				jEdge->joint->m_islandFlag = true;
 				
-				b2Body* other = jn->other;
+				b2Body* other = jEdge->other;
 				
 				if (other->m_flags & b2Body::e_islandFlag)
 				{
@@ -716,7 +719,8 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				}
 				
 				b2Assert(queueStart + queueSize < queueCapacity);
-				queue[queueStart + queueSize++] = other;
+				queue[queueStart + queueSize] = other;
+				++queueSize;
 				other->m_flags |= b2Body::e_islandFlag;
 			}
 		}
@@ -724,7 +728,6 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		b2TimeStep subStep;
 		subStep.warmStarting = false;
 		subStep.dt = (1.0f - minTOI) * step.dt;
-		b2Assert(subStep.dt > B2_FLT_EPSILON);
 		subStep.inv_dt = 1.0f / subStep.dt;
 		subStep.dtRatio = 0.0f;
 		subStep.velocityIterations = step.velocityIterations;
