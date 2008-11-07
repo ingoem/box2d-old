@@ -15,6 +15,8 @@ SOURCES = \
 	./Dynamics/Contacts/b2PolyContact.cpp \
 	./Dynamics/Contacts/b2CircleContact.cpp \
 	./Dynamics/Contacts/b2PolyAndCircleContact.cpp \
+	./Dynamics/Contacts/b2EdgeAndCircleContact.cpp \
+	./Dynamics/Contacts/b2PolyAndEdgeContact.cpp \
 	./Dynamics/Contacts/b2ContactSolver.cpp \
 	./Dynamics/b2WorldCallbacks.cpp \
 	./Dynamics/Joints/b2MouseJoint.cpp \
@@ -34,6 +36,7 @@ SOURCES = \
 	./Collision/Shapes/b2Shape.cpp \
 	./Collision/Shapes/b2CircleShape.cpp \
 	./Collision/Shapes/b2PolygonShape.cpp \
+	./Collision/Shapes/b2EdgeShape.cpp \
 	./Collision/b2TimeOfImpact.cpp \
 	./Collision/b2PairManager.cpp \
 	./Collision/b2CollidePoly.cpp \

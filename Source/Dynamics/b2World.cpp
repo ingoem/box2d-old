@@ -25,6 +25,7 @@
 #include "../Collision/b2Collision.h"
 #include "../Collision/Shapes/b2CircleShape.h"
 #include "../Collision/Shapes/b2PolygonShape.h"
+#include "../Collision/Shapes/b2EdgeShape.h"
 #include <new>
 
 b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
@@ -937,6 +938,19 @@ void b2World::DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color,
 					vertices[i] = b2Mul(xf, localCoreVertices[i]);
 				}
 				m_debugDraw->DrawPolygon(vertices, vertexCount, coreColor);
+			}
+		}
+		break;
+		
+	case e_edgeShape:
+		{
+			b2EdgeShape* edge = (b2EdgeShape*)shape;
+			
+			m_debugDraw->DrawSegment(b2Mul(xf, edge->GetVertex1()), b2Mul(xf, edge->GetVertex2()), color);
+			
+			if (core)
+			{
+				m_debugDraw->DrawSegment(b2Mul(xf, edge->GetCoreVertex1()), b2Mul(xf, edge->GetCoreVertex2()), coreColor);
 			}
 		}
 		break;

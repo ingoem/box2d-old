@@ -39,6 +39,7 @@
 #include "CompoundShapes.h"
 #include "DistanceTest.h"
 #include "Dominos.h"
+#include "DynamicEdges.h"
 #include "ElasticBody.h"
 #include "Gears.h"
 #include "LineJoint.h"
@@ -47,12 +48,14 @@
 #include "Prismatic.h"
 #include "Pulleys.h"
 #include "Pyramid.h"
+#include "PyramidStaticEdges.h"
 #include "RaycastTest.h"
 #include "Revolute.h"
 #include "SensorTest.h"
 #include "ShapeEditing.h"
 #include "SliderCrank.h"
 #include "SphereStack.h"
+#include "StaticEdges.h"
 #include "TheoJansen.h"
 #include "TimeOfImpact.h"
 #include "VaryingFriction.h"
@@ -63,6 +66,9 @@
 
 TestEntry g_testEntries[] =
 {
+	{"Static Edges", StaticEdges::Create},
+	{"Pyramid And Static Edges", PyramidStaticEdges::Create},
+	{"Dynamic Edges", DynamicEdges::Create},
 	{"Line Joint", LineJoint::Create},
 	{"SphereStack", SphereStack::Create},
 	{"Pyramid", Pyramid::Create},
