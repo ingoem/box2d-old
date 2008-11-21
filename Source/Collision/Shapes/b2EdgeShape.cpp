@@ -55,6 +55,8 @@ void b2EdgeShape::UpdateSweepRadius(const b2Vec2& center)
 
 bool b2EdgeShape::TestPoint(const b2XForm& transform, const b2Vec2& p) const
 {
+	B2_NOT_USED(transform);
+	B2_NOT_USED(p);
 	return false;
 }
 
@@ -66,7 +68,7 @@ b2SegmentCollide b2EdgeShape::TestSegment(const b2XForm& transform,
 {
 	b2Vec2 r = segment.p2 - segment.p1;
 	b2Vec2 v1 = b2Mul(transform, m_v1);
-	b2Vec2 d = b2Mul(transform, m_v2); - v1;
+	b2Vec2 d = b2Mul(transform, m_v2) - v1;
 	b2Vec2 n = b2Cross(d, 1.0f);
 
 	const float32 k_slop = 100.0f * B2_FLT_EPSILON;
