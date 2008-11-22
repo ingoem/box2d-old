@@ -274,11 +274,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\ConvexDecomposition.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\DistanceTest.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\Examples\TestBed\Tests\Dominos.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Examples\TestBed\Tests\DynamicEdges.h"
 				>
 			</File>
 			<File
@@ -310,6 +318,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\PyramidStaticEdges.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\RaycastTest.h"
 				>
 			</File>
@@ -331,6 +343,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Examples\TestBed\Tests\SphereStack.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Examples\TestBed\Tests\StaticEdges.h"
 				>
 			</File>
 			<File

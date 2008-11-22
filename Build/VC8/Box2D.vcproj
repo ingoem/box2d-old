@@ -210,6 +210,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Source\Collision\Shapes\b2EdgeShape.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Collision\Shapes\b2EdgeShape.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Source\Collision\Shapes\b2PolygonShape.cpp"
 					>
 				</File>
@@ -334,6 +342,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Source\Dynamics\Contacts\b2EdgeAndCircleContact.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Contacts\b2EdgeAndCircleContact.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Source\Dynamics\Contacts\b2NullContact.h"
 					>
 				</File>
@@ -343,6 +359,14 @@
 				</File>
 				<File
 					RelativePath="..\..\Source\Dynamics\Contacts\b2PolyAndCircleContact.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Contacts\b2PolyAndEdgeContact.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Contacts\b2PolyAndEdgeContact.h"
 					>
 				</File>
 				<File
