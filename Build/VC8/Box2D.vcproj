@@ -446,6 +446,58 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Controllers"
+				>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2BuoyancyController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2BuoyancyController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2ConstantAccelController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2ConstantAccelController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2ConstantForceController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2ConstantForceController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2Controller.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2Controller.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2GravityController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2GravityController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2TensorDampingController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Source\Dynamics\Controllers\b2TensorDampingController.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath="..\..\Include\Box2D.h"

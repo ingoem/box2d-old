@@ -30,6 +30,7 @@
 #include "BreakableBody.h"
 #include "Bridge.h"
 #include "BroadPhaseTest.h"
+#include "Buoyancy.h"
 #include "Car.h"
 #include "CCDTest.h"
 #include "Chain.h"
@@ -103,5 +104,6 @@ TestEntry g_testEntries[] =
 	{"PolyCollision", PolyCollision::Create},
 	{"Elastic Body", ElasticBody::Create},
 	{"Raycast Test", RaycastTest::Create},
+	{"Buoyancy", Buoyancy::Create},
 	{NULL, NULL}
 };

@@ -246,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Examples\TestBed\Tests\Buoyancy.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Examples\TestBed\Tests\Car.h"
 				>
 			</File>
@@ -295,6 +299,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Examples\TestBed\Tests\Gears.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Examples\TestBed\Tests\LineJoint.h"
 				>
 			</File>
 			<File
@@ -386,10 +394,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath="..\..\Examples\TestBed\Tests\LineJoint.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

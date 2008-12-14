@@ -36,6 +36,7 @@ struct Settings
 		drawStats(0),
 		drawShapes(1),
 		drawJoints(1),
+		drawControllers(1),
 		drawCoreShapes(0),
 		drawAABBs(0),
 		drawOBBs(0),
@@ -56,6 +57,7 @@ struct Settings
 	int32 positionIterations;
 	int32 drawShapes;
 	int32 drawJoints;
+	int32 drawControllers;
 	int32 drawCoreShapes;
 	int32 drawAABBs;
 	int32 drawOBBs;

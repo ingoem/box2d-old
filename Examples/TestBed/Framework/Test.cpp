@@ -308,6 +308,7 @@ void Test::Step(Settings* settings)
 	uint32 flags = 0;
 	flags += settings->drawShapes			* b2DebugDraw::e_shapeBit;
 	flags += settings->drawJoints			* b2DebugDraw::e_jointBit;
+	flags += settings->drawControllers		* b2DebugDraw::e_controllerBit;
 	flags += settings->drawCoreShapes		* b2DebugDraw::e_coreShapeBit;
 	flags += settings->drawAABBs			* b2DebugDraw::e_aabbBit;
 	flags += settings->drawOBBs				* b2DebugDraw::e_obbBit;
