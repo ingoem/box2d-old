@@ -27,6 +27,12 @@ SOURCES = \
 	./Dynamics/Joints/b2DistanceJoint.cpp \
 	./Dynamics/Joints/b2GearJoint.cpp \
 	./Dynamics/Joints/b2LineJoint.cpp \
+	./Dynamics/Controllers/b2Controller.cpp \
+	./Dynamics/Controllers/b2BuoyancyController.cpp \
+	./Dynamics/Controllers/b2GravityController.cpp \
+	./Dynamics/Controllers/b2TensorDampingController.cpp \
+	./Dynamics/Controllers/b2ConstantForceController.cpp \
+	./Dynamics/Controllers/b2ConstantAccelController.cpp \
 	./Common/b2StackAllocator.cpp \
 	./Common/b2Math.cpp \
 	./Common/b2BlockAllocator.cpp \
