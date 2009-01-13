@@ -82,11 +82,12 @@ protected:
 	int32 m_bodyCount;
 
 	b2Controller(const b2ControllerDef* def):
-		m_prev(NULL),
-		m_next(NULL),
-		m_bodyCount(0),
+		m_world(NULL),
 		m_bodyList(NULL),
-		m_world(NULL)
+		m_bodyCount(0),
+		m_prev(NULL),
+		m_next(NULL)
+		
 		{
 			B2_NOT_USED(def);
 		}
@@ -101,6 +102,9 @@ private:
 
 class b2ControllerDef
 {
+public:
+	virtual ~b2ControllerDef() {};
+	
 private:
 	friend class b2World;
 	virtual b2Controller* Create(b2BlockAllocator* allocator) = 0;
