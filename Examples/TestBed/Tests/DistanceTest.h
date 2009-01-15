@@ -112,14 +112,14 @@ public:
 		m_textLine += 15;
 
 		glPointSize(4.0f);
-		glColor3f(1.0f, 0.0f, 0.0f);
+		glColor4f(1.0f, 0.0f, 0.0f,1);
 		glBegin(GL_POINTS);
 		glVertex2f(x1.x, x1.y);
 		glVertex2f(x2.x, x2.y);
 		glEnd();
 		glPointSize(1.0f);
 
-		glColor3f(1.0f, 1.0f, 0.0f);
+		glColor4f(1.0f, 1.0f, 0.0f,1);
 		glBegin(GL_LINES);
 		glVertex2f(x1.x, x1.y);
 		glVertex2f(x2.x, x2.y);

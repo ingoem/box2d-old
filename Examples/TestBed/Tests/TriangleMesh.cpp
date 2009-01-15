@@ -1017,7 +1017,12 @@ void TriangleMesh::CheckNumber(float32 x)
 #if defined(_MSC_VER) || defined(__BORLANDC__)
     c =  _finite(x);
 #else
-    c =   finite(x);
+	
+#ifdef TARGET_OS_IPHONE
+    c =   isfinite(x);
+#else
+	 c =   finite(x);
+#endif
 #endif
     tmAssert(c!=0);
 }
