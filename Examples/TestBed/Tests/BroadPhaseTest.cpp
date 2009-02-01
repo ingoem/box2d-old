@@ -27,16 +27,16 @@ const float32 k_width = 1.0f;
 inline void GetRandomAABB(b2AABB* aabb)
 {
 	b2Vec2 w; w.Set(k_width, k_width);
-	aabb->lowerBound.x = b2Random(-k_extent, k_extent);
-	aabb->lowerBound.y = b2Random(0.0f, 2.0f * k_extent);
+	aabb->lowerBound.x = RandomFloat(-k_extent, k_extent);
+	aabb->lowerBound.y = RandomFloat(0.0f, 2.0f * k_extent);
 	aabb->upperBound = aabb->lowerBound + w;
 }
 
 inline void MoveAABB(b2AABB* aabb)
 {
 	b2Vec2 d;
-	d.x = b2Random(-0.5f, 0.5f);
-	d.y = b2Random(-0.5f, 0.5f);
+	d.x = RandomFloat(-0.5f, 0.5f);
+	d.y = RandomFloat(-0.5f, 0.5f);
 	//d.x = 2.0f;
 	//d.y = 0.0f;
 	aabb->lowerBound += d;

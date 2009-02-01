@@ -47,10 +47,10 @@ public:
 
 			for (int i = 0; i < 10; ++i)
 			{
-				float32 x = b2Random(-0.1f, 0.1f);
+				float32 x = RandomFloat(-0.1f, 0.1f);
 				b2BodyDef bd;
 				bd.position.Set(x + 5.0f, 1.05f + 2.5f * i);
-				bd.angle = b2Random(-b2_pi, b2_pi);
+				bd.angle = RandomFloat(-b2_pi, b2_pi);
 				b2Body* body = m_world->CreateBody(&bd);
 				body->CreateShape(&sd1);
 				body->CreateShape(&sd2);
@@ -69,10 +69,10 @@ public:
 
 			for (int i = 0; i < 10; ++i)
 			{
-				float32 x = b2Random(-0.1f, 0.1f);
+				float32 x = RandomFloat(-0.1f, 0.1f);
 				b2BodyDef bd;
 				bd.position.Set(x - 5.0f, 1.05f + 2.5f * i);
-				bd.angle = b2Random(-b2_pi, b2_pi);
+				bd.angle = RandomFloat(-b2_pi, b2_pi);
 				b2Body* body = m_world->CreateBody(&bd);
 				body->CreateShape(&sd1);
 				body->CreateShape(&sd2);
@@ -105,7 +105,7 @@ public:
 
 			for (int32 i = 0; i < 10; ++i)
 			{
-				float32 x = b2Random(-0.1f, 0.1f);
+				float32 x = RandomFloat(-0.1f, 0.1f);
 				b2BodyDef bd;
 				bd.position.Set(x, 2.05f + 2.5f * i);
 				bd.angle = 0.0f;

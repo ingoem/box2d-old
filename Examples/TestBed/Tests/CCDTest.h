@@ -45,7 +45,7 @@ public:
 			sd.density = 1.0f;
 			sd.restitution = 0.0f;
 
-			m_angularVelocity = b2Random(-50.0f, 50.0f);
+			m_angularVelocity = RandomFloat(-50.0f, 50.0f);
 			//m_angularVelocity = 8.5009336f;
 
 			b2BodyDef bd;
@@ -191,7 +191,7 @@ public:
 			bd.position.Set(-5.0f, 20.0f);
 			bd.isBullet = true;
 			b2Body* body = m_world->CreateBody(&bd);
-			body->SetAngularVelocity(b2Random(-50.0f, 50.0f));
+			body->SetAngularVelocity(RandomFloat(-50.0f, 50.0f));
 
 			b2PolygonDef sd;
 			sd.SetAsBox(0.1f, 4.0f);
@@ -208,7 +208,7 @@ public:
 			bd.position.Set(0.0f, 15.0f + i);
 			bd.isBullet = true;
 			b2Body* body = m_world->CreateBody(&bd);
-			body->SetAngularVelocity(b2Random(-50.0f, 50.0f));
+			body->SetAngularVelocity(RandomFloat(-50.0f, 50.0f));
 
 			b2CircleDef sd;
 			sd.radius = 0.25f;

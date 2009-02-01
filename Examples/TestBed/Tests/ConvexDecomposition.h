@@ -241,8 +241,8 @@ public:
 
 			for (int32 i=0; i<15; ++i){
 				for (int32 j=0; j<nRand; ++j){
-					x5[j] = b2Random(-3.0f,3.0f);
-					y5[j] = b2Random(-3.0f,3.0f);
+					x5[j] = RandomFloat(-3.0f,3.0f);
+					y5[j] = RandomFloat(-3.0f,3.0f);
 					//if (j%4 == 2) {x5[j] = 0.0f;y5[j] = 0.0f;}
 				}
 				b2Polygon pgon5(x5,y5,nRand);
