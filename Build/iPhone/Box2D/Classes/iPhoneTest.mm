@@ -247,7 +247,7 @@ void Test::MouseMove(const b2Vec2& p)
 
 void Test::LaunchBomb()
 {
-	b2Vec2 p(b2Random(-15.0f, 15.0f), 30.0f);
+	b2Vec2 p(RandomFloat(-15.0f, 15.0f), 30.0f);
 	b2Vec2 v = -5.0f * p;
 	LaunchBomb(p, v);
 }
