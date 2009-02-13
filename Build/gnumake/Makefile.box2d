@@ -1,0 +1,165 @@
+ROOT=		.
+PACKAGE=	Source
+INSTALL_DIR=	/usr/local
+SOURCE=${ROOT}/${PACKAGE}
+BUILD=${ROOT}/Gen/${PACKAGE}
+
+TARGETS= ${BUILD}/float/libbox2d.a ${BUILD}/fixed/libbox2d.a
+TARGETS+= ${BUILD}/float/libbox2d.so ${BUILD}/fixed/libbox2d.so
+
+ifdef DEVKITPRO
+TARGETS += ${BUILD}/nds-float/lib/libbox2d.a ${BUILD}/nds-fixed/lib/libbox2d.a
+endif
+
+CXXFLAGS=	-g -O2 -I./Include
+
+SOURCES = \
+	Dynamics/b2Body.cpp \
+	Dynamics/b2Island.cpp \
+	Dynamics/b2World.cpp \
+	Dynamics/b2ContactManager.cpp \
+	Dynamics/Contacts/b2Contact.cpp \
+	Dynamics/Contacts/b2PolyContact.cpp \
+	Dynamics/Contacts/b2CircleContact.cpp \
+	Dynamics/Contacts/b2PolyAndCircleContact.cpp \
+	Dynamics/Contacts/b2EdgeAndCircleContact.cpp \
+	Dynamics/Contacts/b2PolyAndEdgeContact.cpp \
+	Dynamics/Contacts/b2ContactSolver.cpp \
+	Dynamics/b2WorldCallbacks.cpp \
+	Dynamics/Joints/b2MouseJoint.cpp \
+	Dynamics/Joints/b2PulleyJoint.cpp \
+	Dynamics/Joints/b2Joint.cpp \
+	Dynamics/Joints/b2RevoluteJoint.cpp \
+	Dynamics/Joints/b2PrismaticJoint.cpp \
+	Dynamics/Joints/b2DistanceJoint.cpp \
+	Dynamics/Joints/b2GearJoint.cpp \
+	Dynamics/Joints/b2LineJoint.cpp \
+	Dynamics/Controllers/b2Controller.cpp \
+	Dynamics/Controllers/b2BuoyancyController.cpp \
+	Dynamics/Controllers/b2GravityController.cpp \
+	Dynamics/Controllers/b2TensorDampingController.cpp \
+	Dynamics/Controllers/b2ConstantForceController.cpp \
+	Dynamics/Controllers/b2ConstantAccelController.cpp \
+	Common/b2StackAllocator.cpp \
+	Common/b2Math.cpp \
+	Common/b2BlockAllocator.cpp \
+	Common/b2Settings.cpp \
+	Collision/b2Collision.cpp \
+	Collision/b2Distance.cpp \
+	Collision/Shapes/b2Shape.cpp \
+	Collision/Shapes/b2CircleShape.cpp \
+	Collision/Shapes/b2PolygonShape.cpp \
+	Collision/Shapes/b2EdgeShape.cpp \
+	Collision/b2TimeOfImpact.cpp \
+	Collision/b2PairManager.cpp \
+	Collision/b2CollidePoly.cpp \
+	Collision/b2CollideCircle.cpp \
+	Collision/b2BroadPhase.cpp 
+#	./Contrib/b2Polygon.cpp \
+#	./Contrib/b2Triangle.cpp
+
+
+ifneq ($(INCLUDE_DEPENDENCIES),yes)
+
+all:	
+	$(MAKE) -f $(lastword $(MAKEFILE_LIST)) --no-print-directory INCLUDE_DEPENDENCIES=yes $(TARGETS)
+
+install:	all
+	mkdir -p $(INSTALL_DIR)/include/box2d
+	(cd $(ROOT)/Source; tar cf - `find . -name \*.h`) | (cd $(INSTALL_DIR)/include/box2d; tar xf - )
+	sed s,../Source/,box2d/, < $(ROOT)/Include/Box2D.h > $(INSTALL_DIR)/include/Box2D.h
+	mkdir -p $(INSTALL_DIR)/lib 
+	cp ${BUILD}/float/libbox2d.a $(INSTALL_DIR)/lib/libbox2d.a
+	ranlib $(INSTALL_DIR)/lib/libbox2d.a
+	cp ${BUILD}/fixed/libbox2d.a $(INSTALL_DIR)/lib/libbox2d_fixed.a
+	ranlib $(INSTALL_DIR)/lib/libbox2d_fixed.a
+	cp ${BUILD}/float/libbox2d.so $(INSTALL_DIR)/lib/libbox2d.so
+	cp ${BUILD}/fixed/libbox2d.so $(INSTALL_DIR)/lib/libbox2d_fixed.so
+
+.PHONY:	clean
+clean:
+	rm -rf ${BUILD}
+
+else
+
+-include $(addprefix ${BUILD}/float/,$(SOURCES:.cpp=.d))
+-include $(addprefix ${BUILD}/fixed/,$(SOURCES:.cpp=.d))
+
+ifdef DEVKITPRO
+-include $(addprefix ${BUILD}/nds-fixed/,$(SOURCES:.cpp=.d))
+-include $(addprefix ${BUILD}/nds-float/,$(SOURCES:.cpp=.d))
+endif
+
+endif
+
+${BUILD}/float/%.o: ${SOURCE}/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+${BUILD}/float/libbox2d.a:	$(addprefix ${BUILD}/float/,$(SOURCES:.cpp=.o))
+	ar cr $@ $^
+	ranlib $@ 
+
+${BUILD}/float/libbox2d.so:  $(addprefix ${BUILD}/float/,$(SOURCES:.cpp=.o))
+	@mkdir -p $(dir $@)
+	$(CXX) -shared -fPIC -C $^ -o $@ -lm -lgcc
+
+${BUILD}/float/%.d:		$(ROOT)/$(PACKAGE)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) -MM -MT $(@:.d=.o) $(CXXFLAGS) -o $@ $<
+
+
+${BUILD}/fixed/%.o:		$(ROOT)/$(PACKAGE)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -DTARGET_FLOAT32_IS_FIXED -c -o $@ $<
+
+${BUILD}/fixed/libbox2d.a:	$(addprefix ${BUILD}/fixed/,$(SOURCES:.cpp=.o)) 
+	ar cr $@ $^
+	ranlib $@
+
+${BUILD}/fixed/libbox2d.so:  $(addprefix ${BUILD}/fixed/,$(SOURCES:.cpp=.o))
+	@mkdir -p $(dir $@)
+	$(CXX) -shared -fPIC -C $^ -o $@ -lm -lgcc
+
+${BUILD}/fixed/%.d:		$(ROOT)/$(PACKAGE)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) -MM -MT $(@:.d=.o) $(CXXFLAGS) -DTARGET_FLOAT32_IS_FIXED -o $@ $<
+
+
+
+NDS_COMPILE_FLAGS= -g -O2 -fomit-frame-pointer -ffast-math \
+		-march=armv5te -mtune=arm946e-s -mthumb-interwork \
+		-DARM9 -fno-rtti -fno-exceptions -c \
+		-DTARGET_IS_NDS \
+		-I$(DEVKITPRO)/libnds/include
+
+
+${BUILD}/nds-fixed/%.o:		$(ROOT)/$(PACKAGE)/%.cpp
+	@mkdir -p $(dir $@)
+	arm-eabi-g++ $(NDS_COMPILE_FLAGS) -DTARGET_FLOAT32_IS_FIXED -o $@ $<
+
+${BUILD}/nds-fixed/lib/libbox2d.a:	$(addprefix ${BUILD}/nds-fixed/,$(SOURCES:.cpp=.o)) 
+	@mkdir -p $(dir $@)
+	arm-eabi-ar cr $@ $^
+	arm-eabi-ranlib $@ 
+
+${BUILD}/nds-fixed/%.d:		$(ROOT)/$(PACKAGE)/%.cpp
+	@mkdir -p $(dir $@)
+	arm-eabi-g++ -MM -MT $(@:.d=.o) $(NDS_COMPILE_FLAGS) \
+		-DTARGET_FLOAT32_IS_FIXED -o $@ $<
+
+
+
+${BUILD}/nds-float/%.o:		$(ROOT)/$(PACKAGE)/%.cpp
+	@mkdir -p $(dir $@)
+	arm-eabi-g++ $(NDS_COMPILE_FLAGS) -o $@ $<
+
+${BUILD}/nds-float/lib/libbox2d.a:	$(addprefix ${BUILD}/nds-float/,$(SOURCES:.cpp=.o))
+	@mkdir -p $(dir $@)
+	arm-eabi-ar cr $@ $^
+	arm-eabi-ranlib $@ 
+
+
+${BUILD}/nds-float/%.d:		$(ROOT)/$(PACKAGE)/%.cpp
+	@mkdir -p $(dir $@) 
+	arm-eabi-g++ -MM -MT $(@:.d=.o) $(NDS_COMPILE_FLAGS) -o $@ $<
