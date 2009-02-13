@@ -1,0 +1,74 @@
+ROOT=.
+PACKAGE=Examples/TestBed
+BUILD=${ROOT}/Gen/${PACKAGE}
+SOURCE=${ROOT}/${PACKAGE}
+
+TARGETS=${BUILD}/float/testbed ${BUILD}/fixed/testbed
+
+CXXFLAGS=	-g -O2
+CXXFLAGS+= -I$(ROOT)/Examples/TestBed/Contrib/freeglut
+CXXFLAGS+= -I$(ROOT)/Examples/TestBed/Contrib/glui
+CXXFLAGS+= -I$(ROOT)/Examples/TestBed/Include
+CXXFLAGS+= -I$(ROOT)/Include
+CXXFLAGS+= -DGLUI_FREEGLUT
+
+LDFLAGS=	-L${ROOT}/Gen/Examples/TestBed/Contrib/freeglut
+LDFLAGS+= -L${ROOT}/Gen/Examples/TestBed/Contrib/glui
+LDFLAGS+= -lglui
+LDFLAGS+= -lglut
+LDFLAGS+= -lGL
+LDFLAGS+= -lGLU
+
+SOURCES=Source/Main.o \
+		Source/Test.o \
+		Source/Render.o \
+		Source/TestEntries.o \
+		Source/Tests/BroadPhaseTest.o \
+		Source/Tests/Biped.o \
+		Source/Tests/BipedDef.o \
+		Source/Tests/TriangleMesh.o
+
+all: ${TARGETS}
+
+fixed: ${BUILD}/fixed/testbed
+float: ${BUILD}/float/testbed
+
+#ifneq ($(INCLUDE_DEPENDENCIES),yes)
+
+#all:	
+#	$(MAKE) -f $(lastword $(MAKEFILE_LIST)) --no-print-directory INCLUDE_DEPENDENCIES=yes $(TARGETS)
+
+#.PHONY:	clean
+#clean:
+#	rm -rf ${BUILD}
+
+#else
+
+#-include $(addprefix ${BUILD}/float/,$(SOURCES:.cpp=.d))
+#-include $(addprefix ${BUILD}/fixed/,$(SOURCES:.cpp=.d))
+
+#endif
+
+FLOAT_OBJECTS= $(addprefix ${BUILD}/float/,$(SOURCES))
+FIXED_OBJECTS= $(addprefix ${BUILD}/fixed/,$(SOURCES))
+
+${BUILD}/fixed/%.o: ${SOURCE}/%.cpp
+	mkdir -p $(dir $@)
+	c++ $(CXXFLAGS) -DTARGET_FLOAT32_IS_FIXED -c -o $@ $<
+
+${BUILD}/float/%.o: ${SOURCE}/%.cpp
+	mkdir -p $(dir $@)
+	c++ $(CXXFLAGS) -c -o $@ $<
+
+${BUILD}/float/%.d:		${SOURCE}/%.cpp
+	@mkdir -p $(dir $@)
+	c++ -M -MT $(@:.d=.o) $(CXXFLAGS) -o $@ $<
+
+${BUILD}/fixed/%.d:		${SOURCE}/%.cpp
+	@mkdir -p $(dir $@)
+	c++ -M -MT $(@:.d=.o) $(CXXFLAGS) -o $@ $<
+
+${BUILD}/float/testbed:	$(FLOAT_OBJECTS)
+	g++ -o $@ $^ -DTARGET_FLOAT32_IS_FIXED -L./Gen/Source/float -lbox2d $(LDFLAGS) 
+${BUILD}/fixed/testbed:	$(FIXED_OBJECTS)
+	g++ -rdynamic -DTARGET_FLOAT32_IS_FIXED -o $@ $^ -L./Gen/Source/fixed -lbox2d $(LDFLAGS)
