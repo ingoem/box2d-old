@@ -49,7 +49,7 @@ SOURCES+=Collision/b2CollideCircle.cpp
 SOURCES+=Collision/b2BroadPhase.cpp
 
 ifdef FLOAT32_IS_FIXED
-DEFINES+=-DFLOAT32_IS_FIXED
+DEFINES+=-DTARGET_FLOAT32_IS_FIXED
 TARGET=${PACKAGE}/build/libbox2d_fixed
 endif
 

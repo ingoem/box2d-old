@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project (box2d CXX)
 enable_language (CXX C)
 
-include_directories (Include)
+include_directories (.)
 
 set(TARGET_FLOAT32_IS_FIXED false CACHE BOOL "Set to 'true' to compile box2d against an internal fixed float type")
 set(TARGET_IS_NDS           false CACHE BOOL "Set to 'true' if target is NDS")
@@ -13,7 +13,7 @@ set(TARGET_IS_NDS           false CACHE BOOL "Set to 'true' if target is NDS")
 ###
 # Box2d engine
 ##
-add_subdirectory (Source)
+add_subdirectory (Box2D)
 ##
 # TestBed
 ##
