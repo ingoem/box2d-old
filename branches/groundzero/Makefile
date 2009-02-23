@@ -1,24 +1,67 @@
-PATCH=	box2d_fixed.patch
-
 all: box2d glut glui testbed
 
 box2d:
-	make -f Build/gnumake/Makefile.box2d
+	make -f Build/gnumake/Makefile.box2d all
 
-glui: glut
-	make -f Build/gnumake/Makefile.glui
+box2d-static:
+	make -f Build/gnumake/Makefile.box2d static
+
+box2d-shared:
+	make -f Build/gnumake/Makefile.box2d shared
+
+box2d-fixed:
+	FLOAT32_IS_FIXED=1 \
+		make -f Build/gnumake/Makefile.box2d all
+
+box2d-fixed-static:
+	FLOAT32_IS_FIXED=1 \
+		make -f Build/gnumake/Makefile.box2d static
+
+box2d-fixed-shared:
+	FLOAT32_IS_FIXED=1 \
+		make -f Build/gnumake/Makefile.box2d shared
+
+box2d-nds:
+	TARGET_IS_NDS=1 \
+		make -f Build/gnumake/Makefile.box2d all
+
+box2d-nds-shared:
+	TARGET_IS_NDS=1 \
+		make -f Build/gnumake/Makefile.box2d shared
+
+box2d-nds-static:
+	TARGET_IS_NDS=1 \
+		make -f Build/gnumake/Makefile.box2d static
+
+box2d-nds-fixed:
+	TARGET_IS_NDS=1 \
+	FLOAT32_IS_FIXED=1 \
+		make -f Build/gnumake/Makefile.box2d all
+
+box2d-nds-fixed-static:
+	TARGET_IS_NDS=1 \
+	FLOAT32_IS_FIXED=1 \
+		make -f Build/gnumake/Makefile.box2d static
+
+box2d-nds-fixed-shared:
+	TARGET_IS_NDS=1 \
+	FLOAT32_IS_FIXED=1 \
+		make -f Build/gnumake/Makefile.box2d shared
 
 glut:
-	make -f Build/gnumake/Makefile.glut
+	make -f Build/gnumake/Makefile.glut all
 
-testbed: box2d glui glut
-	make -f Build/gnumake/Makefile.TestBed
+glui: glut
+	make -f Build/gnumake/Makefile.glui all
 
-install:
-	make -f Makefile.Source install
+testbed: box2d-static glui glut
+	make -f Build/gnumake/Makefile.TestBed all
 
 clean:
-	rm -rf Gen
+	make -f Build/gnumake/Makefile.box2d clean
+	make -f Build/gnumake/Makefile.glui clean
+	make -f Build/gnumake/Makefile.glut clean
+	make -f Build/gnumake/Makefile.TestBed clean
 
 patch:
 	svn diff > $(PATCH)

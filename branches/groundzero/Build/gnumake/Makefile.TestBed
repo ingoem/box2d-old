@@ -1,74 +1,31 @@
 ROOT=.
-PACKAGE=Examples/TestBed
-BUILD=${ROOT}/Gen/${PACKAGE}
-SOURCE=${ROOT}/${PACKAGE}
+PACKAGE=${ROOT}/Examples/TestBed
+TARGET=${ROOT}/${PACKAGE}/build/testbed
 
-TARGETS=${BUILD}/float/testbed ${BUILD}/fixed/testbed
+INCLUDES+=-I$(ROOT)/Examples/TestBed/Contrib/freeglut
+INCLUDES+=-I$(ROOT)/Examples/TestBed/Contrib/glui
+INCLUDES+=-I$(ROOT)/Examples/TestBed/Source
+INCLUDES+=-I$(ROOT)
+DEFINES+=-DGLUI_FREEGLUT
 
-CXXFLAGS=	-g -O2
-CXXFLAGS+= -I$(ROOT)/Examples/TestBed/Contrib/freeglut
-CXXFLAGS+= -I$(ROOT)/Examples/TestBed/Contrib/glui
-CXXFLAGS+= -I$(ROOT)/Examples/TestBed/Include
-CXXFLAGS+= -I$(ROOT)/Include
-CXXFLAGS+= -DGLUI_FREEGLUT
+LDFLAGS=-L${ROOT}/Examples/TestBed/Contrib/freeglut/build
+LDFLAGS+=-L${ROOT}/Examples/TestBed/Contrib/glui/build
+LDFLAGS+=-L${ROOT}/Box2D/build
+LDFLAGS+=-lglui
+LDFLAGS+=-lglut
+LDFLAGS+=-lGL
+LDFLAGS+=-lGLU
+LDFLAGS+=-lbox2d
 
-LDFLAGS=	-L${ROOT}/Gen/Examples/TestBed/Contrib/freeglut
-LDFLAGS+= -L${ROOT}/Gen/Examples/TestBed/Contrib/glui
-LDFLAGS+= -lglui
-LDFLAGS+= -lglut
-LDFLAGS+= -lGL
-LDFLAGS+= -lGLU
+SOURCES=Source/Main.c
+SOURCES+=Source/Test.c
+SOURCES+=Source/Render.c
+SOURCES+=Source/TestEntries.c
+SOURCES+=Source/Tests/BroadPhaseTest.c
+SOURCES+=Source/Tests/Biped.c
+SOURCES+=Source/Tests/BipedDef.c
+SOURCES+=Source/Tests/TriangleMesh.c
 
-SOURCES=Source/Main.o \
-		Source/Test.o \
-		Source/Render.o \
-		Source/TestEntries.o \
-		Source/Tests/BroadPhaseTest.o \
-		Source/Tests/Biped.o \
-		Source/Tests/BipedDef.o \
-		Source/Tests/TriangleMesh.o
+all: binary
 
-all: ${TARGETS}
-
-fixed: ${BUILD}/fixed/testbed
-float: ${BUILD}/float/testbed
-
-#ifneq ($(INCLUDE_DEPENDENCIES),yes)
-
-#all:	
-#	$(MAKE) -f $(lastword $(MAKEFILE_LIST)) --no-print-directory INCLUDE_DEPENDENCIES=yes $(TARGETS)
-
-#.PHONY:	clean
-#clean:
-#	rm -rf ${BUILD}
-
-#else
-
-#-include $(addprefix ${BUILD}/float/,$(SOURCES:.cpp=.d))
-#-include $(addprefix ${BUILD}/fixed/,$(SOURCES:.cpp=.d))
-
-#endif
-
-FLOAT_OBJECTS= $(addprefix ${BUILD}/float/,$(SOURCES))
-FIXED_OBJECTS= $(addprefix ${BUILD}/fixed/,$(SOURCES))
-
-${BUILD}/fixed/%.o: ${SOURCE}/%.cpp
-	mkdir -p $(dir $@)
-	c++ $(CXXFLAGS) -DTARGET_FLOAT32_IS_FIXED -c -o $@ $<
-
-${BUILD}/float/%.o: ${SOURCE}/%.cpp
-	mkdir -p $(dir $@)
-	c++ $(CXXFLAGS) -c -o $@ $<
-
-${BUILD}/float/%.d:		${SOURCE}/%.cpp
-	@mkdir -p $(dir $@)
-	c++ -M -MT $(@:.d=.o) $(CXXFLAGS) -o $@ $<
-
-${BUILD}/fixed/%.d:		${SOURCE}/%.cpp
-	@mkdir -p $(dir $@)
-	c++ -M -MT $(@:.d=.o) $(CXXFLAGS) -o $@ $<
-
-${BUILD}/float/testbed:	$(FLOAT_OBJECTS)
-	g++ -o $@ $^ -DTARGET_FLOAT32_IS_FIXED -L./Gen/Source/float -lbox2d $(LDFLAGS) 
-${BUILD}/fixed/testbed:	$(FIXED_OBJECTS)
-	g++ -rdynamic -DTARGET_FLOAT32_IS_FIXED -o $@ $^ -L./Gen/Source/fixed -lbox2d $(LDFLAGS)
+include Build/gnumake/config.mk
