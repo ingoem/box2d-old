@@ -19,9 +19,9 @@ OBJECTS=${COBJECTS:.cpp=.o}
 
 # Check the toolchain or die with a verbose error.
 toolchain:
-	@if ! type -f $(CXX) 2>&1 > /dev/null; then echo "!!! Your c++-compiler '$(CXX)' does not exist"; exit 1; fi
-	@if ! type -f $(RANLIB) 2>&1 > /dev/null; then echo "!!! Your ranlib '$(RANLIB)' does not exist"; exit 2; fi
-	@if ! type -f $(AR) 2>&1 > /dev/null; then echo "!!! Your archiver '$(AR)' does not exist"; exit 3; fi
+	@if ! type $(CXX) 2>&1 > /dev/null; then echo "!!! Your c++-compiler '$(CXX)' does not exist"; exit 1; fi
+	@if ! type $(RANLIB) 2>&1 > /dev/null; then echo "!!! Your ranlib '$(RANLIB)' does not exist"; exit 2; fi
+	@if ! type $(AR) 2>&1 > /dev/null; then echo "!!! Your archiver '$(AR)' does not exist"; exit 3; fi
 
 .cpp.o: toolchain
 	@echo "  Compiling: $@"
