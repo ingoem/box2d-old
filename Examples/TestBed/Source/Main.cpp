@@ -25,7 +25,7 @@
 #include "Render.h"
 #include "Test.h"
 
-#include <box2d/Box2D.h>
+#include <Box2D/Box2D.h>
 
 namespace
 {

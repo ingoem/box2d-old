@@ -1,43 +1,33 @@
-ROOT=		.
-PACKAGE=	Examples/TestBed/Contrib/freeglut
-BUILD= Gen/$(PACKAGE)
-SOURCE= ${ROOT}/${PACKAGE}
+ROOT=.
+PACKAGE=./Examples/TestBed/Contrib/freeglut
+TARGET=${PACKAGE}/build/libglut
 
-all:	${BUILD}/libglut.a
+DEFINES=
+INCLUDES=-I${PACKAGE}
 
-CFLAGS=	-g -O2 -DTARGET_HOST_UNIX_X11 -DHAVE_FCNTL_H -DHAVE_SYS_IOCTL_H -I$(ROOT)/$(PACKAGE)
+SOURCES=freeglut_callbacks.c
+SOURCES+=freeglut_cursor.c
+SOURCES+=freeglut_display.c
+SOURCES+=freeglut_ext.c
+SOURCES+=freeglut_font_data.c
+SOURCES+=freeglut_font.c
+SOURCES+=freeglut_gamemode.c
+SOURCES+=freeglut_geometry.c
+SOURCES+=freeglut_glutfont_definitions.c
+SOURCES+=freeglut_init.c
+SOURCES+=freeglut_joystick.c
+SOURCES+=freeglut_main.c
+SOURCES+=freeglut_menu.c
+SOURCES+=freeglut_misc.c
+SOURCES+=freeglut_overlay.c
+SOURCES+=freeglut_state.c
+SOURCES+=freeglut_stroke_mono_roman.c
+SOURCES+=freeglut_stroke_roman.c
+SOURCES+=freeglut_structure.c
+SOURCES+=freeglut_teapot.c
+SOURCES+=freeglut_videoresize.c
+SOURCES+=freeglut_window.c
 
-OBJECTS=	\
-	freeglut_callbacks.o \
-	freeglut_cursor.o \
-	freeglut_display.o \
-	freeglut_ext.o \
-	freeglut_font_data.o \
-	freeglut_font.o \
-	freeglut_gamemode.o \
-	freeglut_geometry.o \
-	freeglut_glutfont_definitions.o \
-	freeglut_init.o \
-	freeglut_joystick.o \
-	freeglut_main.o \
-	freeglut_menu.o \
-	freeglut_misc.o \
-	freeglut_overlay.o \
-	freeglut_state.o \
-	freeglut_stroke_mono_roman.o \
-	freeglut_stroke_roman.o \
-	freeglut_structure.o \
-	freeglut_teapot.o \
-	freeglut_videoresize.o \
-	freeglut_window.o
+include Build/gnumake/config.mk
 
-${BUILD}/%.o:	$(SOURCE)/%.c
-	@mkdir -p $(dir $@)
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-${BUILD}/libglut.a:	$(addprefix ${BUILD}/,$(OBJECTS))
-	ar cr $@ $(addprefix ${BUILD}/,$(OBJECTS))
-	ranlib $@
-
-clean:
-	rm -rf ${BUILD}
+all: static
