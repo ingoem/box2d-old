@@ -1,8 +1,8 @@
-include_directories(Include)
 
+include_directories(Source)
 include_directories(Contrib/freeglut)
 include_directories(Contrib/glui)
-include_directories(${box2d_SOURCE_DIR}/Include)
+include_directories(${box2d_SOURCE_DIR})
 
 add_subdirectory(Contrib/freeglut)
 add_subdirectory(Contrib/glui)
