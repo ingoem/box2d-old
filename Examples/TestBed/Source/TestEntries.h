@@ -25,6 +25,9 @@
 #include <GL/glut.h>
 #endif
 
+/**
+ * Edit: TestEntries.cpp if you wan't to add custom Tests, don't put them here.
+ */
 extern TestEntry g_testEntries[];
 
 #endif /* _TESTENTRIES_H_ */

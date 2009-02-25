@@ -27,7 +27,7 @@ Bullet (http:/www.bulletphysics.com).
 */
 
 #include "Box2D/Common/b2Settings.h"
-#include "b2Collision.h"
+#include "Box2D/Collision/b2Collision.h"
 #include "Box2D/Collision/b2PairManager.h"
 #include <climits>
 
