@@ -1,0 +1,16 @@
+ons feb 25 18:48:55 CET 2009 by udoprog
+- Renamed ./Source to ./Box2D (fixing cross platform #include problems).
+- Removed relative includes in all header files.
+- Moved ./Contrib/glui and ./Contrib/glut to ./Examples/TestBed/Contrib/*.
+- Merged kavaler's makefiles with my own and removed the creation of the ./Gen
+directory. Objects are now generated next to their source files since this
+decreases the complexity of the Makefile's greatly (thanks kavaler).
+- Added a CMake alternative build to the svn which is currently experimental.
+- Minor code maintenence (comments, bad casts).
+
+TestBed changes:
+- Examples/TestBed/Source/TestEntries.h no longer defines all the different
+projects, edit Examples/TestBed/Source/TestEntries.cpp for this (more
+flexibility, less stupid bug-prone).
+
+! Visual Studio 2005/XCode and Iphone building is definitely broken.
