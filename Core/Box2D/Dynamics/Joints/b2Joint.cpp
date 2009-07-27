@@ -27,7 +27,6 @@
 #include <Box2D/Dynamics/b2Body.h>
 #include <Box2D/Dynamics/b2World.h>
 #include <Box2D/Common/b2BlockAllocator.h>
-#include <Box2D/Collision/b2BroadPhase.h>
 
 #include <new>
 
@@ -138,9 +137,19 @@ b2Joint::b2Joint(const b2JointDef* def)
 	m_type = def->type;
 	m_prev = NULL;
 	m_next = NULL;
-	m_body1 = def->body1;
-	m_body2 = def->body2;
+	m_bodyA = def->body1;
+	m_bodyB = def->body2;
 	m_collideConnected = def->collideConnected;
 	m_islandFlag = false;
 	m_userData = def->userData;
+
+	m_edgeA.joint = NULL;
+	m_edgeA.other = NULL;
+	m_edgeA.prev = NULL;
+	m_edgeA.next = NULL;
+
+	m_edgeB.joint = NULL;
+	m_edgeB.other = NULL;
+	m_edgeB.prev = NULL;
+	m_edgeB.next = NULL;
 }

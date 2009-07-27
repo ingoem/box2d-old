@@ -77,18 +77,10 @@ typedef float float32;
 /// The maximum number of vertices on a convex polygon.
 #define b2_maxPolygonVertices		8
 
-/// Factor used to fatten AABBs in b2DynamicTree. This allows client
-/// objects to move a small amount without needing to adjust the tree.
-#define b2_fatAABBFactor			1.5f
-
-/// The initial pool size for the dynamic tree.
-#define b2_nodePoolSize				50
-
-/// This must be a power of two
-#define b2_maxProxies				512
-
-/// This must be a power of two
-#define b2_maxPairs					(8 * b2_maxProxies)
+/// This is used to fatten AABBs in the dynamic tree. This allows proxies
+/// to move by a small amount without triggering a tree adjustment.
+/// This is in meters.
+#define b2_aabbExtension			0.1f
 
 /// A small length used as a collision and constraint tolerance. Usually it is
 /// chosen to be numerically significant, but visually insignificant.

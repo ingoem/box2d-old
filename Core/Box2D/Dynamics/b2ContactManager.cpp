@@ -17,114 +17,21 @@
 */
 
 #include <Box2D/Dynamics/b2ContactManager.h>
-#include <Box2D/Dynamics/b2World.h>
 #include <Box2D/Dynamics/b2Body.h>
 #include <Box2D/Dynamics/b2Fixture.h>
+#include <Box2D/Dynamics/b2WorldCallbacks.h>
+#include <Box2D/Dynamics/Contacts/b2Contact.h>
 
-// This is a callback from the broad-phase when two AABB proxies begin
-// to overlap. We create a b2Contact to manage the narrow phase.
-void* b2ContactManager::PairAdded(void* proxyUserDataA, void* proxyUserDataB)
+b2ContactFilter b2_defaultFilter;
+b2ContactListener b2_defaultListener;
+
+b2ContactManager::b2ContactManager()
 {
-	b2Fixture* fixtureA = (b2Fixture*)proxyUserDataA;
-	b2Fixture* fixtureB = (b2Fixture*)proxyUserDataB;
-
-	b2Body* bodyA = fixtureA->GetBody();
-	b2Body* bodyB = fixtureB->GetBody();
-
-	if (bodyA->IsStatic() && bodyB->IsStatic())
-	{
-		return &m_nullContact;
-	}
-
-	if (fixtureA->GetBody() == fixtureB->GetBody())
-	{
-		return &m_nullContact;
-	}
-
-	if (bodyB->IsConnected(bodyA))
-	{
-		return &m_nullContact;
-	}
-
-	if (m_world->m_contactFilter != NULL && m_world->m_contactFilter->ShouldCollide(fixtureA, fixtureB) == false)
-	{
-		return &m_nullContact;
-	}
-
-	// Call the factory.
-	b2Contact* c = b2Contact::Create(fixtureA, fixtureB, &m_world->m_blockAllocator);
-
-	if (c == NULL)
-	{
-		return &m_nullContact;
-	}
-
-	// Contact creation may swap shapes.
-	fixtureA = c->GetFixtureA();
-	fixtureB = c->GetFixtureB();
-	bodyA = fixtureA->GetBody();
-	bodyB = fixtureB->GetBody();
-
-	// Insert into the world.
-	c->m_prev = NULL;
-	c->m_next = m_world->m_contactList;
-	if (m_world->m_contactList != NULL)
-	{
-		m_world->m_contactList->m_prev = c;
-	}
-	m_world->m_contactList = c;
-
-	// Connect to island graph.
-
-	// Connect to body A
-	c->m_nodeA.contact = c;
-	c->m_nodeA.other = bodyB;
-
-	c->m_nodeA.prev = NULL;
-	c->m_nodeA.next = bodyA->m_contactList;
-	if (bodyA->m_contactList != NULL)
-	{
-		bodyA->m_contactList->prev = &c->m_nodeA;
-	}
-	bodyA->m_contactList = &c->m_nodeA;
-
-	// Connect to body B
-	c->m_nodeB.contact = c;
-	c->m_nodeB.other = bodyA;
-
-	c->m_nodeB.prev = NULL;
-	c->m_nodeB.next = bodyB->m_contactList;
-	if (bodyB->m_contactList != NULL)
-	{
-		bodyB->m_contactList->prev = &c->m_nodeB;
-	}
-	bodyB->m_contactList = &c->m_nodeB;
-
-	++m_world->m_contactCount;
-	return c;
-}
-
-// This is a callback from the broad-phase when two AABB proxies cease
-// to overlap. We retire the b2Contact.
-void b2ContactManager::PairRemoved(void* proxyUserDataA, void* proxyUserDataB, void* pairUserData)
-{
-	B2_NOT_USED(proxyUserDataA);
-	B2_NOT_USED(proxyUserDataB);
-
-	if (pairUserData == NULL)
-	{
-		return;
-	}
-
-	b2Contact* c = (b2Contact*)pairUserData;
-	if (c == &m_nullContact)
-	{
-		return;
-	}
-
-	// An attached body is being destroyed, we must destroy this contact
-	// immediately to avoid orphaned shape pointers.
-	Destroy(c);
+	m_contactList = NULL;
+	m_contactCount = 0;
+	m_contactFilter = &b2_defaultFilter;
+	m_contactListener = &b2_defaultListener;
+	m_allocator = NULL;
 }
 
 void b2ContactManager::Destroy(b2Contact* c)
@@ -136,7 +43,7 @@ void b2ContactManager::Destroy(b2Contact* c)
 
 	if (c->m_manifold.m_pointCount > 0)
 	{
-		m_world->m_contactListener->EndContact(c);
+		m_contactListener->EndContact(c);
 	}
 
 	// Remove from the world.
@@ -150,9 +57,9 @@ void b2ContactManager::Destroy(b2Contact* c)
 		c->m_next->m_prev = c->m_prev;
 	}
 
-	if (c == m_world->m_contactList)
+	if (c == m_contactList)
 	{
-		m_world->m_contactList = c->m_next;
+		m_contactList = c->m_next;
 	}
 
 	// Remove from body 1
@@ -188,8 +95,8 @@ void b2ContactManager::Destroy(b2Contact* c)
 	}
 
 	// Call the factory.
-	b2Contact::Destroy(c, &m_world->m_blockAllocator);
-	--m_world->m_contactCount;
+	b2Contact::Destroy(c, m_allocator);
+	--m_contactCount;
 }
 
 // This is the top level collision call for the time step. Here
@@ -198,15 +105,177 @@ void b2ContactManager::Destroy(b2Contact* c)
 void b2ContactManager::Collide()
 {
 	// Update awake contacts.
-	for (b2Contact* c = m_world->m_contactList; c; c = c->GetNext())
+	b2Contact* c = m_contactList;
+	while (c)
 	{
-		b2Body* bodyA = c->GetFixtureA()->GetBody();
-		b2Body* bodyB = c->GetFixtureB()->GetBody();
+		b2Fixture* fixtureA = c->GetFixtureA();
+		b2Fixture* fixtureB = c->GetFixtureB();
+		b2Body* bodyA = fixtureA->GetBody();
+		b2Body* bodyB = fixtureB->GetBody();
+
 		if (bodyA->IsSleeping() && bodyB->IsSleeping())
 		{
 			continue;
 		}
 
-		c->Update(m_world->m_contactListener);
+		// Is this contact flagged for filtering?
+		if (c->m_flags & b2Contact::e_filterFlag)
+		{
+			// Are both bodies static?
+			if (bodyA->IsStatic() && bodyB->IsStatic())
+			{
+				b2Contact* cNuke = c;
+				c = cNuke->GetNext();
+				Destroy(cNuke);
+				continue;
+			}
+
+			// Does a joint override collision?
+			if (bodyB->IsConnected(bodyA))
+			{
+				b2Contact* cNuke = c;
+				c = cNuke->GetNext();
+				Destroy(cNuke);
+				continue;
+			}
+
+			// Check user filtering.
+			if (m_contactFilter->ShouldCollide(fixtureA, fixtureB) == false)
+			{
+				b2Contact* cNuke = c;
+				c = cNuke->GetNext();
+				Destroy(cNuke);
+				continue;
+			}
+
+			// Clear the filtering flag.
+			c->m_flags &= ~b2Contact::e_filterFlag;
+		}
+
+		int32 proxyIdA = fixtureA->m_proxyId;
+		int32 proxyIdB = fixtureB->m_proxyId;
+		const b2AABB& aabbA = m_broadPhase.GetAABB(proxyIdA);
+		const b2AABB& aabbB = m_broadPhase.GetAABB(proxyIdB);
+
+		// Here we cull out contacts that cease to overlap.
+		if (b2TestOverlap(aabbA, aabbB) == false)
+		{
+			b2Contact* cNuke = c;
+			c = cNuke->GetNext();
+			Destroy(cNuke);
+			continue;
+		}
+
+		// The contact persists.
+		c->Update(m_contactListener);
+		c = c->GetNext();
 	}
+}
+
+void b2ContactManager::FindNewContacts()
+{
+	m_broadPhase.UpdatePairs(this);
+}
+
+void b2ContactManager::AddPair(void* proxyUserDataA, void* proxyUserDataB)
+{
+	b2Fixture* fixtureA = (b2Fixture*)proxyUserDataA;
+	b2Fixture* fixtureB = (b2Fixture*)proxyUserDataB;
+
+	b2Body* bodyA = fixtureA->GetBody();
+	b2Body* bodyB = fixtureB->GetBody();
+
+	// Are the fixtures on the same body?
+	if (bodyA == bodyB)
+	{
+		return;
+	}
+
+	// Are both bodies static?
+	if (bodyA->IsStatic() && bodyB->IsStatic())
+	{
+		return;
+	}
+
+	// Does a contact already exist?
+	b2ContactEdge* edge = bodyB->GetConactList();
+	while (edge)
+	{
+		if (edge->other == bodyA)
+		{
+			b2Fixture* fA = edge->contact->GetFixtureA();
+			b2Fixture* fB = edge->contact->GetFixtureB();
+			if (fA == fixtureA && fB == fixtureB)
+			{
+				// A contact already exists.
+				return;
+			}
+
+			if (fA == fixtureB && fB == fixtureA)
+			{
+				// A contact already exists.
+				return;
+			}
+		}
+
+		edge = edge->next;
+	}
+
+	// Does a joint override collision?
+	if (bodyB->IsConnected(bodyA))
+	{
+		return;
+	}
+
+	// Check user filtering.
+	if (m_contactFilter->ShouldCollide(fixtureA, fixtureB) == false)
+	{
+		return;
+	}
+
+	// Call the factory.
+	b2Contact* c = b2Contact::Create(fixtureA, fixtureB, m_allocator);
+
+	// Contact creation may swap fixtures.
+	fixtureA = c->GetFixtureA();
+	fixtureB = c->GetFixtureB();
+	bodyA = fixtureA->GetBody();
+	bodyB = fixtureB->GetBody();
+
+	// Insert into the world.
+	c->m_prev = NULL;
+	c->m_next = m_contactList;
+	if (m_contactList != NULL)
+	{
+		m_contactList->m_prev = c;
+	}
+	m_contactList = c;
+
+	// Connect to island graph.
+
+	// Connect to body A
+	c->m_nodeA.contact = c;
+	c->m_nodeA.other = bodyB;
+
+	c->m_nodeA.prev = NULL;
+	c->m_nodeA.next = bodyA->m_contactList;
+	if (bodyA->m_contactList != NULL)
+	{
+		bodyA->m_contactList->prev = &c->m_nodeA;
+	}
+	bodyA->m_contactList = &c->m_nodeA;
+
+	// Connect to body B
+	c->m_nodeB.contact = c;
+	c->m_nodeB.other = bodyA;
+
+	c->m_nodeB.prev = NULL;
+	c->m_nodeB.next = bodyB->m_contactList;
+	if (bodyB->m_contactList != NULL)
+	{
+		bodyB->m_contactList->prev = &c->m_nodeB;
+	}
+	bodyB->m_contactList = &c->m_nodeB;
+
+	++m_contactCount;
 }

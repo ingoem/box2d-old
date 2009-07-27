@@ -47,7 +47,7 @@ public:
 			sd.restitution = 0.0f;
 
 			m_angularVelocity = RandomFloat(-50.0f, 50.0f);
-			//m_angularVelocity = 32.284004f;
+			m_angularVelocity = -30.669577f;
 
 			b2BodyDef bd;
 			bd.position.Set(00.0f, 20.0f);

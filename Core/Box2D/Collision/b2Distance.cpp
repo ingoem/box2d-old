@@ -403,20 +403,25 @@ void b2Distance(b2DistanceOutput* output,
 
 	// These store the vertices of the last simplex so that we
 	// can check for duplicates and prevent cycling.
-	const int32 k_maxSave = k_maxIters + 3;
-	int32 saveA[k_maxSave], saveB[k_maxSave];
-	int32 saveCount = simplex.m_count;
+	int32 saveA[3], saveB[3];
+	int32 saveCount = 0;
 
-	for (int32 i = 0; i < saveCount; ++i)
-	{
-		saveA[i] = vertices->indexA;
-		saveB[i] = vertices->indexB;
-	}
+	b2Vec2 closestPoint = simplex.GetClosestPoint();
+	float32 distanceSqr1 = closestPoint.LengthSquared();
+	float32 distanceSqr2 = distanceSqr1;
 
 	// Main iteration loop.
 	int32 iter = 0;
 	while (iter < k_maxIters)
 	{
+		// Copy simplex so we can identify duplicates.
+		saveCount = simplex.m_count;
+		for (int32 i = 0; i < saveCount; ++i)
+		{
+			saveA[i] = vertices[i].indexA;
+			saveB[i] = vertices[i].indexB;
+		}
+
 		switch (simplex.m_count)
 		{
 		case 1:
@@ -439,6 +444,17 @@ void b2Distance(b2DistanceOutput* output,
 		{
 			break;
 		}
+
+		// Compute closest point.
+		b2Vec2 p = simplex.GetClosestPoint();
+		distanceSqr2 = p.LengthSquared();
+
+		// Ensure progress
+		if (distanceSqr2 >= distanceSqr1)
+		{
+			//break;
+		}
+		distanceSqr1 = distanceSqr2;
 
 		// Get search direction.
 		b2Vec2 d = simplex.GetSearchDirection();
@@ -484,11 +500,6 @@ void b2Distance(b2DistanceOutput* output,
 		{
 			break;
 		}
-
-		b2Assert(saveCount < k_maxSave);
-		saveA[saveCount] = vertex->indexA;
-		saveB[saveCount] = vertex->indexB;
-		++saveCount;
 
 		// New vertex is ok and needed.
 		++simplex.m_count;

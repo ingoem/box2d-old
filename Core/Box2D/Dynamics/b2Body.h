@@ -34,6 +34,7 @@ struct b2ContactEdge;
 
 /// A body definition holds all the data needed to construct a rigid body.
 /// You can safely re-use body definitions.
+/// Shapes are added to a body after construction.
 struct b2BodyDef
 {
 	/// This constructor sets the body definition default values.
@@ -58,6 +59,9 @@ struct b2BodyDef
 	/// You can use this to initialized the mass properties of the body.
 	/// If you prefer, you can set the mass properties after the shapes
 	/// have been added using b2Body::SetMassFromShapes.
+	/// By default the mass data is set to zero, meaning the body is seen
+	/// as static. If you intend the body to be dynamic, a small performance
+	/// gain can be had by setting the mass to some positive value.
 	b2MassData massData;
 
 	/// Use this to store application specific body data.
@@ -122,6 +126,7 @@ public:
 	/// Set the mass properties. Note that this changes the center of mass position.
 	/// If you are not sure how to compute mass properties, use SetMassFromShapes.
 	/// The inertia tensor is assumed to be relative to the center of mass.
+	/// You can make the body static by using a zero mass.
 	/// @param massData the mass properties.
 	void SetMassData(const b2MassData* data);
 
@@ -130,35 +135,15 @@ public:
 	/// to call this again. Note that this changes the center of mass position.
 	void SetMassFromShapes();
 
-	/// Set the position of the body's origin and rotation (radians).
+	/// Set the position of the body's origin and rotation.
 	/// This breaks any contacts and wakes the other bodies.
-	/// @param position the new world position of the body's origin (not necessarily
-	/// the center of mass).
-	/// @param angle the new world rotation angle of the body in radians.
-	/// @return false if the movement put a shape outside the world. In this case the
-	/// body is automatically frozen.
-	bool SetXForm(const b2Vec2& position, float32 angle);
-
-	/// Set the position of the body's origin and rotation (radians).
-	/// This breaks any contacts and wakes the other bodies.
-	/// Note this is less efficient than the other overload - you should use that
-	/// if the angle is available.
-	/// @param xf the transform of position and angle to set the body to.
-	/// @return false if the movement put a shape outside the world. In this case the
-	/// body is automatically frozen.
-	bool SetXForm(const b2XForm& xf);
+	/// @param position the world position of the body's local origin.
+	/// @param angle the world rotation in radians.
+	void SetXForm(const b2Vec2& position, float32 angle);
 
 	/// Get the body transform for the body's origin.
 	/// @return the world transform of the body's origin.
 	const b2XForm& GetXForm() const;
-
-	/// Set the world body origin position.
-	/// @param position the new position of the body.
-	void SetPosition(const b2Vec2& position);
-
-	/// Set the world body angle.
-	/// @param angle the new angle of the body.
-	void SetAngle(float32 angle);
 
 	/// Get the world body origin position.
 	/// @return the world position of the body's origin.
@@ -273,10 +258,6 @@ public:
 	/// Is this body static (immovable)?
 	bool IsStatic() const;
 
-	/// Make this body static (immovable).
-	/// Use SetMass and SetMassFromShapes to make bodies dynamic.
-	void SetStatic();
-
 	/// Is this body dynamic (movable)?
 	bool IsDynamic() const;
 
@@ -365,7 +346,7 @@ private:
 	b2Body(const b2BodyDef* bd, b2World* world);
 	~b2Body();
 
-	bool SynchronizeFixtures();
+	void SynchronizeFixtures();
 	void SynchronizeTransform();
 
 	// This is used to prevent connected bodies from colliding.
@@ -412,21 +393,6 @@ private:
 inline const b2XForm& b2Body::GetXForm() const
 {
 	return m_xf;
-}
-
-inline bool b2Body::SetXForm(const b2XForm& xf)
-{
-	return SetXForm(xf.position, xf.GetAngle());
-}
-
-inline void b2Body::SetPosition(const b2Vec2& position)
-{
-	SetXForm(position, GetAngle());
-}
-
-inline void b2Body::SetAngle(float32 angle)
-{
-	SetXForm(GetPosition(), angle);
 }
 
 inline const b2Vec2& b2Body::GetPosition() const

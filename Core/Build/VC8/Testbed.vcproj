@@ -214,14 +214,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Examples\TestBed\Tests\BroadPhaseTest.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Examples\TestBed\Tests\BroadPhaseTest.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Examples\TestBed\Tests\CCDTest.h"
 				>
 			</File>

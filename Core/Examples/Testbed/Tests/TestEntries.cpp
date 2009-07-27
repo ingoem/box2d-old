@@ -23,7 +23,6 @@
 
 #include "ApplyForce.h"
 #include "Bridge.h"
-#include "BroadPhaseTest.h"
 #include "CCDTest.h"
 #include "Chain.h"
 #include "CollisionFiltering.h"
@@ -53,16 +52,16 @@
 
 TestEntry g_testEntries[] =
 {
-	{"Sensor Test", SensorTest::Create},
 	{"CCD Test", CCDTest::Create},
+	{"Pyramid", Pyramid::Create},
 	{"SphereStack", SphereStack::Create},
+	{"Sensor Test", SensorTest::Create},
 	{"Vertical Stack", VerticalStack::Create},
 	{"Time of Impact", TimeOfImpact::Create},
 	{"Distance Test", DistanceTest::Create},
 	{"PolyCollision", PolyCollision::Create},
 	{"Dynamic Tree", DynamicTreeTest::Create},
 	{"Line Joint", LineJoint::Create},
-	{"Pyramid", Pyramid::Create},
 	{"Prismatic", Prismatic::Create},
 	{"Revolute", Revolute::Create},
 	{"Bridge", Bridge::Create},
@@ -81,6 +80,5 @@ TestEntry g_testEntries[] =
 	{"Apply Force", ApplyForce::Create},
 	{"Pulleys", Pulleys::Create},
 	{"Shape Editing", ShapeEditing::Create},
-	{"Broad Phase", BroadPhaseTest::Create},
 	{NULL, NULL}
 };

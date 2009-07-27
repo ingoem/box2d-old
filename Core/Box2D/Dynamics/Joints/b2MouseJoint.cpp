@@ -18,7 +18,7 @@
 
 #include <Box2D/Dynamics/Joints/b2MouseJoint.h>
 #include <Box2D/Dynamics/b2Body.h>
-#include <Box2D/Dynamics/b2World.h>
+#include <Box2D/Dynamics/b2TimeStep.h>
 
 // p = attached point, m = mouse point
 // C = p - m
@@ -32,7 +32,7 @@ b2MouseJoint::b2MouseJoint(const b2MouseJointDef* def)
 : b2Joint(def)
 {
 	m_target = def->target;
-	m_localAnchor = b2MulT(m_body2->GetXForm(), m_target);
+	m_localAnchor = b2MulT(m_bodyB->GetXForm(), m_target);
 
 	m_maxForce = def->maxForce;
 	m_impulse.SetZero();
@@ -46,16 +46,16 @@ b2MouseJoint::b2MouseJoint(const b2MouseJointDef* def)
 
 void b2MouseJoint::SetTarget(const b2Vec2& target)
 {
-	if (m_body2->IsSleeping())
+	if (m_bodyB->IsSleeping())
 	{
-		m_body2->WakeUp();
+		m_bodyB->WakeUp();
 	}
 	m_target = target;
 }
 
 void b2MouseJoint::InitVelocityConstraints(const b2TimeStep& step)
 {
-	b2Body* b = m_body2;
+	b2Body* b = m_bodyB;
 
 	float32 mass = b->GetMass();
 
@@ -111,7 +111,7 @@ void b2MouseJoint::InitVelocityConstraints(const b2TimeStep& step)
 
 void b2MouseJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
-	b2Body* b = m_body2;
+	b2Body* b = m_bodyB;
 
 	b2Vec2 r = b2Mul(b->GetXForm().R, m_localAnchor - b->GetLocalCenter());
 
@@ -139,7 +139,7 @@ b2Vec2 b2MouseJoint::GetAnchor1() const
 
 b2Vec2 b2MouseJoint::GetAnchor2() const
 {
-	return m_body2->GetWorldPoint(m_localAnchor);
+	return m_bodyB->GetWorldPoint(m_localAnchor);
 }
 
 b2Vec2 b2MouseJoint::GetReactionForce(float32 inv_dt) const

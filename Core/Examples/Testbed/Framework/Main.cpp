@@ -379,10 +379,7 @@ int main(int argc, char** argv)
 	GLUI_Panel* drawPanel =	glui->add_panel("Draw");
 	glui->add_checkbox_to_panel(drawPanel, "Shapes", &settings.drawShapes);
 	glui->add_checkbox_to_panel(drawPanel, "Joints", &settings.drawJoints);
-	glui->add_checkbox_to_panel(drawPanel, "Controllers", &settings.drawControllers);
-	glui->add_checkbox_to_panel(drawPanel, "Core Shapes", &settings.drawCoreShapes);
 	glui->add_checkbox_to_panel(drawPanel, "AABBs", &settings.drawAABBs);
-	glui->add_checkbox_to_panel(drawPanel, "OBBs", &settings.drawOBBs);
 	glui->add_checkbox_to_panel(drawPanel, "Pairs", &settings.drawPairs);
 	glui->add_checkbox_to_panel(drawPanel, "Contact Points", &settings.drawContactPoints);
 	glui->add_checkbox_to_panel(drawPanel, "Contact Normals", &settings.drawContactNormals);

@@ -115,7 +115,6 @@ public:
 	void SolveVelocityConstraints(const b2TimeStep& step);
 	bool SolvePositionConstraints(float32 baumgarte);
 
-	b2Body* m_ground;
 	b2Vec2 m_groundAnchor1;
 	b2Vec2 m_groundAnchor2;
 	b2Vec2 m_localAnchor1;

@@ -37,7 +37,6 @@ For discussion please visit http://www.box2d.org/forum
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
 
 #include <Box2D/Collision/b2BroadPhase.h>
-#include <Box2D/Collision/b2PairManager.h>
 #include <Box2D/Collision/b2Distance.h>
 #include <Box2D/Collision/b2DynamicTree.h>
 #include <Box2D/Collision/b2TimeOfImpact.h>
@@ -45,6 +44,7 @@ For discussion please visit http://www.box2d.org/forum
 #include <Box2D/Dynamics/b2Body.h>
 #include <Box2D/Dynamics/b2Fixture.h>
 #include <Box2D/Dynamics/b2WorldCallbacks.h>
+#include <Box2D/Dynamics/b2TimeStep.h>
 #include <Box2D/Dynamics/b2World.h>
 
 #include <Box2D/Dynamics/Contacts/b2Contact.h>

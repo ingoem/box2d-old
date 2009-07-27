@@ -16,28 +16,20 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef B2_TIME_OF_IMPACT_H
-#define B2_TIME_OF_IMPACT_H
+#ifndef B2_TIME_STEP_H
+#define B2_TIME_STEP_H
 
-#include <Box2D/Common/b2Math.h>
-#include <climits>
+#include <Box2D/Common/b2Settings.h>
 
-/// Inpute parameters for b2TimeOfImpact
-struct b2TOIInput
+/// This is an internal structure.
+struct b2TimeStep
 {
-	b2Sweep sweepA;
-	b2Sweep sweepB;
-	float32 tolerance;
+	float32 dt;			// time step
+	float32 inv_dt;		// inverse time step (0 if dt == 0).
+	float32 dtRatio;	// dt * inv_dt0
+	int32 velocityIterations;
+	int32 positionIterations;
+	bool warmStarting;
 };
-
-/// Compute the time when two shapes begin to touch or touch at a closer distance.
-/// TOI considers the shape radii. It attempts to have the radii overlap by the tolerance.
-/// Iterations terminate with the overlap is within 0.5 * tolerance. The tolerance should be
-/// smaller than sum of the shape radii.
-/// @warning the sweeps must have the same time interval.
-/// @return the fraction between [0,1] in which the shapes first touch.
-/// fraction=0 means the shapes begin touching/overlapped, and fraction=1 means the shapes don't touch.
-template <typename TA, typename TB>
-float32 b2TimeOfImpact(const b2TOIInput* input, const TA* shapeA, const TB* shapeB);
 
 #endif

@@ -136,7 +136,6 @@ public:
 	/// Set the user data pointer.
 	void SetUserData(void* data);
 
-	//--------------- Internals Below -------------------
 protected:
 	friend class b2World;
 	friend class b2Body;
@@ -159,10 +158,10 @@ protected:
 	b2JointType m_type;
 	b2Joint* m_prev;
 	b2Joint* m_next;
-	b2JointEdge m_node1;
-	b2JointEdge m_node2;
-	b2Body* m_body1;
-	b2Body* m_body2;
+	b2JointEdge m_edgeA;
+	b2JointEdge m_edgeB;
+	b2Body* m_bodyA;
+	b2Body* m_bodyB;
 
 	bool m_islandFlag;
 	bool m_collideConnected;
@@ -199,12 +198,12 @@ inline b2JointType b2Joint::GetType() const
 
 inline b2Body* b2Joint::GetBody1()
 {
-	return m_body1;
+	return m_bodyA;
 }
 
 inline b2Body* b2Joint::GetBody2()
 {
-	return m_body2;
+	return m_bodyB;
 }
 
 inline b2Joint* b2Joint::GetNext()

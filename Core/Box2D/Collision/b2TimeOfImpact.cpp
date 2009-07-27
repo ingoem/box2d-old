@@ -407,7 +407,10 @@ float32 b2TimeOfImpact(const b2TOIInput* input, const TA* shapeA, const TB* shap
 				++rootIterCount;
 				++b2_toiRootIters;
 
-				b2Assert(rootIterCount < 50);
+				if (rootIterCount == 50)
+				{
+					break;
+				}
 			}
 
 			b2_toiMaxRootIters = b2Max(b2_toiMaxRootIters, rootIterCount);

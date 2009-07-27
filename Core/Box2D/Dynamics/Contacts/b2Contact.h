@@ -96,7 +96,10 @@ public:
 
 	/// Get the second fixture in this contact.
 	b2Fixture* GetFixtureB();
-    
+
+	/// Flag this contact for filtering. Filtering will occur the next time step.
+	void FlagForFiltering();
+
 	//--------------- Internals Below -------------------
 protected:
 	friend class b2ContactManager;
@@ -117,6 +120,8 @@ protected:
 		e_toiFlag		= 0x0008,
         // TODO: Doc
 		e_touchFlag		= 0x0010,
+		// This contact needs filtering because a fixture filter was changed.
+		e_filterFlag	= 0x0020,
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
@@ -194,6 +199,11 @@ inline b2Fixture* b2Contact::GetFixtureA()
 inline b2Fixture* b2Contact::GetFixtureB()
 {
 	return m_fixtureB;
+}
+
+inline void b2Contact::FlagForFiltering()
+{
+	m_flags |= e_filterFlag;
 }
 
 #endif

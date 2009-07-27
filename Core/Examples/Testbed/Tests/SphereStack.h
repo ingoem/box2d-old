@@ -25,7 +25,7 @@ public:
 
 	enum
 	{
-		e_count = 10
+		e_count = 2
 	};
 
 	SphereStack()

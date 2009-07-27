@@ -61,8 +61,6 @@ public:
 		b2TOIInput input;
 		input.sweepA = sweepA;
 		input.sweepB = sweepB;
-		input.sweepRadiusA = m_shapeA.ComputeSweepRadius(sweepA.localCenter);
-		input.sweepRadiusB = m_shapeB.ComputeSweepRadius(sweepB.localCenter);
 		input.tolerance = b2_linearSlop;
 
 		float32 toi = b2TimeOfImpact(&input, &m_shapeA, &m_shapeB);

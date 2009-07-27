@@ -22,6 +22,11 @@
 class Pyramid : public Test
 {
 public:
+	enum
+	{
+		e_count = 25,
+	};
+
 	Pyramid()
 	{
 		{
@@ -45,11 +50,11 @@ public:
 			b2Vec2 deltaX(0.5625f, 1.25f);
 			b2Vec2 deltaY(1.125f, 0.0f);
 
-			for (int32 i = 0; i < 25; ++i)
+			for (int32 i = 0; i < e_count; ++i)
 			{
 				y = x;
 
-				for (int32 j = i; j < 25; ++j)
+				for (int32 j = i; j < e_count; ++j)
 				{
 					b2BodyDef bd;
 					bd.position = y;

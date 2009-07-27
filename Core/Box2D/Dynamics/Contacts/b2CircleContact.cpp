@@ -59,8 +59,6 @@ float32 b2CircleContact::ComputeTOI(const b2Sweep& sweepA, const b2Sweep& sweepB
 	b2TOIInput input;
 	input.sweepA = sweepA;
 	input.sweepB = sweepB;
-	input.sweepRadiusA = m_fixtureA->ComputeSweepRadius(sweepA.localCenter);
-	input.sweepRadiusB = m_fixtureB->ComputeSweepRadius(sweepB.localCenter);
 	input.tolerance = b2_linearSlop;
 
 	return b2TimeOfImpact(&input, (const b2CircleShape*)m_fixtureA->GetShape(), (const b2CircleShape*)m_fixtureB->GetShape());

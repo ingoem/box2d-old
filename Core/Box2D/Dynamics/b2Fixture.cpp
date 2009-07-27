@@ -17,10 +17,11 @@
 */
 
 #include <Box2D/Dynamics/b2Fixture.h>
+#include <Box2D/Dynamics/Contacts/b2Contact.h>
 #include <Box2D/Collision/Shapes/b2CircleShape.h>
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
-#include <Box2D/Collision/b2Collision.h>
 #include <Box2D/Collision/b2BroadPhase.h>
+#include <Box2D/Collision/b2Collision.h>
 #include <Box2D/Common/b2BlockAllocator.h>
 
 #include <new>
@@ -57,14 +58,14 @@ b2Fixture::b2Fixture()
 	m_userData = NULL;
 	m_body = NULL;
 	m_next = NULL;
-	m_proxyId = b2_nullProxy;
+	m_proxyId = b2BroadPhase::e_nullProxy;
 	m_shape = NULL;
 }
 
 b2Fixture::~b2Fixture()
 {
 	b2Assert(m_shape == NULL);
-	b2Assert(m_proxyId == b2_nullProxy);
+	b2Assert(m_proxyId == b2BroadPhase::e_nullProxy);
 }
 
 void b2Fixture::Create(b2BlockAllocator* allocator, b2BroadPhase* broadPhase, b2Body* body, const b2XForm& xf, const b2FixtureDef* def)
@@ -116,28 +117,16 @@ void b2Fixture::Create(b2BlockAllocator* allocator, b2BroadPhase* broadPhase, b2
 	b2AABB aabb;
 	m_shape->ComputeAABB(&aabb, xf);
 
-	bool inRange = broadPhase->InRange(aabb);
-
-	// You are creating a shape outside the world box.
-	b2Assert(inRange);
-
-	if (inRange)
-	{
-		m_proxyId = broadPhase->CreateProxy(aabb, this);
-	}
-	else
-	{
-		m_proxyId = b2_nullProxy;
-	}
+	m_proxyId = broadPhase->CreateProxy(aabb, this);
 }
 
 void b2Fixture::Destroy(b2BlockAllocator* allocator, b2BroadPhase* broadPhase)
 {
 	// Remove proxy from the broad-phase.
-	if (m_proxyId != b2_nullProxy)
+	if (m_proxyId != b2BroadPhase::e_nullProxy)
 	{
 		broadPhase->DestroyProxy(m_proxyId);
-		m_proxyId = b2_nullProxy;
+		m_proxyId = b2BroadPhase::e_nullProxy;
 	}
 
 	// Free the child shape.
@@ -167,11 +156,11 @@ void b2Fixture::Destroy(b2BlockAllocator* allocator, b2BroadPhase* broadPhase)
 	m_shape = NULL;
 }
 
-bool b2Fixture::Synchronize(b2BroadPhase* broadPhase, const b2XForm& transform1, const b2XForm& transform2)
+void b2Fixture::Synchronize(b2BroadPhase* broadPhase, const b2XForm& transform1, const b2XForm& transform2)
 {
-	if (m_proxyId == b2_nullProxy)
+	if (m_proxyId == b2BroadPhase::e_nullProxy)
 	{	
-		return false;
+		return;
 	}
 
 	// Compute an AABB that covers the swept shape (may miss some rotation effect).
@@ -181,38 +170,28 @@ bool b2Fixture::Synchronize(b2BroadPhase* broadPhase, const b2XForm& transform1,
 	
 	b2AABB aabb;
 	aabb.Combine(aabb1, aabb2);
-
-	if (broadPhase->InRange(aabb))
-	{
-		broadPhase->MoveProxy(m_proxyId, aabb);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	broadPhase->MoveProxy(m_proxyId, aabb);
 }
 
-void b2Fixture::RefilterProxy(b2BroadPhase* broadPhase, const b2XForm& transform)
+void b2Fixture::SetFilterData(const b2FilterData& filter)
 {
-	if (m_proxyId == b2_nullProxy)
-	{	
+	m_filter = filter;
+
+	if (m_body == NULL)
+	{
 		return;
 	}
 
-	broadPhase->DestroyProxy(m_proxyId);
-
-	b2AABB aabb;
-	m_shape->ComputeAABB(&aabb, transform);
-
-	bool inRange = broadPhase->InRange(aabb);
-
-	if (inRange)
+	// Flag associated contacts for filtering.
+	b2ContactEdge* edge = m_body->GetConactList();
+	while (edge)
 	{
-		m_proxyId = broadPhase->CreateProxy(aabb, this);
-	}
-	else
-	{
-		m_proxyId = b2_nullProxy;
+		b2Contact* contact = edge->contact;
+		b2Fixture* fixtureA = contact->GetFixtureA();
+		b2Fixture* fixtureB = contact->GetFixtureB();
+		if (fixtureA == this || fixtureB == this)
+		{
+			contact->FlagForFiltering();
+		}
 	}
 }

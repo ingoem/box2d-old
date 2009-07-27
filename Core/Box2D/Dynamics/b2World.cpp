@@ -24,27 +24,20 @@
 #include <Box2D/Dynamics/Contacts/b2Contact.h>
 #include <Box2D/Dynamics/Contacts/b2ContactSolver.h>
 #include <Box2D/Collision/b2Collision.h>
+#include <Box2D/Collision/b2BroadPhase.h>
 #include <Box2D/Collision/Shapes/b2CircleShape.h>
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
 #include <new>
 
-b2ContactFilter b2_defaultFilter;
-b2ContactListener b2_defaultListener;
-
-b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
+b2World::b2World(const b2Vec2& gravity, bool doSleep)
 {
 	m_destructionListener = NULL;
-	m_boundaryListener = NULL;
-	m_contactFilter = &b2_defaultFilter;
-	m_contactListener = &b2_defaultListener;
 	m_debugDraw = NULL;
 
 	m_bodyList = NULL;
-	m_contactList = NULL;
 	m_jointList = NULL;
 
 	m_bodyCount = 0;
-	m_contactCount = 0;
 	m_jointCount = 0;
 
 	m_warmStarting = true;
@@ -53,23 +46,15 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_allowSleep = doSleep;
 	m_gravity = gravity;
 
-	m_lock = false;
+	m_flags = 0;
 
 	m_inv_dt0 = 0.0f;
 
-	m_contactManager.m_world = this;
-	void* mem = b2Alloc(sizeof(b2BroadPhase));
-	m_broadPhase = new (mem) b2BroadPhase(worldAABB, &m_contactManager);
-
-	b2BodyDef bd;
-	m_groundBody = CreateBody(&bd);
+	m_contactManager.m_allocator = &m_blockAllocator;
 }
 
 b2World::~b2World()
 {
-	DestroyBody(m_groundBody);
-	m_broadPhase->~b2BroadPhase();
-	b2Free(m_broadPhase);
 }
 
 void b2World::SetDestructionListener(b2DestructionListener* listener)
@@ -77,19 +62,14 @@ void b2World::SetDestructionListener(b2DestructionListener* listener)
 	m_destructionListener = listener;
 }
 
-void b2World::SetBoundaryListener(b2BoundaryListener* listener)
-{
-	m_boundaryListener = listener;
-}
-
 void b2World::SetContactFilter(b2ContactFilter* filter)
 {
-	m_contactFilter = filter;
+	m_contactManager.m_contactFilter = filter;
 }
 
 void b2World::SetContactListener(b2ContactListener* listener)
 {
-	m_contactListener = listener;
+	m_contactManager.m_contactListener = listener;
 }
 
 void b2World::SetDebugDraw(b2DebugDraw* debugDraw)
@@ -99,8 +79,8 @@ void b2World::SetDebugDraw(b2DebugDraw* debugDraw)
 
 b2Body* b2World::CreateBody(const b2BodyDef* def)
 {
-	b2Assert(m_lock == false);
-	if (m_lock == true)
+	b2Assert(IsLocked() == false);
+	if (IsLocked())
 	{
 		return NULL;
 	}
@@ -124,29 +104,39 @@ b2Body* b2World::CreateBody(const b2BodyDef* def)
 void b2World::DestroyBody(b2Body* b)
 {
 	b2Assert(m_bodyCount > 0);
-	b2Assert(m_lock == false);
-	if (m_lock == true)
+	b2Assert(IsLocked() == false);
+	if (IsLocked())
 	{
 		return;
 	}
 
 	// Delete the attached joints.
-	b2JointEdge* jn = b->m_jointList;
-	while (jn)
+	b2JointEdge* je = b->m_jointList;
+	while (je)
 	{
-		b2JointEdge* jn0 = jn;
-		jn = jn->next;
+		b2JointEdge* je0 = je;
+		je = je->next;
 
 		if (m_destructionListener)
 		{
-			m_destructionListener->SayGoodbye(jn0->joint);
+			m_destructionListener->SayGoodbye(je0->joint);
 		}
 
-		DestroyJoint(jn0->joint);
+		DestroyJoint(je0->joint);
 	}
+	b->m_jointList = NULL;
 
-	// Delete the attached fixtures. This destroys broad-phase
-	// proxies and pairs, leading to the destruction of contacts.
+	// Delete the attached contacts.
+	b2ContactEdge* ce = b->m_contactList;
+	while (ce)
+	{
+		b2ContactEdge* ce0 = ce;
+		ce = ce->next;
+		m_contactManager.Destroy(ce0->contact);
+	}
+	b->m_contactList = NULL;
+
+	// Delete the attached fixtures. This destroys broad-phase proxies.
 	b2Fixture* f = b->m_fixtureList;
 	while (f)
 	{
@@ -158,10 +148,12 @@ void b2World::DestroyBody(b2Body* b)
 			m_destructionListener->SayGoodbye(f0);
 		}
 
-		f0->Destroy(&m_blockAllocator, m_broadPhase);
+		f0->Destroy(&m_blockAllocator, &m_contactManager.m_broadPhase);
 		f0->~b2Fixture();
 		m_blockAllocator.Free(f0, sizeof(b2Fixture));
 	}
+	b->m_fixtureList = NULL;
+	b->m_fixtureCount = 0;
 
 	// Remove world body list.
 	if (b->m_prev)
@@ -186,7 +178,11 @@ void b2World::DestroyBody(b2Body* b)
 
 b2Joint* b2World::CreateJoint(const b2JointDef* def)
 {
-	b2Assert(m_lock == false);
+	b2Assert(IsLocked() == false);
+	if (IsLocked())
+	{
+		return NULL;
+	}
 
 	b2Joint* j = b2Joint::Create(def, &m_blockAllocator);
 
@@ -201,37 +197,62 @@ b2Joint* b2World::CreateJoint(const b2JointDef* def)
 	++m_jointCount;
 
 	// Connect to the bodies' doubly linked lists.
-	j->m_node1.joint = j;
-	j->m_node1.other = j->m_body2;
-	j->m_node1.prev = NULL;
-	j->m_node1.next = j->m_body1->m_jointList;
-	if (j->m_body1->m_jointList) j->m_body1->m_jointList->prev = &j->m_node1;
-	j->m_body1->m_jointList = &j->m_node1;
+	j->m_edgeA.joint = j;
+	j->m_edgeA.other = j->m_bodyB;
+	j->m_edgeA.prev = NULL;
+	j->m_edgeA.next = j->m_bodyA->m_jointList;
+	if (j->m_bodyA->m_jointList) j->m_bodyA->m_jointList->prev = &j->m_edgeA;
+	j->m_bodyA->m_jointList = &j->m_edgeA;
 
-	j->m_node2.joint = j;
-	j->m_node2.other = j->m_body1;
-	j->m_node2.prev = NULL;
-	j->m_node2.next = j->m_body2->m_jointList;
-	if (j->m_body2->m_jointList) j->m_body2->m_jointList->prev = &j->m_node2;
-	j->m_body2->m_jointList = &j->m_node2;
+	j->m_edgeB.joint = j;
+	j->m_edgeB.other = j->m_bodyA;
+	j->m_edgeB.prev = NULL;
+	j->m_edgeB.next = j->m_bodyB->m_jointList;
+	if (j->m_bodyB->m_jointList) j->m_bodyB->m_jointList->prev = &j->m_edgeB;
+	j->m_bodyB->m_jointList = &j->m_edgeB;
 
-	// If the joint prevents collisions, then reset collision filtering.
-	if (def->collideConnected == false)
+	b2Body* bodyA = def->body1;
+	b2Body* bodyB = def->body2;
+
+	bool staticA = bodyA->IsStatic();
+	bool staticB = bodyB->IsStatic();
+
+	// If the joint prevents collisions, then flag any contacts for filtering.
+	if (def->collideConnected == false && (staticA == false || staticB == false))
 	{
-		// Reset the proxies on the body with the minimum number of fixtures.
-		b2Body* b = def->body1->m_fixtureCount < def->body2->m_fixtureCount ? def->body1 : def->body2;
-		for (b2Fixture* f = b->m_fixtureList; f; f = f->m_next)
+		// Ensure we iterate over contacts on a dynamic body (usually have less contacts
+		// than a static body). Ideally we will have a contact count on both bodies.
+		if (staticB)
 		{
-			f->RefilterProxy(m_broadPhase, b->GetXForm());
+			b2Swap(bodyA, bodyB);
+		}
+
+		b2ContactEdge* edge = bodyB->GetConactList();
+		while (edge)
+		{
+			if (edge->other == bodyA)
+			{
+				// Flag the contact for filtering at the next time step (where either
+				// body is awake).
+				edge->contact->FlagForFiltering();
+			}
+
+			edge = edge->next;
 		}
 	}
+
+	// Note: creating a joint doesn't wake the bodies.
 
 	return j;
 }
 
 void b2World::DestroyJoint(b2Joint* j)
 {
-	b2Assert(m_lock == false);
+	b2Assert(IsLocked() == false);
+	if (IsLocked())
+	{
+		return;
+	}
 
 	bool collideConnected = j->m_collideConnected;
 
@@ -252,87 +273,90 @@ void b2World::DestroyJoint(b2Joint* j)
 	}
 
 	// Disconnect from island graph.
-	b2Body* body1 = j->m_body1;
-	b2Body* body2 = j->m_body2;
+	b2Body* bodyA = j->m_bodyA;
+	b2Body* bodyB = j->m_bodyB;
 
 	// Wake up connected bodies.
-	body1->WakeUp();
-	body2->WakeUp();
+	bodyA->WakeUp();
+	bodyB->WakeUp();
 
 	// Remove from body 1.
-	if (j->m_node1.prev)
+	if (j->m_edgeA.prev)
 	{
-		j->m_node1.prev->next = j->m_node1.next;
+		j->m_edgeA.prev->next = j->m_edgeA.next;
 	}
 
-	if (j->m_node1.next)
+	if (j->m_edgeA.next)
 	{
-		j->m_node1.next->prev = j->m_node1.prev;
+		j->m_edgeA.next->prev = j->m_edgeA.prev;
 	}
 
-	if (&j->m_node1 == body1->m_jointList)
+	if (&j->m_edgeA == bodyA->m_jointList)
 	{
-		body1->m_jointList = j->m_node1.next;
+		bodyA->m_jointList = j->m_edgeA.next;
 	}
 
-	j->m_node1.prev = NULL;
-	j->m_node1.next = NULL;
+	j->m_edgeA.prev = NULL;
+	j->m_edgeA.next = NULL;
 
 	// Remove from body 2
-	if (j->m_node2.prev)
+	if (j->m_edgeB.prev)
 	{
-		j->m_node2.prev->next = j->m_node2.next;
+		j->m_edgeB.prev->next = j->m_edgeB.next;
 	}
 
-	if (j->m_node2.next)
+	if (j->m_edgeB.next)
 	{
-		j->m_node2.next->prev = j->m_node2.prev;
+		j->m_edgeB.next->prev = j->m_edgeB.prev;
 	}
 
-	if (&j->m_node2 == body2->m_jointList)
+	if (&j->m_edgeB == bodyB->m_jointList)
 	{
-		body2->m_jointList = j->m_node2.next;
+		bodyB->m_jointList = j->m_edgeB.next;
 	}
 
-	j->m_node2.prev = NULL;
-	j->m_node2.next = NULL;
+	j->m_edgeB.prev = NULL;
+	j->m_edgeB.next = NULL;
 
 	b2Joint::Destroy(j, &m_blockAllocator);
 
 	b2Assert(m_jointCount > 0);
 	--m_jointCount;
 
-	// If the joint prevents collisions, then reset collision filtering.
+	// If the joint prevents collisions, then flag any contacts for filtering.
 	if (collideConnected == false)
 	{
-		// Reset the proxies on the body with the minimum number of fixtures.
-		b2Body* b = body1->m_fixtureCount < body2->m_fixtureCount ? body1 : body2;
-		for (b2Fixture* f = b->m_fixtureList; f; f = f->m_next)
+		b2ContactEdge* edge = bodyB->GetConactList();
+		while (edge)
 		{
-			f->RefilterProxy(m_broadPhase, b->GetXForm());
+			if (edge->other == bodyA)
+			{
+				// Flag the contact for filtering at the next time step (where either
+				// body is awake).
+				edge->contact->FlagForFiltering();
+			}
+
+			edge = edge->next;
 		}
 	}
-}
-
-void b2World::Refilter(b2Fixture* fixture)
-{
-	b2Assert(m_lock == false);
-
-	fixture->RefilterProxy(m_broadPhase, fixture->GetBody()->GetXForm());
 }
 
 // Find islands, integrate and solve constraints, solve position constraints
 void b2World::Solve(const b2TimeStep& step)
 {
 	// Size the island for the worst case.
-	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator, m_contactListener);
+	b2Island island(m_bodyCount,
+					m_contactManager.m_contactCount,
+					m_jointCount,
+					&m_stackAllocator,
+					m_contactManager.m_contactListener);
 
 	// Clear all the island flags.
 	for (b2Body* b = m_bodyList; b; b = b->m_next)
 	{
 		b->m_flags &= ~b2Body::e_islandFlag;
 	}
-	for (b2Contact* c = m_contactList; c; c = c->m_next)
+	for (b2Contact* c = m_contactManager.m_contactList; c; c = c->m_next)
 	{
 		c->m_flags &= ~b2Contact::e_islandFlag;
 	}
@@ -380,25 +404,25 @@ void b2World::Solve(const b2TimeStep& step)
 			}
 
 			// Search all contacts connected to this body.
-			for (b2ContactEdge* cn = b->m_contactList; cn; cn = cn->next)
+			for (b2ContactEdge* ce = b->m_contactList; ce; ce = ce->next)
 			{
 				// Has this contact already been added to an island?
 				// Is this contact non-solid (involves a sensor).
-				if (cn->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_nonSolidFlag))
+				if (ce->contact->m_flags & (b2Contact::e_islandFlag | b2Contact::e_nonSolidFlag))
 				{
 					continue;
 				}
 
 				// Is this contact touching?
-				if ((cn->contact->m_flags & b2Contact::e_touchFlag) == 0)
+				if ((ce->contact->m_flags & b2Contact::e_touchFlag) == 0)
 				{
 					continue;
 				}
 
-				island.Add(cn->contact);
-				cn->contact->m_flags |= b2Contact::e_islandFlag;
+				island.Add(ce->contact);
+				ce->contact->m_flags |= b2Contact::e_islandFlag;
 
-				b2Body* other = cn->other;
+				b2Body* other = ce->other;
 
 				// Was the other body already added to this island?
 				if (other->m_flags & b2Body::e_islandFlag)
@@ -412,17 +436,17 @@ void b2World::Solve(const b2TimeStep& step)
 			}
 
 			// Search all joints connect to this body.
-			for (b2JointEdge* jn = b->m_jointList; jn; jn = jn->next)
+			for (b2JointEdge* je = b->m_jointList; je; je = je->next)
 			{
-				if (jn->joint->m_islandFlag == true)
+				if (je->joint->m_islandFlag == true)
 				{
 					continue;
 				}
 
-				island.Add(jn->joint);
-				jn->joint->m_islandFlag = true;
+				island.Add(je->joint);
+				je->joint->m_islandFlag = true;
 
-				b2Body* other = jn->other;
+				b2Body* other = je->other;
 				if (other->m_flags & b2Body::e_islandFlag)
 				{
 					continue;
@@ -463,28 +487,23 @@ void b2World::Solve(const b2TimeStep& step)
 			continue;
 		}
 
-		// Update fixtures (for broad-phase). If the fixtures go out of
-		// the world AABB then fixtures and contacts may be destroyed,
-		// including contacts that are
-		bool inRange = b->SynchronizeFixtures();
-
-		// Did the body's fixtures leave the world?
-		if (inRange == false && m_boundaryListener != NULL)
-		{
-			m_boundaryListener->Violation(b);
-		}
+		// Update fixtures (for broad-phase).
+		b->SynchronizeFixtures();
 	}
 
-	// Commit fixture proxy movements to the broad-phase so that new contacts are created.
-	// Also, some contacts can be destroyed.
-	m_broadPhase->Commit();
+	// Look for new contacts.
+	m_contactManager.FindNewContacts();
 }
 
 // Find TOI contacts and solve them.
 void b2World::SolveTOI(const b2TimeStep& step)
 {
 	// Reserve an island and a queue for TOI island solution.
-	b2Island island(m_bodyCount, b2_maxTOIContactsPerIsland, b2_maxTOIJointsPerIsland, &m_stackAllocator, m_contactListener);
+	b2Island island(m_bodyCount,
+					b2_maxTOIContactsPerIsland,
+					b2_maxTOIJointsPerIsland,
+					&m_stackAllocator,
+					m_contactManager.m_contactListener);
 
 	//Simple one pass queue
 	//Relies on the fact that we're only making one pass
@@ -503,7 +522,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		b->m_sweep.t0 = 0.0f;
 	}
 
-	for (b2Contact* c = m_contactList; c; c = c->m_next)
+	for (b2Contact* c = m_contactManager.m_contactList; c; c = c->m_next)
 	{
 		// Invalidate TOI
 		c->m_flags &= ~(b2Contact::e_toiFlag | b2Contact::e_islandFlag);
@@ -521,7 +540,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		b2Contact* minContact = NULL;
 		float32 minTOI = 1.0f;
 
-		for (b2Contact* c = m_contactList; c; c = c->m_next)
+		for (b2Contact* c = m_contactManager.m_contactList; c; c = c->m_next)
 		{
 			if (c->m_flags & (b2Contact::e_slowFlag | b2Contact::e_nonSolidFlag))
 			{
@@ -606,7 +625,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		b2->Advance(minTOI);
 
 		// The TOI contact likely has some new contact points.
-		minContact->Update(m_contactListener);
+		minContact->Update(m_contactManager.m_contactListener);
 		minContact->m_flags &= ~b2Contact::e_toiFlag;
 
 		if ((minContact->m_flags & b2Contact::e_touchFlag) == 0)
@@ -759,22 +778,14 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				continue;
 			}
 
-			// Update fixtures (for broad-phase). If the fixtures go out of
-			// the world AABB then fixtures and contacts may be destroyed,
-			// including contacts that are
-			bool inRange = b->SynchronizeFixtures();
-
-			// Did the body's fixtures leave the world?
-			if (inRange == false && m_boundaryListener != NULL)
-			{
-				m_boundaryListener->Violation(b);
-			}
+			// Update fixtures (for broad-phase).
+			b->SynchronizeFixtures();
 
 			// Invalidate all contact TOIs associated with this body. Some of these
 			// may not be in the island because they were not touching.
-			for (b2ContactEdge* cn = b->m_contactList; cn; cn = cn->next)
+			for (b2ContactEdge* ce = b->m_contactList; ce; ce = ce->next)
 			{
-				cn->contact->m_flags &= ~b2Contact::e_toiFlag;
+				ce->contact->m_flags &= ~b2Contact::e_toiFlag;
 			}
 		}
 
@@ -794,7 +805,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 
 		// Commit fixture proxy movements to the broad-phase so that new contacts are created.
 		// Also, some contacts can be destroyed.
-		m_broadPhase->Commit();
+		m_contactManager.FindNewContacts();
 	}
 
 	m_stackAllocator.Free(queue);
@@ -802,7 +813,17 @@ void b2World::SolveTOI(const b2TimeStep& step)
 
 void b2World::Step(float32 dt, int32 velocityIterations, int32 positionIterations)
 {
-	m_lock = true;
+	int32 height;
+	height = m_contactManager.m_broadPhase.ComputeHeight();
+
+	// If new fixtures were added, we need to find the new contacts.
+	if (m_flags & e_newFixture)
+	{
+		m_contactManager.FindNewContacts();
+		m_flags &= ~e_newFixture;
+	}
+
+	m_flags |= e_locked;
 
 	b2TimeStep step;
 	step.dt = dt;
@@ -821,7 +842,7 @@ void b2World::Step(float32 dt, int32 velocityIterations, int32 positionIteration
 
 	step.warmStarting = m_warmStarting;
 
-	// Update contacts.
+	// Update contacts. This is where some contacts are destroyed.
 	m_contactManager.Collide();
 
 	// Integrate velocities, solve velocity constraints, and integrate positions.
@@ -841,22 +862,24 @@ void b2World::Step(float32 dt, int32 velocityIterations, int32 positionIteration
 		m_inv_dt0 = step.inv_dt;
 	}
 
-	m_lock = false;
+	m_flags &= ~e_locked;
 }
 
-int32 b2World::Query(const b2AABB& aabb, b2Fixture** fixtures, int32 maxCount)
+void b2World::Query(b2QueryCallback* callback, const b2AABB& aabb)
 {
-	void** results = (void**)m_stackAllocator.Allocate(maxCount * sizeof(void*));
-
-	int32 count = m_broadPhase->Query(aabb, results, maxCount);
-
-	for (int32 i = 0; i < count; ++i)
+	struct Wrapper
 	{
-		fixtures[i] = (b2Fixture*)results[i];
-	}
+		void QueryCallback(void* userData)
+		{
+			callback->ReportFixture((b2Fixture*)userData);
+		}
 
-	m_stackAllocator.Free(results);
-	return count;
+		b2QueryCallback* callback;
+	};
+
+	Wrapper wrapper;
+	wrapper.callback = callback;
+	m_contactManager.m_broadPhase.Query(&wrapper, aabb);
 }
 
 void b2World::DrawShape(b2Fixture* fixture, const b2XForm& xf, const b2Color& color)
@@ -981,78 +1004,28 @@ void b2World::DrawDebugData()
 
 	if (flags & b2DebugDraw::e_pairBit)
 	{
-		b2BroadPhase* bp = m_broadPhase;
-		b2Vec2 invQ;
-		invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
-		b2Color color(0.9f, 0.9f, 0.3f);
-
-		for (int32 i = 0; i < b2_tableCapacity; ++i)
-		{
-			uint16 index = bp->m_pairManager.m_hashTable[i];
-			while (index != b2_nullPair)
-			{
-				b2Pair* pair = bp->m_pairManager.m_pairs + index;
-				b2Proxy* p1 = bp->m_proxyPool + pair->proxyId1;
-				b2Proxy* p2 = bp->m_proxyPool + pair->proxyId2;
-
-				b2AABB b1, b2;
-				b1.lowerBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p1->lowerBounds[0]].value;
-				b1.lowerBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p1->lowerBounds[1]].value;
-				b1.upperBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p1->upperBounds[0]].value;
-				b1.upperBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p1->upperBounds[1]].value;
-				b2.lowerBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p2->lowerBounds[0]].value;
-				b2.lowerBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p2->lowerBounds[1]].value;
-				b2.upperBound.x = bp->m_worldAABB.lowerBound.x + invQ.x * bp->m_bounds[0][p2->upperBounds[0]].value;
-				b2.upperBound.y = bp->m_worldAABB.lowerBound.y + invQ.y * bp->m_bounds[1][p2->upperBounds[1]].value;
-
-				b2Vec2 x1 = 0.5f * (b1.lowerBound + b1.upperBound);
-				b2Vec2 x2 = 0.5f * (b2.lowerBound + b2.upperBound);
-
-				m_debugDraw->DrawSegment(x1, x2, color);
-
-				index = pair->next;
-			}
-		}
+		// TODO_ERIN
 	}
 
 	if (flags & b2DebugDraw::e_aabbBit)
 	{
-		b2BroadPhase* bp = m_broadPhase;
-		b2Vec2 worldLower = bp->m_worldAABB.lowerBound;
-		b2Vec2 worldUpper = bp->m_worldAABB.upperBound;
-
-		b2Vec2 invQ;
-		invQ.Set(1.0f / bp->m_quantizationFactor.x, 1.0f / bp->m_quantizationFactor.y);
 		b2Color color(0.9f, 0.3f, 0.9f);
-		for (int32 i = 0; i < b2_maxProxies; ++i)
+		b2BroadPhase* bp = &m_contactManager.m_broadPhase;
+
+		for (b2Body* b = m_bodyList; b; b = b->GetNext())
 		{
-			b2Proxy* p = bp->m_proxyPool + i;
-			if (p->IsValid() == false)
+			for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
 			{
-				continue;
+				b2AABB aabb = bp->GetAABB(f->m_proxyId);
+				b2Vec2 vs[4];
+				vs[0].Set(aabb.lowerBound.x, aabb.lowerBound.y);
+				vs[1].Set(aabb.upperBound.x, aabb.lowerBound.y);
+				vs[2].Set(aabb.upperBound.x, aabb.upperBound.y);
+				vs[3].Set(aabb.lowerBound.x, aabb.upperBound.y);
+
+				m_debugDraw->DrawPolygon(vs, 4, color);
 			}
-
-			b2AABB b;
-			b.lowerBound.x = worldLower.x + invQ.x * bp->m_bounds[0][p->lowerBounds[0]].value;
-			b.lowerBound.y = worldLower.y + invQ.y * bp->m_bounds[1][p->lowerBounds[1]].value;
-			b.upperBound.x = worldLower.x + invQ.x * bp->m_bounds[0][p->upperBounds[0]].value;
-			b.upperBound.y = worldLower.y + invQ.y * bp->m_bounds[1][p->upperBounds[1]].value;
-
-			b2Vec2 vs[4];
-			vs[0].Set(b.lowerBound.x, b.lowerBound.y);
-			vs[1].Set(b.upperBound.x, b.lowerBound.y);
-			vs[2].Set(b.upperBound.x, b.upperBound.y);
-			vs[3].Set(b.lowerBound.x, b.upperBound.y);
-
-			m_debugDraw->DrawPolygon(vs, 4, color);
 		}
-
-		b2Vec2 vs[4];
-		vs[0].Set(worldLower.x, worldLower.y);
-		vs[1].Set(worldUpper.x, worldLower.y);
-		vs[2].Set(worldUpper.x, worldUpper.y);
-		vs[3].Set(worldLower.x, worldUpper.y);
-		m_debugDraw->DrawPolygon(vs, 4, b2Color(0.3f, 0.9f, 0.9f));
 	}
 
 	if (flags & b2DebugDraw::e_centerOfMassBit)
@@ -1066,22 +1039,7 @@ void b2World::DrawDebugData()
 	}
 }
 
-void b2World::Validate()
-{
-	m_broadPhase->Validate();
-}
-
 int32 b2World::GetProxyCount() const
 {
-	return m_broadPhase->m_proxyCount;
-}
-
-int32 b2World::GetPairCount() const
-{
-	return m_broadPhase->m_pairManager.m_pairCount;
-}
-
-bool b2World::InRange(const b2AABB& aabb) const
-{
-	return m_broadPhase->InRange(aabb);
+	return m_contactManager.m_broadPhase.GetProxyCount();
 }

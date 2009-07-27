@@ -199,14 +199,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Box2D\Collision\b2PairManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Box2D\Collision\b2PairManager.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Box2D\Collision\b2TimeOfImpact.cpp"
 				>
 			</File>
@@ -311,6 +303,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Box2D\Dynamics\b2TimeStep.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Box2D\Dynamics\b2World.cpp"
 				>
 			</File>
@@ -351,10 +347,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Box2D\Dynamics\Contacts\b2ContactSolver.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Box2D\Dynamics\Contacts\b2NullContact.h"
 					>
 				</File>
 				<File

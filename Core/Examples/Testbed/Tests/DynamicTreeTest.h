@@ -39,7 +39,7 @@ public:
 		{
 			Actor* actor = m_actors + i;
 			GetRandomAABB(&actor->aabb);
-			actor->proxyId = m_tree.CreateProxy(actor->aabb, actor);
+			actor->proxyId = m_tree.CreateProxy(actor->aabb, i);
 		}
 
 		m_stepCount = 0;
@@ -89,7 +89,7 @@ public:
 		for (int32 i = 0; i < e_actorCount; ++i)
 		{
 			Actor* actor = m_actors + i;
-			if (actor->proxyId == b2_nullProxy)
+			if (actor->proxyId == b2_nullNode)
 				continue;
 
 			b2Color c(0.9f, 0.9f, 0.9f);
@@ -151,15 +151,17 @@ public:
 		}
 	}
 
-	void QueryCallback(const b2AABB& aabb, void* userData)
+	void QueryCallback(int32 actorIndex)
 	{
-		Actor* actor = (Actor*)userData;
-		actor->overlap = b2TestOverlap(aabb, actor->aabb);
+		b2Assert(0 <= actorIndex && actorIndex < e_actorCount);
+		Actor* actor = m_actors + actorIndex;
+		actor->overlap = b2TestOverlap(m_queryAABB, actor->aabb);
 	}
 
-	void RayCastCallback(b2RayCastOutput* pOutput, const b2RayCastInput& input, void* userData)
+	void RayCastCallback(b2RayCastOutput* pOutput, const b2RayCastInput& input, int32 actorIndex)
 	{
-		Actor* actor = (Actor*)userData;
+		b2Assert(0 <= actorIndex && actorIndex < e_actorCount);
+		Actor* actor = m_actors + actorIndex;
 
 		actor->aabb.RayCast(pOutput, input);
 
@@ -178,7 +180,7 @@ private:
 		b2AABB aabb;
 		float32 fraction;
 		bool overlap;
-		uint16 proxyId;
+		int32 proxyId;
 	};
 
 	void GetRandomAABB(b2AABB* aabb)
@@ -216,10 +218,10 @@ private:
 		{
 			int32 j = rand() % e_actorCount;
 			Actor* actor = m_actors + j;
-			if (actor->proxyId == b2_nullProxy)
+			if (actor->proxyId == b2_nullNode)
 			{
 				GetRandomAABB(&actor->aabb);
-				actor->proxyId = m_tree.CreateProxy(actor->aabb, actor);
+				actor->proxyId = m_tree.CreateProxy(actor->aabb, j);
 				return;
 			}
 		}
@@ -231,10 +233,10 @@ private:
 		{
 			int32 j = rand() % e_actorCount;
 			Actor* actor = m_actors + j;
-			if (actor->proxyId != b2_nullProxy)
+			if (actor->proxyId != b2_nullNode)
 			{
 				m_tree.DestroyProxy(actor->proxyId);
-				actor->proxyId = b2_nullProxy;
+				actor->proxyId = b2_nullNode;
 				return;
 			}
 		}
@@ -246,7 +248,7 @@ private:
 		{
 			int32 j = rand() % e_actorCount;
 			Actor* actor = m_actors + j;
-			if (actor->proxyId == b2_nullProxy)
+			if (actor->proxyId == b2_nullNode)
 			{
 				continue;
 			}
@@ -282,7 +284,7 @@ private:
 
 		for (int32 i = 0; i < e_actorCount; ++i)
 		{
-			if (m_actors[i].proxyId == b2_nullProxy)
+			if (m_actors[i].proxyId == b2_nullNode)
 			{
 				continue;
 			}
@@ -307,7 +309,7 @@ private:
 		b2RayCastOutput bruteOutput;
 		for (int32 i = 0; i < e_actorCount; ++i)
 		{
-			if (m_actors[i].proxyId == b2_nullProxy)
+			if (m_actors[i].proxyId == b2_nullNode)
 			{
 				continue;
 			}

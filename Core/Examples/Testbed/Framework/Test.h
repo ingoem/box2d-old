@@ -59,10 +59,7 @@ struct Settings
 		drawStats(0),
 		drawShapes(1),
 		drawJoints(1),
-		drawControllers(1),
-		drawCoreShapes(0),
 		drawAABBs(0),
-		drawOBBs(0),
 		drawPairs(0),
 		drawContactPoints(0),
 		drawContactNormals(0),
@@ -80,10 +77,7 @@ struct Settings
 	int32 positionIterations;
 	int32 drawShapes;
 	int32 drawJoints;
-	int32 drawControllers;
-	int32 drawCoreShapes;
 	int32 drawAABBs;
-	int32 drawOBBs;
 	int32 drawPairs;
 	int32 drawContactPoints;
 	int32 drawContactNormals;
@@ -112,14 +106,6 @@ class DestructionListener : public b2DestructionListener
 public:
 	void SayGoodbye(b2Fixture* fixture) { B2_NOT_USED(fixture); }
 	void SayGoodbye(b2Joint* joint);
-
-	Test* test;
-};
-
-class BoundaryListener : public b2BoundaryListener	
-{
-public:
-	void Violation(b2Body* body);
 
 	Test* test;
 };
@@ -158,7 +144,6 @@ public:
 
 	// Let derived tests know that a joint was destroyed.
 	virtual void JointDestroyed(b2Joint* joint) { B2_NOT_USED(joint); }
-	virtual void BoundaryViolated(b2Body* body) { B2_NOT_USED(body); }
 
 	// Callbacks for derived classes.
 	virtual void BeginContact(b2Contact* contact) { B2_NOT_USED(contact); }
@@ -175,11 +160,11 @@ protected:
 	friend class BoundaryListener;
 	friend class ContactListener;
 
+	b2Body* m_groundBody;
 	b2AABB m_worldAABB;
 	ContactPoint m_points[k_maxContactPoints];
 	int32 m_pointCount;
 	DestructionListener m_destructionListener;
-	BoundaryListener m_boundaryListener;
 	DebugDraw m_debugDraw;
 	int32 m_textLine;
 	b2World* m_world;

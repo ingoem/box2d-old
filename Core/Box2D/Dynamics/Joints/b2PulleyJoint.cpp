@@ -18,7 +18,7 @@
 
 #include <Box2D/Dynamics/Joints/b2PulleyJoint.h>
 #include <Box2D/Dynamics/b2Body.h>
-#include <Box2D/Dynamics/b2World.h>
+#include <Box2D/Dynamics/b2TimeStep.h>
 
 // Pulley:
 // length1 = norm(p1 - s1)
@@ -64,9 +64,8 @@ void b2PulleyJointDef::Initialize(b2Body* b1, b2Body* b2,
 b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 : b2Joint(def)
 {
-	m_ground = m_body1->GetWorld()->GetGroundBody();
-	m_groundAnchor1 = def->groundAnchor1 - m_ground->GetXForm().position;
-	m_groundAnchor2 = def->groundAnchor2 - m_ground->GetXForm().position;
+	m_groundAnchor1 = def->groundAnchor1;
+	m_groundAnchor2 = def->groundAnchor2;
 	m_localAnchor1 = def->localAnchor1;
 	m_localAnchor2 = def->localAnchor2;
 
@@ -85,8 +84,8 @@ b2PulleyJoint::b2PulleyJoint(const b2PulleyJointDef* def)
 
 void b2PulleyJoint::InitVelocityConstraints(const b2TimeStep& step)
 {
-	b2Body* b1 = m_body1;
-	b2Body* b2 = m_body2;
+	b2Body* b1 = m_bodyA;
+	b2Body* b2 = m_bodyB;
 
 	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
 	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
@@ -94,8 +93,8 @@ void b2PulleyJoint::InitVelocityConstraints(const b2TimeStep& step)
 	b2Vec2 p1 = b1->m_sweep.c + r1;
 	b2Vec2 p2 = b2->m_sweep.c + r2;
 
-	b2Vec2 s1 = m_ground->GetXForm().position + m_groundAnchor1;
-	b2Vec2 s2 = m_ground->GetXForm().position + m_groundAnchor2;
+	b2Vec2 s1 = m_groundAnchor1;
+	b2Vec2 s2 = m_groundAnchor2;
 
 	// Get the pulley axes.
 	m_u1 = p1 - s1;
@@ -194,8 +193,8 @@ void b2PulleyJoint::SolveVelocityConstraints(const b2TimeStep& step)
 {
 	B2_NOT_USED(step);
 
-	b2Body* b1 = m_body1;
-	b2Body* b2 = m_body2;
+	b2Body* b1 = m_bodyA;
+	b2Body* b2 = m_bodyB;
 
 	b2Vec2 r1 = b2Mul(b1->GetXForm().R, m_localAnchor1 - b1->GetLocalCenter());
 	b2Vec2 r2 = b2Mul(b2->GetXForm().R, m_localAnchor2 - b2->GetLocalCenter());
@@ -254,11 +253,11 @@ bool b2PulleyJoint::SolvePositionConstraints(float32 baumgarte)
 {
 	B2_NOT_USED(baumgarte);
 
-	b2Body* b1 = m_body1;
-	b2Body* b2 = m_body2;
+	b2Body* b1 = m_bodyA;
+	b2Body* b2 = m_bodyB;
 
-	b2Vec2 s1 = m_ground->GetXForm().position + m_groundAnchor1;
-	b2Vec2 s2 = m_ground->GetXForm().position + m_groundAnchor2;
+	b2Vec2 s1 = m_groundAnchor1;
+	b2Vec2 s2 = m_groundAnchor2;
 
 	float32 linearError = 0.0f;
 
@@ -376,12 +375,12 @@ bool b2PulleyJoint::SolvePositionConstraints(float32 baumgarte)
 
 b2Vec2 b2PulleyJoint::GetAnchor1() const
 {
-	return m_body1->GetWorldPoint(m_localAnchor1);
+	return m_bodyA->GetWorldPoint(m_localAnchor1);
 }
 
 b2Vec2 b2PulleyJoint::GetAnchor2() const
 {
-	return m_body2->GetWorldPoint(m_localAnchor2);
+	return m_bodyB->GetWorldPoint(m_localAnchor2);
 }
 
 b2Vec2 b2PulleyJoint::GetReactionForce(float32 inv_dt) const
@@ -398,26 +397,26 @@ float32 b2PulleyJoint::GetReactionTorque(float32 inv_dt) const
 
 b2Vec2 b2PulleyJoint::GetGroundAnchor1() const
 {
-	return m_ground->GetXForm().position + m_groundAnchor1;
+	return m_groundAnchor1;
 }
 
 b2Vec2 b2PulleyJoint::GetGroundAnchor2() const
 {
-	return m_ground->GetXForm().position + m_groundAnchor2;
+	return m_groundAnchor2;
 }
 
 float32 b2PulleyJoint::GetLength1() const
 {
-	b2Vec2 p = m_body1->GetWorldPoint(m_localAnchor1);
-	b2Vec2 s = m_ground->GetXForm().position + m_groundAnchor1;
+	b2Vec2 p = m_bodyA->GetWorldPoint(m_localAnchor1);
+	b2Vec2 s = m_groundAnchor1;
 	b2Vec2 d = p - s;
 	return d.Length();
 }
 
 float32 b2PulleyJoint::GetLength2() const
 {
-	b2Vec2 p = m_body2->GetWorldPoint(m_localAnchor2);
-	b2Vec2 s = m_ground->GetXForm().position + m_groundAnchor2;
+	b2Vec2 p = m_bodyB->GetWorldPoint(m_localAnchor2);
+	b2Vec2 s = m_groundAnchor2;
 	b2Vec2 d = p - s;
 	return d.Length();
 }

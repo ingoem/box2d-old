@@ -35,37 +35,28 @@ void DestructionListener::SayGoodbye(b2Joint* joint)
 	}
 }
 
-void BoundaryListener::Violation(b2Body* body)
-{
-	if (test->m_bomb != body)
-	{
-		test->BoundaryViolated(body);
-	}
-}
-
 Test::Test()
 {
-	m_worldAABB.lowerBound.Set(-200.0f, -100.0f);
-	m_worldAABB.upperBound.Set(200.0f, 200.0f);
 	b2Vec2 gravity;
 	gravity.Set(0.0f, -10.0f);
 	bool doSleep = false;
-	m_world = new b2World(m_worldAABB, gravity, doSleep);
+	m_world = new b2World(gravity, doSleep);
 	m_bomb = NULL;
 	m_textLine = 30;
 	m_mouseJoint = NULL;
 	m_pointCount = 0;
 
 	m_destructionListener.test = this;
-	m_boundaryListener.test = this;
 	m_world->SetDestructionListener(&m_destructionListener);
-	m_world->SetBoundaryListener(&m_boundaryListener);
 	m_world->SetContactListener(this);
 	m_world->SetDebugDraw(&m_debugDraw);
 	
 	m_bombSpawning = false;
 
 	m_stepCount = 0;
+
+	b2BodyDef bodyDef;
+	m_groundBody = m_world->CreateBody(&bodyDef);
 }
 
 Test::~Test()
@@ -110,6 +101,38 @@ void Test::DrawTitle(int x, int y, const char *string)
     m_debugDraw.DrawString(x, y, string);
 }
 
+class QueryCallback : public b2QueryCallback
+{
+public:
+	QueryCallback(const b2Vec2& point)
+	{
+		m_point = point;
+		m_fixture = NULL;
+	}
+
+	bool ReportFixture(b2Fixture* fixture)
+	{
+		b2Body* body = fixture->GetBody();
+		if (body->IsStatic() == false)
+		{
+			bool inside = fixture->TestPoint(m_point);
+			if (inside)
+			{
+				m_fixture = fixture;
+
+				// We are done, terminate the query.
+				return false;
+			}
+		}
+
+		// Continue the query.
+		return true;
+	}
+
+	b2Vec2 m_point;
+	b2Fixture* m_fixture;
+};
+
 void Test::MouseDown(const b2Vec2& p)
 {
 	m_mouseWorld = p;
@@ -127,28 +150,14 @@ void Test::MouseDown(const b2Vec2& p)
 	aabb.upperBound = p + d;
 
 	// Query the world for overlapping shapes.
-	const int32 k_maxCount = 10;
-	b2Fixture* fixtures[k_maxCount];
-	int32 count = m_world->Query(aabb, fixtures, k_maxCount);
-	b2Body* body = NULL;
-	for (int32 i = 0; i < count; ++i)
-	{
-		b2Body* b = fixtures[i]->GetBody();
-		if (b->IsStatic() == false && b->GetMass() > 0.0f)
-		{
-			bool inside = fixtures[i]->TestPoint(p);
-			if (inside)
-			{
-				body = b;
-				break;
-			}
-		}
-	}
+	QueryCallback callback(p);
+	m_world->Query(&callback, aabb);
 
-	if (body)
+	if (callback.m_fixture)
 	{
+		b2Body* body = callback.m_fixture->GetBody();
 		b2MouseJointDef md;
-		md.body1 = m_world->GetGroundBody();
+		md.body1 = m_groundBody;
 		md.body2 = body;
 		md.target = p;
 #ifdef TARGET_FLOAT32_IS_FIXED
@@ -234,6 +243,7 @@ void Test::LaunchBomb(const b2Vec2& position, const b2Vec2& velocity)
 	}
 
 	b2BodyDef bd;
+	bd.massData.mass = 1.0;
 	bd.allowSleep = true;
 	bd.position = position;
 	
@@ -252,14 +262,9 @@ void Test::LaunchBomb(const b2Vec2& position, const b2Vec2& velocity)
 	b2AABB aabb;
 	aabb.lowerBound = minV;
 	aabb.upperBound = maxV;
-	
-	bool inRange = m_world->InRange(aabb);
 
-	if (inRange)
-	{
-		m_bomb->CreateFixture(&sd);
-		m_bomb->SetMassFromShapes();
-	}
+	m_bomb->CreateFixture(&sd);
+	m_bomb->SetMassFromShapes();
 }
 
 void Test::Step(Settings* settings)
@@ -284,10 +289,7 @@ void Test::Step(Settings* settings)
 	uint32 flags = 0;
 	flags += settings->drawShapes			* b2DebugDraw::e_shapeBit;
 	flags += settings->drawJoints			* b2DebugDraw::e_jointBit;
-	flags += settings->drawControllers		* b2DebugDraw::e_controllerBit;
-	flags += settings->drawCoreShapes		* b2DebugDraw::e_coreShapeBit;
 	flags += settings->drawAABBs			* b2DebugDraw::e_aabbBit;
-	flags += settings->drawOBBs				* b2DebugDraw::e_obbBit;
 	flags += settings->drawPairs			* b2DebugDraw::e_pairBit;
 	flags += settings->drawCOMs				* b2DebugDraw::e_centerOfMassBit;
 	m_debugDraw.SetFlags(flags);
@@ -306,8 +308,6 @@ void Test::Step(Settings* settings)
 		++m_stepCount;
 	}
 
-	m_world->Validate();
-
 	if (m_bomb != NULL && m_bomb->IsFrozen())
 	{
 		m_world->DestroyBody(m_bomb);
@@ -316,13 +316,8 @@ void Test::Step(Settings* settings)
 
 	if (settings->drawStats)
 	{
-		m_debugDraw.DrawString(5, m_textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)",
-			m_world->GetProxyCount(), b2_maxProxies,
-			m_world->GetPairCount(), b2_maxPairs);
-		m_textLine += 15;
-
-		m_debugDraw.DrawString(5, m_textLine, "bodies/contacts/joints = %d/%d/%d",
-			m_world->GetBodyCount(), m_world->GetContactCount(), m_world->GetJointCount());
+		m_debugDraw.DrawString(5, m_textLine, "bodies/contacts/joints/proxies = %d/%d/%d",
+			m_world->GetBodyCount(), m_world->GetContactCount(), m_world->GetJointCount(), m_world->GetProxyCount());
 		m_textLine += 15;
 
 		m_debugDraw.DrawString(5, m_textLine, "heap bytes = %d", b2_byteCount);

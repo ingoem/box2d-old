@@ -43,15 +43,6 @@ public:
 	/// @see b2Shape::ComputeMass
 	void ComputeMass(b2MassData* massData, float32 density) const;
 
-	/// @see b2Shape::ComputeSubmergedArea
-	float32 ComputeSubmergedArea(	const b2Vec2& normal,
-									float32 offset,
-									const b2XForm& xf, 
-									b2Vec2* c) const;
-
-	/// @see b2Shape::ComputeSweepRadius
-	float32 ComputeSweepRadius(const b2Vec2& pivot) const;
-
 	/// Get the supporting vertex index in the given direction.
 	int32 GetSupport(const b2Vec2& d) const;
 
@@ -85,11 +76,6 @@ inline const b2Vec2& b2CircleShape::GetVertex(int32 index) const
 	B2_NOT_USED(index);
 	b2Assert(index == 0);
 	return m_p;
-}
-
-inline float32 b2CircleShape::ComputeSweepRadius(const b2Vec2& pivot) const
-{
-	return b2Distance(m_p, pivot);
 }
 
 #endif

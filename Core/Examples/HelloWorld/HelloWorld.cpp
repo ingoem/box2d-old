@@ -28,12 +28,6 @@ int main(int argc, char** argv)
 	B2_NOT_USED(argc);
 	B2_NOT_USED(argv);
 
-	// Define the size of the world. Simulation will still work
-	// if bodies reach the end of the world, but it will be slower.
-	b2AABB worldAABB;
-	worldAABB.lowerBound.Set(-100.0f, -100.0f);
-	worldAABB.upperBound.Set(100.0f, 100.0f);
-
 	// Define the gravity vector.
 	b2Vec2 gravity(0.0f, -10.0f);
 
@@ -41,7 +35,7 @@ int main(int argc, char** argv)
 	bool doSleep = true;
 
 	// Construct a world object, which will hold and simulate the rigid bodies.
-	b2World world(worldAABB, gravity, doSleep);
+	b2World world(gravity, doSleep);
 
 	// Define the ground body.
 	b2BodyDef groundBodyDef;
