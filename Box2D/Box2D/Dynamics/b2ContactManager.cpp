@@ -115,6 +115,7 @@ void b2ContactManager::Collide()
 
 		if (bodyA->IsSleeping() && bodyB->IsSleeping())
 		{
+			c = c->GetNext();
 			continue;
 		}
 
