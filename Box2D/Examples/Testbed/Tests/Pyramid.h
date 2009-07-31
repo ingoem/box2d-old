@@ -31,10 +31,12 @@ public:
 	{
 		{
 			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
+			sd.vertices[0].Set(-50.0f, 0.0f);
+			sd.vertices[1].Set(50.0f, 0.0f);
+			sd.vertexCount = 2;
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
+			bd.position.Set(0.0f, 0.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
 			ground->CreateFixture(&sd);
 		}
