@@ -70,10 +70,16 @@ void b2PolygonShape::SetAsEdge(const b2Vec2& v1, const b2Vec2& v2)
 
 static b2Vec2 ComputeCentroid(const b2Vec2* vs, int32 count)
 {
-	b2Assert(count >= 3);
+	b2Assert(count >= 2);
 
 	b2Vec2 c; c.Set(0.0f, 0.0f);
 	float32 area = 0.0f;
+
+	if (count == 2)
+	{
+		c = 0.5f * (vs[0] + vs[1]);
+		return c;
+	}
 
 	// pRef is the reference point for forming triangles.
 	// It's location doesn't change the result (except for rounding error).
@@ -116,7 +122,7 @@ static b2Vec2 ComputeCentroid(const b2Vec2* vs, int32 count)
 
 void b2PolygonShape::Set(const b2Vec2* vertices, int32 count)
 {
-	b2Assert(3 <= count && count <= b2_maxPolygonVertices);
+	b2Assert(2 <= count && count <= b2_maxPolygonVertices);
 	m_vertexCount = count;
 
 	// Copy vertices.
