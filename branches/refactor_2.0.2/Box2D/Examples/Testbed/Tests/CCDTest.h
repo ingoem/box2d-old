@@ -27,54 +27,60 @@ public:
 	{
 #if 1
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(10.0f, 0.2f);
-			sd.density = 0.0f;
+			b2PolygonShape shape;
+			shape.SetAsBox(10.0f, 0.2f);
+
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 0.0f;
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, -0.2f);
 			b2Body* body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
+			body->CreateFixture(&fd);
 
-			sd.SetAsBox(0.2f, 1.0f, b2Vec2(0.5f, 1.2f), 0.0f);
-			body->CreateFixture(&sd);
+			shape.SetAsBox(0.2f, 1.0f, b2Vec2(0.5f, 1.2f), 0.0f);
+			body->CreateFixture(&fd);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(2.0f, 0.1f);
-			sd.density = 1.0f;
-			sd.restitution = 0.0f;
+			b2PolygonShape shape;
+			shape.SetAsBox(2.0f, 0.1f);
+
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 1.0f;
+			fd.restitution = 0.0f;
 
 			m_angularVelocity = RandomFloat(-50.0f, 50.0f);
 			m_angularVelocity = -30.669577f;
 
 			b2BodyDef bd;
-			bd.position.Set(00.0f, 20.0f);
+			bd.position.Set(0.0f, 20.0f);
 			b2Body* body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
+			body->CreateFixture(&fd);
 			body->SetMassFromShapes();
 			body->SetLinearVelocity(b2Vec2(0.0f, -100.0f));
 			body->SetAngularVelocity(m_angularVelocity);
 		}
 #elif 0
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(10.0f, 0.1f);
-			sd.density = 0.0f;
+			b2FixtureDef fd;
+			fd.SetAsBox(10.0f, 0.1f);
+			fd.density = 0.0f;
 
 			b2BodyDef bd;
 			bd.type = b2BodyDef::e_static;
 			bd.position.Set(0.0f, -0.2f);
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&fd);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(2.0f, 0.1f);
-			sd.density = 1.0f;
-			sd.restitution = 0.0f;
+			b2FixtureDef fd;
+			fd.SetAsBox(2.0f, 0.1f);
+			fd.density = 1.0f;
+			fd.restitution = 0.0f;
 
 			b2BodyDef bd1;
 			bd1.type = b2BodyDef::e_dynamic;
@@ -82,30 +88,30 @@ public:
 			bd1.allowSleep = false;
 			bd1.position.Set(0.0f, 20.0f);
 			b2Body* b1 = m_world->Create(&bd1);
-			b1->CreateFixture(&sd);
+			b1->CreateFixture(&fd);
 			b1->SetMassFromShapes();
 			b1->SetLinearVelocity(b2Vec2(0.0f, -100.0f));
 
-			sd.SetAsBox(1.0f, 0.1f);
+			fd.SetAsBox(1.0f, 0.1f);
 			b2BodyDef bd2;
 			bd2.type = b2BodyDef::e_dynamic;
 			bd2.isBullet = true;
 			bd2.allowSleep = false;
 			bd2.position.Set(0.0f, 20.2f);
 			b2Body* b2 = m_world->Create(&bd2);
-			b2->CreateFixture(&sd);
+			b2->CreateFixture(&fd);
 			b2->SetMassFromShapes();
 			b2->SetLinearVelocity(b2Vec2(0.0f, -100.0f));
 
-			sd.SetAsBox(0.25f, 0.25f);
-			sd.density = 10.0f;
+			fd.SetAsBox(0.25f, 0.25f);
+			fd.density = 10.0f;
 			b2BodyDef bd3;
 			bd3.type = b2BodyDef::e_dynamic;
 			bd3.isBullet = true;
 			bd3.allowSleep = false;
 			bd3.position.Set(0.0f, 100.0f);
 			b2Body* b3 = m_world->Create(&bd3);
-			b3->CreateFixture(&sd);
+			b3->CreateFixture(&fd);
 			b3->SetMassFromShapes();
 			b3->SetLinearVelocity(b2Vec2(0.0f, -150.0f));
 		}
@@ -117,38 +123,38 @@ public:
 			bd.position.Set(0.0f, 20.0f);
 			b2Body* body = m_world->CreateBody(&bd);
 
-			b2PolygonDef sd;
-			sd.density = 0.0f;
-			sd.restitution = k_restitution;
+			b2FixtureDef fd;
+			fd.density = 0.0f;
+			fd.restitution = k_restitution;
 
-			sd.SetAsBox(0.1f, 10.0f, b2Vec2(-10.0f, 0.0f), 0.0f);
-			body->CreateFixture(&sd);
+			fd.SetAsBox(0.1f, 10.0f, b2Vec2(-10.0f, 0.0f), 0.0f);
+			body->CreateFixture(&fd);
 
-			sd.SetAsBox(0.1f, 10.0f, b2Vec2(10.0f, 0.0f), 0.0f);
-			body->CreateFixture(&sd);
+			fd.SetAsBox(0.1f, 10.0f, b2Vec2(10.0f, 0.0f), 0.0f);
+			body->CreateFixture(&fd);
 
-			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, -10.0f), 0.5f * b2_pi);
-			body->CreateFixture(&sd);
+			fd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, -10.0f), 0.5f * b2_pi);
+			body->CreateFixture(&fd);
 
-			sd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, 10.0f), -0.5f * b2_pi);
-			body->CreateFixture(&sd);
+			fd.SetAsBox(0.1f, 10.0f, b2Vec2(0.0f, 10.0f), -0.5f * b2_pi);
+			body->CreateFixture(&fd);
 		}
 
 #if 0
 		{
-			b2PolygonDef sd_bottom;
+			b2FixtureDef sd_bottom;
 			sd_bottom.SetAsBox(1.0f, 0.1f, b2Vec2(0.0f, -1.0f), 0.0f);
 			sd_bottom.density = 4.0f;
 
-			b2PolygonDef sd_top;
+			b2FixtureDef sd_top;
 			sd_top.SetAsBox(1.0f, 0.1f, b2Vec2(0.0f,  1.0f), 0.0f);
 			sd_top.density = 4.0f;
 
-			b2PolygonDef sd_left;
+			b2FixtureDef sd_left;
 			sd_left.SetAsBox(0.1f, 1.0f, b2Vec2(-1.0f, 0.0f), 0.0f);
 			sd_left.density = 4.0f;
 
-			b2PolygonDef sd_right;
+			b2FixtureDef sd_right;
 			sd_right.SetAsBox(0.1f, 1.0f, b2Vec2(1.0f, 0.0f), 0.0f);
 			sd_right.density = 4.0f;
 
@@ -164,15 +170,15 @@ public:
 		}
 #elif 0
 		{
-			b2PolygonDef sd_bottom;
+			b2FixtureDef sd_bottom;
 			sd_bottom.SetAsBox( 1.5f, 0.15f );
 			sd_bottom.density = 4.0f;
 
-			b2PolygonDef sd_left;
+			b2FixtureDef sd_left;
 			sd_left.SetAsBox(0.15f, 2.7f, b2Vec2(-1.45f, 2.35f), 0.2f);
 			sd_left.density = 4.0f;
 
-			b2PolygonDef sd_right;
+			b2FixtureDef sd_right;
 			sd_right.SetAsBox(0.15f, 2.7f, b2Vec2(1.45f, 2.35f), -0.2f);
 			sd_right.density = 4.0f;
 
@@ -192,11 +198,11 @@ public:
 			b2Body* body = m_world->CreateBody(&bd);
 			body->SetAngularVelocity(RandomFloat(-50.0f, 50.0f));
 
-			b2PolygonDef sd;
-			sd.SetAsBox(0.1f, 4.0f);
-			sd.density = 1.0f;
-			sd.restitution = 0.0f;
-			body->CreateFixture(&sd);
+			b2FixtureDef fd;
+			fd.SetAsBox(0.1f, 4.0f);
+			fd.density = 1.0f;
+			fd.restitution = 0.0f;
+			body->CreateFixture(&fd);
 			body->SetMassFromShapes();
 		}
 #endif
@@ -209,11 +215,11 @@ public:
 			b2Body* body = m_world->CreateBody(&bd);
 			body->SetAngularVelocity(RandomFloat(-50.0f, 50.0f));
 
-			b2CircleDef sd;
-			sd.radius = 0.25f;
-			sd.density = 1.0f;
-			sd.restitution = 0.0f;
-			body->CreateFixture(&sd);
+			b2FixtureDef fd;
+			fd.radius = 0.25f;
+			fd.density = 1.0f;
+			fd.restitution = 0.0f;
+			body->CreateFixture(&fd);
 			body->SetMassFromShapes();
 		}
 #endif

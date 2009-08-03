@@ -30,13 +30,13 @@ public:
 	{
 		// Ground body
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-			sd.friction = 0.3f;
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-50.0f, 0.0f), b2Vec2(50.0f, 0.0f));
+
+			b2FixtureDef sd;
+			sd.shape = &shape;;
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
-			
 			b2Body* ground = m_world->CreateBody(&bd);
 			ground->CreateFixture(&sd);
 		}
@@ -45,11 +45,16 @@ public:
 		float32 yLo = 2.0f, yHi = 35.0f;
 
 		// Small triangle
-		b2PolygonDef triangleShapeDef;
-		triangleShapeDef.vertexCount = 3;
-		triangleShapeDef.vertices[0].Set(-1.0f, 0.0f);
-		triangleShapeDef.vertices[1].Set(1.0f, 0.0f);
-		triangleShapeDef.vertices[2].Set(0.0f, 2.0f);
+		b2Vec2 vertices[3];
+		vertices[0].Set(-1.0f, 0.0f);
+		vertices[1].Set(1.0f, 0.0f);
+		vertices[2].Set(0.0f, 2.0f);
+
+		b2PolygonShape polygon;
+		polygon.Set(vertices, 3);
+
+		b2FixtureDef triangleShapeDef;
+		triangleShapeDef.shape = &polygon;
 		triangleShapeDef.density = 1.0f;
 
 		b2BodyDef triangleBodyDef;
@@ -60,9 +65,11 @@ public:
 		body1->SetMassFromShapes();
 
 		// Large triangle (recycle definitions)
-		triangleShapeDef.vertices[0] *= 2.0f;
-		triangleShapeDef.vertices[1] *= 2.0f;
-		triangleShapeDef.vertices[2] *= 2.0f;
+		vertices[0] *= 2.0f;
+		vertices[1] *= 2.0f;
+		vertices[2] *= 2.0f;
+		polygon.Set(vertices, 3);
+
 		triangleBodyDef.position.Set(RandomFloat(xLo, xHi), RandomFloat(yLo, yHi));
 
 		b2Body* body2 = m_world->CreateBody(&triangleBodyDef);
@@ -70,8 +77,10 @@ public:
 		body2->SetMassFromShapes();
 		
 		// Small box
-		b2PolygonDef boxShapeDef;
-		boxShapeDef.SetAsBox(1.0f, 0.5f);
+		polygon.SetAsBox(1.0f, 0.5f);
+
+		b2FixtureDef boxShapeDef;
+		boxShapeDef.shape = &polygon;
 		boxShapeDef.density = 1.0f;
 
 		b2BodyDef boxBodyDef;
@@ -82,7 +91,7 @@ public:
 		body3->SetMassFromShapes();
 
 		// Large box (recycle definitions)
-		boxShapeDef.SetAsBox(2.0f, 1.0f);
+		polygon.SetAsBox(2.0f, 1.0f);
 		boxBodyDef.position.Set(RandomFloat(xLo, xHi), RandomFloat(yLo, yHi));
 		
 		b2Body* body4 = m_world->CreateBody(&boxBodyDef);
@@ -90,8 +99,11 @@ public:
 		body4->SetMassFromShapes();
 
 		// Small circle
-		b2CircleDef circleShapeDef;
-		circleShapeDef.radius = 1.0f;
+		b2CircleShape circle;
+		circle.m_radius = 1.0f;
+
+		b2FixtureDef circleShapeDef;
+		circleShapeDef.shape = &circle;
 		circleShapeDef.density = 1.0f;
 
 		b2BodyDef circleBodyDef;
@@ -102,7 +114,7 @@ public:
 		body5->SetMassFromShapes();
 
 		// Large circle
-		circleShapeDef.radius *= 2.0f;
+		circle.m_radius *= 2.0f;
 		circleBodyDef.position.Set(RandomFloat(xLo, xHi), RandomFloat(yLo, yHi));
 
 		b2Body* body6 = m_world->CreateBody(&circleBodyDef);

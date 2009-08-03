@@ -25,44 +25,16 @@
 #define B2_NOT_USED(x) x
 #define b2Assert(A) assert(A)
 
-// need to include NDS jtypes.h instead of 
-// usual typedefs because NDS jtypes defines
-// them slightly differently, oh well.
-#ifdef TARGET_IS_NDS
-
-#include "jtypes.h"
-
-#else
-
 typedef signed char	int8;
 typedef signed short int16;
 typedef signed int int32;
 typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int uint32;
-
-#endif
-
-#ifdef	TARGET_FLOAT32_IS_FIXED
-
-#include "Fixed.h"
-
-typedef Fixed float32;
-#define	B2_FLT_MAX	FIXED_MAX
-#define	B2_FLT_EPSILON	FIXED_EPSILON
-#define	B2FORCE_SCALE(x)	((x)<<7)
-#define	B2FORCE_INV_SCALE(x)	((x)>>7)
-
-#else
-
 typedef float float32;
+
 #define	B2_FLT_MAX	FLT_MAX
 #define	B2_FLT_EPSILON	FLT_EPSILON
-#define	B2FORCE_SCALE(x)	(x)
-#define	B2FORCE_INV_SCALE(x)	(x)
-
-#endif
-
 #define b2_pi						3.14159265359f
 
 /// @file

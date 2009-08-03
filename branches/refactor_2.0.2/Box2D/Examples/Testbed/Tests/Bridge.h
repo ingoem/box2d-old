@@ -26,21 +26,22 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.5f, 0.125f);
-			sd.density = 20.0f;
-			sd.friction = 0.2f;
+			b2PolygonShape shape;
+			shape.SetAsBox(0.5f, 0.125f);
 
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 20.0f;
+			fd.friction = 0.2f;
 
 			b2RevoluteJointDef jd;
 			const int32 numPlanks = 30;
@@ -51,7 +52,7 @@ public:
 				b2BodyDef bd;
 				bd.position.Set(-14.5f + 1.0f * i, 5.0f);
 				b2Body* body = m_world->CreateBody(&bd);
-				body->CreateFixture(&sd);
+				body->CreateFixture(&fd);
 				body->SetMassFromShapes();
 
 				b2Vec2 anchor(-15.0f + 1.0f * i, 5.0f);
@@ -68,30 +69,38 @@ public:
 
 		for (int32 i = 0; i < 2; ++i)
 		{
-			b2PolygonDef sd;
-			sd.vertexCount = 3;
-			sd.vertices[0].Set(-0.5f, 0.0f);
-			sd.vertices[1].Set(0.5f, 0.0f);
-			sd.vertices[2].Set(0.0f, 1.5f);
-			sd.density = 1.0f;
+			b2Vec2 vertices[3];
+			vertices[0].Set(-0.5f, 0.0f);
+			vertices[1].Set(0.5f, 0.0f);
+			vertices[2].Set(0.0f, 1.5f);
+
+			b2PolygonShape shape;
+			shape.Set(vertices, 3);
+
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 1.0f;
 
 			b2BodyDef bd;
 			bd.position.Set(-8.0f + 8.0f * i, 12.0f);
 			b2Body* body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
+			body->CreateFixture(&fd);
 			body->SetMassFromShapes();
 		}
 
 		for (int32 i = 0; i < 3; ++i)
 		{
-			b2CircleDef sd;
-			sd.radius = 0.5f;
-			sd.density = 1.0f;
+			b2CircleShape shape;
+			shape.m_radius = 0.5f;
+
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 1.0f;
 
 			b2BodyDef bd;
 			bd.position.Set(-6.0f + 6.0f * i, 10.0f);
 			b2Body* body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
+			body->CreateFixture(&fd);
 			body->SetMassFromShapes();
 		}
 	}

@@ -25,7 +25,10 @@
 class b2CircleShape : public b2Shape
 {
 public:
-	b2CircleShape() { m_type = b2_circleShape; }
+	b2CircleShape();
+
+	/// Implement b2Shape.
+	b2Shape* Clone(b2BlockAllocator* allocator) const;
 
 	/// @see b2Shape::TestPoint
 	bool TestPoint(const b2XForm& transform, const b2Vec2& p) const;
@@ -58,6 +61,13 @@ public:
 	/// Position
 	b2Vec2 m_p;
 };
+
+inline b2CircleShape::b2CircleShape()
+{
+	m_type = e_circle;
+	m_radius = 0.0f;
+	m_p.SetZero();
+}
 
 inline int32 b2CircleShape::GetSupport(const b2Vec2 &d) const
 {

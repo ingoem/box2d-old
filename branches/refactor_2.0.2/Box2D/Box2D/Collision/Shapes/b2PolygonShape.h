@@ -26,7 +26,10 @@
 class b2PolygonShape : public b2Shape
 {
 public:
-	b2PolygonShape() { m_type = b2_polygonShape; m_radius = b2_polygonRadius; }
+	b2PolygonShape();
+
+	/// Implement b2Shape.
+	b2Shape* Clone(b2BlockAllocator* allocator) const;
 
 	/// Copy vertices. This assumes the vertices define a convex polygon.
 	/// It is assumed that the exterior is the the right of each edge.
@@ -80,6 +83,14 @@ public:
 	b2Vec2 m_normals[b2_maxPolygonVertices];
 	int32 m_vertexCount;
 };
+
+inline b2PolygonShape::b2PolygonShape()
+{
+	m_type = e_polygon;
+	m_radius = b2_polygonRadius;
+	m_vertexCount = 0;
+	m_centroid.SetZero();
+}
 
 inline int32 b2PolygonShape::GetSupport(const b2Vec2& d) const
 {

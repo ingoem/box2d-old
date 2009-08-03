@@ -251,10 +251,13 @@ void Test::LaunchBomb(const b2Vec2& position, const b2Vec2& velocity)
 	m_bomb = m_world->CreateBody(&bd);
 	m_bomb->SetLinearVelocity(velocity);
 	
-	b2CircleDef sd;
-	sd.radius = 0.3f;
-	sd.density = 20.0f;
-	sd.restitution = 0.1f;
+	b2CircleShape circle;
+	circle.m_radius = 0.3f;
+
+	b2FixtureDef fd;
+	fd.shape = &circle;
+	fd.density = 20.0f;
+	fd.restitution = 0.1f;
 	
 	b2Vec2 minV = position - b2Vec2(0.3f,0.3f);
 	b2Vec2 maxV = position + b2Vec2(0.3f,0.3f);
@@ -263,7 +266,7 @@ void Test::LaunchBomb(const b2Vec2& position, const b2Vec2& velocity)
 	aabb.lowerBound = minV;
 	aabb.upperBound = maxV;
 
-	m_bomb->CreateFixture(&sd);
+	m_bomb->CreateFixture(&fd);
 	m_bomb->SetMassFromShapes();
 }
 

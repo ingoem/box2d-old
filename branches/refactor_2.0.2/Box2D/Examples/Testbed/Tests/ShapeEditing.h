@@ -26,24 +26,21 @@ public:
 	ShapeEditing()
 	{
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
-
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		b2BodyDef bodydef;
 		bodydef.position.Set(0.0f, 10.0f);
 		m_body = m_world->CreateBody(&bodydef);
 
-		b2PolygonDef sd;
-		sd.SetAsBox(4.0f, 4.0f, b2Vec2(0.0f, 0.0f), 0.0f);
-		sd.density = 10.0f;
-		m_fixture1 = m_body->CreateFixture(&sd);
+		b2PolygonShape shape;
+		shape.SetAsBox(4.0f, 4.0f, b2Vec2(0.0f, 0.0f), 0.0f);
+		m_fixture1 = m_body->CreateFixture(&shape, 10.0f);
 		m_body->SetMassFromShapes();
 
 		m_fixture2 = NULL;
@@ -56,11 +53,10 @@ public:
 		case 'c':
 			if (m_fixture2 == NULL)
 			{
-				b2CircleDef sd;
-				sd.radius = 3.0f;
-				sd.density = 10.0f;
-				sd.localPosition.Set(0.5f, -4.0f);
-				m_fixture2 = m_body->CreateFixture(&sd);
+				b2CircleShape shape;
+				shape.m_radius = 3.0f;
+				shape.m_p.Set(0.5f, -4.0f);
+				m_fixture2 = m_body->CreateFixture(&shape, 10.0f);
 				m_body->SetMassFromShapes();
 				m_body->WakeUp();
 			}

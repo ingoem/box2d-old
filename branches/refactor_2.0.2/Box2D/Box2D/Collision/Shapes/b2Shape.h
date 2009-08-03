@@ -19,6 +19,7 @@
 #ifndef B2_SHAPE_H
 #define B2_SHAPE_H
 
+#include <Box2D/Common/b2BlockAllocator.h>
 #include <Box2D/Common/b2Math.h>
 #include <Box2D/Collision/b2Collision.h>
 
@@ -33,15 +34,6 @@ struct b2MassData
 
 	/// The rotational inertia of the shape.
 	float32 I;
-};
-
-/// The various collision shape types supported by Box2D.
-enum b2ShapeType
-{
-	b2_unknownShape = -1,
-	b2_circleShape,
-	b2_polygonShape,
-	b2_shapeTypeCount,
 };
 
 /// Return codes from TestSegment
@@ -59,12 +51,23 @@ class b2Shape
 {
 public:
 	
-	b2Shape() { m_type = b2_unknownShape; }
+	enum Type
+	{
+		e_unknown= -1,
+		e_circle = 0,
+		e_polygon = 1,
+		e_typeCount = 2,
+	};
+
+	b2Shape() { m_type = e_unknown; }
 	virtual ~b2Shape() {}
+
+	/// Clone the concrete shape using the provided allocator.
+	virtual b2Shape* Clone(b2BlockAllocator* allocator) const = 0;
 
 	/// Get the type of this shape. You can use this to down cast to the concrete shape.
 	/// @return the shape type.
-	b2ShapeType GetType() const;
+	Type GetType() const;
 
 	/// Test a point for containment in this shape. This only works for convex shapes.
 	/// @param xf the shape world transform.
@@ -96,11 +99,11 @@ public:
 	/// @param density the density in kilograms per meter squared.
 	virtual void ComputeMass(b2MassData* massData, float32 density) const = 0;
 
-	b2ShapeType m_type;
+	Type m_type;
 	float32 m_radius;
 };
 
-inline b2ShapeType b2Shape::GetType() const
+inline b2Shape::Type b2Shape::GetType() const
 {
 	return m_type;
 }

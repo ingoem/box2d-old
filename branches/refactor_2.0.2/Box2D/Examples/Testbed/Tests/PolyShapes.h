@@ -28,51 +28,55 @@ public:
 	{
 		// Ground body
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-			sd.friction = 0.3f;
-			
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
-		sds[0].vertexCount = 3;
-		sds[0].vertices[0].Set(-0.5f, 0.0f);
-		sds[0].vertices[1].Set(0.5f, 0.0f);
-		sds[0].vertices[2].Set(0.0f, 1.5f);
-		sds[0].density = 1.0f;
-		sds[0].friction = 0.3f;
+		{
+			b2Vec2 vertices[3];
+			vertices[0].Set(-0.5f, 0.0f);
+			vertices[1].Set(0.5f, 0.0f);
+			vertices[2].Set(0.0f, 1.5f);
+			polygons[0].Set(vertices, 3);
+		}
 		
-		sds[1].vertexCount = 3;
-		sds[1].vertices[0].Set(-0.1f, 0.0f);
-		sds[1].vertices[1].Set(0.1f, 0.0f);
-		sds[1].vertices[2].Set(0.0f, 1.5f);
-		sds[1].density = 1.0f;
-		sds[1].friction = 0.3f;
+		{
+			b2Vec2 vertices[3];
+			vertices[0].Set(-0.1f, 0.0f);
+			vertices[1].Set(0.1f, 0.0f);
+			vertices[2].Set(0.0f, 1.5f);
+			polygons[1].Set(vertices, 3);
+		}
 
-		sds[2].vertexCount = 8;
-		float32 w = 1.0f;
-		float32 b = w / (2.0f + sqrtf(2.0f));
-		float32 s = sqrtf(2.0f) * b;
-		sds[2].vertices[0].Set(0.5f * s, 0.0f);
-		sds[2].vertices[1].Set(0.5f * w, b);
-		sds[2].vertices[2].Set(0.5f * w, b + s);
-		sds[2].vertices[3].Set(0.5f * s, w);
-		sds[2].vertices[4].Set(-0.5f * s, w);
-		sds[2].vertices[5].Set(-0.5f * w, b + s);
-		sds[2].vertices[6].Set(-0.5f * w, b);
-		sds[2].vertices[7].Set(-0.5f * s, 0.0f);
-		sds[2].density = 1.0f;
-		sds[2].friction = 0.3f;
+		{
+			float32 w = 1.0f;
+			float32 b = w / (2.0f + sqrtf(2.0f));
+			float32 s = sqrtf(2.0f) * b;
 
-		sds[3].SetAsBox(0.5f, 0.5f);
-		sds[3].density = 1.0f;
-		sds[3].friction = 0.3f;
+			b2Vec2 vertices[8];
+			vertices[0].Set(0.5f * s, 0.0f);
+			vertices[1].Set(0.5f * w, b);
+			vertices[2].Set(0.5f * w, b + s);
+			vertices[3].Set(0.5f * s, w);
+			vertices[4].Set(-0.5f * s, w);
+			vertices[5].Set(-0.5f * w, b + s);
+			vertices[6].Set(-0.5f * w, b);
+			vertices[7].Set(-0.5f * s, 0.0f);
 
-		circleDef.radius = 0.5f;
-		circleDef.density = 1.0f;
+			polygons[2].Set(vertices, 8);
+		}
+
+		{
+			polygons[3].SetAsBox(0.5f, 0.5f);
+		}
+
+		{
+			circle.m_radius = 0.5f;
+		}
 
 		bodyIndex = 0;
 		memset(bodies, 0, sizeof(bodies));
@@ -101,12 +105,22 @@ public:
 
 		if (index < 4)
 		{
-			bodies[bodyIndex]->CreateFixture(sds + index);
+			b2FixtureDef fd;
+			fd.shape = polygons + index;
+			fd.density = 1.0f;
+			fd.friction = 0.3f;
+			bodies[bodyIndex]->CreateFixture(&fd);
 		}
 		else
 		{
-			bodies[bodyIndex]->CreateFixture(&circleDef);
+			b2FixtureDef fd;
+			fd.shape = &circle;
+			fd.density = 1.0f;
+			fd.friction = 0.3f;
+
+			bodies[bodyIndex]->CreateFixture(&fd);
 		}
+
 		bodies[bodyIndex]->SetMassFromShapes();
 
 		bodyIndex = (bodyIndex + 1) % k_maxBodies;
@@ -157,8 +171,8 @@ public:
 
 	int32 bodyIndex;
 	b2Body* bodies[k_maxBodies];
-	b2PolygonDef sds[4];
-	b2CircleDef circleDef;
+	b2PolygonShape polygons[4];
+	b2CircleShape circle;
 };
 
 #endif

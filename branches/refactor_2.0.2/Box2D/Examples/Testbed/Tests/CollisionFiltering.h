@@ -44,23 +44,28 @@ public:
 	{
 		// Ground body
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+
+			b2FixtureDef sd;
+			sd.shape = &shape;
 			sd.friction = 0.3f;
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
-
 			b2Body* ground = m_world->CreateBody(&bd);
 			ground->CreateFixture(&sd);
 		}
 
 		// Small triangle
-		b2PolygonDef triangleShapeDef;
-		triangleShapeDef.vertexCount = 3;
-		triangleShapeDef.vertices[0].Set(-1.0f, 0.0f);
-		triangleShapeDef.vertices[1].Set(1.0f, 0.0f);
-		triangleShapeDef.vertices[2].Set(0.0f, 2.0f);
+		b2Vec2 vertices[3];
+		vertices[0].Set(-1.0f, 0.0f);
+		vertices[1].Set(1.0f, 0.0f);
+		vertices[2].Set(0.0f, 2.0f);
+		b2PolygonShape polygon;
+		polygon.Set(vertices, 3);
+
+		b2FixtureDef triangleShapeDef;
+		triangleShapeDef.shape = &polygon;
 		triangleShapeDef.density = 1.0f;
 
 		triangleShapeDef.filter.groupIndex = k_smallGroup;
@@ -75,9 +80,10 @@ public:
 		body1->SetMassFromShapes();
 
 		// Large triangle (recycle definitions)
-		triangleShapeDef.vertices[0] *= 2.0f;
-		triangleShapeDef.vertices[1] *= 2.0f;
-		triangleShapeDef.vertices[2] *= 2.0f;
+		vertices[0] *= 2.0f;
+		vertices[1] *= 2.0f;
+		vertices[2] *= 2.0f;
+		polygon.Set(vertices, 3);
 		triangleShapeDef.filter.groupIndex = k_largeGroup;
 		triangleBodyDef.position.Set(-5.0f, 6.0f);
 		triangleBodyDef.fixedRotation = true; // look at me!
@@ -87,9 +93,11 @@ public:
 		body2->SetMassFromShapes();
 
 		// Small box
-		b2PolygonDef boxShapeDef;
-		boxShapeDef.SetAsBox(1.0f, 0.5f);
+		polygon.SetAsBox(1.0f, 0.5f);
+		b2FixtureDef boxShapeDef;
+		boxShapeDef.shape = &polygon;
 		boxShapeDef.density = 1.0f;
+		boxShapeDef.restitution = 0.1f;
 
 		boxShapeDef.filter.groupIndex = k_smallGroup;
 		boxShapeDef.filter.categoryBits = k_boxCategory;
@@ -103,7 +111,7 @@ public:
 		body3->SetMassFromShapes();
 
 		// Large box (recycle definitions)
-		boxShapeDef.SetAsBox(2.0f, 1.0f);
+		polygon.SetAsBox(2.0f, 1.0f);
 		boxShapeDef.filter.groupIndex = k_largeGroup;
 		boxBodyDef.position.Set(0.0f, 6.0f);
 
@@ -112,8 +120,11 @@ public:
 		body4->SetMassFromShapes();
 
 		// Small circle
-		b2CircleDef circleShapeDef;
-		circleShapeDef.radius = 1.0f;
+		b2CircleShape circle;
+		circle.m_radius = 1.0f;
+
+		b2FixtureDef circleShapeDef;
+		circleShapeDef.shape = &circle;
 		circleShapeDef.density = 1.0f;
 
 		circleShapeDef.filter.groupIndex = k_smallGroup;
@@ -128,7 +139,7 @@ public:
 		body5->SetMassFromShapes();
 
 		// Large circle
-		circleShapeDef.radius *= 2.0f;
+		circle.m_radius *= 2.0f;
 		circleShapeDef.filter.groupIndex = k_largeGroup;
 		circleBodyDef.position.Set(5.0f, 6.0f);
 

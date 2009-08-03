@@ -111,10 +111,20 @@ struct b2BodyDef
 class b2Body
 {
 public:
-	/// Creates a fixture and attach it to this body.
+	/// Creates a fixture and attach it to this body. Use this function if you need
+	/// to set some fixture parameters, like friction. Otherwise you can create the
+	/// fixture directly from a shape.
 	/// @param def the fixture definition.
 	/// @warning This function is locked during callbacks.
 	b2Fixture* CreateFixture(const b2FixtureDef* def);
+
+	/// Creates a fixture from a shape and attach it to this body.
+	/// This is a convenience function. Use b2FixtureDef if you need to set parameters
+	/// like friction, restitution, user data, or filtering.
+	/// @param shape the shape to be cloned.
+	/// @param density the shape density (set to zero for static bodies).
+	/// @warning This function is locked during callbacks.
+	b2Fixture* CreateFixture(const b2Shape* shape, float32 density = 0.0f);
 
 	/// Destroy a fixture. This removes the fixture from the broad-phase and
 	/// therefore destroys any contacts associated with this fixture. All fixtures

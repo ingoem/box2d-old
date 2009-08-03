@@ -34,26 +34,28 @@ public:
 	VerticalStack()
 	{
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f, b2Vec2(0.0f, -10.0f), 0.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, 0.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
 
-			sd.SetAsBox(0.1f, 10.0f, b2Vec2(20.0f, 10.0f), 0.0f);
-			ground->CreateFixture(&sd);
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
+
+			shape.SetAsEdge(b2Vec2(20.0f, 0.0f), b2Vec2(20.0f, 20.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		float32 xs[5] = {0.0f, -10.0f, -5.0f, 5.0f, 10.0f};
 
 		for (int32 j = 0; j < e_columnCount; ++j)
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.5f, 0.5f);
-			sd.density = 1.0f;
-			sd.friction = 0.3f;
+			b2PolygonShape shape;
+			shape.SetAsBox(0.5f, 0.5f);
+
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 1.0f;
+			fd.friction = 0.3f;
 
 			for (int i = 0; i < e_rowCount; ++i)
 			{
@@ -65,7 +67,7 @@ public:
 				bd.position.Set(xs[j] + x, 0.752f + 1.54f * i);
 				b2Body* body = m_world->CreateBody(&bd);
 
-				body->CreateFixture(&sd);
+				body->CreateFixture(&fd);
 				body->SetMassFromShapes();
 			}
 		}
@@ -85,17 +87,20 @@ public:
 			}
 
 			{
-				b2CircleDef sd;
-				sd.density = 20.0f;
-				sd.radius = 0.25f;
-				sd.restitution = 0.05f;
+				b2CircleShape shape;
+				shape.m_radius = 0.25f;
+
+				b2FixtureDef fd;
+				fd.shape = &shape;
+				fd.density = 20.0f;
+				fd.restitution = 0.05f;
 
 				b2BodyDef bd;
 				bd.isBullet = true;
 				bd.position.Set(-31.0f, 5.0f);
 
 				m_bullet = m_world->CreateBody(&bd);
-				m_bullet->CreateFixture(&sd);
+				m_bullet->CreateFixture(&fd);
 				m_bullet->SetMassFromShapes();
 
 				m_bullet->SetLinearVelocity(b2Vec2(400.0f, 0.0f));

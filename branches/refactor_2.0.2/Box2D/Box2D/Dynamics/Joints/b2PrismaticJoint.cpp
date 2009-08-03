@@ -112,7 +112,7 @@ b2PrismaticJoint::b2PrismaticJoint(const b2PrismaticJointDef* def)
 
 	m_lowerTranslation = def->lowerTranslation;
 	m_upperTranslation = def->upperTranslation;
-	m_maxMotorForce = B2FORCE_INV_SCALE(def->maxMotorForce);
+	m_maxMotorForce = def->maxMotorForce;
 	m_motorSpeed = def->motorSpeed;
 	m_enableLimit = def->enableLimit;
 	m_enableMotor = def->enableMotor;
@@ -578,7 +578,7 @@ void b2PrismaticJoint::SetMaxMotorForce(float32 force)
 {
 	m_bodyA->WakeUp();
 	m_bodyB->WakeUp();
-	m_maxMotorForce = B2FORCE_SCALE(float32(1.0))*force;
+	m_maxMotorForce = force;
 }
 
 float32 b2PrismaticJoint::GetMotorForce() const

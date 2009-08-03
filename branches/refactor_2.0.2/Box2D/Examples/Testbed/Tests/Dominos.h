@@ -27,74 +27,75 @@ public:
 	{
 		b2Body* b1;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			b1 = m_world->CreateBody(&bd);
-			b1->CreateFixture(&sd);
+			b1->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(6.0f, 0.25f);
+			b2PolygonShape shape;
+			shape.SetAsBox(6.0f, 0.25f);
 
 			b2BodyDef bd;
 			bd.position.Set(-1.5f, 10.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.1f, 1.0f);
-			sd.density = 20.0f;
-			sd.friction = 0.1f;
+			b2PolygonShape shape;
+			shape.SetAsBox(0.1f, 1.0f);
+
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 20.0f;
+			fd.friction = 0.1f;
 
 			for (int i = 0; i < 10; ++i)
 			{
 				b2BodyDef bd;
 				bd.position.Set(-6.0f + 1.0f * i, 11.25f);
 				b2Body* body = m_world->CreateBody(&bd);
-				body->CreateFixture(&sd);
+				body->CreateFixture(&fd);
 				body->SetMassFromShapes();
 			}
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(7.0f, 0.25f, b2Vec2_zero, 0.3f);
+			b2PolygonShape shape;
+			shape.SetAsBox(7.0f, 0.25f, b2Vec2_zero, 0.3f);
 
 			b2BodyDef bd;
 			bd.position.Set(1.0f, 6.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&shape);
 		}
 
 		b2Body* b2;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.25f, 1.5f);
+			b2PolygonShape shape;
+			shape.SetAsBox(0.25f, 1.5f);
 
 			b2BodyDef bd;
 			bd.position.Set(-7.0f, 4.0f);
 			b2 = m_world->CreateBody(&bd);
-			b2->CreateFixture(&sd);
+			b2->CreateFixture(&shape);
 		}
 
 		b2Body* b3;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(6.0f, 0.125f);
-			sd.density = 10.0f;
+			b2PolygonShape shape;
+			shape.SetAsBox(6.0f, 0.125f);
 
 			b2BodyDef bd;
 			bd.position.Set(-0.9f, 1.0f);
 			bd.angle = -0.15f;
 
 			b3 = m_world->CreateBody(&bd);
-			b3->CreateFixture(&sd);
+			b3->CreateFixture(&shape, 10.0f);
 			b3->SetMassFromShapes();
 		}
 
@@ -108,14 +109,13 @@ public:
 
 		b2Body* b4;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.25f, 0.25f);
-			sd.density = 10.0f;
+			b2PolygonShape shape;
+			shape.SetAsBox(0.25f, 0.25f);
 
 			b2BodyDef bd;
 			bd.position.Set(-10.0f, 15.0f);
 			b4 = m_world->CreateBody(&bd);
-			b4->CreateFixture(&sd);
+			b4->CreateFixture(&shape, 10.0f);
 			b4->SetMassFromShapes();
 		}
 
@@ -129,18 +129,21 @@ public:
 			bd.position.Set(6.5f, 3.0f);
 			b5 = m_world->CreateBody(&bd);
 
-			b2PolygonDef sd;
-			sd.density = 10.0f;
-			sd.friction = 0.1f;
+			b2PolygonShape shape;
+			b2FixtureDef fd;
 
-			sd.SetAsBox(1.0f, 0.1f, b2Vec2(0.0f, -0.9f), 0.0f);
-			b5->CreateFixture(&sd);
+			fd.shape = &shape;
+			fd.density = 10.0f;
+			fd.friction = 0.1f;
 
-			sd.SetAsBox(0.1f, 1.0f, b2Vec2(-0.9f, 0.0f), 0.0f);
-			b5->CreateFixture(&sd);
+			shape.SetAsBox(1.0f, 0.1f, b2Vec2(0.0f, -0.9f), 0.0f);
+			b5->CreateFixture(&fd);
 
-			sd.SetAsBox(0.1f, 1.0f, b2Vec2(0.9f, 0.0f), 0.0f);
-			b5->CreateFixture(&sd);
+			shape.SetAsBox(0.1f, 1.0f, b2Vec2(-0.9f, 0.0f), 0.0f);
+			b5->CreateFixture(&fd);
+
+			shape.SetAsBox(0.1f, 1.0f, b2Vec2(0.9f, 0.0f), 0.0f);
+			b5->CreateFixture(&fd);
 
 			b5->SetMassFromShapes();
 		}
@@ -151,15 +154,13 @@ public:
 
 		b2Body* b6;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(1.0f, 0.1f);
-			sd.density = 30.0f;
-			sd.friction = 0.2f;
+			b2PolygonShape shape;
+			shape.SetAsBox(1.0f, 0.1f);
 
 			b2BodyDef bd;
 			bd.position.Set(6.5f, 4.1f);
 			b6 = m_world->CreateBody(&bd);
-			b6->CreateFixture(&sd);
+			b6->CreateFixture(&shape, 30.0f);
 			b6->SetMassFromShapes();
 		}
 
@@ -169,15 +170,14 @@ public:
 
 		b2Body* b7;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.1f, 1.0f);
-			sd.density = 10.0f;
+			b2PolygonShape shape;
+			shape.SetAsBox(0.1f, 1.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(7.4f, 1.0f);
 
 			b7 = m_world->CreateBody(&bd);
-			b7->CreateFixture(&sd);
+			b7->CreateFixture(&shape, 10.0f);
 			b7->SetMassFromShapes();
 		}
 
@@ -191,16 +191,17 @@ public:
 		m_world->CreateJoint(&djd);
 
 		{
-			b2CircleDef sd;
-			sd.radius = 0.2f;
-			sd.density = 10.0f;
+			float32 radius = 0.2f;
+
+			b2CircleShape shape;
+			shape.m_radius = radius;
 
 			for (int32 i = 0; i < 4; ++i)
 			{
 				b2BodyDef bd;
-				bd.position.Set(5.9f + 2.0f * sd.radius * i, 2.4f);
+				bd.position.Set(5.9f + 2.0f * radius * i, 2.4f);
 				b2Body* body = m_world->CreateBody(&bd);
-				body->CreateFixture(&sd);
+				body->CreateFixture(&shape, 10.0f);
 				body->SetMassFromShapes();
 			}
 		}

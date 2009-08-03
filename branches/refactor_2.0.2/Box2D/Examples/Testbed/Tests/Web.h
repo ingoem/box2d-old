@@ -27,41 +27,38 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.5f, 0.5f);
-			sd.density = 5.0f;
-			sd.friction = 0.2f;
+			b2PolygonShape shape;
+			shape.SetAsBox(0.5f, 0.5f);
 
 			b2BodyDef bd;
 
 			bd.position.Set(-5.0f, 5.0f);
 			m_bodies[0] = m_world->CreateBody(&bd);
-			m_bodies[0]->CreateFixture(&sd);
+			m_bodies[0]->CreateFixture(&shape, 5.0f);
 			m_bodies[0]->SetMassFromShapes();
 
 			bd.position.Set(5.0f, 5.0f);
 			m_bodies[1] = m_world->CreateBody(&bd);
-			m_bodies[1]->CreateFixture(&sd);
+			m_bodies[1]->CreateFixture(&shape, 5.0f);
 			m_bodies[1]->SetMassFromShapes();
 
 			bd.position.Set(5.0f, 15.0f);
 			m_bodies[2] = m_world->CreateBody(&bd);
-			m_bodies[2]->CreateFixture(&sd);
+			m_bodies[2]->CreateFixture(&shape, 5.0f);
 			m_bodies[2]->SetMassFromShapes();
 
 			bd.position.Set(-5.0f, 15.0f);
 			m_bodies[3] = m_world->CreateBody(&bd);
-			m_bodies[3]->CreateFixture(&sd);
+			m_bodies[3]->CreateFixture(&shape, 5.0f);
 			m_bodies[3]->SetMassFromShapes();
 
 			b2DistanceJointDef jd;
@@ -72,7 +69,7 @@ public:
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[0];
-			jd.localAnchor1.Set(-10.0f, 10.0f);
+			jd.localAnchor1.Set(-10.0f, 0.0f);
 			jd.localAnchor2.Set(-0.5f, -0.5f);
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
@@ -82,7 +79,7 @@ public:
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[1];
-			jd.localAnchor1.Set(10.0f, 10.0f);
+			jd.localAnchor1.Set(10.0f, 0.0f);
 			jd.localAnchor2.Set(0.5f, -0.5f);
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
@@ -92,7 +89,7 @@ public:
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[2];
-			jd.localAnchor1.Set(10.0f, 30.0f);
+			jd.localAnchor1.Set(10.0f, 20.0f);
 			jd.localAnchor2.Set(0.5f, 0.5f);
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);
@@ -102,7 +99,7 @@ public:
 
 			jd.body1 = ground;
 			jd.body2 = m_bodies[3];
-			jd.localAnchor1.Set(-10.0f, 30.0f);
+			jd.localAnchor1.Set(-10.0f, 20.0f);
 			jd.localAnchor2.Set(-0.5f, 0.5f);
 			p1 = jd.body1->GetWorldPoint(jd.localAnchor1);
 			p2 = jd.body2->GetWorldPoint(jd.localAnchor2);

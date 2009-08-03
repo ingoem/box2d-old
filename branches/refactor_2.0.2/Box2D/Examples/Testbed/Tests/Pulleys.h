@@ -26,13 +26,12 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
@@ -41,20 +40,19 @@ public:
 			float32 y = 16.0f;
 			float32 L = 12.0f;
 
-			b2PolygonDef sd;
-			sd.SetAsBox(a, b);
-			sd.density = 5.0f;
+			b2PolygonShape shape;
+			shape.SetAsBox(a, b);
 
 			b2BodyDef bd;
 
 			bd.position.Set(-10.0f, y);
 			b2Body* body1 = m_world->CreateBody(&bd);
-			body1->CreateFixture(&sd);
+			body1->CreateFixture(&shape, 5.0f);
 			body1->SetMassFromShapes();
 
 			bd.position.Set(10.0f, y);
 			b2Body* body2 = m_world->CreateBody(&bd);
-			body2->CreateFixture(&sd);
+			body2->CreateFixture(&shape, 5.0f);
 			body2->SetMassFromShapes();
 
 			b2PulleyJointDef pulleyDef;
