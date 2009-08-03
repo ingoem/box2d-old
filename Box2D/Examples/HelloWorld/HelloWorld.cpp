@@ -23,6 +23,8 @@
 // This is a simple example of building and running a simulation
 // using Box2D. Here we create a large ground box and a small dynamic
 // box.
+// There are no graphics for this example. Box2D is meant to be used
+// with your rendering engine in your game engine.
 int main(int argc, char** argv)
 {
 	B2_NOT_USED(argc);
@@ -47,13 +49,18 @@ int main(int argc, char** argv)
 	b2Body* groundBody = world.CreateBody(&groundBodyDef);
 
 	// Define the ground box shape.
-	b2PolygonDef groundShapeDef;
+	b2PolygonShape groundBox;
 
 	// The extents are the half-widths of the box.
-	groundShapeDef.SetAsBox(50.0f, 10.0f);
+	groundBox.SetAsBox(50.0f, 10.0f);
 
-	// Add the ground shape to the ground body.
-	groundBody->CreateFixture(&groundShapeDef);
+	// Define the ground fixture. This binds a shape (geometry) to a
+	// body (dynamics).
+	b2FixtureDef groundFixtureDef;
+	groundFixtureDef.shape = &groundBox;
+
+	// Add the ground fixture to the ground body.
+	groundBody->CreateFixture(&groundFixtureDef);
 
 	// Define the dynamic body. We set its position and call the body factory.
 	b2BodyDef bodyDef;
@@ -61,17 +68,21 @@ int main(int argc, char** argv)
 	b2Body* body = world.CreateBody(&bodyDef);
 
 	// Define another box shape for our dynamic body.
-	b2PolygonDef shapeDef;
-	shapeDef.SetAsBox(1.0f, 1.0f);
+	b2PolygonShape dynamicBox;
+	dynamicBox.SetAsBox(1.0f, 1.0f);
+
+	// Define the dynamic body fixture.
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &dynamicBox;
 
 	// Set the box density to be non-zero, so it will be dynamic.
-	shapeDef.density = 1.0f;
+	fixtureDef.density = 1.0f;
 
 	// Override the default friction.
-	shapeDef.friction = 0.3f;
+	fixtureDef.friction = 0.3f;
 
 	// Add the shape to the body.
-	body->CreateFixture(&shapeDef);
+	body->CreateFixture(&fixtureDef);
 
 	// Now tell the dynamic body to compute it's mass properties base
 	// on its shape.

@@ -26,19 +26,17 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2CircleDef sd;
-			sd.radius = 0.5f;
-			sd.density = 5.0f;
+			b2CircleShape shape;
+			shape.m_radius = 0.5f;
 
 			b2BodyDef bd;
 
@@ -46,7 +44,7 @@ public:
 
 			bd.position.Set(0.0f, 20.0f);
 			b2Body* body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
+			body->CreateFixture(&shape, 5.0f);
 			body->SetMassFromShapes();
 
 			float32 w = 100.0f;

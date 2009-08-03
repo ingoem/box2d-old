@@ -27,25 +27,22 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
 
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.5f, 2.0f);
-			sd.density = 1.0f;
-
+			b2PolygonShape shape;
+			shape.SetAsBox(0.5f, 2.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(0.0f, 7.0f);
 			b2Body* body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
+			body->CreateFixture(&shape, 1.0f);
 			body->SetMassFromShapes();
 
 			b2LineJointDef jd;

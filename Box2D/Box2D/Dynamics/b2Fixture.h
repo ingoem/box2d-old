@@ -28,7 +28,7 @@ class b2Body;
 class b2BroadPhase;
 
 /// This holds contact filtering data.
-struct b2FilterData
+struct b2Filter
 {
 	/// The collision category bits. Normally you would just set one bit.
 	uint16 categoryBits;
@@ -50,7 +50,7 @@ struct b2FixtureDef
 	/// The constructor sets the default fixture definition values.
 	b2FixtureDef()
 	{
-		type = b2_unknownShape;
+		shape = NULL;
 		userData = NULL;
 		friction = 0.2f;
 		restitution = 0.0f;
@@ -63,8 +63,9 @@ struct b2FixtureDef
 
 	virtual ~b2FixtureDef() {}
 
-	/// Holds the shape type for down-casting.
-	b2ShapeType type;
+	/// The shape, this must be set. The shape will be cloned, so you
+	/// can create the shape on the stack.
+	const b2Shape* shape;
 
 	/// Use this to store application specific fixture data.
 	void* userData;
@@ -83,52 +84,9 @@ struct b2FixtureDef
 	bool isSensor;
 
 	/// Contact filtering data.
-	b2FilterData filter;
+	b2Filter filter;
 };
 
-/// This structure is used to build a fixture with a circle shape.
-struct b2CircleDef : public b2FixtureDef
-{
-	b2CircleDef()
-	{
-		type = b2_circleShape;
-		localPosition.SetZero();
-		radius = 1.0f;
-	}
-
-	b2Vec2 localPosition;
-	float32 radius;
-};
-
-/// Convex polygon. The vertices must be ordered so that the outside of
-/// the polygon is on the right side of the edges (looking along the edge
-/// from start to end).
-struct b2PolygonDef : public b2FixtureDef
-{
-	b2PolygonDef()
-	{
-		type = b2_polygonShape;
-		vertexCount = 0;
-	}
-
-	/// Build vertices to represent an axis-aligned box.
-	/// @param hx the half-width.
-	/// @param hy the half-height.
-	void SetAsBox(float32 hx, float32 hy);
-
-	/// Build vertices to represent an oriented box.
-	/// @param hx the half-width.
-	/// @param hy the half-height.
-	/// @param center the center of the box in local coordinates.
-	/// @param angle the rotation of the box in local coordinates.
-	void SetAsBox(float32 hx, float32 hy, const b2Vec2& center, float32 angle);
-
-	/// The polygon vertices in local coordinates.
-	b2Vec2 vertices[b2_maxPolygonVertices];
-
-	/// The number of polygon vertices.
-	int32 vertexCount;
-};
 
 /// A fixture is used to attach a shape to a body for collision detection. A fixture
 /// inherits its transform from its parent. Fixtures hold additional non-geometric data
@@ -140,7 +98,7 @@ class b2Fixture
 public:
 	/// Get the type of the child shape. You can use this to down cast to the concrete shape.
 	/// @return the shape type.
-	b2ShapeType GetType() const;
+	b2Shape::Type GetType() const;
 
 	/// Get the child shape. You can modify the child shape, however you should not change the
 	/// number of vertices because this will crash some collision caching mechanisms.
@@ -152,16 +110,15 @@ public:
 	bool IsSensor() const;
 
 	/// Set if this fixture is a sensor.
-	/// You must call b2World::Refilter to update existing contacts.
 	void SetSensor(bool sensor);
 
 	/// Set the contact filtering data. This is an expensive operation and should
 	/// not be called frequently. This will not update contacts until the next time
 	/// step when either parent body is awake.
-	void SetFilterData(const b2FilterData& filter);
+	void SetFilterData(const b2Filter& filter);
 
 	/// Get the contact filtering data.
-	const b2FilterData& GetFilterData() const;
+	const b2Filter& GetFilterData() const;
 
 	/// Get the parent body of this fixture. This is NULL if the fixture is not attached.
 	/// @return the parent body.
@@ -233,7 +190,6 @@ protected:
 
 	void Synchronize(b2BroadPhase* broadPhase, const b2XForm& xf1, const b2XForm& xf2);
 
-	b2ShapeType m_type;
 	b2Fixture* m_next;
 	b2Body* m_body;
 
@@ -244,16 +200,16 @@ protected:
 	float32 m_restitution;
 
 	int32 m_proxyId;
-	b2FilterData m_filter;
+	b2Filter m_filter;
 
 	bool m_isSensor;
 
 	void* m_userData;
 };
 
-inline b2ShapeType b2Fixture::GetType() const
+inline b2Shape::Type b2Fixture::GetType() const
 {
-	return m_type;
+	return m_shape->GetType();
 }
 
 inline const b2Shape* b2Fixture::GetShape() const
@@ -271,12 +227,7 @@ inline bool b2Fixture::IsSensor() const
 	return m_isSensor;
 }
 
-inline void b2Fixture::SetSensor(bool sensor)
-{
-	m_isSensor = sensor;
-}
-
-inline const b2FilterData& b2Fixture::GetFilterData() const
+inline const b2Filter& b2Fixture::GetFilterData() const
 {
 	return m_filter;
 }

@@ -27,19 +27,21 @@ public:
 		b2Body* ground = NULL;
 		{
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->CreateBody(&bd);
 
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-			ground->CreateFixture(&sd);
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.6f, 0.125f);
-			sd.density = 20.0f;
-			sd.friction = 0.2f;
+			b2PolygonShape shape;
+			shape.SetAsBox(0.6f, 0.125f);
+
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 20.0f;
+			fd.friction = 0.2f;
 
 			b2RevoluteJointDef jd;
 			jd.collideConnected = false;
@@ -51,7 +53,7 @@ public:
 				b2BodyDef bd;
 				bd.position.Set(0.5f + i, y);
 				b2Body* body = m_world->CreateBody(&bd);
-				body->CreateFixture(&sd);
+				body->CreateFixture(&fd);
 				body->SetMassFromShapes();
 
 				b2Vec2 anchor(float32(i), y);

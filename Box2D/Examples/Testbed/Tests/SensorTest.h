@@ -33,38 +33,38 @@ public:
 	{
 		{
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
-
 			b2Body* ground = m_world->CreateBody(&bd);
 
 			{
-				b2PolygonDef sd;
-				sd.SetAsBox(50.0f, 10.0f);
-				ground->CreateFixture(&sd);
+				b2PolygonShape shape;
+				shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+				ground->CreateFixture(&shape);
 			}
 
 #if 0
 			{
-				b2PolygonDef sd;
+				b2FixtureDef sd;
 				sd.SetAsBox(10.0f, 2.0f, b2Vec2(0.0f, 20.0f), 0.0f);
 				sd.isSensor = true;
 				m_sensor = ground->CreateFixture(&sd);
 			}
 #else
 			{
-				b2CircleDef cd;
-				cd.isSensor = true;
-				cd.radius = 5.0f;
-				cd.localPosition.Set(0.0f, 20.0f);
-				m_sensor = ground->CreateFixture(&cd);
+				b2CircleShape shape;
+				shape.m_radius = 5.0f;
+				shape.m_p.Set(0.0f, 10.0f);
+
+				b2FixtureDef fd;
+				fd.shape = &shape;
+				fd.isSensor = true;
+				m_sensor = ground->CreateFixture(&fd);
 			}
 #endif
 		}
 
 		{
-			b2CircleDef sd;
-			sd.radius = 1.0f;
-			sd.density = 1.0f;
+			b2CircleShape shape;
+			shape.m_radius = 1.0f;
 
 			for (int32 i = 0; i < e_count; ++i)
 			{
@@ -75,7 +75,7 @@ public:
 				m_touching[i] = false;
 				m_bodies[i] = m_world->CreateBody(&bd);
 
-				m_bodies[i]->CreateFixture(&sd);
+				m_bodies[i]->CreateFixture(&shape, 1.0f);
 				m_bodies[i]->SetMassFromShapes();
 			}
 		}

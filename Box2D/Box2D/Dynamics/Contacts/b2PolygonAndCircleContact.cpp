@@ -40,8 +40,8 @@ void b2PolygonAndCircleContact::Destroy(b2Contact* contact, b2BlockAllocator* al
 b2PolygonAndCircleContact::b2PolygonAndCircleContact(b2Fixture* fixtureA, b2Fixture* fixtureB)
 : b2Contact(fixtureA, fixtureB)
 {
-	b2Assert(m_fixtureA->GetType() == b2_polygonShape);
-	b2Assert(m_fixtureB->GetType() == b2_circleShape);
+	b2Assert(m_fixtureA->GetType() == b2Shape::e_polygon);
+	b2Assert(m_fixtureB->GetType() == b2Shape::e_circle);
 }
 
 void b2PolygonAndCircleContact::Evaluate()

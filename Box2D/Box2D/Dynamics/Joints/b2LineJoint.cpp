@@ -103,7 +103,7 @@ b2LineJoint::b2LineJoint(const b2LineJointDef* def)
 
 	m_lowerTranslation = def->lowerTranslation;
 	m_upperTranslation = def->upperTranslation;
-	m_maxMotorForce = B2FORCE_INV_SCALE(def->maxMotorForce);
+	m_maxMotorForce = def->maxMotorForce;
 	m_motorSpeed = def->motorSpeed;
 	m_enableLimit = def->enableLimit;
 	m_enableMotor = def->enableMotor;
@@ -545,7 +545,7 @@ void b2LineJoint::SetMaxMotorForce(float32 force)
 {
 	m_bodyA->WakeUp();
 	m_bodyB->WakeUp();
-	m_maxMotorForce = B2FORCE_SCALE(float32(1.0))*force;
+	m_maxMotorForce = force;
 }
 
 float32 b2LineJoint::GetMotorForce() const

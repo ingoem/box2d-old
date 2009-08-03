@@ -27,31 +27,27 @@ public:
 		b2Body* ground = NULL;
 		{
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->CreateBody(&bd);
 
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-			ground->CreateFixture(&sd);
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(50.0f, 0.0f), b2Vec2(-50.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2CircleDef circle1;
-			circle1.radius = 1.0f;
-			circle1.density = 5.0f;
-			
-			b2CircleDef circle2;
-			circle2.radius = 2.0f;
-			circle2.density = 5.0f;
+			b2CircleShape circle1;
+			circle1.m_radius = 1.0f;
 
-			b2PolygonDef box;
+			b2CircleShape circle2;
+			circle2.m_radius = 2.0f;
+			
+			b2PolygonShape box;
 			box.SetAsBox(0.5f, 5.0f);
-			box.density = 5.0f;
 
 			b2BodyDef bd1;
 			bd1.position.Set(-3.0f, 12.0f);
 			b2Body* body1 = m_world->CreateBody(&bd1);
-			body1->CreateFixture(&circle1);
+			body1->CreateFixture(&circle1, 5.0f);
 			body1->SetMassFromShapes();
 
 			b2RevoluteJointDef jd1;
@@ -65,7 +61,7 @@ public:
 			b2BodyDef bd2;
 			bd2.position.Set(0.0f, 12.0f);
 			b2Body* body2 = m_world->CreateBody(&bd2);
-			body2->CreateFixture(&circle2);
+			body2->CreateFixture(&circle2, 5.0f);
 			body2->SetMassFromShapes();
 
 			b2RevoluteJointDef jd2;
@@ -75,7 +71,7 @@ public:
 			b2BodyDef bd3;
 			bd3.position.Set(2.5f, 12.0f);
 			b2Body* body3 = m_world->CreateBody(&bd3);
-			body3->CreateFixture(&box);
+			body3->CreateFixture(&box, 5.0f);
 			body3->SetMassFromShapes();
 
 			b2PrismaticJointDef jd3;
@@ -91,7 +87,7 @@ public:
 			jd4.body2 = body2;
 			jd4.joint1 = m_joint1;
 			jd4.joint2 = m_joint2;
-			jd4.ratio = circle2.radius / circle1.radius;
+			jd4.ratio = circle2.m_radius / circle1.m_radius;
 			m_joint4 = (b2GearJoint*)m_world->CreateJoint(&jd4);
 
 			b2GearJointDef jd5;
@@ -99,7 +95,7 @@ public:
 			jd5.body2 = body3;
 			jd5.joint1 = m_joint2;
 			jd5.joint2 = m_joint3;
-			jd5.ratio = -1.0f / circle2.radius;
+			jd5.ratio = -1.0f / circle2.m_radius;
 			m_joint5 = (b2GearJoint*)m_world->CreateJoint(&jd5);
 		}
 	}

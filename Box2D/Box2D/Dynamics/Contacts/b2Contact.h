@@ -73,7 +73,7 @@ public:
 	/// @return true if this contact should generate a response.
 	bool IsSolid() const;
 
-    //TODO: Doc
+    /// Change the solidity of this contact. Used for sensors.
 	void SetSolid(bool solid);
 
 	/// Is this contact invalid?
@@ -125,10 +125,10 @@ protected:
 	};
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
-						b2ShapeType typeA, b2ShapeType typeB);
+						b2Shape::Type typeA, b2Shape::Type typeB);
 	static void InitializeRegisters();
 	static b2Contact* Create(b2Fixture* fixtureA, b2Fixture* fixtureB, b2BlockAllocator* allocator);
-    static void Destroy(b2Contact* contact, b2ShapeType typeA, b2ShapeType typeB, b2BlockAllocator* allocator);
+	static void Destroy(b2Contact* contact, b2Shape::Type typeA, b2Shape::Type typeB, b2BlockAllocator* allocator);
 	static void Destroy(b2Contact* contact, b2BlockAllocator* allocator);
 
 	b2Contact() : m_fixtureA(NULL), m_fixtureB(NULL) {}
@@ -140,7 +140,7 @@ protected:
 
 	virtual float32 ComputeTOI(const b2Sweep& sweepA, const b2Sweep& sweepB) const = 0;
 
-	static b2ContactRegister s_registers[b2_shapeTypeCount][b2_shapeTypeCount];
+	static b2ContactRegister s_registers[b2Shape::e_typeCount][b2Shape::e_typeCount];
 	static bool s_initialized;
 
 	uint32 m_flags;
@@ -179,6 +179,18 @@ inline void b2Contact::GetWorldManifold(b2WorldManifold* worldManifold) const
 inline bool b2Contact::IsSolid() const
 {
 	return (m_flags & e_nonSolidFlag) == 0;
+}
+
+inline void b2Contact::SetSolid(bool solid)
+{
+	if (solid)
+	{
+		m_flags &= ~e_nonSolidFlag;
+	}
+	else
+	{
+		m_flags |= e_nonSolidFlag;
+	}
 }
 
 inline bool b2Contact::AreTouching() const

@@ -35,34 +35,45 @@ public:
 		b2Vec2 p5(6.0f * s, 1.5f);
 		b2Vec2 p6(2.5f * s, 3.7f);
 
-		b2PolygonDef sd1, sd2;
-		sd1.vertexCount = 3;
-		sd2.vertexCount = 3;
-		sd1.filter.groupIndex = -1;
-		sd2.filter.groupIndex = -1;
-		sd1.density = 1.0f;
-		sd2.density = 1.0f;
+		b2FixtureDef fd1, fd2;
+		fd1.filter.groupIndex = -1;
+		fd2.filter.groupIndex = -1;
+		fd1.density = 1.0f;
+		fd2.density = 1.0f;
+
+		b2PolygonShape poly1, poly2;
 
 		if (s > 0.0f)
 		{
-			sd1.vertices[0] = p1;
-			sd1.vertices[1] = p2;
-			sd1.vertices[2] = p3;
+			b2Vec2 vertices[3];
 
-			sd2.vertices[0] = b2Vec2_zero;
-			sd2.vertices[1] = p5 - p4;
-			sd2.vertices[2] = p6 - p4;
+			vertices[0] = p1;
+			vertices[1] = p2;
+			vertices[2] = p3;
+			poly1.Set(vertices, 3);
+
+			vertices[0] = b2Vec2_zero;
+			vertices[1] = p5 - p4;
+			vertices[2] = p6 - p4;
+			poly2.Set(vertices, 3);
 		}
 		else
 		{
-			sd1.vertices[0] = p1;
-			sd1.vertices[1] = p3;
-			sd1.vertices[2] = p2;
+			b2Vec2 vertices[3];
 
-			sd2.vertices[0] = b2Vec2_zero;
-			sd2.vertices[1] = p6 - p4;
-			sd2.vertices[2] = p5 - p4;
+			vertices[0] = p1;
+			vertices[1] = p3;
+			vertices[2] = p2;
+			poly1.Set(vertices, 3);
+
+			vertices[0] = b2Vec2_zero;
+			vertices[1] = p6 - p4;
+			vertices[2] = p5 - p4;
+			poly2.Set(vertices, 3);
 		}
+
+		fd1.shape = &poly1;
+		fd2.shape = &poly2;
 
 		b2BodyDef bd1, bd2;
 		bd1.position = m_offset;
@@ -74,8 +85,8 @@ public:
 		b2Body* body1 = m_world->CreateBody(&bd1);
 		b2Body* body2 = m_world->CreateBody(&bd2);
 
-		body1->CreateFixture(&sd1);
-		body2->CreateFixture(&sd2);
+		body1->CreateFixture(&fd1);
+		body2->CreateFixture(&fd2);
 
 		body1->SetMassFromShapes();
 		body2->SetMassFromShapes();
@@ -113,40 +124,44 @@ public:
 		m_motorOn = true;
 		b2Vec2 pivot(0.0f, 0.8f);
 
+		// Ground
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
 
-			sd.SetAsBox(0.5f, 5.0f, b2Vec2(-50.0f, 15.0f), 0.0f);
-			ground->CreateFixture(&sd);
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-50.0f, 0.0f), b2Vec2(50.0f, 0.0f));
+			ground->CreateFixture(&shape);
 
-			sd.SetAsBox(0.5f, 5.0f, b2Vec2(50.0f, 15.0f), 0.0f);
-			ground->CreateFixture(&sd);
+			shape.SetAsEdge(b2Vec2(-50.0f, 0.0f), b2Vec2(-50.0f, 10.0f));
+			ground->CreateFixture(&shape);
+
+			shape.SetAsEdge(b2Vec2(50.0f, 0.0f), b2Vec2(50.0f, 10.0f));
+			ground->CreateFixture(&shape);
 		}
 
+		// Balls
 		for (int32 i = 0; i < 40; ++i)
 		{
-			b2CircleDef sd;
-			sd.density = 1.0f;
-			sd.radius = 0.25f;
+			b2CircleShape shape;
+			shape.m_radius = 0.25f;
 
 			b2BodyDef bd;
 			bd.position.Set(-40.0f + 2.0f * i, 0.5f);
 
 			b2Body* body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
+			body->CreateFixture(&shape, 1.0f);
 			body->SetMassFromShapes();
 		}
 
+		// Chassis
 		{
-			b2PolygonDef sd;
+			b2PolygonShape shape;
+			shape.SetAsBox(2.5f, 1.0f);
+
+			b2FixtureDef sd;
 			sd.density = 1.0f;
-			sd.SetAsBox(2.5f, 1.0f);
+			sd.shape = &shape;
 			sd.filter.groupIndex = -1;
 			b2BodyDef bd;
 			bd.position = pivot + m_offset;
@@ -156,9 +171,12 @@ public:
 		}
 
 		{
-			b2CircleDef sd;
+			b2CircleShape shape;
+			shape.m_radius = 1.6f;
+
+			b2FixtureDef sd;
 			sd.density = 1.0f;
-			sd.radius = 1.6f;
+			sd.shape = &shape;
 			sd.filter.groupIndex = -1;
 			b2BodyDef bd;
 			bd.position = pivot + m_offset;

@@ -17,6 +17,15 @@
 */
 
 #include <Box2D/Collision/Shapes/b2CircleShape.h>
+#include <new>
+
+b2Shape* b2CircleShape::Clone(b2BlockAllocator* allocator) const
+{
+	void* mem = allocator->Allocate(sizeof(b2CircleShape));
+	b2CircleShape* clone = new (mem) b2CircleShape;
+	*clone = *this;
+	return clone;
+}
 
 bool b2CircleShape::TestPoint(const b2XForm& transform, const b2Vec2& p) const
 {

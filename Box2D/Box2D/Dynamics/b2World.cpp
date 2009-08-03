@@ -888,7 +888,7 @@ void b2World::DrawShape(b2Fixture* fixture, const b2XForm& xf, const b2Color& co
 
 	switch (fixture->GetType())
 	{
-	case b2_circleShape:
+	case b2Shape::e_circle:
 		{
 			b2CircleShape* circle = (b2CircleShape*)fixture->GetShape();
 
@@ -900,7 +900,7 @@ void b2World::DrawShape(b2Fixture* fixture, const b2XForm& xf, const b2Color& co
 		}
 		break;
 
-	case b2_polygonShape:
+	case b2Shape::e_polygon:
 		{
 			b2PolygonShape* poly = (b2PolygonShape*)fixture->GetShape();
 			int32 vertexCount = poly->m_vertexCount;

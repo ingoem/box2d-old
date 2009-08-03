@@ -137,6 +137,37 @@ b2Fixture* b2Body::CreateFixture(const b2FixtureDef* def)
 	return fixture;
 }
 
+b2Fixture* b2Body::CreateFixture(const b2Shape* shape, float32 density)
+{
+	b2Assert(m_world->IsLocked() == false);
+	if (m_world->IsLocked() == true)
+	{
+		return NULL;
+	}
+
+	b2BlockAllocator* allocator = &m_world->m_blockAllocator;
+	b2BroadPhase* broadPhase = &m_world->m_contactManager.m_broadPhase;
+
+	b2FixtureDef def;
+	def.shape = shape;
+	def.density = density;
+
+	void* mem = allocator->Allocate(sizeof(b2Fixture));
+	b2Fixture* fixture = new (mem) b2Fixture;
+	fixture->Create(allocator, broadPhase, this, m_xf, &def);
+
+	fixture->m_next = m_fixtureList;
+	m_fixtureList = fixture;
+	++m_fixtureCount;
+
+	fixture->m_body = this;
+
+	// Let the world know we have a new fixture.
+	m_world->m_flags |= b2World::e_newFixture;
+
+	return fixture;
+}
+
 void b2Body::DestroyFixture(b2Fixture* fixture)
 {
 	b2Assert(m_world->IsLocked() == false);

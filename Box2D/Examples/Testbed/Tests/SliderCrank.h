@@ -28,76 +28,92 @@ public:
 	{
 		b2Body* ground = NULL;
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
 			ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			// Define crank.
-			b2PolygonDef sd;
-			sd.SetAsBox(0.5f, 2.0f);
-			sd.density = 1.0f;
-
-			b2RevoluteJointDef rjd;
-
 			b2Body* prevBody = ground;
 
-			b2BodyDef bd;
-			bd.position.Set(0.0f, 7.0f);
-			b2Body* body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
-			body->SetMassFromShapes();
+			// Define crank.
+			{
+				b2PolygonShape shape;
+				shape.SetAsBox(0.5f, 2.0f);
 
-			rjd.Initialize(prevBody, body, b2Vec2(0.0f, 5.0f));
-			rjd.motorSpeed = 1.0f * b2_pi;
-			rjd.maxMotorTorque = 10000.0f;
-			rjd.enableMotor = true;
-			m_joint1 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
+				b2BodyDef bd;
+				bd.position.Set(0.0f, 7.0f);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateFixture(&shape, 2.0f);
+				body->SetMassFromShapes();
 
-			prevBody = body;
+				b2RevoluteJointDef rjd;
+				rjd.Initialize(prevBody, body, b2Vec2(0.0f, 5.0f));
+				rjd.motorSpeed = 1.0f * b2_pi;
+				rjd.maxMotorTorque = 10000.0f;
+				rjd.enableMotor = true;
+				m_joint1 = (b2RevoluteJoint*)m_world->CreateJoint(&rjd);
+
+				prevBody = body;
+			}
 
 			// Define follower.
-			sd.SetAsBox(0.5f, 4.0f);
-			bd.position.Set(0.0f, 13.0f);
-			body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
-			body->SetMassFromShapes();
+			{
+				b2PolygonShape shape;
+				shape.SetAsBox(0.5f, 4.0f);
 
-			rjd.Initialize(prevBody, body, b2Vec2(0.0f, 9.0f));
-			rjd.enableMotor = false;
-			m_world->CreateJoint(&rjd);
+				b2BodyDef bd;
+				bd.position.Set(0.0f, 13.0f);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateFixture(&shape, 2.0f);
+				body->SetMassFromShapes();
 
-			prevBody = body;
+				b2RevoluteJointDef rjd;
+				rjd.Initialize(prevBody, body, b2Vec2(0.0f, 9.0f));
+				rjd.enableMotor = false;
+				m_world->CreateJoint(&rjd);
+
+				prevBody = body;
+			}
 
 			// Define piston
-			sd.SetAsBox(1.5f, 1.5f);
-			bd.position.Set(0.0f, 17.0f);
-			body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
-			body->SetMassFromShapes();
+			{
+				b2PolygonShape shape;
+				shape.SetAsBox(1.5f, 1.5f);
 
-			rjd.Initialize(prevBody, body, b2Vec2(0.0f, 17.0f));
-			m_world->CreateJoint(&rjd);
+				b2BodyDef bd;
+				bd.position.Set(0.0f, 17.0f);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateFixture(&shape, 2.0f);
+				body->SetMassFromShapes();
 
-			b2PrismaticJointDef pjd;
-			pjd.Initialize(ground, body, b2Vec2(0.0f, 17.0f), b2Vec2(0.0f, 1.0f));
+				b2RevoluteJointDef rjd;
+				rjd.Initialize(prevBody, body, b2Vec2(0.0f, 17.0f));
+				m_world->CreateJoint(&rjd);
 
-			pjd.maxMotorForce = 1000.0f;
-			pjd.enableMotor = true;
+				b2PrismaticJointDef pjd;
+				pjd.Initialize(ground, body, b2Vec2(0.0f, 17.0f), b2Vec2(0.0f, 1.0f));
 
-			m_joint2 = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
+				pjd.maxMotorForce = 1000.0f;
+				pjd.enableMotor = true;
+
+				m_joint2 = (b2PrismaticJoint*)m_world->CreateJoint(&pjd);
+			}
 
 			// Create a payload
-			sd.density = 2.0f;
-			bd.position.Set(0.0f, 23.0f);
-			body = m_world->CreateBody(&bd);
-			body->CreateFixture(&sd);
-			body->SetMassFromShapes();
+			{
+				b2PolygonShape shape;
+				shape.SetAsBox(1.5f, 1.5f);
+
+				b2BodyDef bd;
+				bd.position.Set(0.0f, 23.0f);
+				b2Body* body = m_world->CreateBody(&bd);
+				body->CreateFixture(&shape, 2.0f);
+				body->SetMassFromShapes();
+			}
 		}
 	}
 

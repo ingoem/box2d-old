@@ -33,20 +33,27 @@ public:
 			bd.position.Set(0.0f, 20.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
 
-			b2PolygonDef sd;
+			b2PolygonShape shape;
+
+			b2FixtureDef sd;
+			sd.shape = &shape;
 			sd.density = 0.0f;
 			sd.restitution = k_restitution;
 
-			sd.SetAsBox(0.2f, 20.0f, b2Vec2(-20.0f, 0.0f), 0.0f);
+			// Left vertical
+			shape.SetAsEdge(b2Vec2(-20.0f, -20.0f), b2Vec2(-20.0f, 20.0f));
 			ground->CreateFixture(&sd);
 
-			sd.SetAsBox(0.2f, 20.0f, b2Vec2(20.0f, 0.0f), 0.0f);
+			// Right vertical
+			shape.SetAsEdge(b2Vec2(20.0f, -20.0f), b2Vec2(20.0f, 20.0f));
 			ground->CreateFixture(&sd);
 
-			sd.SetAsBox(0.2f, 20.0f, b2Vec2(0.0f, -20.0f), 0.5f * b2_pi);
+			// Top horizontal
+			shape.SetAsEdge(b2Vec2(-20.0f, 20.0f), b2Vec2(20.0f, 20.0f));
 			ground->CreateFixture(&sd);
 
-			sd.SetAsBox(0.2f, 20.0f, b2Vec2(0.0f, 20.0f), -0.5f * b2_pi);
+			// Bottom horizontal
+			shape.SetAsEdge(b2Vec2(-20.0f, -20.0f), b2Vec2(20.0f, -20.0f));
 			ground->CreateFixture(&sd);
 		}
 
@@ -55,29 +62,38 @@ public:
 			xf1.R.Set(0.3524f * b2_pi);
 			xf1.position = b2Mul(xf1.R, b2Vec2(1.0f, 0.0f));
 
-			b2PolygonDef sd1;
-			sd1.vertexCount = 3;
-			sd1.vertices[0] = b2Mul(xf1, b2Vec2(-1.0f, 0.0f));
-			sd1.vertices[1] = b2Mul(xf1, b2Vec2(1.0f, 0.0f));
-			sd1.vertices[2] = b2Mul(xf1, b2Vec2(0.0f, 0.5f));
+			b2Vec2 vertices[3];
+			vertices[0] = b2Mul(xf1, b2Vec2(-1.0f, 0.0f));
+			vertices[1] = b2Mul(xf1, b2Vec2(1.0f, 0.0f));
+			vertices[2] = b2Mul(xf1, b2Vec2(0.0f, 0.5f));
+			
+			b2PolygonShape poly1;
+			poly1.Set(vertices, 3);
+
+			b2FixtureDef sd1;
+			sd1.shape = &poly1;
 			sd1.density = 2.0f;
 
 			b2XForm xf2;
 			xf2.R.Set(-0.3524f * b2_pi);
 			xf2.position = b2Mul(xf2.R, b2Vec2(-1.0f, 0.0f));
 
-			b2PolygonDef sd2;
-			sd2.vertexCount = 3;
-			sd2.vertices[0] = b2Mul(xf2, b2Vec2(-1.0f, 0.0f));
-			sd2.vertices[1] = b2Mul(xf2, b2Vec2(1.0f, 0.0f));
-			sd2.vertices[2] = b2Mul(xf2, b2Vec2(0.0f, 0.5f));
+			vertices[0] = b2Mul(xf2, b2Vec2(-1.0f, 0.0f));
+			vertices[1] = b2Mul(xf2, b2Vec2(1.0f, 0.0f));
+			vertices[2] = b2Mul(xf2, b2Vec2(0.0f, 0.5f));
+			
+			b2PolygonShape poly2;
+			poly2.Set(vertices, 3);
+
+			b2FixtureDef sd2;
+			sd2.shape = &poly2;
 			sd2.density = 2.0f;
 
 			b2BodyDef bd;
 			bd.angularDamping = 2.0f;
 			bd.linearDamping = 0.1f;
 
-			bd.position.Set(0.0f, 1.05f);
+			bd.position.Set(0.0f, 2.0);
 			bd.angle = b2_pi;
 			m_body = m_world->CreateBody(&bd);
 			m_body->CreateFixture(&sd1);

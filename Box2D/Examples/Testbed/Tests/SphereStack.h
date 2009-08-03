@@ -25,26 +25,23 @@ public:
 
 	enum
 	{
-		e_count = 2
+		e_count = 10
 	};
 
 	SphereStack()
 	{
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 10.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -10.0f);
-
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2CircleDef sd;
-			sd.radius = 1.0f;
-			sd.density = 1.0f;
+			b2CircleShape shape;
+			shape.m_radius = 1.0f;
 
 			for (int32 i = 0; i < e_count; ++i)
 			{
@@ -53,7 +50,7 @@ public:
 
 				m_bodies[i] = m_world->CreateBody(&bd);
 
-				m_bodies[i]->CreateFixture(&sd);
+				m_bodies[i]->CreateFixture(&shape, 1.0f);
 				m_bodies[i]->SetMassFromShapes();
 
 				//m_bodies[i]->SetLinearVelocity(b2Vec2(0.0f, -100.0f));

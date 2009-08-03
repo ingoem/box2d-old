@@ -30,22 +30,18 @@ public:
 	Pyramid()
 	{
 		{
-			b2PolygonDef sd;
-			sd.vertices[0].Set(-50.0f, 0.0f);
-			sd.vertices[1].Set(50.0f, 0.0f);
-			sd.vertexCount = 2;
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, 0.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
 			float32 a = 0.5f;
-			sd.SetAsBox(a, a);
-			sd.density = 5.0f;
+			b2PolygonShape shape;
+			shape.SetAsBox(a, a);
 
 			b2Vec2 x(-10.0f, 0.75f);
 			b2Vec2 y;
@@ -61,7 +57,7 @@ public:
 					b2BodyDef bd;
 					bd.position = y;
 					b2Body* body = m_world->CreateBody(&bd);
-					body->CreateFixture(&sd);
+					body->CreateFixture(&shape, 5.0f);
 					body->SetMassFromShapes();
 
 					y += deltaY;

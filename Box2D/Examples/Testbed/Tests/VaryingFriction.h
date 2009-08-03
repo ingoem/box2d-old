@@ -26,77 +26,79 @@ public:
 	VaryingFriction()
 	{
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(50.0f, 20.0f);
-
 			b2BodyDef bd;
-			bd.position.Set(0.0f, -20.0f);
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+
+			b2PolygonShape shape;
+			shape.SetAsEdge(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(13.0f, 0.25f);
+			b2PolygonShape shape;
+			shape.SetAsBox(13.0f, 0.25f);
 
 			b2BodyDef bd;
 			bd.position.Set(-4.0f, 22.0f);
 			bd.angle = -0.25f;
 
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.25f, 1.0f);
+			b2PolygonShape shape;
+			shape.SetAsBox(0.25f, 1.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(10.5f, 19.0f);
 
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(13.0f, 0.25f);
+			b2PolygonShape shape;
+			shape.SetAsBox(13.0f, 0.25f);
 
 			b2BodyDef bd;
 			bd.position.Set(4.0f, 14.0f);
 			bd.angle = 0.25f;
 
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.25f, 1.0f);
+			b2PolygonShape shape;
+			shape.SetAsBox(0.25f, 1.0f);
 
 			b2BodyDef bd;
 			bd.position.Set(-10.5f, 11.0f);
 
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(13.0f, 0.25f);
+			b2PolygonShape shape;
+			shape.SetAsBox(13.0f, 0.25f);
 
 			b2BodyDef bd;
 			bd.position.Set(-4.0f, 6.0f);
 			bd.angle = -0.25f;
 
 			b2Body* ground = m_world->CreateBody(&bd);
-			ground->CreateFixture(&sd);
+			ground->CreateFixture(&shape);
 		}
 
 		{
-			b2PolygonDef sd;
-			sd.SetAsBox(0.5f, 0.5f);
-			sd.density = 25.0f;
+			b2PolygonShape shape;
+			shape.SetAsBox(0.5f, 0.5f);
+
+			b2FixtureDef fd;
+			fd.shape = &shape;
+			fd.density = 25.0f;
 
 			float friction[5] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};
 
@@ -106,8 +108,8 @@ public:
 				bd.position.Set(-15.0f + 4.0f * i, 28.0f);
 				b2Body* body = m_world->CreateBody(&bd);
 
-				sd.friction = friction[i];
-				body->CreateFixture(&sd);
+				fd.friction = friction[i];
+				body->CreateFixture(&fd);
 				body->SetMassFromShapes();
 			}
 		}
